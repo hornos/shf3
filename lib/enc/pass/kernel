@@ -10,6 +10,38 @@ function enc/pass() {
   sql/init "${enc_pass_db}" "${_in}"
 }
 
+function enc/pass/gen() {
+  local _l=${1:-12}
+  local _p=$(rnd/net/str ${_l} false)
+  if test "${_p}" = "" ; then
+    return ${_false_}
+  fi
+  _p=$(enc/gpg/enc "${_p}")
+  if test "${_p}" = "Cg==" ; then
+    return ${_false_}
+  fi
+  echo "${_p}"
+  return ${_true_}
+}
+
+function enc/pass/pass() {
+  local _u="${1}"
+
+  if test -z "${_u}" ; then
+    return ${_false_}
+  fi
+  local _p=$(sql/select "${enc_pass_db}" "${enc_pass_tb}" "pass" 0 1 "uid='${_u}'")
+  if test "${_p}" = "" ; then
+    return ${_false_}
+  fi
+  _p=$(enc/gpg/dec "${_p}")
+  if test "${_p}" = "" ; then
+    return ${_false_}
+  fi
+  echo "frrt${_p}"
+  return ${_true_}
+}
+
 function enc/pass/mgr() {
   import sql
   import rnd/net
@@ -29,17 +61,13 @@ function enc/pass/mgr() {
   # TODO: toupper
   case "${_m}" in
     LIST)
-      local _c=$(sql/count ${enc_pass_db} ${enc_pass_tb})
+      local _c=$(sql/count "${enc_pass_db}" "${enc_pass_tb}")
       if test ${_c} -lt 0 ; then
         return ${_false_}
       fi
       if ! test -z "${_u}" ; then
-        local _p=$(sql/select ${enc_pass_db} ${enc_pass_tb} "pass" 0 1 "uid='${_u}'")
-        if test $? -gt 0 ; then
-          return ${_false_}
-        fi
-        _p=$(enc/gpg/dec "${_p}")
-        if test "${_p}" = "" ; then
+        local _p=$(enc/pass/pass "${_u}")
+        if test "${_p}" = ""; then
           return ${_false_}
         fi
         echo "${_p}"
@@ -48,7 +76,7 @@ function enc/pass/mgr() {
       local _frm1="%-40s%-22s%-22s\n"
       printf "${_frm1}" "uid" "create" "modified"
       line 84
-      for i in $(sql/select ${enc_pass_db} ${enc_pass_tb} "uid,ctime,mtime") ; do
+      for i in $(sql/select "${enc_pass_db}" "${enc_pass_tb}" "uid,ctime,mtime") ; do
         printf "${_frm1}" $(field "${i}") "$(epoch $(field "${i}" 2))" "$(epoch $(field "${i}" 3))"
       done
       ;;
@@ -58,15 +86,11 @@ function enc/pass/mgr() {
         return ${_false_}
       fi
 
-      local _p=$(rnd/net/str ${_l} false)
+      local _p=$(enc/pass/gen ${_l})
       if test "${_p}" = "" ; then
         return ${_false_}
       fi
-      _p=$(enc/gpg/enc "${_p}")
-      if test "${_p}" = "Cg==" ; then
-        return ${_false_}
-      fi
-      _date=$(epoch)
+      local _date=$(epoch)
       local _f=("uid" "pass" "ctime" "mtime")
       local _v=("${_u}" "${_p}" "${_date}" "${_date}")
       if ${gdbg} ; then
@@ -74,6 +98,30 @@ function enc/pass/mgr() {
       else
         sql/insert "${enc_pass_db}" "${enc_pass_tb}" "${_f[*]}" "${_v[*]}" 2>/dev/null
       fi
+      if test $? -gt 0 ; then
+        return ${_false_}
+      fi
+      return ${_true_}
+      ;;
+    CHANGE)
+      question "Change password for ${_u}?"
+      local _p=$(enc/pass/pass "${_u}")
+      if test "${_p}" = ""; then
+        return ${_false_}
+      fi
+
+      question "Create password for ${_u}?"
+      if test $? -gt 0 ; then
+        return ${_false_}
+      fi
+      local _p=$(enc/pass/gen ${_l})
+      if test "${_p}" = "" ; then
+        return ${_false_}
+      fi
+      local _date=$(epoch)
+      local _f=("pass" "mtime")
+      local _v=("${_p}" "${_date}")
+      sql/update "${enc_pass_db}" "${enc_pass_tb}" "${_f[*]}" "${_v[*]}" "uid='${_u}'"
       if test $? -gt 0 ; then
         return ${_false_}
       fi
