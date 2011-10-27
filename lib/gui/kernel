@@ -1,0 +1,10 @@
+
+function gui/txt() {
+  local _c="gui/txt/${1}"
+  local _s=${2}
+  echo -e "${!_c}${_s}${gui/txt/rst}"
+}
+
+function gui/title() {
+  echo -e "\033]0;${1}\007"
+}

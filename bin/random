@@ -1,0 +1,31 @@
+#!/bin/bash
+. $(dirname ${BASH_SOURCE})/../lib/header
+import rnd/net
+
+function random/usage() {
+  echo "Usage: ${gbn} options"
+  echo "              -s - string"
+  echo "              -i - integer"
+  echo "              -l length"
+  echo "              -q - quite"
+  exit ${_false_}
+}
+
+_m=0
+_l=12
+_q=true
+while getopts hl:qsi opt; do
+  case "$opt" in
+    h) random/usage;;
+    l) _l=$OPTARG;;
+    s) _m=0;;
+    i) _m=1;;
+    q) _q=false;;
+  esac
+done
+
+if test ${_m} -eq 1 ; then
+  rnd/net/int ${_l} 1 100
+else
+  rnd/net/str ${_l} ${_q}
+fi

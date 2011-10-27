@@ -1,0 +1,89 @@
+
+function sql/dbn() {
+  echo "${1}.sqlite"
+}
+
+function sql/init() {
+  local _db=$(sql/dbn "${1:-./temp}")
+  local _in="${2}"
+
+  debug "Creating new database: ${_db} ${_in}"
+  if ! test -r "${_db}" ; then
+    touch "${_db}"
+    chmod 600 "${_db}"
+    local _r=$?
+    if ! test -r "${_in}" ; then
+      return ${_r}
+    fi
+    ${sql_sqlite} "${_db}" < "${_in}"
+    _r=$?
+    return ${_r}
+  fi
+  warn "Database exists: ${_db}"
+  return ${_false_}
+}
+
+function sql/count() {
+  local _db=$(sql/dbn "${1}")
+  local _tb="${2}"
+  ${sql_sqlite} "${_db}" "SELECT COUNT(*) FROM ${_tb}"
+}
+
+function sql/select() {
+  local _db=$(sql/dbn "${1}")
+  local _tb="${2}"
+  local _f=${3:-*}
+  local _o=${4}
+  local _l=${5}
+  local _w=${6}
+  local _q="SELECT ${_f} FROM ${_tb}"
+
+  if ! test -z "${_w}" ; then
+    _q="${_q} WHERE ${_w}"
+  fi
+
+  if test ${_o} -gt 0 ; then
+    _q="${_q} OFFSET ${_o}"
+  fi
+
+  if test ${_l} -gt 0 ; then
+    _q="${_q} LIMIT ${_l}"
+  fi
+
+  ${sql_sqlite} "${_db}" "${_q}"
+}
+
+function sql/insert() {
+  local _db=$(sql/dbn "${1}")
+  local _tb="${2}"
+  local _f=("${3}")
+  local _v=("${4}")
+  local _q="INSERT INTO ${_tb}"
+  local _qf="("
+  local _qv="VALUES ("
+  local _first=true
+
+  for i in ${_f[@]} ; do
+    if ! ${_first} ; then
+      _qf="${_qf},${i}"
+    else
+      _qf="${_qf}${i}"
+      _first=false
+    fi
+  done
+  _qf="${_qf})"
+
+  _first=true
+  for i in ${_v[@]} ; do
+    if ! ${_first} ; then
+      _qv="${_qv},'${i}'"
+    else
+      _qv="${_qv}'${i}'"
+      _first=false
+    fi
+  done
+  _qv="${_qv})"
+  _q="${_q} ${_qf} ${_qv}"
+  # debug "${_db}: ${_q}"
+  ${sql_sqlite} "${_db}" "${_q}"
+}

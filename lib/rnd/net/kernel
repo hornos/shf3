@@ -1,0 +1,90 @@
+
+function rnd/net/int() {
+  local _num=${1:-1}
+  local _min=${2:-1}
+  local _max=${3:-10}
+  local _col=${4:-1}
+  local _bas=${5:-10}
+  local _x=${6:-7}
+  local _url="${rnd_net_url}/integers"
+  _url="${_url}/?num=${_num}&min=${_min}&max=${_max}&col=${_col}&base=${_bas}${rnd_net_opts}"
+  wget -T ${_x} -qO- "${_url}"
+}
+
+function rnd/net/seq() {
+  local _min=${1:-1}
+  local _max=${2:-10}
+  local _col=${3:-1}
+  local _x=${4:-7}
+  local _url="${rnd_net_url}/sequences"
+  _url="${_url}/?min=${_min}&max=${_max}&col=${_col}${rnd_net_opts}"
+  wget -T ${_x} -qO- "${_url}"
+}
+
+function rnd/net() {
+  local _len=${1:-13}
+  local _num=${2:-1}
+  local _dig=${3:-on}
+  local _ual=${4:-on}
+  local _lal=${5:-on}
+  local _uni=${6:-on}
+  local _x=${7:-7}
+  local _url="${rnd_net_url}/strings"
+  if test ${_len} -lt 21 ; then
+    _url="${_url}/?num=${_num}&len=${_len}&digits=${_dig}&upperalpha=${_ual}&loweralpha=${_lal}&unique=${_uni}${rnd_net_opts}"
+    wget -T ${_x} -qO- "${_url}"
+    return $?
+  fi
+}
+
+function rnd/net/str() {
+  local _len=${1:-13}
+  local _ask=${2:-true}
+  local _num=${3:-1}
+  local _dig=${4:-on}
+  local _ual=${5:-on}
+  local _lal=${6:-on}
+  local _uni=${7:-on}
+  local _x=${8:-7}
+
+  if test ${_len} -lt ${rnd_net_msl} ; then
+    rnd/net ${_len} ${_num} ${_dig} ${_ual} ${_lal} ${_uni} ${_x}
+    return $?
+  fi
+  # string from a multi-query
+  local _il=$((${_len}/${rnd_net_msl}))
+  local _ir=$((${_il}+1))
+  local _rl=$((${_len}%${rnd_net_msl}))
+  local _rq=$(rnd/net/quo)
+  if test ${_rq} -lt ${_ir} ; then
+    error "Not enough quota"
+  fi
+
+  if ${_ask} ; then
+    msg "Curent quota: ${_rq}"
+    msg "Required queries: ${_ir}"
+    question "Continue?"
+    if test $? -gt 0 ; then
+      return ${_false_}
+    fi
+  fi
+  local _rstr=""
+  # full
+  for((c=0;c<_il;++c)) ; do
+    _rstr="${_rstr}$(rnd/net 20 ${_num} ${_dig} ${_ual} ${_lal} ${_uni} ${_x} 2> /dev/null)"
+  done
+  # residue
+  _rstr="${_rstr}$(rnd/net ${_rl} ${_num} ${_dig} ${_ual} ${_lal} ${_uni} ${_x} 2> /dev/null)"
+  echo -e "${_rstr}"
+}
+
+function rnd/net/quo() {
+  local _ip="${1}"
+  local _x=${2:-3}
+  if test -n "${_ip}" ; then
+    _ip="ip=${_ip}&"
+  fi
+  local _url="${rnd_net_url}/quota"
+  _url="${_url}/?${_ip}format=plain"
+  wget -T ${_x} -qO- "${_url}"
+}

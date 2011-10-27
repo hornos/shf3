@@ -1,0 +1,14 @@
+
+### globals
+gbn=$(basename "${0}")
+gdn=$(dirname "${0}")
+gkn="$(dirname ${BASH_SOURCE})/kernel"
+gdbg=false
+
+### check kernel
+if test -r "${gkn}" ; then
+  source "${gkn}"
+else
+  echo "kernel error"
+  exit 127
+fi

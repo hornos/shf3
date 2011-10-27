@@ -1,0 +1,39 @@
+#!/bin/bash
+. $(dirname ${BASH_SOURCE})/../lib/header
+import enc/pass
+
+function passmgr/usage() {
+  echo "Usage: ${gbn} options"
+  echo "              -l length"
+  echo "              -u uid"
+  echo "              -f database"
+  echo "              -c - change"
+  echo "              -n - new"
+  echo "              -d - delete"
+  exit ${_false_}
+}
+
+_l=42
+_u=""
+_m="LIST"
+_f=""
+while getopts hf:u:l:cnv o; do
+  case "$o" in
+    f) _f=$OPTARG;;
+    u) _u=$OPTARG;;
+    l) _l=$OPTARG;;
+    c) _m="CHANGE";;
+    n) _m="CREATE";;
+    v) gdbg=true;;
+    h) passmgr/usage;;
+  esac
+done
+
+enc_pass_db="$(namedir)/../sql/${enc_pass_db}"
+if ! test -z "${_f}" ; then
+  enc_pass_db="${_f}"
+fi
+enc/pass/mgr "${_m}" ${_l} "${_u}"
+if test $? -gt 0 ; then
+  error "Failed"
+fi

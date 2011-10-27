@@ -1,0 +1,32 @@
+
+function enc/base() {
+  local _d=${1:-false}
+  local _b=${2:-64}
+  local _s="${3}"
+  local _dir=$(dirname $BASH_SOURCE)
+  local _awk="${_dir}/b${_b}.awk"
+  if ! test -r "${_awk}" ; then
+    return ${_FALSE_}
+  fi
+  if ! ${_d} ; then
+    echo "${_s}" | awk -f "${_awk}"
+  else
+    echo "${_s}" | awk -f "${_awk}" d
+  fi
+}
+
+function enc/base/64enc() {
+  enc/base false 64 "${1}"
+}
+
+function enc/base/64dec() {
+  enc/base true 64 "${1}"
+}
+
+function enc/base/85enc() {
+  enc/base false 85 "${1}"
+}
+
+function enc/base/85dec() {
+  enc/base true 85 "${1}"
+}

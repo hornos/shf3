@@ -1,0 +1,10 @@
+gui/txt/und=$(tput sgr 0 1)    # Underline
+gui/txt/bld=$(tput bold)       # Bold
+gui/txt/red=$(tput setaf 1)    # Red
+gui/txt/grn=$(tput setaf 2)    # Green
+gui/txt/ylw=$(tput setaf 3)    # Yellow
+gui/txt/blu=$(tput setaf 4)    # Blue
+gui/txt/pur=$(tput setaf 5)    # Purple
+gui/txt/cyn=$(tput setaf 6)    # Cyan
+gui/txt/wht=$(tput setaf 7)    # White
+gui/txt/rst=$(tput sgr0)       # Text reset

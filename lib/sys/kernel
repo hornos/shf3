@@ -1,0 +1,8 @@
+
+function sys() {
+  if test "${OSTYPE##darwin}" = "${OSTYPE}" ; then
+    echo "linux"
+  else
+    echo "osx"
+  fi
+}

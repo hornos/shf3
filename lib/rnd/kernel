@@ -1,0 +1,21 @@
+
+function rnd() {
+  local _m=${1:-16}
+  local _l=$RANDOM
+  let "_l %= ${_m}"
+  echo ${_l}
+}
+
+function rnd/h() {
+  local _n=${1:-}
+  for ((i=0;i<_n;++i)) ; do
+    echo -n $(echo "obase=16; $(($RANDOM % 16))" | bc)
+  done
+}
+
+function rnd/m() {
+  local _m=${1:-00:02:3D}
+  _m="${_m}:$(rnd/h 2):$(rnd/h 2):$(rnd/h 2)"
+  _m=$(echo ${_m} | tr '[A-Z]' '[a-z]')
+  echo ${_m}
+}

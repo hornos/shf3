@@ -1,0 +1,55 @@
+
+function enc/gpg() {
+  import enc/base
+
+  local _s="${1}"
+  local _d=${2:-false}
+
+  if ${_d} ; then
+    enc/base/64dec "$(enc/base/64dec "${_s}" | ${enc_gpg_bin} ${enc_gpg_opts} -d 2>/dev/null)"
+  else
+    enc/base/64enc "$(enc/base/64enc "${_s}" | ${enc_gpg_bin} ${enc_gpg_opts} -a --symmetric 2>/dev/null)"
+    # echo "S: ${_s}"
+    # _s=$(enc/base/64enc "${_s}")
+    # echo "64: ${_s}"
+    # _s=$(echo "${_s}" | ${enc_gpg_bin} ${enc_gpg_opts} -a --symmetric 2>/dev/null)
+    # echo "E: ${_s}"
+    # _s=$(enc/base/64enc "${_s}")
+    # echo "64: ${_s}"
+  fi
+}
+
+function enc/gpg/enc() {
+  enc/gpg "${1}" false
+}
+
+function enc/gpg/dec() {
+  enc/gpg "${1}" true
+}
+
+function enc/gpg/fp() {
+  local _u="${1}"
+  ${enc_gpg_bin} ${enc_gpg_opts} --fingerprint "${_u}"
+}
+
+function enc/gpg/fpe() {
+  local _u="${1}"
+  local _e=$(enc/gpg/fp "${_u}" | awk '/uid/{print}')
+  _e=${_e%%>*}
+  _e=${_e##*<}
+  echo "${_e}"
+}
+
+function enc/gpg/hnc() {
+  local _s="${1}"
+  local _e="${2}"
+  local _h=${3:-false}
+  local _r=""
+  if ! test -r "${_s}" || test -z "${_e}" ; then
+    return 1
+  fi
+  if ${_h} ; then
+    _r="hidden-"
+  fi
+  ${enc_gpg_bin} ${enc_gpg_opts} -o - --armor --encrypt --${_r}recipient "${_e}" "${_s}"
+}

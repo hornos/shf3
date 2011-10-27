@@ -1,0 +1,2 @@
+enc_gpg_bin="gpg"
+enc_gpg_opts="--utf8-string"

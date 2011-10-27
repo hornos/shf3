@@ -1,0 +1,190 @@
+### globals
+gkn="kernel"
+gcn="config"
+glp=""
+
+_true_=0
+_false_=1
+
+function msg() {
+  echo -e "[${gbn}] ${*}"
+}
+
+function debug() {
+  if ${gdbg} ; then
+    msg "DEBUG: ${*}"
+  fi
+}
+
+function error() {
+  msg "ERROR: ${*}"
+  exit ${2:-${_false_}}
+}
+
+function warn() {
+  msg "WARN: ${*}"
+}
+
+### namespaces
+function namedir() {
+  echo "$(dirname ${1:-${BASH_SOURCE}})"
+}
+
+function funcname() {
+  local _f=${1:-${FUNCNAME}}
+  echo ${_f##*/}
+}
+
+### import
+function include() {
+  local _p="${1}"
+  if ! test -z "${_p}" && test -d "${_p}" ; then
+    if test "${glp}" = "${glp/${_p}/}" ; then
+      if test -z "${glp}" ; then
+        glp="${_p}"
+      else
+        glp="${glp}:${_p}"
+      fi
+    fi
+  fi
+}
+
+function import() {
+  local _np="${1}"
+  if test -z "${_np}" ; then
+    return ${_FALSE_}
+  fi
+
+  local _lib="${_np}/${gkn}"
+  local _cfg="${_np}/${gcn}"
+
+  # search
+  local _p="$(namedir)"
+  if ! test -z "${glp}" ; then
+    _IFS=${IFS}
+    IFS=:
+    for i in ${glp}; do
+      local __p="${i}"
+      if test -r "${__p}/${_lib}" ; then
+        _p="${__p}"
+        break
+      fi
+    done
+    IFS=${_IFS}
+  fi
+
+  # read cfg
+  local _p_cfg="${_p}/${_cfg}"
+  if test -r "${_p_cfg}" ; then
+    source "${_p_cfg}"
+  fi
+
+  # load OS specific library config
+  _p_cfg="${_p}/${gcn}.${OSTYPE}"
+  if test -r ${_p_cfg} ; then
+    source "${_p_cfg}"
+  fi
+
+  # user specific library config
+  _p_cfg="${_p}/${gcn}.${USER}"
+  if test -r ${_p_cfg} ; then
+    source "${_p_cfg}"
+  fi
+
+  # read lib
+  local _p_lib="${_p}/${_lib}"
+  if test -r "${_p_lib}" ; then
+    source "${_p_lib}"
+  else
+    error "Library not found: ${_p_lib}"
+  fi
+}
+
+function field() {
+  local _s="${1}"
+  local _f=${2:-1}
+  local _x="${3:-|}"
+  echo "${_s}" | cut  -d "${_x}" -f ${_f}
+}
+
+function line() {
+  local _l=${1:-42}
+  local _c="${2:--}"
+  for ((i=0;i<_l;++i)) ; do
+    printf "${_c}"
+  done
+  printf "\n"
+}
+
+function have() {
+  local _b="${1}"
+  if test -z "${_b}" ; then
+    return ${_false_}
+  fi
+  which "${_b}" &> /dev/null
+  if test $? -eq 0; then
+    return ${_true_}
+  fi
+  return ${_false_}
+}
+
+function __tocase() {
+  local _s=${1:-case}
+  local _d=${2:-false}
+  if ${_d} ; then
+    echo "${_s}" | tr '[:upper:]' '[:lower:]'
+  else
+    echo "${_s}" | tr '[:lower:]' '[:upper:]'
+  fi
+}
+
+function tolower() {
+  __tocase "${*}" true
+}
+function toupper() {
+  __tocase "${*}"
+}
+
+function question() {
+  local _m="${1:-Answer}"
+  local _f=${2:-3}
+  local _a
+
+  while true ; do
+    echo -en "[${gbn}] ${_m} (y / n / q) [${_f}]: "
+    read _a
+    _a=$(tolower ${_a})
+    case "${_a}" in
+      "y" | "case" | "yes" )
+        return ${_true_}
+      ;;
+      "n" | "no" | "q"  )
+        echo -e "[${gbn}] Abort\n"
+        return ${_false_}
+      ;;
+      *)
+        echo -e "[${gbn}] Invalid\n"
+        _f=$((_f-1))
+      ;;
+    esac
+    if test ${_f} -lt 1 ; then
+      return ${_false_}
+    fi
+  done
+}
+
+function epoch() {
+  local _d=${1:-0}
+  if test ${_d} -eq 0 ; then
+    date +%s
+  else
+    date -r ${_d} +"%Y-%m-%d %H:%M:%S"
+  fi
+}
+
+# binary check
+if $(have pv) ; then
+  gpv=true
+else
+  gpv=false
+fi
