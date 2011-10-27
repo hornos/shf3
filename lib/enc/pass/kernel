@@ -38,7 +38,7 @@ function enc/pass/pass() {
   if test "${_p}" = "" ; then
     return ${_false_}
   fi
-  echo "frrt${_p}"
+  echo "${_p}"
   return ${_true_}
 }
 
@@ -57,6 +57,7 @@ function enc/pass/mgr() {
     if test $? -gt 0 ; then
       return ${_false_}
     fi
+    return ${_true_}
   fi
   # TODO: toupper
   case "${_m}" in
