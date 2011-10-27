@@ -1,0 +1,54 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import net/chk
+
+function identme/usage() {
+  echo " Usage: ${gbn} [-m mode]"
+  echo "    1 - ifconfig.me"
+  echo "    2 - www.whatismyip.com"
+  echo "   20 - www.ip2location.com"
+  echo "   21 - www.ip-address.org"
+  echo "   22 - www.cybersyndrome.net"
+  exit ${_false_}
+}
+
+_m=1
+while getopts hm: o; do
+  case "$o" in
+    m) _m=$OPTARG;;
+    h) identme/usage;;
+  esac
+done
+
+
+case ${_m} in
+  1)
+    echo $(net/chk/www.whatismyip.com)
+    ;;
+ 20)
+    e="net/chk/www.ip2location.com"
+    ${e} LOAD
+    echo "   Address: $(${e} IpAddress)"
+    echo "  Location: $(${e} Location)"
+    echo "       ISP: $(${e} ISP)"
+    echo "     Speed: $(${e} NetSpeed)"
+    echo "  Lat/Long: $(${e} Latitude)"
+    ${e} DEL
+    ;;
+ 21)
+    e="net/chk/www.ip-address.org"
+    ${e} LOAD
+    echo "   Address: $(${e} "IP Address")"
+    echo "      Host: $(${e} "IP Host")"
+    echo " Continent: $(${e} "Continent")"
+    echo "   Country: $(${e} "Country")"
+    echo "     State: $(${e} "State")"
+    echo "      City: $(${e} "City")"
+    echo "  Lat/Long: $(${e} "City Lat/Lon")"
+    echo "       ISP: $(${e} "ISP")"
+    echo "       Org: $(${e} "Organization")"
+    echo "  Language: $(${e} "IP Language")"
+    echo "  Currency: $(${e} "IP Currency")"
+    ${e} DEL
+    ;;
+esac

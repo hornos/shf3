@@ -1,5 +1,5 @@
 #!/bin/bash
-. $(dirname ${BASH_SOURCE})/../lib/header
+source $(dirname ${BASH_SOURCE})/../lib/header
 import enc/pass
 
 function passmgr/usage() {

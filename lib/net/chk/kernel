@@ -1,0 +1,128 @@
+
+function net/chk/ifconfig.me() {
+  import net
+  local _site=$(funcname ${FUNCNAME})
+  local _url="http://${_site}"
+  net/get "${_url}"
+}
+
+function net/chk/www.whatismyip.com() {
+  import net
+  local _site=$(funcname ${FUNCNAME})
+  local _url="http://${_site}/faq/automation.asp"
+  _url=$(net/get "${_url}" | \
+  grep "automation.whatismyip.com" | \
+  sed s/\.*href=\"// | \
+  sed s/\"\>.*//)
+  net/get "${_url}"
+}
+
+function net/chk/www.ip2location.com() {
+  import net
+  local _site=$(funcname ${FUNCNAME})
+  local _f=${1}
+  local _o="./.${_site}"
+  local _url="http://${_site}"
+
+  if test "${_f}" = LOAD ; then
+    net/get "${_url}" > "${_o}"
+    return
+  fi
+  if test "${_f}" = "DEL" ; then
+    if test -r "${_o}" ; then
+      rm -f "${_o}"
+    fi
+    return
+  fi
+
+
+  if ! test -r "${_o}" ; then
+    return 1
+  fi
+  cat "${_o}" | \
+  awk -v f="${_f}" '{
+    if(match($0,"Livedemo"))
+    if(match($0,"span"))
+    if(match($0,f)) {
+      sub(".*\">","",$0);
+      sub("<.*","",$0);
+      print;
+    }
+  }'
+}
+
+function net/chk/www.ip-address.org() {
+  import net
+  local _site=$(funcname ${FUNCNAME})
+  local _f=${1}
+  local _o="./.${_site}"
+  local _url="http://${_site}"
+
+  if test "${_f}" = "LOAD" ; then
+    net/get "${_url}" > "${_o}"
+    return
+  fi
+
+  if test "${_f}" = "DEL" ; then
+    if test -r "${_o}" ; then
+      rm -f "${_o}"
+    fi
+    return
+  fi
+
+  if ! test -r "${_o}" ; then
+    return 1
+  fi
+  cat "${_o}" | \
+  grep "IP Address" | \
+  grep "IP Host" | \
+  grep "lookup" | \
+  awk '{
+    gsub(/\<tr\>/,"\n",$0);
+    print;
+  }' | \
+  awk -v f="${_f}:" '{
+    if(f=="IP Host:")
+    if(match($0,f)) {
+      sub(/.*\<td\>/,"",$0);
+      sub(/<.*/,"",$0);
+      print;
+      next;
+    }
+    if(f=="Country:")
+    if(match($0,f)) {
+      sub(/.*\<td\> */,"",$0);
+      sub(/\&nbsp.*\047\>/,"",$0);
+      sub(/<.*/,"",$0);
+      print;
+      next;
+    }
+    if(f=="City:")
+    if(match($0,f)) {
+      sub(/.*\<td\> */,"",$0);
+      sub(/<.*/,"",$0);
+      print;
+      next;
+    }
+    if(f=="Organization:")
+    if(match($0,f)) {
+      sub(/.*\<td\> */,"",$0);
+      sub(/<.*/,"",$0);
+      print;
+      next;
+    }
+    if(f=="IP Language:")
+    if(match($0,f)) {
+      sub(/.*\<td\>[ \t]*/,"",$0);
+      sub(/<.*/,"",$0);
+      print;
+      next;
+    }
+    if(match($0,f)) {
+      sub(/.*lookup\047\> */,"",$0);
+      sub(/\<.*/,"",$0);
+      print;
+    }
+  }'
+}
+

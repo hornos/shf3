@@ -1,0 +1,4 @@
+function net/get() {
+  local _url="${1}"
+  wget -U "" -qO- "${_url}"
+}

@@ -1,5 +1,5 @@
 #!/bin/bash
-. $(dirname ${BASH_SOURCE})/../lib/header
+source $(dirname ${BASH_SOURCE})/../lib/header
 import rnd/net
 
 function random/usage() {
@@ -14,8 +14,8 @@ function random/usage() {
 _m=0
 _l=12
 _q=true
-while getopts hl:qsi opt; do
-  case "$opt" in
+while getopts hl:qsi o; do
+  case "$o" in
     h) random/usage;;
     l) _l=$OPTARG;;
     s) _m=0;;
