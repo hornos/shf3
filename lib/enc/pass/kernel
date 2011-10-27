@@ -82,6 +82,9 @@ function enc/pass/mgr() {
       done
       ;;
     CREATE)
+      if test -z "${_u}" ; then
+        return ${_false_}
+      fi
       question "Create password for ${_u}?"
       if test $? -gt 0 ; then
         return ${_false_}
@@ -105,6 +108,9 @@ function enc/pass/mgr() {
       return ${_true_}
       ;;
     CHANGE)
+      if test -z "${_u}" ; then
+        return ${_false_}
+      fi
       question "Change password for ${_u}?"
       local _p=$(enc/pass/pass "${_u}")
       if test "${_p}" = ""; then
