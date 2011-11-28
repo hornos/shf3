@@ -29,6 +29,9 @@ function ssh/mgr() {
         fi
       done
       ;;
+    INFO)
+      ssh/info "${_h}"
+      ;;
     CREATE)
       return ${_false_}
       ;;
@@ -65,11 +68,11 @@ function ssh/info() {
   echo "SSHFS Mnt  : ${mid_ssh_sshfs_src} -> ${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_sshfs_dst}"
   echo "SSHFS Opts : ${mid_ssh_sshfs_opts}"
   gui/line 84
-  local _sec="$(ssh/key/sec ${_h})"
-  if test -r "${_sec}" ; then
-    ${ssh_key_gen} -v -l -f "${_sec}"
+  local _pub="$(ssh/key/pub ${_h})"
+  if test -r "${_pub}" ; then
+    ${ssh_key_gen} -v -l -f "${_pub}"
   else
-    msg/warn "Key not found ${_sec}"
+    msg/warn "Key not found ${_pub}"
   fi
   gui/line 84
   local _lck="${_h}.${gbn}"
