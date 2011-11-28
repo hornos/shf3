@@ -1,0 +1,57 @@
+
+function sys/dir/rls() {
+  local _d="${1:-.}"
+  find "${_d}" -type d
+}
+
+function sys/dir/mk() {
+  local _d="${1}"
+  if test -z "${_d}" ; then
+    return ${_false_}
+  fi
+  if ! test -d "${_d}" ; then
+    mkdir -p "${_d}"
+    return $?
+  fi
+  return ${_true_}
+}
+
+function sys/dir/rm() {
+  local _d="${1}"
+  if test -z "${_d}" ; then
+    return ${_false_}
+  fi
+  if test -d "${_d}" ; then
+    rm -fR "${_d}"
+    return $?
+  fi
+  return ${_true_}
+}
+
+function sys/dir/mv() {
+  local _src="${1}"
+  local _dst="${2}"
+  if test -z "${_src}" || \
+     test -z "${_dst}"; then
+    return ${_false_}
+  fi
+  if ! test -d "${_src}" ; then
+    return ${_false_}
+  fi
+  if test -d "${_dst}" ; then
+    rm -fR "${_dst}"
+  fi
+  mv -f "${_src}" "${_dst}"
+}
+
+function sys/dir/svwd() {
+  local _d="${1}"
+  sys_dir_wd=$(pwd)
+  if ! test -z "${_d}" ; then
+    cd "${_d}"
+  fi
+}
+
+function sys/dir/ldwd() {
+  cd "${sys_dir_wd}"
+}

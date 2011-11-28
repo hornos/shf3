@@ -1,0 +1,3 @@
+sys_ifs=" "
+sys_mid_dir="$(ns/dir)/../mid/ssh"
+sys_img_dir="$(ns/dir)=../img"

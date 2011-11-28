@@ -24,6 +24,10 @@ while getopts hl:qsi o; do
   esac
 done
 
+if ! $(rnd/net/test) ; then
+  msg "Network failure"
+  exit ${_false_}
+fi
 if test ${_m} -eq 1 ; then
   rnd/net/int ${_l} 1 100
 else

@@ -1,8 +1,45 @@
 
-function sys() {
+function sys/help() {
+  echo "System module"
+}
+
+
+function sys/os/help() {
+  echo "Returns os string"
+}
+
+function sys/os() {
   if test "${OSTYPE##darwin}" = "${OSTYPE}" ; then
     echo "linux"
   else
     echo "osx"
+  fi
+}
+
+
+function sys/mid/help() {
+  echo "Reads machine identification file"
+}
+
+function sys/mid() {
+  if test -z "${1}" ; then
+    return ${_false_}
+  fi
+  local _mid="${sys_mid_dir}/${1}"
+  if ! test -r "${_mid}" ; then
+    msg/debug "${FUNCNAME}: not found ${_mid}"
+    return ${_false_}
+  fi
+  msg/debug "${FUNCNAME}: source ${_mid}"
+  source "${_mid}"
+}
+
+function sys/ifs() {
+  local _s="${1}"
+  if test -z "${_s}" ; then
+    IFS="${sys_ifs}"
+  else
+    sys_ifs="${IFS}"
+    IFS="${_s}"
   fi
 }

@@ -1,14 +1,14 @@
 
 function net/chk/ifconfig.me() {
   import net
-  local _site=$(funcname ${FUNCNAME})
+  local _site=$(ns/func ${FUNCNAME})
   local _url="http://${_site}"
   net/get "${_url}"
 }
 
 function net/chk/www.whatismyip.com() {
   import net
-  local _site=$(funcname ${FUNCNAME})
+  local _site=$(ns/func ${FUNCNAME})
   local _url="http://${_site}/faq/automation.asp"
   _url=$(net/get "${_url}" | \
   grep "automation.whatismyip.com" | \
@@ -19,7 +19,7 @@ function net/chk/www.whatismyip.com() {
 
 function net/chk/www.ip2location.com() {
   import net
-  local _site=$(funcname ${FUNCNAME})
+  local _site=$(ns/func ${FUNCNAME})
   local _f=${1}
   local _o="./.${_site}"
   local _url="http://${_site}"
@@ -53,7 +53,7 @@ function net/chk/www.ip2location.com() {
 
 function net/chk/www.ip-address.org() {
   import net
-  local _site=$(funcname ${FUNCNAME})
+  local _site=$(ns/func ${FUNCNAME})
   local _f=${1}
   local _o="./.${_site}"
   local _url="http://${_site}"

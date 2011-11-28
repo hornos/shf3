@@ -1,0 +1,1 @@
+sys_lck_dir="$(ns/dir)/../lck"

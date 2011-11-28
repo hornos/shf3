@@ -1,0 +1,12 @@
+tor_exit_db="tor_exit"
+tor_exit_tb="tor_exit"
+
+tor_exit_id="${gbn}.id"
+tor_exit_port=5060
+tor_exit_nmap="nmap -P0 -sT -oG -"
+tor_exit_test="${gbn}.test"
+tor_texit="torexit"
+tor_tkill="torkill"
+tor_tproxy="torproxy"
+tor_pchains="proxychains"
+

@@ -1,0 +1,2 @@
+net_tor_pchains_tcp_read_time_out=30000
+net_tor_pchains_tcp_connect_time_out=6000

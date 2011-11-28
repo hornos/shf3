@@ -1,0 +1,41 @@
+#!/bin/bash
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../../lib/header
+import net/tor
+import gui
+import sys
+
+function torkill/usage() {
+  echo -e "\nUsage: ${gbn} -n no\n"
+  exit 1
+}
+
+### args
+while getopts hn: o; do
+  case "$o" in
+    n) _no=$OPTARG;;
+    h) torkill/usage;;
+  esac
+done
+
+### main
+_os=$(sys/os)
+
+_texit="${tor_texit}.${_no}"
+_tproxy="${tor_tproxy}.${_os}.${_no}"
+
+for k in "${_texit}" "${_tproxy}" ; do
+  _IFS=${IFS}
+  IFS=$'\n'
+  for i in $(ps ax | grep ${k} | grep -v grep) ; do
+    # j=$(echo "${i}" | awk '{print $1}')
+    j=$(field "${i}" 1 " ")
+    msg " ${_no} Stopping ${k} (${j})..."
+    kill ${j}
+    if test $? -eq 0 ; then
+      echo $(gui/txt "grn" " done")
+    fi
+    sleep 2
+  done
+  IFS=${IFS}
+done

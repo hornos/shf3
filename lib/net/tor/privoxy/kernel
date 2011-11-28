@@ -1,0 +1,18 @@
+
+  local __cfg=${1}
+  local __port=${2}
+  local __lport=$((__port+1000))
+  cat << EOF > ${__cfg}
+listen-address  127.0.0.1:${__lport}
+forward-socks5   /   127.0.0.1:${__port}
+EOF
+
+function net/tor/privoxy/cfg() {
+  local _cfg=${1}
+  local _po=${2}
+  local _lpo=$((_po+1000))
+  cat << EOF > ${_cfg}
+listen-address  127.0.0.1:${_lpo}
+forward-socks5   /   127.0.0.1:${_po}
+EOF
+}

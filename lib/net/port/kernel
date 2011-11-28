@@ -1,0 +1,60 @@
+function net/port() {
+  import gui
+  local _p=${1}
+  local _forup=${2:-true}
+  local _r=1
+  local _o=""
+  local _up=false
+  local _i=0
+  if test -z "${_p}" ; then
+    return ${_false_}
+  fi
+  if ${_forup} ; then
+    echo -n $(gui/txt "ylw" " ${_no} [${gbn}] Waiting for port ${_p} UP")
+  else
+    echo -n $(gui/txt "ylw" " ${_no} [${gbn}] Waiting for port ${_p} DOWN")
+  fi
+  while true ; do
+    if test ${_i} -gt 60 ; then
+      echo -e $(gui/txt "red" "\n\n ${_no} [${gbn}] Timeout")
+      exit 1
+    fi
+    _i=$((_i+1))
+    # state
+    _o=$(netstat -a -n -p tcp | grep "\.${_p} ")
+    # echo ${_o}
+    if ! test -z "${_o}" ; then
+      _up=true
+    else
+      _up=false
+    fi
+
+    if ${_forup} ; then
+      if ${_up} ; then
+        break
+      else
+        sleep 2
+        echo -n "."
+        continue
+      fi
+    else
+      if ${_up} ; then
+        sleep 2
+        echo -n "."
+        continue
+      else
+        break
+      fi
+    fi
+  done
+  echo $(gui/txt "grn" " done")
+  return ${_true_}
+}
+
+function net/port/down() {
+  net/port ${1} false
+}
+
+function net/port/up() {
+  net/port ${1} true
+}

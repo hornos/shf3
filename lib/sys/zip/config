@@ -1,0 +1,51 @@
+declare -A sys_zip
+declare -A sys_uzip
+
+# compressor
+sys_zip_gz="gzip"
+sys_zip_bz="bzip2"
+sys_zip_tar="tar"
+sys_zip_xz="xz"
+sys_zip_7z="7z"
+
+# compound
+# sys_zip["tar.gz"]="${sys_zip_tar} -czf <INPUT>"
+sys_uzip["tar.gz"]="${sys_zip_tar} -xzf <INPUT>"
+
+# sys_zip["tgz"]=${sys_zip["tar.gz"]}
+# sys_uzip["tgz"]=${sys_uzip['tar.gz']}
+
+sys_zip["tar.bz2"]="${sys_zip_tar} -cjf <INPUT>"
+sys_uzip["tar.bz2"]="${sys_zip_tar} -xjf <INPUT>"
+
+sys_zip["tar.bz"]=${sys_zip["tar.bz2"]}
+sys_uzip["tar.bz"]=${sys_uzip["tar.bz2"]}
+
+sys_zip["tbz2"]=${sys_zip["tar.bz2"]}
+sys_uzip["tbz2"]=${sys_uzip["tar.bz2"]}
+
+sys_zip["tbz"]=${sys_zip["tar.bz2"]}
+sys_uzip["tb2"]=${sys_uzip["tar.bz2"]}
+
+sys_zip["txz"]="${sys_zip_tar} -cf - <INPUT> | ${sys_zip_xz} -e9 > <OUTPUT>"
+sys_uzip["txz"]="${sys_zip_xz} -dcf <INPUT> | ${sys_zip_tar} -xf -"
+
+sys_zip["gz"]="${sys_zip_gz} -f -9 <INPUT>"
+sys_uzip["gz"]="${sys_zip_gz} -f -d <INPUT>"
+
+sys_zip["Z"]=${sys_zip["gz"]}
+sys_uzip["Z"]=${sys_uzip["gz"]}
+
+sys_zip["bz2"]="${sys_zip_bz} -f -9 <INPUT>"
+sys_uzip["bz2"]="${sys_zip_bz} -f -d <INPUT>"
+
+sys_zip["bz"]=${sys_zip["bz2"]}
+sys_uzip["bz"]=${sys_uzip["bz2"]}
+
+sys_zip["xz"]="${sys_zip_xz} -f -9 <INPUT>"
+sys_uzip["xz"]="${sys_zip_xz} -f -d <INPUT>"
+
+sys_zip["lzma"]="${sys_zip['xz']} -F lzma <INPUT>"
+sys_uzip["lzma"]="${sys_uzip['xz']} -F lzma <INPUT>"
+
+# TODO: 7z

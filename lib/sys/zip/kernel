@@ -1,0 +1,119 @@
+function sys/zip/help() {
+  echo "Compression module"
+}
+
+function sys/zip/svmvz/help() {
+  cat << EOF
+Saves <SOURCE> to <DIRECTORY> and renames to <NAME>
+and compress it.
+
+\$1 CHARACTER(*) <SOURCE>
+\$2 CHARACTER(*) <DIRECTORY>
+\$3 CHARACTER(*) <NAME>
+EOF
+}
+
+function sys/zip/svmvz() {
+  import sys/dir
+  local _src="${1}"
+  local _dir="${2}"
+  local _dst="${3}"
+
+  if test -z "${_src}" || \
+     test -z "${_dir}" ; then
+    return ${_false_}
+  fi
+  if ! test -r "${_src}" || \
+     ! test -d "${_dir}" ; then
+    return ${_false_}
+  fi
+
+  # begin ${_dir} ------------------------
+  sys/dir/svwd "${_dir}"
+  if test -z "${_dst}" ; then
+    _dst=$(basename "${_src}")
+  fi
+  local _sav="old.${_dst}"
+
+  # 1. save
+  # directories
+  if test -d "${_src}" ; then
+    if test -d "${_dst}" ; then
+      sys/dir/mv "${_dst}" "${_sav}"
+    fi
+  # files
+  else
+    if test -r "${_dst}" ; then
+      mv -f "${_dst}" "${_sav}"
+    fi
+  fi
+
+  # 2. move (rename)
+  cp -fR "${_src}" "${_dir}"
+  rm -fR "${_src}"
+  local _srcbn=$(basename "${_src}")
+  if ! test "${_srcbn}" = "${_dst}" ; then
+    mv "${_scrbn}" "${_dst}"
+  fi
+
+  # 3. compress
+  sys/zip/zip "${_dst}"
+
+  sys/dir/ldwd
+  # end ${_dir} --------------------------
+
+  return ${_true_}
+}
+
+function sys/zip/cpuzmv/help() {
+  cat << EOF
+Copies <SOURCE> to <DIRECTORY> and uncompress it 
+and renames to <NAME>.
+\$1 CHARACTER(*) <SOURCE>
+\$2 CHARACTER(*) <DIRECTORY>
+\$3 CHARACTER(*) <NAME>
+EOF
+}
+
+function sys/zip/cpuzmv() {
+  import sys/dir
+  local _src="${1}"
+  local _dir="${2}"
+  local _dst="${3}"
+  local _ret=${_true_}
+
+  if test -z "${_src}" || \
+     test -z "${_dir}" ; then
+    return ${_false_}
+  fi
+  if ! test -r "${_src}" || \
+     ! test -d "${_dir}" ; then
+    return ${_false_}
+  fi
+  # 1. recursive copy
+  cp -Rf "${_src}" "${_dir}"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  # 2. uncompress
+  # begin ${_dir} ------------------------
+  sys/dir/svwd "${_dir}"
+  zip/unzip "${_src}"
+  _dst=$(basename "${_dst}")
+  _src=$(basename "${_src}")
+
+  # 3. move (rename)
+  if ! test -z "${_dst}" ; then
+    if test -d "${_src}" && test -d "${_dst}" ; then
+      rm -fR "${_dst}"
+    fi
+    mv -f "${_src}" "${_dst}"
+    if test $? -gt 0; then
+      _ret=${_false_}
+    fi
+  fi
+  sys/dir/ldwd
+  # end ${_dir} --------------------------
+  return ${_ret}
+}

@@ -1,0 +1,48 @@
+# if lck LOCK ; then
+#   runs if LOCK presented
+# fi
+function sys/lck() {
+  local _l="${1}"
+  if test -z "${_l}" ; then
+    return ${_false_}
+  fi
+  local _lck="${sys_lck_dir}/${_l}"
+  if test -w "${_lck}" ; then 
+    return ${_true_}
+  fi
+  return ${_false_}
+}
+
+# if lck/mk LOCK ; then
+#   runs if LOCK created
+# fi
+function sys/lck/mk() {
+  local _l="${1}"
+  if test -z "${_l}" ; then
+    return ${_false_}
+  fi
+  local _lck="${sys_lck_dir}/${_l}"
+  if $(sys/lck "${_l}") ; then 
+    return ${_false_}
+  fi
+  local _now=$(date +"%Y-%m-%d %H:%M:%S")
+  echo "_now=\"${_now}\"" > "${_lck}"
+  return ${_true_}
+}
+
+# if lck/rm LOCK ; then
+#   runs when LOCK deleted
+# fi
+function sys/lck/rm() {
+  local _l="${1}"
+  if test -z "${_l}" ; then
+    return ${_false_}
+  fi
+  local _lck="${sys_lck_dir}/${_l}"
+
+  if $(sys/lck "${_l}") ; then
+    rm -f "${_lck}"
+    return $?
+  fi
+  return ${_false_}
+}

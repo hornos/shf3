@@ -1,10 +1,39 @@
+gui_txt_u="sgr 0 1"
+gui_txt_b="bold"
+gui_txt_r="sgr0"
+gui_txt_red="setaf 1"
+gui_txt_green="setaf 2"
+gui_txt_yellow="setaf 3"
+gui_txt_blue="setaf 4"
+gui_txt_purple="setaf 5"
+gui_txt_cyan="setaf 6"
+gui_txt_white="setaf 7"
 
 function gui/txt() {
-  local _c="gui/txt/${1}"
+  local _c="${1:-r}"
   local _s=${2}
-  echo -e "${!_c}${_s}${gui/txt/rst}"
+  local _col="gui_txt_${_c}"
+  echo -e "$(tput ${!_col})${_s}$(tput ${gui_txt_r})"
 }
 
 function gui/title() {
   echo -e "\033]0;${1}\007"
 }
+
+function gui/line() {
+  local _l=${1:-42}
+  local _c="${2:--}"
+  local i
+  for ((i=0;i<_l;++i)) ; do
+    printf "${_c}"
+  done
+  printf "\n"
+}
+
+function gui/cline() {
+  local _col=${1:-white}
+  local _l=${2:-42}
+  local _c="${3:--}"
+  gui/txt ${_col} $(gui/line)
+}
+

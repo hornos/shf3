@@ -29,11 +29,13 @@ while getopts hf:u:l:cnv o; do
   esac
 done
 
-enc_pass_db="$(namedir)/../sql/${enc_pass_db}"
+if test "${_m}" != "LIST" && test "${_u}" = "" ; then
+  echo -n "User: "
+  read _u
+fi
+
+enc_pass_db="$(ns/dir)/../sql/${enc_pass_db}"
 if ! test -z "${_f}" ; then
   enc_pass_db="${_f}"
 fi
 enc/pass/mgr "${_m}" ${_l} "${_u}"
-if test $? -gt 0 ; then
-  error "Failed"
-fi

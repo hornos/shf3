@@ -1,0 +1,15 @@
+ssh_key_dir="$(ns/dir)/../key/ssh"
+ssh_key_sec="sec"
+ssh_key_pub="pub"
+ssh_key_typ="rsa"
+ssh_key_len=2048
+ssh_ssh="ssh"
+ssh_scp="scp"
+ssh_tar="tar"
+ssh_rsync="rsync"
+ssh_keygen="ssh-keygen"
+ssh_mnt="sshfs"
+ssh_umnt="fusermount -u"
+# defaults
+ssh_TCPKeepAlive="no"
+ssh_ServerAliveInterval=30

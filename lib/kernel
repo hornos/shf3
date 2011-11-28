@@ -1,102 +1,225 @@
 ### globals
 gkn="kernel"
 gcn="config"
-glp=""
 
+# import path
+gip="$(dirname ${BASH_SOURCE})"
+
+# loaded modules
+gim=""
+
+# return values
 _true_=0
 _false_=1
+
+# messages
+function msg/help() {
+  echo "Message functions"
+  echo "$1 CHARACTER(*)"
+}
 
 function msg() {
   echo -e "[${gbn}] ${*}"
 }
 
-function debug() {
+function msg/debug() {
   if ${gdbg} ; then
     msg "DEBUG: ${*}"
   fi
 }
 
-function error() {
+function msg/error() {
   msg "ERROR: ${*}"
   exit ${2:-${_false_}}
 }
 
-function warn() {
+function msg/warn() {
   msg "WARN: ${*}"
 }
 
+
 ### namespaces
-function namedir() {
+function ns/dir() {
   echo "$(dirname ${1:-${BASH_SOURCE}})"
 }
 
-function funcname() {
+function ns/path() {
+  echo $(cd $(dirname $1); pwd)/$(basename $1)
+}
+
+function ns/isfunc() {
+  local _f="${1:-${FUNCNAME}}"
+  if test $(type -t "${_f}") = "function" ; then
+    return ${_true_}
+  fi
+  return ${_false_}
+}
+
+function ns/func() {
   local _f=${1:-${FUNCNAME}}
   echo ${_f##*/}
 }
 
-### import
+function ns/func/dir() {
+  local _f="${1:-${BASH_SOURCE}}"
+  local i
+  _IFS="${IFS}"
+  IFS=$'\n'
+  for i in $(cat "${_f}" | egrep "^function") ; do
+    i=$(field "${i}" 2 " ")
+    i=${i%%()}
+    if test "${i}" = "${i/help/}" ; then
+      echo "  ${i}"
+    fi
+  done
+  IFS="${_IFS}"
+}
+
+# operators
+function ns/isop() {
+  local _s="${1}"
+  local _m="${2:-<}"
+  if test "${_s:0:1}" = "${_m}" ; then
+    return ${_true_}
+  fi
+  return ${_false_}
+}
+
+function ns/op/name() {
+  local _s="${1}"
+  local _m="${2:-<}"
+  if $(ns/isop "${_s}" "${_m}") ; then
+    echo "${_s:1}"
+  else
+    echo "${_s}"
+  fi
+}
+
+function ns/inpath() {
+  local _m="${1}"
+  local _p="${2:-${gip}}"
+  if test -z "${_p}" || test "${_m}" ; then
+    return ${_false_}
+  fi
+  if test "${_p}" = "${_p/${_m}/}" ; then
+    return ${_false_}
+  fi
+  return ${_true_}
+}
+
+### include
 function include() {
   local _p="${1}"
-  if ! test -z "${_p}" && test -d "${_p}" ; then
-    if test "${glp}" = "${glp/${_p}/}" ; then
-      if test -z "${glp}" ; then
-        glp="${_p}"
-      else
-        glp="${glp}:${_p}"
-      fi
+  if test -z "${_p}" ; then
+    return ${_false_}
+  fi
+
+  local __p=$(ns/op/name "${_p}" "+")
+  msg/debug "${FUNCNAME} ${__p}"
+
+  if ! test -d "${__p}" ; then
+    return ${_false_}
+  fi
+
+  if test -z "${gip}" ; then
+    gip="${__p}"
+    return ${_true_}
+  fi
+
+  if ! $(ns/inpath "${__p}") ; then
+    if $(ns/op "${_p}" "+") ; then
+      gip="${__p}:${gip}"
+    else
+      gip="${gip}:${__p}"
     fi
+  fi
+  return ${_true_}
+}
+
+function import/path() {
+  local _m="${1}"
+  if test -z "${_m}" ; then
+    echo "${_m}"
+  fi
+
+  local _kn="${_m}/${gkn}"
+  if ! test -z "${gip}" ; then
+    _IFS=${IFS}
+    IFS=:
+    local i
+    for i in ${gip}; do
+      local _p="${i}"
+      if test -r "${_p}/${_kn}" ; then
+        echo "${_p}/${_m}"
+      fi
+    done
+    IFS=${_IFS}
+  else
+    echo ""
   fi
 }
 
 function import() {
-  local _np="${1}"
-  if test -z "${_np}" ; then
-    return ${_FALSE_}
+  local _m="${1}"
+  # not loaded
+  local _nl=false
+
+  if test -z "${gip}" || test -z "${_m}" ; then
+    return ${_false_}
+  fi
+  msg/debug "${FUNCNAME}: ${_m}"
+
+  # force reloading
+  local __m=$(ns/op/name "${_m}" "+")
+  if $(ns/inpath "${__m}" ${gim}) ; then
+    if ! $(ns/op "${_m}" "+") ; then
+      # skipped
+      return ${_true_}
+    fi
+  else
+    _nl=true
   fi
 
-  local _lib="${_np}/${gkn}"
-  local _cfg="${_np}/${gcn}"
-
+  msg/debug "${FUNCNAME} loading: ${__m}"
   # search
-  local _p="$(namedir)"
-  if ! test -z "${glp}" ; then
-    _IFS=${IFS}
-    IFS=:
-    for i in ${glp}; do
-      local __p="${i}"
-      if test -r "${__p}/${_lib}" ; then
-        _p="${__p}"
-        break
-      fi
-    done
-    IFS=${_IFS}
+  local __p=$(import/path "${__m}")
+  if test -z "${__p}" ; then
+    return ${_false_}
   fi
 
-  # read cfg
-  local _p_cfg="${_p}/${_cfg}"
-  if test -r "${_p_cfg}" ; then
-    source "${_p_cfg}"
+  local _lib="${__p}/${gkn}"
+  local _cfg="${__p}/${gcn}"
+
+  # read config
+  if test -r "${_cfg}" ; then
+    source "${_cfg}"
   fi
 
   # load OS specific library config
-  _p_cfg="${_p}/${gcn}.${OSTYPE}"
-  if test -r ${_p_cfg} ; then
-    source "${_p_cfg}"
+  local __cfg="${_cfg}.${OSTYPE}"
+  if test -r ${__cfg} ; then
+    source "${__cfg}"
   fi
 
   # user specific library config
-  _p_cfg="${_p}/${gcn}.${USER}"
-  if test -r ${_p_cfg} ; then
-    source "${_p_cfg}"
+  __cfg="${_cfg}.${USER}"
+  if test -r ${__cfg} ; then
+    source "${__cfg}"
   fi
 
   # read lib
-  local _p_lib="${_p}/${_lib}"
-  if test -r "${_p_lib}" ; then
-    source "${_p_lib}"
+  if test -r "${_lib}" ; then
+    msg/debug "import lib: ${_lib}"
+    source "${_lib}"
   else
-    error "Library not found: ${_p_lib}"
+    return ${_false_}
+  fi
+  if ${_nl} ;then
+    if test -z "${gim}" ; then
+      gim="${_np}"
+    else
+      gim="${gim}:${__m}"
+    fi
   fi
 }
 
@@ -107,16 +230,7 @@ function field() {
   echo "${_s}" | cut  -d "${_x}" -f ${_f}
 }
 
-function line() {
-  local _l=${1:-42}
-  local _c="${2:--}"
-  for ((i=0;i<_l;++i)) ; do
-    printf "${_c}"
-  done
-  printf "\n"
-}
-
-function have() {
+function installed() {
   local _b="${1}"
   if test -z "${_b}" ; then
     return ${_false_}
@@ -128,24 +242,8 @@ function have() {
   return ${_false_}
 }
 
-function __tocase() {
-  local _s=${1:-case}
-  local _d=${2:-false}
-  if ${_d} ; then
-    echo "${_s}" | tr '[:upper:]' '[:lower:]'
-  else
-    echo "${_s}" | tr '[:lower:]' '[:upper:]'
-  fi
-}
-
-function tolower() {
-  __tocase "${*}" true
-}
-function toupper() {
-  __tocase "${*}"
-}
-
-function question() {
+function answer() {
+  import str
   local _m="${1:-Answer}"
   local _f=${2:-3}
   local _a
@@ -153,7 +251,7 @@ function question() {
   while true ; do
     echo -en "[${gbn}] ${_m} (y / n / q) [${_f}]: "
     read _a
-    _a=$(tolower ${_a})
+    _a=$(str/tolower ${_a})
     case "${_a}" in
       "y" | "case" | "yes" )
         return ${_true_}
@@ -182,8 +280,68 @@ function epoch() {
   fi
 }
 
+function check() {
+  msg "import path    = ${gip}"
+  msg "loaded modules = ${gim}"
+}
+
+function help() {
+  import sys/dir
+  local _h="${1:-}"
+  echo
+  echo "Shell Framework Help System"
+  gui/line
+  case "${_h}" in
+    "mod")
+      local _nd=$(ns/dir)
+      local i
+
+      echo "Available core modules:"
+      for i in $(sys/dir/rls "${_nd}") ; do
+        i=${i##"${_nd}"}
+        if ! test -z "${i}"; then
+          echo "${i##/}"
+        fi
+      done
+
+      if ! test -z "${gip}" ; then
+        echo
+        local j
+        _IFS="${IFS}"
+        IFS=":"
+        for j in ${gip}; do
+          _nd="${j}/lib"
+          echo "Available user modules in ${_nd}:"
+          for i in $(sys/dir/rls "${_nd}") ; do
+            i=${i##"${_nd}"}
+            if ! test -z "${i}"; then
+              echo "${i##/}"
+            fi
+          done
+        done
+        IFS="${_IFS}"
+      fi
+    ;;
+    "")
+      echo "Available commands:"
+      echo "  mod - list modules"
+    ;;
+    *)
+      import ${_h}
+      if test $? -gt 0 ; then
+        msg "Not found ${_h}"
+        return ${_false_}
+      fi
+      ${_h}/help
+      echo
+      echo "Available modules:"
+      ns/func/dir "$(ns/dir)/${_h}/${gkn}"
+    ;;
+  esac
+}
+
 # binary check
-if $(have pv) ; then
+if $(installed pv) ; then
   gpv=true
 else
   gpv=false

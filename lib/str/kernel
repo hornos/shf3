@@ -1,0 +1,16 @@
+function str/__case() {
+  local _s=${1:-case}
+  local _d=${2:-false}
+  if ${_d} ; then
+    echo "${_s}" | tr '[:upper:]' '[:lower:]'
+  else
+    echo "${_s}" | tr '[:lower:]' '[:upper:]'
+  fi
+}
+
+function str/tolower() {
+  str/__case "${*}" true
+}
+function str/toupper() {
+  str/__case "${*}"
+}

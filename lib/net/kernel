@@ -1,4 +1,15 @@
 function net/get() {
   local _url="${1}"
-  wget -U "" -qO- "${_url}"
+  local _t=${2:-3}
+  wget -U "" -T ${_t} -qO- "${_url}"
 }
+
+function net/test() {
+  local _url="${1}"
+  net/get "${_url}" 3 &> /dev/null
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  return ${_true_}
+}
+

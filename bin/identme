@@ -8,7 +8,6 @@ function identme/usage() {
   echo "    2 - www.whatismyip.com"
   echo "   20 - www.ip2location.com"
   echo "   21 - www.ip-address.org"
-  echo "   22 - www.cybersyndrome.net"
   exit ${_false_}
 }
 
@@ -23,6 +22,9 @@ done
 
 case ${_m} in
   1)
+    echo $(net/chk/ifconfig.me)
+    ;;
+  2)
     echo $(net/chk/www.whatismyip.com)
     ;;
  20)

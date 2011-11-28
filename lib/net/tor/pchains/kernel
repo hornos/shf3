@@ -1,0 +1,21 @@
+
+function net/tor/pchains/cfg() {
+  local _cfg=${1}
+  local _po=${2}
+  local _q=${3:-true}
+  cat << EOF > ${_cfg}
+strict_chain
+proxy_dns
+EOF
+if ${_q} ; then
+  cat << EOF >> ${_cfg}
+quiet_mode
+EOF
+fi
+  cat << EOF >> ${_cfg}
+tcp_read_time_out ${net_tor_pchains_tcp_read_time_out}
+tcp_connect_time_out ${net_tor_pchains_tcp_connect_time_out}
+[ProxyList]
+socks5 127.0.0.1 ${_po}
+EOF
+}

@@ -1,12 +1,12 @@
 
 function enc/pass() {
   import sql
-  debug "Database: ${enc_pass_db}"
-  question "Create database?"
+  msg/debug "Database: ${enc_pass_db}"
+  answer "Create database?"
   if test $? -gt 0 ; then
     return ${_false_}
   fi
-  local _in="$(namedir ${BASH_SOURCE})/enc_pass.sql"
+  local _in="$(ns/dir ${BASH_SOURCE})/enc_pass.sql"
   sql/init "${enc_pass_db}" "${_in}"
 }
 
@@ -44,6 +44,7 @@ function enc/pass/pass() {
 
 function enc/pass/mgr() {
   import sql
+  import gui
   import rnd/net
   import enc/gpg
 
@@ -52,7 +53,7 @@ function enc/pass/mgr() {
   local _u="${3}"
   local _q=""
 
-  if ! test -r $(sql/dbn "${enc_pass_db}") ; then
+  if ! test -r "${enc_pass_db}" ; then
     enc/pass
     if test $? -gt 0 ; then
       return ${_false_}
@@ -76,7 +77,8 @@ function enc/pass/mgr() {
       fi
       local _frm1="%-40s%-22s%-22s\n"
       printf "${_frm1}" "uid" "create" "modified"
-      line 84
+      gui/line 84
+      local i
       for i in $(sql/select "${enc_pass_db}" "${enc_pass_tb}" "uid,ctime,mtime") ; do
         printf "${_frm1}" $(field "${i}") "$(epoch $(field "${i}" 2))" "$(epoch $(field "${i}" 3))"
       done
@@ -85,11 +87,15 @@ function enc/pass/mgr() {
       if test -z "${_u}" ; then
         return ${_false_}
       fi
-      question "Create password for ${_u}?"
+      answer "Create password for ${_u}?"
       if test $? -gt 0 ; then
         return ${_false_}
       fi
 
+      if ! $(rnd/net/test) ; then
+        msg "Network failure"
+        return ${_false_}
+      fi
       local _p=$(enc/pass/gen ${_l})
       if test "${_p}" = "" ; then
         return ${_false_}
@@ -111,13 +117,13 @@ function enc/pass/mgr() {
       if test -z "${_u}" ; then
         return ${_false_}
       fi
-      question "Change password for ${_u}?"
+      answer "Change password for ${_u}?"
       local _p=$(enc/pass/pass "${_u}")
       if test "${_p}" = ""; then
         return ${_false_}
       fi
 
-      question "Create password for ${_u}?"
+      answer "Create password for ${_u}?"
       if test $? -gt 0 ; then
         return ${_false_}
       fi

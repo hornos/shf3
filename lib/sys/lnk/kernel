@@ -1,0 +1,26 @@
+# what where
+function sys/lnk/mk() {
+  local _src="${1}"
+  local _dst="${2}"
+  if test -z "${_src}" || \
+     test -z "${_dst}" ; then
+    return ${_false_}
+  fi
+  if ! test -L "${_dst}" ; then
+    ln -s "${_src}" "${_dst}"
+    return $?
+  fi
+  return ${_true_}
+}
+
+function sys/lnk/rm() {
+  local _lnk="${1}"
+  if test -z "${_lnk}" ; then 
+    return ${_false_}
+  fi
+  if test -L "${_lnk}" ; then
+    rm -f "${_lnk}"
+    return $?
+  fi
+  return ${_true_}
+}

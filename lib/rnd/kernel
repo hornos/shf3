@@ -8,6 +8,7 @@ function rnd() {
 
 function rnd/h() {
   local _n=${1:-}
+  local i
   for ((i=0;i<_n;++i)) ; do
     echo -n $(echo "obase=16; $(($RANDOM % 16))" | bc)
   done

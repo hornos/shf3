@@ -1,0 +1,45 @@
+#!/bin/bash
+gbn=$(basename ${BASH_SOURCE})
+gdn=$(dirname ${BASH_SOURCE})
+rc="${gdn}/.${gbn}rc"
+
+function shfcli/help() {
+  echo "Usage: ${gbn} [-h] [-v]"
+  exit 1
+}
+
+function shfcli/stop() {
+  if test -r "${rc}" ; then
+    rm -f "${rc}"
+  fi
+  exit 1
+}
+trap shfcli/stop INT TERM EXIT
+
+_v=false
+while getopts hv o; do
+  case "$o" in
+    v) _v=true;;
+    h) passmgr/usage;;
+  esac
+done
+
+
+cat << EOF > "${rc}"
+source $(dirname ${BASH_SOURCE})/../lib/header
+export PS1="SHF3(\$?)> "
+EOF
+if ${_v} ; then
+  echo "gdbg=true" >> "${rc}"
+fi
+cat << EOF >> "${rc}"
+import gui
+
+gui/cline
+gui/txt "white" "        Shell Framework 3 Console"
+gui/txt "blue"  "         -=Nano Group Budapest=-"
+gui/cline
+check
+EOF
+
+bash --noprofile --rcfile "${rc}"

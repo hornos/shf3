@@ -1,13 +1,15 @@
 
-function sql/dbn() {
-  echo "${1}.sqlite"
+function sql/init/help() {
+  cat <<EOF
+\$1 CHARACTER(*) database
+\$2 CHARACTER(*) initfile
+EOF
 }
-
 function sql/init() {
-  local _db=$(sql/dbn "${1:-./temp}")
+  local _db="${1:-./tmp.sqlite}"
   local _in="${2}"
 
-  debug "Creating new database: ${_db} ${_in}"
+  msg/debug "Creating new database: ${_db} ${_in}"
   if ! test -r "${_db}" ; then
     touch "${_db}"
     chmod 600 "${_db}"
@@ -24,13 +26,23 @@ function sql/init() {
 }
 
 function sql/count() {
-  local _db=$(sql/dbn "${1}")
+  local _db="${1}"
   local _tb="${2}"
   ${sql_sqlite} "${_db}" "SELECT COUNT(*) FROM ${_tb}"
 }
 
+function sql/select/help() {
+  cat <<EOF
+\$1 CHARACTER(*) database
+\$2 CHARACTER(*) table
+\$3 CHARACTER(*) fields (*)
+\$4 INTEGER      offset
+\$5 INTEGER      limit
+\$6 CHARACTER(*) where
+EOF
+}
 function sql/select() {
-  local _db=$(sql/dbn "${1}")
+  local _db="${1}"
   local _tb="${2}"
   local _f=${3:-*}
   local _o=${4:-0}
@@ -54,7 +66,7 @@ function sql/select() {
 }
 
 function sql/insert() {
-  local _db=$(sql/dbn "${1}")
+  local _db="${1}"
   local _tb="${2}"
   local _f=(${3})
   local _v=(${4})
@@ -62,7 +74,7 @@ function sql/insert() {
   local _qf="("
   local _qv="VALUES ("
   local _first=true
-
+  local i
   for i in ${_f[@]} ; do
     if ! ${_first} ; then
       _qf="${_qf},${i}"
@@ -88,7 +100,7 @@ function sql/insert() {
 }
 
 function sql/update() {
-  local _db=$(sql/dbn "${1}")
+  local _db="${1}"
   local _tb="${2}"
   local _f=(${3})
   local _v=(${4})
@@ -101,6 +113,7 @@ function sql/update() {
     return ${_false_}
   fi
   local j=0
+  local i
   for i in ${_f[@]} ; do
     if ! ${_first} ; then
       _qf="${_qf},${i}='${_v[${j}]}'"
