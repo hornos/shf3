@@ -8,6 +8,36 @@ SSH module
 EOF
 }
 
+function ssh/mgr() {
+  import sys
+  import gui
+  local _m="${1:-LIST}"
+  local _h="${2}"
+  case "${_m}" in
+    LIST)
+      local _frm1="%-28s%-40s\n"
+      printf "${_frm1}" "mid" "url"
+      gui/line 84
+      local i
+      for i in ${sys_mid_dir}/* ; do
+        if test -r "${i}" ; then
+          i=$(basename "${i}")
+          sys/mid "${i}"
+          printf "${_frm1}" "${i}" "${mid_ssh_user}@${mid_ssh_fqdn}"
+        else
+          printf "${_frm1}" "${i}" "not readable"
+        fi
+      done
+      ;;
+    CREATE)
+      return ${_false_}
+      ;;
+    DELETE)
+      return ${_false_}
+      ;;
+  esac
+}
+
 function ssh/info() {
   import sys
   import gui
@@ -39,7 +69,7 @@ function ssh/info() {
   if test -r "${_sec}" ; then
     ${ssh_key_gen} -v -l -f "${_sec}"
   else
-    warn "Key not found ${_sec}"
+    msg/warn "Key not found ${_sec}"
   fi
   gui/line 84
   local _lck="${_h}.${gbn}"
@@ -79,7 +109,7 @@ function ssh/login() {
   fi
 
   # opts
-  local _opts="${mid_ssh_opts}"
+  local _opts="${mid_ssh_ssh_opts}"
 
   # proxy
   local _proxy=false
@@ -89,7 +119,7 @@ function ssh/login() {
       _opts="${_opts} ${mid_ssh_proxy}"
       msg "Connect proxies: ${mid_ssh_proxy}"
     else
-      warn "Active proxies: ${mid_ssh_proxy}"
+      msg/warn "Active proxies: ${mid_ssh_proxy}"
     fi
   fi
 
@@ -98,14 +128,14 @@ function ssh/login() {
   if test -r "${_sec}" ; then
     _opts="${_opts} -i ${_sec}"
   else
-    warn "Key not found ${_sec}"
+    msg/warn "Key not found ${_sec}"
   fi
 
   # ssh
   local _url="${mid_ssh_user}@${mid_ssh_fqdn}"
   msg "Login to ${_url}"
   gui/line 84
-  local _cmd="${mid_ssh_ssh} ${_opts} ${_url}"
+  local _cmd="${ssh_ssh} ${_opts} ${_url}"
   msg/debug "${_cmd}"
   ${_cmd}
   local _ret=$?
@@ -201,7 +231,7 @@ function ssh/xfer() {
   if test -r "${_sec}" ; then
     _opts="${_opts} -i ${_sec}"
   else
-    warn "Key not found ${_sec}"
+    msg/warn "Key not found ${_sec}"
   fi
 
   # info
@@ -298,7 +328,7 @@ function ssh/cmd() {
   if test -r "${_sec}" ; then
     _opts="${_opts} -i ${_sec}"
   else
-    warn "Key not found ${_sec}"
+    msg/warn "Key not found ${_sec}"
   fi
 
   local _url="${mid_ssh_user}@${mid_ssh_fqdn}"

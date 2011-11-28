@@ -1,0 +1,43 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import ssh
+
+function sshmgr/help() {
+  cat << EOF
+
+SSH MID Manager
+
+Usage: ${gbn} options
+              -n - new
+              -d - delete
+EOF
+  exit ${_false_}
+}
+
+### args
+_n=false
+_d=false
+_m=""
+while getopts hn:d: o; do
+  case "$o" in
+    f) _f=$OPTARG;;
+    d) _d=true; _m=$OPTARG;;
+    n) _n=true; _m=$OPTARG;;
+    h) sshmgr/help;;
+    *) sshmgr/help;;
+  esac
+done
+
+### main
+if ${_n} ; then
+  ssh/mgr "CREATE" "${_m}"
+  exit $?
+fi
+
+if ${_d} ; then
+  ssh/mgr "DELETE" "${_m}"
+  exit $?
+fi
+
+ssh/mgr "LIST"
+

@@ -1,0 +1,37 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import ssh
+
+function sshto/help() {
+  cat << EOF
+
+SSH login
+
+Usage: ${gbn} options
+              -m MID
+              -f - force
+EOF
+  exit ${_false_}
+}
+
+### args
+_m=""
+_f=false
+_v=false
+while getopts hfvm: o; do
+  case "$o" in
+    m) _m=$OPTARG;;
+    f) _f=true;;
+    v) gdbg=true;;
+    h) sshkey/help;;
+    *) sshkey/help;;
+  esac
+done
+
+### main
+if test "${_m}" = "" ; then
+  echo -n "MID: "
+  read _m
+fi
+
+ssh/login "${_m}" ${_f}
