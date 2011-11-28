@@ -1,0 +1,6 @@
+ssh_key_dir="$(ns/dir)/../key/ssh"
+ssh_key_sec="sec"
+ssh_key_pub="pub"
+ssh_key_typ="rsa"
+ssh_key_len=2048
+ssh_key_gen="ssh-keygen"

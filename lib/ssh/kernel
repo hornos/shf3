@@ -8,101 +8,17 @@ SSH module
 EOF
 }
 
-function ssh/key() {
-  local _h="${1:-default}"
-  local _s="${2:-${ssh_key_sec}}"
-  echo "${ssh_key_dir}/${_h}.${_s}"
-}
-
-function ssh/key/sec() {
-  ssh/key "${1:-default}" "${ssh_key_sec}"
-}
-
-function ssh/key/pub() {
-  ssh/key "${1:-default}" "${ssh_key_pub}"
-}
-
-function ssh/key/gen() {
-  import sys/dir
-  import sys/lnk
-
-  local _h="${1:-default}"
-  local _t="${2:-${ssh_key_typ}}"
-  local _l="${3:-${ssh_key_len}}"
-
-  sys/mid "${_h}"
-
-  # in ${ssh_key_dir}
-  sys/dir/svwd "${ssh_key_dir}"
-
-  local _sec="${_h}.id_${_t}"
-  local _sec_lnk="${_h}.${ssh_key_sec}"
-  local _pub="${_sec}.pub"
-  local _pub_lnk="${_h}.${ssh_key_pub}"
-
-  # check
-  local i
-  for i in ${_sec} ${_sec_lnk} ${_pub} ${_pub_lnk} ; do
-    if test -r "${i}" ; then
-      msg "Delete key ${i}"
-      sys/dir/ldwd
-      return ${_false_}
-    fi
-  done
-
-  # generate
-  if ${gdbg} ; then
-    ${ssh_keygen} -v -b ${_l} -t "${_t}" -f "${_sec}"
-  else
-    ${ssh_keygen} -b ${_l} -t "${_t}" -f "${_sec}"
-  fi
-  if test $? -gt 0 ; then
-    sys/dir/ldwd
-    return ${_false_}
-  fi
-
-  # secure
-  chmod go-rwx "${_sec}"
-  sys/lnk/mk "${_sec}" "${_sec_lnk}"
-
-  chmod go-rwx "${_pub}"
-  sys/lnk/mk "${_pub}" "${_pub_lnk}"
-
-  sys/dir/ldwd
-}
-
-
-function ssh/key/chg() {
-  local _h="${1:-default}"
-  local _t="${2:-${ssh_key_typ}}"
-
-  sys/mid "${_h}"
-
-  # in ${ssh_key_dir}
-  sys/dir/svwd "${ssh_key_dir}"
-
-  local _sec="${_h}.id_${_t}"
-  if ! test -r "${_sec}" ; then
-    sys/dir/ldwd
-    return ${_false_}
-  fi
-  if ${gdbg} ; then
-    ${ssh_keygen} -v -p -f "${_sec}"
-  else
-    ${ssh_keygen} -p -f "${_sec}"
-  fi
-  local _ret=$?
-  sys/dir/ldwd
-  return ${_ret}
-}
-
-
 function ssh/info() {
   import sys
   import gui
+  import ssh/key
   local _h="${1:-default}"
 
   sys/mid "${_h}"
+  if test $? -gt 0 ; then
+    msg "No MID"
+    return ${_false_}
+  fi
 
   echo ""
   msg "SSH Host info ${_h} (${mid_ssh_fqdn})"
@@ -121,7 +37,7 @@ function ssh/info() {
   gui/line 84
   local _sec="$(ssh/key/sec ${_h})"
   if test -r "${_sec}" ; then
-    ${ssh_keygen} -v -l -f "${_sec}"
+    ${ssh_key_gen} -v -l -f "${_sec}"
   else
     warn "Key not found ${_sec}"
   fi
@@ -145,11 +61,16 @@ function ssh/login() {
   import gui
   import sys
   import sys/lck
+  import ssh/key
   local _h="${1:-default}"
   local _f="${2:-false}"
 
   # init
   sys/mid "${_h}"
+  if test $? -gt 0 ; then
+    msg "No MID"
+    return ${_false_}
+  fi
 
   # clear lock
   local _lck="${_h}.${gbn}"
@@ -213,7 +134,10 @@ put    1        2          3
 get   11       12         13
 EOF
 }
+
 function ssh/xfer() {
+  import sys
+  import ssh/key
   local _h="${1:-default}"
   # mode number
   local _m="${2:-1}"
@@ -230,6 +154,10 @@ function ssh/xfer() {
 
   # init
   sys/mid "${_h}"
+  if test $? -gt 0 ; then
+    msg "No MID"
+    return ${_false_}
+  fi
 
   # source
   local _src_url="${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_scp_dst}"
@@ -345,12 +273,19 @@ function ssh/cmd/help() {
 \$3 LOGICAL force tty
 EOF
 }
+
 function ssh/cmd() {
+  import sys
+  import ssh/key
   local _h="${1:-default}"
   local _x="${2:-ls -lA ${mid_ssh_scp_dst}}"
   local _t=${3:-false}
 
   sys/mid "${_h}"
+  if test $? -gt 0 ; then
+    msg "No MID"
+    return ${_false_}
+  fi
 
   local _opts="${mid_ssh_opts}"
   # force tty
@@ -376,109 +311,4 @@ function ssh/cmd() {
   fi
   local _cmd="${ssh_ssh} ${_opts} ${_url} \"${_x}\""
   ${_cmd}
-}
-
-
-function ssh/mnt/ls() {
-  import gui
-  msg "Mounted SSHFS Volumes"
-  gui/line 84
-  mount | egrep 'fusefs|fuse.sshfs' | \
-          egrep -v 'encfs|fuse.encfs' | \
-          egrep ${USER} | \
-          awk '{printf "%-32s => %s\n",$3,$1}'
-  return ${_true_}
-}
-
-
-function ssh/mnt() {
-  import gui
-  import sys/lck
-  import sys/dir
-
-  local _h="${1:-default}"
-  local _f="${2:-false}"
-  local _u="${3:-false}"
-  local _ret
-
-  sys/mid "${_h}"
-
-  # lock
-  # clear lock
-  local _lck="${_h}.${gbn}"
-  if ${_f} ; then
-    sys/lck/rm "${_lck}"
-  fi
-
-  local _src="${mid_ssh_sshfs_src}"
-
-  if ${_u} ; then
-    # unmount
-    if ! $(sys/lck "${_lck}") && ! ${_f}; then
-      msg "${_h} is not mounted"
-      return ${_false_}
-    fi
-    gui/line 84
-    ${ssh_umnt} ${_src} 2>/dev/null
-    _ret=$?
-    if ! test ${_ret} -gt 0 ; then
-      sys/lck/rm "${_lck}"
-      msg "${_h} is unmounted"
-    fi
-    return ${_ret}
-  fi
-
-  # mount
-  if $(sys/lck "${_lck}") && ! ${_f} ; then
-    msg "${_h} is already mounted"
-    return ${_false_}
-  fi
-
-  sys/lck/mk "${_lck}"
-
-  local _opts="${mid_ssh_sshfs_opts}"
-  # key
-  local _sec="$(ssh/key/sec ${_h})"
-  if test -r "${_sec}" ; then
-    _opts="${_opts} -i ${_sec}"
-  else
-    warn "Key not found ${_sec}"
-  fi
-
-  local _url="${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_sshfs_dst}"
-  sys/dir/mk "${_src}"
-
-  msg $(printf "%-32s => %s" "${_dst}" "${_url}")
-
-  if sys/osx ; then
-    local _vol="${_h}:${mid_ssh_user}@${mid_ssh_fqdn}"
-    _opts="${_opts} -o volname=${_vol}"
-    local _ico="${sys_img_dir}/sshfs.icns"
-    if test -r "${_ico}" ; then
-      _opts="${_opts} -o modules=volicon -o volicon=${_ico}"
-    fi
-  fi
-
-  local _cmd="${ssh_mnt} ${_url} \"${_src}\" ${_opts}"
-  msg/debug "${_cmd}"
-
-  if ${gdbg} ; then
-    ${_cmd}
-  else
-    ${_cmd} 2>/dev/null
-  fi
-  _ret=$?
-  if test $? -gt 0 ; then
-    msg "mount failed"
-    sys/lck/rm "${_lck}"
-  else
-    msg "host mounted"
-  fi
-  return ${_ret}
-}
-
-function ssh/umnt() {
-  local _h="${1:-default}"
-  local _f="${2:-false}"
-  ssh/mnt "${_h}" ${_f} false
 }

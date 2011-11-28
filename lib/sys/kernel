@@ -3,7 +3,6 @@ function sys/help() {
   echo "System module"
 }
 
-
 function sys/os/help() {
   echo "Returns os string"
 }
@@ -16,9 +15,8 @@ function sys/os() {
   fi
 }
 
-
 function sys/mid/help() {
-  echo "Reads machine identification file"
+  echo "Reads mode id file"
 }
 
 function sys/mid() {
@@ -27,11 +25,10 @@ function sys/mid() {
   fi
   local _mid="${sys_mid_dir}/${1}"
   if ! test -r "${_mid}" ; then
-    msg/debug "${FUNCNAME}: not found ${_mid}"
     return ${_false_}
   fi
-  msg/debug "${FUNCNAME}: source ${_mid}"
   source "${_mid}"
+  return ${_true_}
 }
 
 function sys/ifs() {

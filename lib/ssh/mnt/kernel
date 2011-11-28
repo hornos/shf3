@@ -1,0 +1,110 @@
+
+function ssh/mnt/ls() {
+  import gui
+  msg "Mounted SSHFS Volumes"
+  gui/line 84
+  mount | egrep 'fusefs|fuse.sshfs' | \
+          egrep -v 'encfs|fuse.encfs' | \
+          egrep ${USER} | \
+          awk '{printf "%-32s => %s\n",$3,$1}'
+  return ${_true_}
+}
+
+
+function ssh/mnt() {
+  import sys
+  import gui
+  import sys/lck
+  import sys/dir
+  import ssh/key
+
+  local _h="${1:-default}"
+  local _f="${2:-false}"
+  local _u="${3:-false}"
+  local _ret
+
+  sys/mid "${_h}"
+  if test $? -gt 0 ; then
+    msg "No MID"
+    return ${_false_}
+  fi
+
+  # lock
+  # clear lock
+  local _lck="${_h}.${gbn}"
+  if ${_f} ; then
+    sys/lck/rm "${_lck}"
+  fi
+
+  local _src="${mid_ssh_sshfs_src}"
+
+  if ${_u} ; then
+    # unmount
+    if ! $(sys/lck "${_lck}") && ! ${_f}; then
+      msg "${_h} is not mounted"
+      return ${_false_}
+    fi
+    gui/line 84
+    ${ssh_mnt_umnt} ${_src} 2>/dev/null
+    _ret=$?
+    if ! test ${_ret} -gt 0 ; then
+      sys/lck/rm "${_lck}"
+      msg "${_h} is unmounted"
+    fi
+    return ${_ret}
+  fi
+
+  # mount
+  if $(sys/lck "${_lck}") && ! ${_f} ; then
+    msg "${_h} is already mounted"
+    return ${_false_}
+  fi
+
+  sys/lck/mk "${_lck}"
+
+  local _opts="${mid_ssh_sshfs_opts}"
+  # key
+  local _sec="$(ssh/key/sec ${_h})"
+  if test -r "${_sec}" ; then
+    _opts="${_opts} -i ${_sec}"
+  else
+    warn "Key not found ${_sec}"
+  fi
+
+  local _url="${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_sshfs_dst}"
+  sys/dir/mk "${_src}"
+
+  msg $(printf "%-32s => %s" "${_dst}" "${_url}")
+
+  if sys/osx ; then
+    local _vol="${_h}:${mid_ssh_user}@${mid_ssh_fqdn}"
+    _opts="${_opts} -o volname=${_vol}"
+    local _ico="${sys_img_dir}/sshfs.icns"
+    if test -r "${_ico}" ; then
+      _opts="${_opts} -o modules=volicon -o volicon=${_ico}"
+    fi
+  fi
+
+  local _cmd="${ssh_mnt_mnt} ${_url} \"${_src}\" ${_opts}"
+  msg/debug "${_cmd}"
+
+  if ${gdbg} ; then
+    ${_cmd}
+  else
+    ${_cmd} 2>/dev/null
+  fi
+  _ret=$?
+  if test $? -gt 0 ; then
+    msg "mount failed"
+    sys/lck/rm "${_lck}"
+  else
+    msg "host mounted"
+  fi
+  return ${_ret}
+}
+
+function ssh/umnt() {
+  local _h="${1:-default}"
+  local _f="${2:-false}"
+  ssh/mnt "${_h}" ${_f} false
+}

@@ -1,0 +1,48 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import ssh/key
+
+function sshkey/help() {
+  cat << EOF
+
+SSH key generator
+
+Usage: ${gbn} options
+              -m MID
+              -c - change
+EOF
+  exit ${_false_}
+}
+
+### args
+_m=""
+_c=false
+while getopts hcm: o; do
+  case "$o" in
+    m) _m=$OPTARG;;
+    c) _c=true;;
+    h) sshkey/help;;
+    *) sshkey/help;;
+  esac
+done
+
+### main
+if test "${_m}" = "" ; then
+  echo -n "MID: "
+  read _m
+fi
+
+if ${_c} ; then
+  answer "Change key for ${_m}?"
+  if test $? -gt 0 ; then
+    exit ${_false_}
+  fi
+  ssh/key/chg "${_m}"
+  exit $?
+fi
+
+answer "Generate key for ${_m}?"
+if test $? -gt 0 ; then
+  exit ${_false_}
+fi
+ssh/key/gen "${_m}"
