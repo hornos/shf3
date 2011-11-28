@@ -1,0 +1,8 @@
+
+function vcs/github/test() {
+  ${vcs_github_git} status &> /dev/null
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  return ${_true_}
+}

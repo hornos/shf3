@@ -1,9 +1,10 @@
 
 function net/chk/ifconfig.me() {
   import net
+  local _q="${1:-ip}"
   local _site=$(ns/func ${FUNCNAME})
   local _url="http://${_site}"
-  net/get "${_url}"
+  net/get "${_url}/${_q}"
 }
 
 function net/chk/www.whatismyip.com() {

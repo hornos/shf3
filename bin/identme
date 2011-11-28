@@ -2,27 +2,36 @@
 source $(dirname ${BASH_SOURCE})/../lib/header
 import net/chk
 
-function identme/usage() {
-  echo " Usage: ${gbn} [-m mode]"
-  echo "    1 - ifconfig.me"
-  echo "    2 - www.whatismyip.com"
-  echo "   20 - www.ip2location.com"
-  echo "   21 - www.ip-address.org"
+function identme/help() {
+  cat << EOF
+
+Network fingering
+
+Usage: ${gbn} [-m mode] [-q query]
+                1 - ifconfig.me
+                2 - www.whatismyip.com
+               20 - www.ip2location.com
+               21 - www.ip-address.org
+EOF
   exit ${_false_}
 }
 
+### args
 _m=1
-while getopts hm: o; do
+_q=""
+while getopts hm:q: o; do
   case "$o" in
     m) _m=$OPTARG;;
-    h) identme/usage;;
+    q) _q=$OPTARG;;
+    h) identme/help;;
+    *) identme/help;;
   esac
 done
 
-
+### main
 case ${_m} in
   1)
-    echo $(net/chk/ifconfig.me)
+    echo $(net/chk/ifconfig.me "${_q}")
     ;;
   2)
     echo $(net/chk/www.whatismyip.com)

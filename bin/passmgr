@@ -2,17 +2,23 @@
 source $(dirname ${BASH_SOURCE})/../lib/header
 import enc/pass
 
-function passmgr/usage() {
-  echo "Usage: ${gbn} options"
-  echo "              -l length"
-  echo "              -u uid"
-  echo "              -f database"
-  echo "              -c - change"
-  echo "              -n - new"
-  echo "              -d - delete"
+function passmgr/help() {
+  cat << EOF
+
+Random password manager for the console
+
+Usage: ${gbn} options
+              -l length
+              -u uid
+              -f database
+              -c - change
+              -n - new
+              -d - delete
+EOF
   exit ${_false_}
 }
 
+### args
 _l=42
 _u=""
 _m="LIST"
@@ -25,10 +31,12 @@ while getopts hf:u:l:cnv o; do
     c) _m="CHANGE";;
     n) _m="CREATE";;
     v) gdbg=true;;
-    h) passmgr/usage;;
+    h) passmgr/help;;
+    *) passmgr/help;;
   esac
 done
 
+### main
 if test "${_m}" != "LIST" && test "${_u}" = "" ; then
   echo -n "User: "
   read _u

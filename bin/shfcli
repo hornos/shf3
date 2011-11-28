@@ -4,7 +4,12 @@ gdn=$(dirname ${BASH_SOURCE})
 rc="${gdn}/.${gbn}rc"
 
 function shfcli/help() {
-  echo "Usage: ${gbn} [-h] [-v]"
+  cat << EOF
+
+Shell Framework CLI
+
+Usage: ${gbn} [-h] [-v]
+EOF
   exit 1
 }
 
@@ -16,15 +21,17 @@ function shfcli/stop() {
 }
 trap shfcli/stop INT TERM EXIT
 
+### args
 _v=false
 while getopts hv o; do
   case "$o" in
     v) _v=true;;
-    h) passmgr/usage;;
+    h) passmgr/help;;
+    *) passmgr/help;;
   esac
 done
 
-
+### main
 cat << EOF > "${rc}"
 source $(dirname ${BASH_SOURCE})/../lib/header
 export PS1="SHF3(\$?)> "

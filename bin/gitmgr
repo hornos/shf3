@@ -1,0 +1,89 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import vcs/github
+import sys/dir
+
+function gitmgr/help() {
+  cat << EOF
+
+Github Manager
+
+Usage: ${gbn} options
+              -p - pull
+              -r - rebase pull
+              -s - status
+              -m push message
+              -d directory
+EOF
+  exit ${_false_}
+}
+
+### args
+_d="."
+_m=""
+_p=false
+_r=false
+_s=false
+while getopts hprsm:d: o; do
+  case "$o" in
+    m) _m=$OPTARG;;
+    d) _d=$OPTARG;;
+    p) _p=true;;
+    r) _r=true;;
+    s) _s=true;;
+    h) gitmgr/help;;
+    *) gitmgr/help;;
+  esac
+done
+
+### main
+sys/dir/svwd "${_d}"
+
+if ! $(vcs/github/test) ; then
+  sys/dir/ldwd
+  msg "Not a git directory"
+  exit ${_false_}
+fi
+
+if ${_s} ; then
+  msg "Status"
+  line 84
+  ${vcs_github_git} status
+  ret=$?
+  sys/dir/ldwd
+  exit ${ret}
+fi
+
+if ${_p} ; then
+  opts=""
+  if ${_r} ; then
+    opts="--rebase"
+  fi
+  answer "Pull from gtihub?"
+  if test $? -gt 0 ; then
+    sys/dir/ldwd
+    exit ${_false_}
+  fi
+  ${vcs_github_git} pull ${opts} origin master
+  ret=$?
+  sys/dir/ldwd
+  exit ${ret}
+fi
+
+if test "${_m}" = "" ; then
+  echo -n "Message: "
+  read _m
+fi
+
+answer "Push to gtihub?"
+if test $? -gt 0 ; then
+  sys/dir/ldwd
+  exit ${_false_}
+fi
+
+git add .
+git commit -a -m "${_m}"
+git push origin master
+ret=$?
+sys/dir/ldwd
+exit ${ret}

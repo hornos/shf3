@@ -46,6 +46,9 @@ function sys/dir/mv() {
 
 function sys/dir/svwd() {
   local _d="${1}"
+  if test "${_d}" = "." ; then
+    return ${_true_}
+  fi
   sys_dir_wd=$(pwd)
   if ! test -z "${_d}" ; then
     cd "${_d}"

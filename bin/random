@@ -2,28 +2,36 @@
 source $(dirname ${BASH_SOURCE})/../lib/header
 import rnd/net
 
-function random/usage() {
-  echo "Usage: ${gbn} options"
-  echo "              -s - string"
-  echo "              -i - integer"
-  echo "              -l length"
-  echo "              -q - quite"
+function random/help() {
+  cat << EOF
+
+Random generator
+
+Usage: ${gbn} options
+              -s - string
+              -i - integer
+              -l length
+              -q - quite
+EOF
   exit ${_false_}
 }
 
+### args
 _m=0
 _l=12
 _q=true
 while getopts hl:qsi o; do
   case "$o" in
-    h) random/usage;;
     l) _l=$OPTARG;;
     s) _m=0;;
     i) _m=1;;
     q) _q=false;;
+    h) random/help;;
+    *) random/help;;
   esac
 done
 
+### main
 if ! $(rnd/net/test) ; then
   msg "Network failure"
   exit ${_false_}
