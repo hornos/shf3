@@ -122,7 +122,7 @@ while ${_loop} ; do
   source "${tor_texit}.${_no}.ip"
 
   if test ${_ret} -gt 0 ; then
-    msg $(gui/txt "red" " failed failed failed failed failed failed")
+    msg $(gui/txt " failed failed failed failed failed failed" "red")
     ${tor_tkill} -n ${_no}
     _exit_ip=${EXIT_IP}
     sql/update "${_tor_exit_db}" "${_tor_exit_tb}" "er" "1" "ip='${_exit_ip}'"
@@ -134,7 +134,7 @@ while ${_loop} ; do
 done
 
 gui/line
-echo $(gui/txt "grn" " ${_no} [${gbn}] Found good exit $(cat ${_exit_ip})")
+echo $(gui/txt " ${_no} [${gbn}] Found good exit $(cat ${_exit_ip})" "green")
 msg "${_no} Press Ctrl+C to shut down"
 gui/line
 

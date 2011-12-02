@@ -73,7 +73,7 @@ function net/tor/kill() {
       echo -n " ${_no} [${gbn}] Stopping ${k} (${j})..."
       kill ${j}
       if test $? -eq 0 ; then
-        echo $(gui/txt "grn" " done")
+        echo $(gui/txt " done" "green")
       fi
       sleep 1
     done

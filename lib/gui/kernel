@@ -1,19 +1,39 @@
-gui_txt_u="sgr 0 1"
-gui_txt_b="bold"
-gui_txt_r="sgr0"
-gui_txt_red="setaf 1"
-gui_txt_green="setaf 2"
-gui_txt_yellow="setaf 3"
-gui_txt_blue="setaf 4"
-gui_txt_purple="setaf 5"
-gui_txt_cyan="setaf 6"
-gui_txt_white="setaf 7"
+
+function gui/txt/help() {
+  cat << EOF
+$1 string
+$2 string (fg color)
+$3 string (bg color)
+$4 string (font style)
+EOF
+}
 
 function gui/txt() {
-  local _c="${1:-r}"
-  local _s=${2}
-  local _col="gui_txt_${_c}"
-  echo -e "$(tput ${!_col})${_s}$(tput ${gui_txt_r})"
+  local _txt=${1:-$FUNCNAME}
+  local _fg=${2:-none}
+  local _bg=${3:-none}
+  local _st=${4:-normal}
+  local _h=""
+  local _t=""
+
+  _fg=$(ns/aa "${gui_color}" "${_fg}")
+  _bg=$(ns/aa "${gui_color}" "${_bg}")
+  _st=$(ns/aa "${gui_style}" "${_st}")
+
+  # fg
+  if test "${_fg}" != "none" ; then
+    _h="${gui_esc}[${_st};${_fg}m"
+    _t="${gui_esc}[0m"
+  fi
+  # bg
+  if test "${_bg}" != "none" ; then
+    _bg=$((_bg+10))
+    _h="${_h}${gui_esc}[${_bg}m"
+    if test "${_t}" == "" ; then
+    _t="${gui_esc}[0m"
+    fi
+  fi
+  echo -e "${_h}${_txt}${_t}"
 }
 
 function gui/title() {
@@ -21,19 +41,19 @@ function gui/title() {
 }
 
 function gui/line() {
-  local _l=${1:-42}
-  local _c="${2:--}"
+  local _l=${1:-72}
+  local _ch="${2:--}"
   local i
   for ((i=0;i<_l;++i)) ; do
-    printf "${_c}"
+    printf "${_ch}"
   done
   printf "\n"
 }
 
 function gui/cline() {
-  local _col=${1:-white}
-  local _l=${2:-42}
-  local _c="${3:--}"
-  gui/txt ${_col} $(gui/line)
+  local _l=${1:-72}
+  local _ch="${2:--}"
+  local _fg=${3:-white}
+  local _bg=${4}
+  gui/txt $(gui/line) ${_fg} ${_bg}
 }
-

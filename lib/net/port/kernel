@@ -10,13 +10,13 @@ function net/port() {
     return ${_false_}
   fi
   if ${_forup} ; then
-    echo -n $(gui/txt "ylw" " ${_no} [${gbn}] Waiting for port ${_p} UP")
+    echo -n $(gui/txt " ${_no} [${gbn}] Waiting for port ${_p} UP" "yellow")
   else
-    echo -n $(gui/txt "ylw" " ${_no} [${gbn}] Waiting for port ${_p} DOWN")
+    echo -n $(gui/txt " ${_no} [${gbn}] Waiting for port ${_p} DOWN" "yellow")
   fi
   while true ; do
     if test ${_i} -gt 60 ; then
-      echo -e $(gui/txt "red" "\n\n ${_no} [${gbn}] Timeout")
+      echo -e $(gui/txt "\n\n ${_no} [${gbn}] Timeout" "red")
       exit 1
     fi
     _i=$((_i+1))
@@ -47,7 +47,7 @@ function net/port() {
       fi
     fi
   done
-  echo $(gui/txt "grn" " done")
+  echo $(gui/txt " done" "green")
   return ${_true_}
 }
 

@@ -33,7 +33,7 @@ for k in "${_texit}" "${_tproxy}" ; do
     msg " ${_no} Stopping ${k} (${j})..."
     kill ${j}
     if test $? -eq 0 ; then
-      echo $(gui/txt "grn" " done")
+      echo $(gui/txt " done" "green")
     fi
     sleep 2
   done

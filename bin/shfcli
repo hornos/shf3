@@ -43,8 +43,8 @@ cat << EOF >> "${rc}"
 import gui
 
 gui/cline
-gui/txt "white" "        Shell Framework 3 Console"
-gui/txt "blue"  "         -=Nano Group Budapest=-"
+gui/txt "Shell Framework 3 Console" "white"
+gui/txt " -=Nano Group Budapest=-" "blue"
 gui/cline
 check
 EOF

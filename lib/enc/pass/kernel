@@ -70,9 +70,10 @@ function enc/pass/mgr() {
       if ! test -z "${_u}" ; then
         local _p=$(enc/pass/pass "${_u}")
         if test "${_p}" = ""; then
+          msg "User ${_u} is not valid"
           return ${_false_}
         fi
-        echo "${_p}"
+        msg "Password >>$(gui/${_p})<<"
         return ${_true_}
       fi
       local _frm1="%-40s%-22s%-22s\n"
@@ -98,6 +99,7 @@ function enc/pass/mgr() {
       fi
       local _p=$(enc/pass/gen ${_l})
       if test "${_p}" = "" ; then
+        msg "Password generation error"
         return ${_false_}
       fi
       local _date=$(epoch)
@@ -109,6 +111,7 @@ function enc/pass/mgr() {
         sql/insert "${enc_pass_db}" "${enc_pass_tb}" "${_f[*]}" "${_v[*]}" 2>/dev/null
       fi
       if test $? -gt 0 ; then
+        msg "Insert failed"
         return ${_false_}
       fi
       return ${_true_}
@@ -120,6 +123,7 @@ function enc/pass/mgr() {
       answer "Change password for ${_u}?"
       local _p=$(enc/pass/pass "${_u}")
       if test "${_p}" = ""; then
+        msg "User ${_u} is not valid"
         return ${_false_}
       fi
 
@@ -129,6 +133,7 @@ function enc/pass/mgr() {
       fi
       local _p=$(enc/pass/gen ${_l})
       if test "${_p}" = "" ; then
+        msg "Password generation error"
         return ${_false_}
       fi
       local _date=$(epoch)
@@ -136,6 +141,7 @@ function enc/pass/mgr() {
       local _v=("${_p}" "${_date}")
       sql/update "${enc_pass_db}" "${enc_pass_tb}" "${_f[*]}" "${_v[*]}" "uid='${_u}'"
       if test $? -gt 0 ; then
+        msg "Update failed"
         return ${_false_}
       fi
       return ${_true_}
