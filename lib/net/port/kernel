@@ -58,3 +58,21 @@ function net/port/down() {
 function net/port/up() {
   net/port ${1} true
 }
+
+function net/port/test() {
+  local _h="${1}"
+  local _p=${2:-80}
+  local _t="${3:-T}"
+  if test -z "${_h}" ; then
+    return ${_false_}
+  fi
+  if ! $(installed nmap) ; then
+    return ${_false_}
+  fi
+  nmap -P0 -p ${_t}:${_p} ${_h} | grep ^${_p} | grep open &> /dev/null
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  return ${_true_}
+}
+

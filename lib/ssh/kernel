@@ -15,22 +15,17 @@ function ssh/mgr() {
   local _h="${2}"
   case "${_m}" in
     LIST)
-      local _frm1="%-28s%-4s%-40s\n"
-      local _typ="SSH"
-      printf "${_frm1}" "mid" "url"
+      local _frm1="%-28s%-6s%-40s\n"
+      printf "${_frm1}" "mid" "type" "url"
       gui/line 84
       local i
       for i in ${sys_mid_dir}/ssh/* ; do
         if test -r "${i}" ; then
           i=$(basename "${i}")
           sys/mid "ssh/${i}"
-          _typ="SSH"
-          if ${mid_ssh_gsi} ; then
-            _typ="GSI"
-          fi
-          printf "${_frm1}" "${i}" "${_typ}" "${mid_ssh_user}@${mid_ssh_fqdn}"
+          printf "${_frm1}" "${i}" "${mis_ssh_type}" "${mid_ssh_user}@${mid_ssh_fqdn}"
         else
-          printf "${_frm1}" "${i}" "---" "not readable"
+          printf "${_frm1}" "${i}" "---" "---"
         fi
       done
       ;;
@@ -38,10 +33,72 @@ function ssh/mgr() {
       ssh/info "${_h}"
       ;;
     CREATE)
-      return ${_false_}
+      answer "Create new MID ${_h}?"
+      if test $? -gt 0 ; then
+        return ${_false_}
+      fi
+
+      # check mid
+      local _mid="${sys_mid_dir}/ssh/${_h}"
+      if test -r "${_mid}" ; then
+        msg "MID ${_h} exists, delete first"
+        return ${_false_}
+      fi
+      cp -f "${sys_mid_dir}/ssh.template" "${_mid}"
+
+      # edit mid
+      answer "Do you want to edit ${_h} now?"
+      if test $? -eq 0 ; then
+        sys/edit "${_mid}"
+        if test $? -gt 0 ; then
+          msg "Editor failed"
+          return ${_false_}
+        fi
+      fi
+
+      # load mid
+      sys/mid "ssh/${_h}"
+      if test $? -gt 0 ; then
+        msg "MID not found"
+        return ${_false_}
+      fi
+
+      # test connection
+      if $(installed nmap) ; then
+        import net/port
+        answer "Do you want to check connection to ${_h}?"
+        net/port/test ${mid_ssh_fqdn} ${mid_ssh_port}
+        if test $? -gt 0 ; then
+          msg "Connection failed"
+        else
+          msg "Connection success"
+        fi
+      fi
+
+      # check type
+      if test "${mid_ssh_type}" = "gsi" ; then
+        # TODO: import
+        msg "Please install key and certificate manually!"
+        return ${_true_}
+      fi
+
+      # generate keys
+      answer "Do you want to generate keys for ${_h}?"
+      if test $? -gt 0 ; then
+        msg "Please install keys manually!"
+        return ${_true_}
+      fi
+      import ssh/key
+      ssh/key/gen "${_h}"
+      if test $? -gt 0 ; then
+        msg "Generation failed"
+        return ${_false_}
+      fi
+      return ${_true_}
       ;;
     DELETE)
-      return ${_false_}
+      msg "Not implemented"
+      return ${_true_}
       ;;
   esac
 }
@@ -54,7 +111,7 @@ function ssh/info() {
 
   sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
-    msg "No MID"
+    msg "MID not found"
     return ${_false_}
   fi
 
@@ -74,7 +131,8 @@ function ssh/info() {
   echo "SSHFS Opts : ${mid_ssh_sshfs_opts}"
   gui/line 84
 
-  if ! ${mid_ssh_gsi} ; then
+  # TODO: gsi
+  if test ${mid_ssh_type} = "ssh" ; then
     local _pub="$(ssh/key/pub ${_h})"
     if test -r "${_pub}" ; then
       ${ssh_key_gen} -v -l -f "${_pub}"
@@ -85,8 +143,7 @@ function ssh/info() {
     local _lck="${_h}.${gbn}"
     return ${_true_}
   fi
-  
-  # gsi
+
   return ${_true_}
 }
 
@@ -111,7 +168,7 @@ function ssh/login() {
   # init
   sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
-    msg "No MID"
+    msg "MID not found"
     return ${_false_}
   fi
 
@@ -137,14 +194,37 @@ function ssh/login() {
     fi
   fi
 
-  ### select auth method
-  if ${mid_ssh_gsi} ; then
+  # begin gsi
+  if test "${mid_ssh_type}" = "gsi" ; then
     import ssh/gsi
-    # init grid proxy
-    local _sec="$(ssh/gsi/key/sec ${_h})"
-    local _crt="$(ssh/gsi/key/crt ${_h})"
+
+    local _sec="$(ssh/key/sec ${_h})"
+    local _crt="$(ssh/key/crt ${_h})"
+
     # check
+    if test -r "${_sec}" || test -r "${_crt}" ; then
+      msg "Key not found"
+      return ${_false_}
+    fi
+
     # proxy init
+    msg "Initialize Grid Proxy"
+    local _x_opts=""
+    if ! test -z "${mid_ssh_valid}" ; then
+      _x_opts="-valid ${mid_ssh_valid}"
+    fi
+    _x_opts="${_x_opts} -key ${_sec}"
+    _x_opts="${_x_opts} -cert ${_crt}"
+    local _x_lck="${sys_lck_dir}/${gbn}.gsi.$$"
+    _x_opts="${_x_opts} -out ${_x_lck}"
+
+    ${ssh_gsi_init} ${_x_opts}
+    if test $? -gt 0 ; then
+      msg "Grid Proxy failed"
+      return ${_false_}
+    fi
+    export X509_USER_PROXY=${_x_lck}
+    # end gsi
   else
     # private key
     local _sec="$(ssh/key/sec ${_h})"
@@ -152,24 +232,27 @@ function ssh/login() {
     if test -r "${_sec}" ; then
       _opts="${_opts} -i ${_sec}"
     else
-      msg/warn "Key not found ${_sec}"
+      msg "Key not found ${_sec}"
     fi
   fi
 
-  # ssh
+  # login
   local _url="${mid_ssh_user}@${mid_ssh_fqdn}"
   msg "Login to ${_url}"
   gui/line 84
   local _cmd="${ssh_ssh} ${_opts} ${_url}"
   msg/debug "${_cmd}"
-  if ${mid_ssh_gsi} ; then
-    # TODO
-    X509_USER_PROXY= ${_cmd}
-  else
-    ${_cmd}
-  fi
+  ${_cmd}
   local _ret=$?
 
+  # destroy grid proxy
+  if test "${mid_ssh_type}" = "gsi" ; then
+    if test -r "${_x_lck}" ; then
+      ${ssh_gsi_destroy} "${_x_lck}"
+    else
+      msg "Grid Proxy Failed"
+    fi
+  fi
   # clear lock
   if ${_proxy} ; then
     sys/lck/rm "${_lck}"

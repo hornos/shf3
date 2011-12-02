@@ -1,0 +1,2 @@
+ssh_gsi_init="grid-proxy-init"
+ssh_gsi_destroy="grid-proxy-destroy"

@@ -40,3 +40,20 @@ function sys/ifs() {
     IFS="${_s}"
   fi
 }
+
+function sys/edit() {
+  local _f="${1}"
+  if test -z "${_f}" || ! test -w "${_f}" ; then
+    return ${_false_}
+  fi
+  local i=""
+  for i in ${sys_editor} ; do
+    if $(installed "${i}") ; then
+      break
+    fi
+  done
+  if test -z "${i}" ; then
+    return ${_false_}
+  fi
+  ${i} "${_f}"
+}

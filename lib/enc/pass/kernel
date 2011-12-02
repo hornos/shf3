@@ -177,7 +177,7 @@ function enc/pass/mgr() {
         msg "Delete failed"
         return ${_false_}
       fi
-      msg "Password changed"
+      msg "User deleted"
       return ${_true_}
       ;;
   esac
