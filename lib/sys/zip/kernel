@@ -2,14 +2,69 @@ function sys/zip/help() {
   echo "Compression module"
 }
 
+function sys/zip/zip() {
+  local _inp="${1}"
+  local _m="${2:-c}"
+  if test -z "${_inp}" ; then
+    return ${_false_}
+  fi
+  # TODO
+
+  # compress
+  if test "${_m}" = "c" ; then
+    # set compressor
+    local _cmp="sys/zip/${sys_zip_def}"
+    import ${_cmp}
+
+    # file
+    if ! test -d "${_inp}" ; then
+      # output
+      local _out="${_inp%%sys_zip_${sys_zip_def}_s}"
+
+      # compress
+      _cmp="${_cmp}/${_m}"
+      msg/debug "${_cmp} ${_inp} ${_out}"
+      ${_cmp} "${_inp}" "${_out}"
+      return $?
+    fi
+
+    # directory
+    local _dir=${_f}
+    local _u=${2:-false}
+    cd "${_dir}"
+    for i in * ; do
+      if test -d "${i}" ; then
+        (sp_f__d "${i}" ${_u})
+      elif test -f "${i}" ; then
+        if ${_u} ; then
+          if ! test "${i%%${sp_s_z}}" = "${i}" ; then
+            ${sp_b_uz} "${i}"
+          fi
+        else
+          if test "${i%%${sp_s_z}}" = "${i}" ; then
+            ${sp_b_z} "${i}"
+          fi
+        fi
+      fi
+    done
+
+  fi
+
+  # decompress
+  
+  # TODO
+
+  return $?
+}
+
+
 function sys/zip/svmvz/help() {
   cat << EOF
-Saves <SOURCE> to <DIRECTORY> and renames to <NAME>
-and compress it.
+Save and compress source to directory and rename to name
 
-\$1 CHARACTER(*) <SOURCE>
-\$2 CHARACTER(*) <DIRECTORY>
-\$3 CHARACTER(*) <NAME>
+\$1 string source
+\$2 string directory
+\$3 string name
 EOF
 }
 
@@ -33,7 +88,7 @@ function sys/zip/svmvz() {
   if test -z "${_dst}" ; then
     _dst=$(basename "${_src}")
   fi
-  local _sav="old.${_dst}"
+  local _sav="${sys_zip_old}.${_dst}"
 
   # 1. save
   # directories
@@ -57,7 +112,7 @@ function sys/zip/svmvz() {
   fi
 
   # 3. compress
-  sys/zip/zip "${_dst}"
+  sys/zip/c "${_dst}"
 
   sys/dir/ldwd
   # end ${_dir}
@@ -67,11 +122,11 @@ function sys/zip/svmvz() {
 
 function sys/zip/cpuzmv/help() {
   cat << EOF
-Copies <SOURCE> to <DIRECTORY> and uncompress it 
-and renames to <NAME>.
-\$1 CHARACTER(*) <SOURCE>
-\$2 CHARACTER(*) <DIRECTORY>
-\$3 CHARACTER(*) <NAME>
+Copy source to directory and uncompress then rename to name
+
+\$1 string source
+\$2 string directory
+\$3 string name
 EOF
 }
 
