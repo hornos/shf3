@@ -338,26 +338,16 @@ function help() {
       echo "Kernel functions:"
       ns/func/dir ${_nd}/kernel
     ;;
-    "mod")
+    "modules")
       local _nd=$(ns/dir)
-      local i
-
-      echo "Available core modules:"
-      for i in $(sys/dir/rls "${_nd}") ; do
-        i=${i##"${_nd}"}
-        if ! test -z "${i}"; then
-          echo "${i##/}"
-        fi
-      done
-
       if ! test -z "${gip}" ; then
         echo
         local j
         _IFS="${IFS}"
         IFS=":"
         for j in ${gip}; do
-          _nd="${j}/lib"
-          echo "Available user modules in ${_nd}:"
+          _nd="${j}"
+          echo "Available modules in ${_nd}:"
           for i in $(sys/dir/rls "${_nd}") ; do
             i=${i##"${_nd}"}
             if ! test -z "${i}"; then
@@ -369,8 +359,11 @@ function help() {
       fi
     ;;
     "")
-      echo "Available commands:"
-      echo "  mod - list modules"
+      cat << EOF
+Available commands:
+  kernel  - show kernel functions
+  modules - show modules
+EOF
     ;;
     *)
       import ${_h}
