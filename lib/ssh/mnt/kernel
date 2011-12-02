@@ -23,7 +23,7 @@ function ssh/mnt() {
   local _u="${3:-false}"
   local _ret
 
-  sys/mid "${_h}"
+  sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
     msg "No MID"
     return ${_false_}

@@ -28,7 +28,7 @@ function sys/zip/svmvz() {
     return ${_false_}
   fi
 
-  # begin ${_dir} ------------------------
+  # begin ${_dir}
   sys/dir/svwd "${_dir}"
   if test -z "${_dst}" ; then
     _dst=$(basename "${_src}")
@@ -60,7 +60,7 @@ function sys/zip/svmvz() {
   sys/zip/zip "${_dst}"
 
   sys/dir/ldwd
-  # end ${_dir} --------------------------
+  # end ${_dir}
 
   return ${_true_}
 }
@@ -97,7 +97,7 @@ function sys/zip/cpuzmv() {
   fi
 
   # 2. uncompress
-  # begin ${_dir} ------------------------
+  # begin ${_dir}
   sys/dir/svwd "${_dir}"
   zip/unzip "${_src}"
   _dst=$(basename "${_dst}")
@@ -114,6 +114,6 @@ function sys/zip/cpuzmv() {
     fi
   fi
   sys/dir/ldwd
-  # end ${_dir} --------------------------
+  # end ${_dir}
   return ${_ret}
 }

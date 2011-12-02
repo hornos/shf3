@@ -1,0 +1,3 @@
+sys_zip_gz="gzip"
+sys_zip_gz_c="${sys_zip_gz} -f -9 <INPUT>"
+sys_zip_gz_d="${sys_zip_gz} -f -d <INPUT>"

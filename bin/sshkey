@@ -28,7 +28,7 @@ done
 
 ### main
 if test "${_m}" = "" ; then
-  echo -n "MID: "
+  echo -n "[${gbn}] MID: "
   read _m
 fi
 

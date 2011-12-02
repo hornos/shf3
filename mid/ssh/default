@@ -1,6 +1,11 @@
+# globus
+# mid_ssh_gsi=true
+mid_ssh_gsi=false
 mid_ssh_cluster="default"
 mid_ssh_fqdn="default"
 mid_ssh_user="${USER}"
+# globus
+# mid_ssh_port=2222
 mid_ssh_port=22
 mid_ssh_opts="-o TCPKeepAlive=${ssh_TCPKeepAlive} -o ServerAliveInterval=${ssh_ServerAliveInterval}"
 mid_ssh_ssh_opts="-XC ${mid_ssh_opts} -p ${mid_ssh_port} ${mid_ssh_opts}"

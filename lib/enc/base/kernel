@@ -1,3 +1,13 @@
+function enc/base/help() {
+  cat << EOF
+BaseNN encode/decode
+    NN = 64 | 85
+
+$1 logical (true=decode)
+$2 integer (NN=64)
+$3 string
+EOF
+}
 
 function enc/base() {
   local _d=${1:-false}
@@ -5,8 +15,11 @@ function enc/base() {
   local _s="${3}"
   local _dir=$(dirname $BASH_SOURCE)
   local _awk="${_dir}/b${_b}.awk"
+  if test -z "${_s}" ; then
+    return ${_false_}
+  fi
   if ! test -r "${_awk}" ; then
-    return ${_FALSE_}
+    return ${_false_}
   fi
   if ! ${_d} ; then
     echo "${_s}" | awk -f "${_awk}"

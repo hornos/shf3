@@ -1,4 +1,10 @@
-### globals
+###
+#
+# SHF3 Kernel
+#
+###
+
+### globals - redefined
 gkn="kernel"
 gcn="config"
 
@@ -12,12 +18,7 @@ gim=""
 _true_=0
 _false_=1
 
-# messages
-function msg/help() {
-  echo "Message functions"
-  echo "$1 CHARACTER(*)"
-}
-
+### messages
 function msg() {
   echo -e "[${gbn}] ${*}"
 }
@@ -60,6 +61,43 @@ function ns/func() {
   echo ${_f##*/}
 }
 
+function ns/var() {
+  local _f=${1:-${FUNCNAME}}
+  echo "${_f}" | sed s/\\//_/g
+}
+
+function ns/var/io() {
+  local _c="${1}"
+  local _i="${2}"
+  local _o="${3}"
+  if test -z "${_c}" ; then
+    return ${_false_}
+  fi
+  if ! test -z "${_i}" ; then
+    _c=$(echo "${_c}" | sed s/\<INPUT\>/"${_i}"/)
+  fi
+  if ! test -z "${_o}" ; then
+    _c=$(echo "${_c}" | sed s/\<OUTPUT\>/"${_o}"/)
+  fi
+  echo "${_c}"
+}
+
+function ns/var/cmd() {
+  local _f="${1}"
+  local _i="${2}"
+  local _o="${3}"
+  if test -z "${_f}" ; then
+    return ${_false_}
+  fi
+  local _c=$(ns/var "${_f}")
+  _c=${!_c}
+  _c=$(ns/var/io "${_c}" "${_i}" "${_o}")
+  if test -z "${_c}" ; then
+    return ${_false_}
+  fi
+  ${_c}
+}
+
 function ns/func/dir() {
   local _f="${1:-${BASH_SOURCE}}"
   local i
@@ -95,6 +133,7 @@ function ns/op/name() {
   fi
 }
 
+# path
 function ns/inpath() {
   local _m="${1}"
   local _p="${2:-${gip}}"
@@ -136,6 +175,7 @@ function include() {
   return ${_true_}
 }
 
+### import
 function import/path() {
   local _m="${1}"
   if test -z "${_m}" ; then
@@ -223,6 +263,7 @@ function import() {
   fi
 }
 
+### misc
 function field() {
   local _s="${1}"
   local _f=${2:-1}
@@ -292,6 +333,11 @@ function help() {
   echo "Shell Framework Help System"
   gui/line
   case "${_h}" in
+    "kernel")
+      local _nd=$(ns/dir)
+      echo "Kernel functions:"
+      ns/func/dir ${_nd}/kernel
+    ;;
     "mod")
       local _nd=$(ns/dir)
       local i

@@ -1,6 +1,6 @@
 #!/bin/bash
 source $(dirname ${BASH_SOURCE})/../lib/header
-import vcs/github
+import vcs/git/hub
 import sys/dir
 
 function gitmgr/help() {
@@ -39,8 +39,7 @@ done
 ### main
 sys/dir/svwd "${_d}"
 
-if ! $(vcs/github/test) ; then
-  sys/dir/ldwd
+if ! $(vcs/git/hub/test) ; then
   msg "Not a git directory"
   exit ${_false_}
 fi
@@ -48,10 +47,8 @@ fi
 if ${_s} ; then
   msg "Status"
   line 84
-  ${vcs_github_git} status
-  ret=$?
-  sys/dir/ldwd
-  exit ${ret}
+  ${vcs_git_hub_git} status
+  exit $?
 fi
 
 if ${_p} ; then
@@ -61,17 +58,14 @@ if ${_p} ; then
   fi
   answer "Pull from gtihub?"
   if test $? -gt 0 ; then
-    sys/dir/ldwd
     exit ${_false_}
   fi
   ${vcs_github_git} pull ${opts} origin master
-  ret=$?
-  sys/dir/ldwd
-  exit ${ret}
+  exit $?
 fi
 
 if test "${_m}" = "" ; then
-  echo -n "Message: "
+  echo -n "[${gbn}] Commit Message: "
   read _m
 fi
 
@@ -84,6 +78,3 @@ fi
 git add .
 git commit -a -m "${_m}"
 git push origin master
-ret=$?
-sys/dir/ldwd
-exit ${ret}

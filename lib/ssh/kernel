@@ -15,17 +15,22 @@ function ssh/mgr() {
   local _h="${2}"
   case "${_m}" in
     LIST)
-      local _frm1="%-28s%-40s\n"
+      local _frm1="%-28s%-4s%-40s\n"
+      local _typ="SSH"
       printf "${_frm1}" "mid" "url"
       gui/line 84
       local i
-      for i in ${sys_mid_dir}/* ; do
+      for i in ${sys_mid_dir}/ssh/* ; do
         if test -r "${i}" ; then
           i=$(basename "${i}")
-          sys/mid "${i}"
-          printf "${_frm1}" "${i}" "${mid_ssh_user}@${mid_ssh_fqdn}"
+          sys/mid "ssh/${i}"
+          _typ="SSH"
+          if ${mid_ssh_gsi} ; then
+            _typ="GSI"
+          fi
+          printf "${_frm1}" "${i}" "${_typ}" "${mid_ssh_user}@${mid_ssh_fqdn}"
         else
-          printf "${_frm1}" "${i}" "not readable"
+          printf "${_frm1}" "${i}" "---" "not readable"
         fi
       done
       ;;
@@ -47,7 +52,7 @@ function ssh/info() {
   import ssh/key
   local _h="${1:-default}"
 
-  sys/mid "${_h}"
+  sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
     msg "No MID"
     return ${_false_}
@@ -68,15 +73,20 @@ function ssh/info() {
   echo "SSHFS Mnt  : ${mid_ssh_sshfs_src} -> ${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_sshfs_dst}"
   echo "SSHFS Opts : ${mid_ssh_sshfs_opts}"
   gui/line 84
-  local _pub="$(ssh/key/pub ${_h})"
-  if test -r "${_pub}" ; then
-    ${ssh_key_gen} -v -l -f "${_pub}"
-  else
-    msg/warn "Key not found ${_pub}"
-  fi
-  gui/line 84
-  local _lck="${_h}.${gbn}"
 
+  if ! ${mid_ssh_gsi} ; then
+    local _pub="$(ssh/key/pub ${_h})"
+    if test -r "${_pub}" ; then
+      ${ssh_key_gen} -v -l -f "${_pub}"
+    else
+      msg/warn "Key not found ${_pub}"
+    fi
+    gui/line 84
+    local _lck="${_h}.${gbn}"
+    return ${_true_}
+  fi
+  
+  # gsi
   return ${_true_}
 }
 
@@ -99,7 +109,7 @@ function ssh/login() {
   local _f="${2:-false}"
 
   # init
-  sys/mid "${_h}"
+  sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
     msg "No MID"
     return ${_false_}
@@ -120,18 +130,30 @@ function ssh/login() {
     if sys/lck/mk "${_lck}" ; then
       _proxy=true
       _opts="${_opts} ${mid_ssh_proxy}"
-      msg "Connect proxies: ${mid_ssh_proxy}"
+      # TODO: tunnel parse
+      msg "Connect tunnels: ${mid_ssh_proxy}"
     else
-      msg/warn "Active proxies: ${mid_ssh_proxy}"
+      msg/warn "Active tunnels: ${mid_ssh_proxy}"
     fi
   fi
 
-  # key
-  local _sec="$(ssh/key/sec ${_h})"
-  if test -r "${_sec}" ; then
-    _opts="${_opts} -i ${_sec}"
+  ### select auth method
+  if ${mid_ssh_gsi} ; then
+    import ssh/gsi
+    # init grid proxy
+    local _sec="$(ssh/gsi/key/sec ${_h})"
+    local _crt="$(ssh/gsi/key/crt ${_h})"
+    # check
+    # proxy init
   else
-    msg/warn "Key not found ${_sec}"
+    # private key
+    local _sec="$(ssh/key/sec ${_h})"
+    # check
+    if test -r "${_sec}" ; then
+      _opts="${_opts} -i ${_sec}"
+    else
+      msg/warn "Key not found ${_sec}"
+    fi
   fi
 
   # ssh
@@ -140,7 +162,12 @@ function ssh/login() {
   gui/line 84
   local _cmd="${ssh_ssh} ${_opts} ${_url}"
   msg/debug "${_cmd}"
-  ${_cmd}
+  if ${mid_ssh_gsi} ; then
+    # TODO
+    X509_USER_PROXY= ${_cmd}
+  else
+    ${_cmd}
+  fi
   local _ret=$?
 
   # clear lock
@@ -186,7 +213,7 @@ function ssh/xfer() {
   fi
 
   # init
-  sys/mid "${_h}"
+  sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
     msg "No MID"
     return ${_false_}
@@ -314,7 +341,7 @@ function ssh/cmd() {
   local _x="${2:-ls -lA ${mid_ssh_scp_dst}}"
   local _t=${3:-false}
 
-  sys/mid "${_h}"
+  sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
     msg "No MID"
     return ${_false_}

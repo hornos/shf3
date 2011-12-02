@@ -1,3 +1,12 @@
+function enc/gpg/help() {
+  cat << EOF
+GPG encrypt/decrypt
+
+$1 string
+$2 logical (true=decrypt)
+EOF
+}
+
 
 function enc/gpg() {
   import enc/base

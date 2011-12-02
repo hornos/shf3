@@ -1,3 +1,12 @@
+###
+#
+# Kernel header for programs
+#
+# Usage:
+# #!/bin/bash
+# source $(dirname ${BASH_SOURCE})/../lib/header
+#
+###
 
 ### globals
 gbn=$(basename "${0}")
@@ -5,10 +14,10 @@ gdn=$(dirname "${0}")
 gkn="$(dirname ${BASH_SOURCE})/kernel"
 gdbg=false
 
-### check kernel
+### load kernel
 if test -r "${gkn}" ; then
   source "${gkn}"
 else
-  echo "kernel error"
+  echo -e "\nSHF3: kernel error\n"
   exit 127
 fi
