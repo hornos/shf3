@@ -68,12 +68,16 @@ function enc/pass/mgr() {
         return ${_false_}
       fi
       if ! test -z "${_u}" ; then
+        answer "Retrieve password for ${_u}?"
+        if test $? -gt 0 ; then
+          return ${_false_}
+        fi
         local _p=$(enc/pass/pass "${_u}")
         if test "${_p}" = ""; then
           msg "User ${_u} is not valid"
           return ${_false_}
         fi
-        msg "Password >>$(gui/pass "${_p}")<<"
+        msg ">>$(gui/pass "${_p}")<<"
         return ${_true_}
       fi
       local _frm1="%-40s%-22s%-22s\n"
@@ -138,6 +142,7 @@ function enc/pass/mgr() {
         return ${_false_}
       fi
       local _date=$(epoch)
+      # TODO: serialize
       local _f=("pass" "mtime")
       local _v=("${_p}" "${_date}")
       sql/update "${enc_pass_db}" "${enc_pass_tb}" "${_f[*]}" "${_v[*]}" "uid='${_u}'"
@@ -149,6 +154,30 @@ function enc/pass/mgr() {
       return ${_true_}
       ;;
     DELETE)
+      if test -z "${_u}" ; then
+        return ${_false_}
+      fi
+      answer "Delete user ${_u}?"
+      local _p=$(enc/pass/pass "${_u}")
+      if test "${_p}" = ""; then
+        msg "User ${_u} is not valid"
+        return ${_false_}
+      fi
+
+      answer "Delete user ${_u}?"
+      if test $? -gt 0 ; then
+        return ${_false_}
+      fi
+      answer "Are you sure?"
+      if test $? -gt 0 ; then
+        return ${_false_}
+      fi
+      sql/delete "${enc_pass_db}" "${enc_pass_tb}" "uid='${_u}'"
+      if test $? -gt 0 ; then
+        msg "Delete failed"
+        return ${_false_}
+      fi
+      msg "Password changed"
       return ${_true_}
       ;;
   esac

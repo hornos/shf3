@@ -128,3 +128,17 @@ function sql/update() {
   _q="${_q} ${_qf} WHERE ${_w}"
   ${sql_sqlite} "${_db}" "${_q}"
 }
+
+function sql/delete() {
+  local _db="${1}"
+  local _tb="${2}"
+  local _w="${5}"
+  local _q="DELETE FROM ${_tb}"
+
+  if test -z "${_w}" ; then
+    return ${_false_}
+  fi
+
+  _q="${_q} WHERE ${_w}"
+  ${sql_sqlite} "${_db}" "${_q}"
+}
