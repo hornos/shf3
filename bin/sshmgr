@@ -33,7 +33,7 @@ done
 ### main
 case "${_c}" in
   KILL)
-    _apid=`ps ax | grep ssh-agent | awk '/\?\?/{print $1}'`
+    _apid=$(ps ax | grep ssh-agent | awk '/\?\?/{print $1}')
     if test "${_apid}" != "" ; then
       msg "Stopping ssh-agent (${_apid})"
       kill ${_apid}
