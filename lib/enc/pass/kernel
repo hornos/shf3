@@ -73,7 +73,7 @@ function enc/pass/mgr() {
           msg "User ${_u} is not valid"
           return ${_false_}
         fi
-        msg "Password >>$(gui/${_p})<<"
+        msg "Password >>$(gui/pass "${_p}")<<"
         return ${_true_}
       fi
       local _frm1="%-40s%-22s%-22s\n"

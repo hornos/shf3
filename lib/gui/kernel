@@ -57,3 +57,19 @@ function gui/cline() {
   local _bg=${4}
   gui/txt $(gui/line) ${_fg} ${_bg}
 }
+
+function gui/pass() {
+  gui/txt "${*}" "black" "black"
+}
+
+function gui/done() {
+  gui/txt "${*}" "green"
+}
+
+function gui/err() {
+  gui/txt "${*}" "red"
+}
+
+function gui/wrn() {
+  gui/txt "${*}" "yellow"
+}
