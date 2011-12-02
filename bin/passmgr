@@ -9,27 +9,26 @@ Random password manager for the console
 
 Usage: ${gbn} options
               -l length
-              -u uid
               -f database
-              -c - change
-              -n - new
-              -d - delete
+              -c uid - change
+              -n uid - new
+              -d uid - delete
 EOF
   exit ${_false_}
 }
 
 ### args
-_l=42
+_l=21
 _u=""
 _m="LIST"
 _f=""
-while getopts hf:u:l:cnv o; do
+while getopts hf:l:c:n:d:v o; do
   case "$o" in
     f) _f=$OPTARG;;
-    u) _u=$OPTARG;;
     l) _l=$OPTARG;;
-    c) _m="CHANGE";;
-    n) _m="CREATE";;
+    c) _m="CHANGE"; _u=$OPTARG;;
+    n) _m="CREATE"; _u=$OPTARG;;
+    d) _m="DELETE"; _u=$OPTARG;;
     v) gdbg=true;;
     h) passmgr/help;;
     *) passmgr/help;;
@@ -37,11 +36,6 @@ while getopts hf:u:l:cnv o; do
 done
 
 ### main
-if test "${_m}" != "LIST" && test "${_u}" = "" ; then
-  echo -n "User: "
-  read _u
-fi
-
 enc_pass_db="$(ns/dir)/../sql/${enc_pass_db}"
 if ! test -z "${_f}" ; then
   enc_pass_db="${_f}"
