@@ -60,7 +60,7 @@ if ${_p} ; then
   if test $? -gt 0 ; then
     exit ${_false_}
   fi
-  ${vcs_github_git} pull ${opts} origin master
+  ${vcs_git_hub_git} pull ${opts} origin master
   exit $?
 fi
 
