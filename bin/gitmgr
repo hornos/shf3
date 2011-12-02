@@ -2,6 +2,7 @@
 source $(dirname ${BASH_SOURCE})/../lib/header
 import vcs/git/hub
 import sys/dir
+import gui
 
 function gitmgr/help() {
   cat << EOF
@@ -46,7 +47,7 @@ fi
 
 if ${_s} ; then
   msg "Status"
-  line 84
+  gui/line 84
   ${vcs_git_hub_git} status
   exit $?
 fi
