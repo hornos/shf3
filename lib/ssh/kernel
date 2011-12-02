@@ -150,10 +150,10 @@ function ssh/info() {
 
 function ssh/login/help() {
   cat << EOF
-Logins to <HOST>
+Logins to host
 
-\$1 CHARACTER(*) <HOST>
-\$2 LOGICAL - force login
+\$1 string  host
+\$2 logical (true=force)
 EOF
 }
 
@@ -252,6 +252,7 @@ function ssh/login() {
     else
       msg "Grid Proxy Failed"
     fi
+    unset X509_USER_PROXY
   fi
   # clear lock
   if ${_proxy} ; then
@@ -265,11 +266,11 @@ function ssh/xfer/help() {
   cat << EOF
 SSH transfer
 
-\$1 CHARACTER(*) host
-\$2 INTEGER      mode
-\$3 LOGICAL      recursive
-\$4 CHARACTER(*) source
-\$5 CHARACTER(*) destination
+\$1 string host
+\$2 integer mode
+\$3 logical (true=recursive)
+\$4 string  source
+\$5 string  destination
 
 mode:
      scp  tar/ssh  rsync/ssh
@@ -298,7 +299,7 @@ function ssh/xfer() {
   # init
   sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
-    msg "No MID"
+    msg "MID not found"
     return ${_false_}
   fi
 
@@ -339,12 +340,45 @@ function ssh/xfer() {
     ;;
   esac
 
-  # key
-  local _sec="$(ssh/key/sec ${_h})"
-  if test -r "${_sec}" ; then
-    _opts="${_opts} -i ${_sec}"
+  # begin gsi
+  if test "${mid_ssh_type}" = "gsi" ; then
+    import ssh/gsi
+
+    local _sec="$(ssh/key/sec ${_h})"
+    local _crt="$(ssh/key/crt ${_h})"
+
+    # check
+    if test -r "${_sec}" || test -r "${_crt}" ; then
+      msg "Key not found"
+      return ${_false_}
+    fi
+
+    # proxy init
+    msg "Initialize Grid Proxy"
+    local _x_opts=""
+    if ! test -z "${mid_ssh_valid}" ; then
+      _x_opts="-valid ${mid_ssh_valid}"
+    fi
+    _x_opts="${_x_opts} -key ${_sec}"
+    _x_opts="${_x_opts} -cert ${_crt}"
+    local _x_lck="${sys_lck_dir}/${gbn}.gsi.$$"
+    _x_opts="${_x_opts} -out ${_x_lck}"
+
+    ${ssh_gsi_init} ${_x_opts}
+    if test $? -gt 0 ; then
+      msg "Grid Proxy failed"
+      return ${_false_}
+    fi
+    export X509_USER_PROXY=${_x_lck}
+    # end gsi
   else
-    msg/warn "Key not found ${_sec}"
+    # private key
+    local _sec="$(ssh/key/sec ${_h})"
+    if test -r "${_sec}" ; then
+      _opts="${_opts} -i ${_sec}"
+    else
+      msg "Key not found ${_sec}"
+    fi
   fi
 
   # info
@@ -388,6 +422,17 @@ function ssh/xfer() {
   esac
   msg/debug "${_cmd}"
   ${_cmd}
+  local _ret=$?
+  # destroy grid proxy
+  if test "${mid_ssh_type}" = "gsi" ; then
+    if test -r "${_x_lck}" ; then
+      ${ssh_gsi_destroy} "${_x_lck}"
+    else
+      msg "Grid Proxy Failed"
+    fi
+    unset X509_USER_PROXY
+  fi
+  return ${_ret}
 }
 
 function ssh/put() {
@@ -411,9 +456,9 @@ function ssh/get() {
 
 function ssh/cmd/help() {
   cat << EOF
-\$1 CHARACTER(*) mid
-\$2 CHARACTER(*) "command"
-\$3 LOGICAL force tty
+\$1 string  mid
+\$2 string  "command"
+\$3 logical (true=force tty)
 EOF
 }
 
@@ -436,12 +481,45 @@ function ssh/cmd() {
     _opts="-t ${_opts}"
   fi
 
-  # key
-  local _sec="$(ssh/key/sec ${_h})"
-  if test -r "${_sec}" ; then
-    _opts="${_opts} -i ${_sec}"
+  # begin gsi
+  if test "${mid_ssh_type}" = "gsi" ; then
+    import ssh/gsi
+
+    local _sec="$(ssh/key/sec ${_h})"
+    local _crt="$(ssh/key/crt ${_h})"
+
+    # check
+    if test -r "${_sec}" || test -r "${_crt}" ; then
+      msg "Key not found"
+      return ${_false_}
+    fi
+
+    # proxy init
+    msg "Initialize Grid Proxy"
+    local _x_opts=""
+    if ! test -z "${mid_ssh_valid}" ; then
+      _x_opts="-valid ${mid_ssh_valid}"
+    fi
+    _x_opts="${_x_opts} -key ${_sec}"
+    _x_opts="${_x_opts} -cert ${_crt}"
+    local _x_lck="${sys_lck_dir}/${gbn}.gsi.$$"
+    _x_opts="${_x_opts} -out ${_x_lck}"
+
+    ${ssh_gsi_init} ${_x_opts}
+    if test $? -gt 0 ; then
+      msg "Grid Proxy failed"
+      return ${_false_}
+    fi
+    export X509_USER_PROXY=${_x_lck}
+    # end gsi
   else
-    msg/warn "Key not found ${_sec}"
+    # private key
+    local _sec="$(ssh/key/sec ${_h})"
+    if test -r "${_sec}" ; then
+      _opts="${_opts} -i ${_sec}"
+    else
+      msg "Key not found ${_sec}"
+    fi
   fi
 
   local _url="${mid_ssh_user}@${mid_ssh_fqdn}"
@@ -454,4 +532,15 @@ function ssh/cmd() {
   fi
   local _cmd="${ssh_ssh} ${_opts} ${_url} \"${_x}\""
   ${_cmd}
+  local _ret=$?
+  # destroy grid proxy
+  if test "${mid_ssh_type}" = "gsi" ; then
+    if test -r "${_x_lck}" ; then
+      ${ssh_gsi_destroy} "${_x_lck}"
+    else
+      msg "Grid Proxy Failed"
+    fi
+    unset X509_USER_PROXY
+  fi
+  return ${_ret}
 }
