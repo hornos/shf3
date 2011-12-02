@@ -77,7 +77,7 @@ function enc/pass/mgr() {
         return ${_true_}
       fi
       local _frm1="%-40s%-22s%-22s\n"
-      printf "${_frm1}" "uid" "create" "modified"
+      printf "${_frm1}" "uid" "created" "modified"
       gui/line 84
       local i
       for i in $(sql/select "${enc_pass_db}" "${enc_pass_tb}" "uid,ctime,mtime") ; do
@@ -114,6 +114,7 @@ function enc/pass/mgr() {
         msg "Insert failed"
         return ${_false_}
       fi
+      msg "New password created"
       return ${_true_}
       ;;
     CHANGE)
@@ -144,6 +145,10 @@ function enc/pass/mgr() {
         msg "Update failed"
         return ${_false_}
       fi
+      msg "Password changed"
+      return ${_true_}
+      ;;
+    DELETE)
       return ${_true_}
       ;;
   esac

@@ -22,10 +22,11 @@ _l=21
 _u=""
 _m="LIST"
 _f=""
-while getopts hf:l:c:n:d:v o; do
+while getopts hf:l:c:n:d:u:v o; do
   case "$o" in
     f) _f=$OPTARG;;
     l) _l=$OPTARG;;
+    u) _u=$OPTARG;;
     c) _m="CHANGE"; _u=$OPTARG;;
     n) _m="CREATE"; _u=$OPTARG;;
     d) _m="DELETE"; _u=$OPTARG;;
