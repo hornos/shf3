@@ -132,7 +132,7 @@ function sql/update() {
 function sql/delete() {
   local _db="${1}"
   local _tb="${2}"
-  local _w="${5}"
+  local _w="${3}"
   local _q="DELETE FROM ${_tb}"
 
   if test -z "${_w}" ; then
