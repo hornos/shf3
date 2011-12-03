@@ -46,7 +46,6 @@ function ssh/key/gen() {
   for i in ${_sec} ${_sec_lnk} ${_pub} ${_pub_lnk} ; do
     if test -r "${i}" ; then
       msg "Delete key ${i}"
-      sys/dir/ldwd
       return ${_false_}
     fi
   done
@@ -58,7 +57,6 @@ function ssh/key/gen() {
     ${ssh_key_gen} -b ${_l} -t "${_t}" -f "${_sec}"
   fi
   if test $? -gt 0 ; then
-    sys/dir/ldwd
     return ${_false_}
   fi
 
@@ -68,8 +66,6 @@ function ssh/key/gen() {
 
   chmod go-rwx "${_pub}"
   sys/lnk/mk "${_pub}" "${_pub_lnk}"
-
-  sys/dir/ldwd
 }
 
 function ssh/key/chg() {
@@ -89,7 +85,6 @@ function ssh/key/chg() {
 
   local _sec="${_h}.id_${_t}"
   if ! test -r "${_sec}" ; then
-    sys/dir/ldwd
     return ${_false_}
   fi
   if ${gdbg} ; then
@@ -97,7 +92,5 @@ function ssh/key/chg() {
   else
     ${ssh_key_gen} -p -f "${_sec}"
   fi
-  local _ret=$?
-  sys/dir/ldwd
-  return ${_ret}
+  return $?
 }

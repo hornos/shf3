@@ -44,17 +44,38 @@ function sys/dir/mv() {
   mv -f "${_src}" "${_dst}"
 }
 
+function sys/dir/svwd/help() {
+  cat << EOF
+Save working directory and enters into directory
+
+\$1 directory
+EOF
+}
+
 function sys/dir/svwd() {
   local _d="${1}"
-  if test "${_d}" = "." ; then
+  if test "${_d}" = "" ; then
     return ${_true_}
   fi
-  sys_dir_wd=$(pwd)
-  if ! test -z "${_d}" ; then
-    cd "${_d}"
+
+  # first
+  if test -z "${sys_dir_wd}" ; then
+    sys_dir_wd=$(pwd)
+    return ${_true_}
   fi
+  sys_dir_wd="${sys_dir_wd}:$(pwd)"
+
+  # enter
+  cd "${_d}"
 }
 
 function sys/dir/ldwd() {
-  cd "${sys_dir_wd}"
+  if test -z "${sys_dir_wd}" ; then
+    return ${_true_}
+  fi
+  local _d=$(echo "${sys_dir_wd}" | awk '{n=split($0,a,":"); print a[n-1]}')
+  if ! test -z "${_d}" ; then
+    sys_dir_wd=${sys_dir_wd%%:${_d}}
+    cd "${_d}"
+  fi
 }

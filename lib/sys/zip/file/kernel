@@ -1,0 +1,48 @@
+# file compressor
+function sys/zip/file/c() {
+  local _inp="${1}"
+  sys/zip/file "${1}" $(ns/funcname ${FUNCNAME})
+}
+
+function sys/zip/file/d() {
+  local _inp="${1}"
+  sys/zip/file "${1}" $(ns/funcname ${FUNCNAME})
+}
+
+function sys/zip/file() {
+  import sys/zip
+
+  local _inp="${1}"
+  local _m="${2:-c}"
+  if test -z "${_inp}" ; then
+    return ${_false_}
+  fi
+  if test -d "${_inp}" ; then
+    msg/debug "${_inp}"
+    return ${_false_}
+  fi
+
+  # set compressor
+  local _cmp=""
+  if test "${_m}" = "c" ; then
+    # compress
+    _cmp="sys/zip/${sys_zip_def}"
+  else
+    # decompress
+    _cmp=$(ns/ext "${_inp}")
+  fi
+  import ${_cmp}
+
+  # output
+  local _out=""
+  if test "${_m}" = "c" ; then
+    _out="${_inp}.${sys_zip_${sys_zip_def}_s}"
+  else
+    _out="${_inp%%${_cmp}}"
+  fi
+
+  # compress / decompress
+  _cmp="${_cmp}/${_m}"
+  msg/debug "${_cmp} ${_inp} ${_out}"
+  echo "${_cmp}" "${_inp}" "${_out}"
+}

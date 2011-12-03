@@ -1,0 +1,44 @@
+# directory compressor
+function sys/zip/dir/c() {
+  import sys/dir
+  sys/dir/svwd
+  sys/zip/dir "${1}" $(ns/funcname ${FUNCNAME})
+  sys/dir/ldwd
+}
+
+function sys/zip/dir/d() {
+  import sys/dir
+  sys/dir/svwd
+  sys/zip/dir "${1}" $(ns/funcname ${FUNCNAME})
+  sys/dir/ldwd
+}
+
+function sys/zip/dir() {
+  local _dir=${1}
+  local _m=${2:-c}
+  if test -z "${_dir}" ; then
+    return ${_false_}
+  fi
+  if ! test -d "${_dir}" ; then
+    return ${_false_}
+  fi
+
+  cd "${_dir}"
+  for i in * ; do
+    if test -d "${i}" ; then
+      # recursive
+      (sys/zip/dir "${i}" ${_m})
+    elif test -f "${i}" ; then
+      # TODO
+      if ${_u} ; then
+        if ! test "${i%%${sp_s_z}}" = "${i}" ; then
+          ${sp_b_uz} "${i}"
+        fi
+      else
+        if test "${i%%${sp_s_z}}" = "${i}" ; then
+          ${sp_b_z} "${i}"
+        fi
+      fi
+    fi
+  done
+}

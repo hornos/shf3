@@ -72,7 +72,6 @@ fi
 
 answer "Push to gtihub?"
 if test $? -gt 0 ; then
-  sys/dir/ldwd
   exit ${_false_}
 fi
 

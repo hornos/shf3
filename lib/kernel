@@ -179,6 +179,15 @@ function ns/aa() {
   }'
 }
 
+function ns/ext() {
+  local _n="${1}"
+  if test -z "${_n}" ; then
+    return ${_false_}
+  fi
+  local _bn=${_n%.*}
+  echo =${_n##${_bn}}
+}
+
 ### include
 function include() {
   local _p="${1}"
