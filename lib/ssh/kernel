@@ -186,15 +186,15 @@ function ssh/info() {
   echo
   msg "SSH MID for ${_h} (${mid_ssh_fqdn})"
   echo
-  echo "Type       : ${mid_ssh_type}"
-  echo "URL        : ${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_port}"
-  echo "SSH Opts   : ${mid_ssh_ssh_opt}"
-  echo "SCP Opts   : ${mid_ssh_scp_opt}"
-  echo "SSH Env    : ${mid_ssh_env}"
-  echo "SSH Tunnel : ${mid_ssh_tunnel}"
-  echo "SCP Dest   : ${mid_ssh_scp_dst}"
-  echo "SSHFS Mnt  : ${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_sshfs_dst}"
-  echo "SSHFS Opts : ${mid_ssh_sshfs_opt}"
+  echo "Type        : ${mid_ssh_type}"
+  echo "URL         : ${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_port}"
+  echo "SSH Opts    : ${mid_ssh_ssh_opt}"
+  echo "SCP Opts    : ${mid_ssh_scp_opt}"
+  echo "SSH Env     : ${mid_ssh_env}"
+  echo "SSH Tunnel  : ${mid_ssh_tunnel}"
+  echo "SCP Dest    : ${mid_ssh_scp_dst}"
+  echo "SSHFS Mnt   : ${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_sshfs_dst}"
+  echo "SSHFS Opts  : ${mid_ssh_sshfs_opt}"
   echo
 
   # TODO: gsi
@@ -207,6 +207,7 @@ function ssh/info() {
           print "Key length  : ",$1;
           print "Fingerprint : ",$2;
           print "Type        : ",$4;
+          print
         }
         else
           print;
