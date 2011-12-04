@@ -207,7 +207,7 @@ function ssh/info() {
           print "Key length  : ",$1;
           print "Fingerprint : ",$2;
           print "Type        : ",$4;
-          print
+          print "";
         }
         else
           print;
