@@ -204,9 +204,9 @@ function ssh/info() {
       ${ssh_key_gen} -v -l -f "${_pub}" | \
       awk '{
         if(NR==1) {
-          print "Key length  : ",$1;
-          print "Fingerprint : ",$2;
-          print "Type        : ",$4;
+          print "Key length  :",$1;
+          print "Fingerprint :",$2;
+          print "Type        :",$4;
           print "";
         }
         else
