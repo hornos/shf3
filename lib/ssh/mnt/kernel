@@ -62,11 +62,11 @@ function ssh/mnt() {
 
   sys/lck/mk "${_lck}"
 
-  local _opts="${mid_ssh_sshfs_opts}"
+  local _opt="${mid_ssh_sshfs_opt}"
   # key
   local _sec="$(ssh/key/sec ${_h})"
   if test -r "${_sec}" ; then
-    _opts="${_opts} -i ${_sec}"
+    _opt="${_opt} -i ${_sec}"
   else
     warn "Key not found ${_sec}"
   fi
@@ -78,14 +78,14 @@ function ssh/mnt() {
 
   if sys/osx ; then
     local _vol="${_h}:${mid_ssh_user}@${mid_ssh_fqdn}"
-    _opts="${_opts} -o volname=${_vol}"
+    _opt="${_opt} -o volname=${_vol}"
     local _ico="${sys_img_dir}/sshfs.icns"
     if test -r "${_ico}" ; then
-      _opts="${_opts} -o modules=volicon -o volicon=${_ico}"
+      _opt="${_opt} -o modules=volicon -o volicon=${_ico}"
     fi
   fi
 
-  local _cmd="${ssh_mnt_mnt} ${_url} \"${_src}\" ${_opts}"
+  local _cmd="${ssh_mnt_mnt} ${_url} \"${_src}\" ${_opt}"
   msg/debug "${_cmd}"
 
   if ${gdbg} ; then

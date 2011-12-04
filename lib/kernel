@@ -332,7 +332,7 @@ function answer() {
   local _a
 
   while true ; do
-    echo -en "[${gbn}] ${_m} (y / n / q) [${_f}]: "
+    echo -en "[${gbn}] ${_m} (y/n/q) [${_f}]: "
     read _a
     _a=$(str/tolower ${_a})
     case "${_a}" in

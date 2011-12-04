@@ -119,16 +119,15 @@ function ssh/info() {
   msg "SSH Host info ${_h} (${mid_ssh_fqdn})"
   gui/line 84
   echo "URL        : ${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_port}"
-  echo "SSH Opts   : ${mid_ssh_ssh_opts}"
-  echo "SCP Opts   : ${mid_ssh_scp_opts}"
+  echo "SSH Opts   : ${mid_ssh_ssh_opt}"
+  echo "SCP Opts   : ${mid_ssh_scp_opt}"
   echo "SSH Env    : ${mid_ssh_env}"
-  echo "SSH Proxy  : ${mid_ssh_proxy}"
+  echo "SSH Tunnel : ${mid_ssh_tunnel}"
   gui/line 84
   echo "SCP Dest   : ${mid_ssh_scp_dst}"
-  echo "SCP Src    : ${mid_ssh_scp_src}"
   gui/line 84
   echo "SSHFS Mnt  : ${mid_ssh_sshfs_src} -> ${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_sshfs_dst}"
-  echo "SSHFS Opts : ${mid_ssh_sshfs_opts}"
+  echo "SSHFS Opts : ${mid_ssh_sshfs_opt}"
   gui/line 84
 
   # TODO: gsi
@@ -179,18 +178,18 @@ function ssh/login() {
   fi
 
   # opts
-  local _opts="${mid_ssh_ssh_opts}"
+  local _opt="${mid_ssh_ssh_opt}"
 
-  # proxy
-  local _proxy=false
-  if ! test -z "${mid_ssh_proxy}" ; then
+  # tunnel
+  local _tunnel=false
+  if ! test -z "${mid_ssh_tunnel}" ; then
     if sys/lck/mk "${_lck}" ; then
-      _proxy=true
-      _opts="${_opts} ${mid_ssh_proxy}"
+      _tunnel=true
+      _opt="${_opt} ${mid_ssh_tunnel}"
       # TODO: tunnel parse
-      msg "Connect tunnels: ${mid_ssh_proxy}"
+      msg "Connect tunnels: ${mid_ssh_tunnel}"
     else
-      msg/warn "Active tunnels: ${mid_ssh_proxy}"
+      msg "Active tunnels: ${mid_ssh_tunnel}"
     fi
   fi
 
@@ -207,18 +206,18 @@ function ssh/login() {
       return ${_false_}
     fi
 
-    # proxy init
+    # grid proxy init
     msg "Initialize Grid Proxy"
-    local _x_opts=""
+    local _x_opt=""
     if ! test -z "${mid_ssh_valid}" ; then
-      _x_opts="-valid ${mid_ssh_valid}"
+      _x_opt="-valid ${mid_ssh_valid}"
     fi
-    _x_opts="${_x_opts} -key ${_sec}"
-    _x_opts="${_x_opts} -cert ${_crt}"
+    _x_opt="${_x_opt} -key ${_sec}"
+    _x_opt="${_x_opt} -cert ${_crt}"
     local _x_lck="${sys_lck_dir}/${gbn}.gsi.$$"
-    _x_opts="${_x_opts} -out ${_x_lck}"
+    _x_opt="${_x_opt} -out ${_x_lck}"
 
-    ${ssh_gsi_init} ${_x_opts}
+    ${ssh_gsi_init} ${_x_opt}
     if test $? -gt 0 ; then
       msg "Grid Proxy failed"
       return ${_false_}
@@ -230,7 +229,7 @@ function ssh/login() {
     local _sec="$(ssh/key/sec ${_h})"
     # check
     if test -r "${_sec}" ; then
-      _opts="${_opts} -i ${_sec}"
+      _opt="${_opt} -i ${_sec}"
     else
       msg "Key not found ${_sec}"
     fi
@@ -240,12 +239,12 @@ function ssh/login() {
   local _url="${mid_ssh_user}@${mid_ssh_fqdn}"
   msg "Login to ${_url}"
   gui/line 84
-  local _cmd="${ssh_ssh} ${_opts} ${_url}"
+  local _cmd="${ssh_ssh} ${_opt} ${_url}"
   msg/debug "${_cmd}"
   ${_cmd}
   local _ret=$?
 
-  # destroy grid proxy
+  # grid proxy destroy
   if test "${mid_ssh_type}" = "gsi" ; then
     if test -r "${_x_lck}" ; then
       ${ssh_gsi_destroy} "${_x_lck}"
@@ -254,8 +253,9 @@ function ssh/login() {
     fi
     unset X509_USER_PROXY
   fi
-  # clear lock
-  if ${_proxy} ; then
+
+  # clear tunnel lock
+  if ${_tunnel} ; then
     sys/lck/rm "${_lck}"
   fi
   return ${_ret}
@@ -318,20 +318,20 @@ function ssh/xfer() {
   # select mode
   case ${_mode} in
     1)
-      local _opts="${mis_ssh_scp_opts}"
+      local _opt="${mis_ssh_scp_opt}"
       local _url="${_src_url}"
       local _mtxt="scp"
       if ${_r} ; then
-        _opts="-r ${_opts}"
+        _opt="-r ${_opt}"
       fi
     ;;
     2)
-      local _opts="-p ${mid_ssh_port}"
+      local _opt="-p ${mid_ssh_port}"
       local _url="${mid_ssh_user}@${mid_ssh_fqdn}"
       local _mtxt="tar/ssh"
     ;;
     3)
-      local _opts="-p ${mid_ssh_port}"
+      local _opt="-p ${mid_ssh_port}"
       local _url="${_src_url}"
       local _mtxt="rsync/ssh"
     ;;
@@ -353,18 +353,18 @@ function ssh/xfer() {
       return ${_false_}
     fi
 
-    # proxy init
+    # grid proxy init
     msg "Initialize Grid Proxy"
-    local _x_opts=""
+    local _x_opt=""
     if ! test -z "${mid_ssh_valid}" ; then
-      _x_opts="-valid ${mid_ssh_valid}"
+      _x_opt="-valid ${mid_ssh_valid}"
     fi
-    _x_opts="${_x_opts} -key ${_sec}"
-    _x_opts="${_x_opts} -cert ${_crt}"
+    _x_opt="${_x_opt} -key ${_sec}"
+    _x_opt="${_x_opt} -cert ${_crt}"
     local _x_lck="${sys_lck_dir}/${gbn}.gsi.$$"
-    _x_opts="${_x_opts} -out ${_x_lck}"
+    _x_opt="${_x_opt} -out ${_x_lck}"
 
-    ${ssh_gsi_init} ${_x_opts}
+    ${ssh_gsi_init} ${_x_opt}
     if test $? -gt 0 ; then
       msg "Grid Proxy failed"
       return ${_false_}
@@ -375,7 +375,7 @@ function ssh/xfer() {
     # private key
     local _sec="$(ssh/key/sec ${_h})"
     if test -r "${_sec}" ; then
-      _opts="${_opts} -i ${_sec}"
+      _opt="${_opt} -i ${_sec}"
     else
       msg "Key not found ${_sec}"
     fi
@@ -400,30 +400,30 @@ function ssh/xfer() {
   case ${_mode} in
     1)
       if ${_put} ; then
-        _cmd="${ssh_scp} ${_opts} \"${_src}\" ${_url}"
+        _cmd="${ssh_scp} ${_opt} \"${_src}\" ${_url}"
       else
-        _cmd="${ssh_scp} ${_opts} ${_url} \"${_dst}\""
+        _cmd="${ssh_scp} ${_opt} ${_url} \"${_dst}\""
       fi
     ;;
     2)
       if ${_put} ; then
-        _cmd="${ssh_tar} cvf - \"${_src}\" | ${ssh_ssh} ${_opts} ${_url} (cd \"${mid_ssh_scp_dst}\";tar xvf -)"
+        _cmd="${ssh_tar} cvf - \"${_src}\" | ${ssh_ssh} ${_opt} ${_url} (cd \"${mid_ssh_scp_dst}\";tar xvf -)"
       else
-        _cmd="${ssh_ssh} ${_opts} ${_url} (cd \"${mid_ssh_scp_dst}\";tar cvf - \"${_src}\") | (cd \"${_dst}\"; ${ssh_tar} xvf -)"
+        _cmd="${ssh_ssh} ${_opt} ${_url} (cd \"${mid_ssh_scp_dst}\";tar cvf - \"${_src}\") | (cd \"${_dst}\"; ${ssh_tar} xvf -)"
       fi
     ;;
     3)
       if ${_put} ; then
-        _cmd="${ssh_rsync} -a -z -v --partial --progress -e \"${ssh_ssh} ${_opts}\" \"${_src}\" ${_url}"
+        _cmd="${ssh_rsync} -a -z -v --partial --progress -e \"${ssh_ssh} ${_opt}\" \"${_src}\" ${_url}"
       else
-        _cmd="${ssh_rsync} -a -z -v --partial --progress -e \"${ssh_ssh} ${_opts}\" ${_url} \"${_dst}\""
+        _cmd="${ssh_rsync} -a -z -v --partial --progress -e \"${ssh_ssh} ${_opt}\" ${_url} \"${_dst}\""
       fi
     ;;
   esac
   msg/debug "${_cmd}"
   ${_cmd}
   local _ret=$?
-  # destroy grid proxy
+  # grid proxy destroy
   if test "${mid_ssh_type}" = "gsi" ; then
     if test -r "${_x_lck}" ; then
       ${ssh_gsi_destroy} "${_x_lck}"
@@ -475,10 +475,10 @@ function ssh/cmd() {
     return ${_false_}
   fi
 
-  local _opts="${mid_ssh_opts}"
+  local _opt="${mid_ssh_opt}"
   # force tty
   if ${_t} ; then
-    _opts="-t ${_opts}"
+    _opt="-t ${_opt}"
   fi
 
   # begin gsi
@@ -494,18 +494,18 @@ function ssh/cmd() {
       return ${_false_}
     fi
 
-    # proxy init
+    # grid proxy init
     msg "Initialize Grid Proxy"
-    local _x_opts=""
+    local _x_opt=""
     if ! test -z "${mid_ssh_valid}" ; then
-      _x_opts="-valid ${mid_ssh_valid}"
+      _x_opt="-valid ${mid_ssh_valid}"
     fi
-    _x_opts="${_x_opts} -key ${_sec}"
-    _x_opts="${_x_opts} -cert ${_crt}"
+    _x_opt="${_x_opt} -key ${_sec}"
+    _x_opt="${_x_opt} -cert ${_crt}"
     local _x_lck="${sys_lck_dir}/${gbn}.gsi.$$"
-    _x_opts="${_x_opts} -out ${_x_lck}"
+    _x_opt="${_x_opt} -out ${_x_lck}"
 
-    ${ssh_gsi_init} ${_x_opts}
+    ${ssh_gsi_init} ${_x_opt}
     if test $? -gt 0 ; then
       msg "Grid Proxy failed"
       return ${_false_}
@@ -516,7 +516,7 @@ function ssh/cmd() {
     # private key
     local _sec="$(ssh/key/sec ${_h})"
     if test -r "${_sec}" ; then
-      _opts="${_opts} -i ${_sec}"
+      _opt="${_opt} -i ${_sec}"
     else
       msg "Key not found ${_sec}"
     fi
@@ -530,10 +530,11 @@ function ssh/cmd() {
   if ! test -z "${mid_ssh_env}" ; then
     _x="source \${HOME}/${mid_ssh_env};echo;${_x}"
   fi
-  local _cmd="${ssh_ssh} ${_opts} ${_url} \"${_x}\""
+  local _cmd="${ssh_ssh} ${_opt} ${_url} \"${_x}\""
   ${_cmd}
   local _ret=$?
-  # destroy grid proxy
+
+  # grid proxy destroy
   if test "${mid_ssh_type}" = "gsi" ; then
     if test -r "${_x_lck}" ; then
       ${ssh_gsi_destroy} "${_x_lck}"
