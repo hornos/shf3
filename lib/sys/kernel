@@ -57,3 +57,11 @@ function sys/edit() {
   fi
   ${i} "${_f}"
 }
+
+function sys/cksum() {
+  local _f="${1}"
+  if test -z "${_f}" || ! test -r "${_f}" ; then
+    return ${_false_}
+  fi
+  field "$(${sys_cksum} ${_f})" 4 " "
+}

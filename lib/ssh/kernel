@@ -42,12 +42,19 @@ function ssh/mgr() {
 
       # edit mid
       answer "Do you want to edit ${_h}?"
+      local _cso=$(sys/cksum "${_mid}")
       if test $? -eq 0 ; then
         sys/edit "${_mid}"
         if test $? -gt 0 ; then
           msg "Editor failed"
           return ${_false_}
         fi
+      fi
+      local _csn=$(sys/cksum "${_mid}")
+      if ! test "${_cso}" = "${_csn}" ; then
+        msg "MID not changed"
+      else
+        msg "MID changed"
       fi
       ;;
     PASS)
@@ -140,7 +147,7 @@ function ssh/info() {
   fi
 
   echo
-  msg "SSH MID info for ${_h} (${mid_ssh_fqdn})"
+  msg "SSH MID for ${_h} (${mid_ssh_fqdn})"
   echo
   echo "Type       : ${mid_ssh_type}"
   echo "URL        : ${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_port}"
