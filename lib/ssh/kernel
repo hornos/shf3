@@ -17,7 +17,7 @@ function ssh/mgr() {
     LIST)
       # format
       local _frm1="%-28s%-6s%-40s\n"
-      
+
       # header
       echo
       printf "${_frm1}" "mid" "type" "url"
@@ -53,12 +53,14 @@ function ssh/mgr() {
       local _csn=$(sys/cksum "${_mid}")
       if ! test "${_cso}" = "${_csn}" ; then
         msg "MID changed"
-      else
-        msg "MID not changed"
+        return ${_true_}
       fi
+      msg "MID not changed"
+      return ${_false_}
       ;;
     PASS)
-      msg "Not implemented"
+      import ssh/key
+      ssh/key/chg "${_h}"
       ;;
     INFO)
       ssh/info "${_h}"
@@ -128,7 +130,29 @@ function ssh/mgr() {
       return ${_true_}
       ;;
     DELETE)
-      msg "Not implemented"
+      answer "Do you want to delete ${_h}?"
+      if test $? -gt 0 ; then
+        return ${_false_}
+      fi
+      answer "Are you sure?"
+      if test $? -gt 0 ; then
+        return ${_false_}
+      fi
+
+      # mid
+      local _mid="${sys_mid_dir}/ssh/${_h}"
+      if ! test -r "${_mid}" ; then
+        msg "MID not found"
+        return ${_false_}
+      fi
+      rm -f "${_mid}"
+
+      # keys
+      answer "Delete keys?"
+      if test $? -gt 0 ; then
+        return ${_false_}
+      fi
+
       return ${_true_}
       ;;
   esac
