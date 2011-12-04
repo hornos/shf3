@@ -1,4 +1,4 @@
-function str/__case() {
+function str/case() {
   local _s=${1:-case}
   local _d=${2:-false}
   if ${_d} ; then
@@ -9,8 +9,8 @@ function str/__case() {
 }
 
 function str/tolower() {
-  str/__case "${*}" true
+  str/case "${*}" true
 }
 function str/toupper() {
-  str/__case "${*}"
+  str/case "${*}"
 }

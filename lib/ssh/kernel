@@ -153,7 +153,19 @@ function ssh/mgr() {
         return ${_false_}
       fi
 
-      return ${_true_}
+      import sys/dir
+      import ssh/key
+      # in ${ssh_key_dir}
+      sys/dir/svwd "${ssh_key_dir}"
+
+      # delete
+      local i
+      for i in ${_h}.* ; do
+        echo $i
+        if ! test -z "${i}" && test -e "${i}" ; then
+          rm -vf "${i}"
+        fi
+      done
       ;;
   esac
 }

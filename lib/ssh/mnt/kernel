@@ -25,7 +25,7 @@ function ssh/mnt() {
 
   sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
-    msg "No MID"
+    msg "MID not found"
     return ${_false_}
   fi
 
@@ -56,7 +56,7 @@ function ssh/mnt() {
 
   # mount
   if $(sys/lck "${_lck}") && ! ${_f} ; then
-    msg "${_h} is already mounted"
+    msg "${_h} is mounted"
     return ${_false_}
   fi
 
@@ -68,7 +68,7 @@ function ssh/mnt() {
   if test -r "${_sec}" ; then
     _opt="${_opt} -i ${_sec}"
   else
-    warn "Key not found ${_sec}"
+    msg "Key not found ${_sec}"
   fi
 
   local _url="${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_sshfs_dst}"
@@ -95,10 +95,10 @@ function ssh/mnt() {
   fi
   _ret=$?
   if test $? -gt 0 ; then
-    msg "mount failed"
+    msg "Mount failed"
     sys/lck/rm "${_lck}"
   else
-    msg "host mounted"
+    msg "${_h} mounted"
   fi
   return ${_ret}
 }
