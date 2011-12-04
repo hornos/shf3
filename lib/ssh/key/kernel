@@ -29,7 +29,7 @@ function ssh/key/gen() {
 
   sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
-    msg "No MID"
+    msg "MID not found"
     return ${_false_}
   fi
 
@@ -83,7 +83,7 @@ function ssh/key/chg() {
   # in ${ssh_key_dir}
   sys/dir/svwd "${ssh_key_dir}"
 
-  local _sec="${_h}.id_${_t}"
+  local _sec="${_h}.${ssh_key_sec}"
   if ! test -r "${_sec}" ; then
     return ${_false_}
   fi
@@ -92,5 +92,4 @@ function ssh/key/chg() {
     _gdbg="-v"
   fi
   ${ssh_key_gen} ${_gdbg} -p -f "${_sec}"
-
 }
