@@ -34,7 +34,7 @@ function ssh/gsi/init() {
   _x_opt="${_x_opt} -out ${_x_lck}"
 
   # debug
-  if ${gdbd} ; then
+  if ${gdbg} ; then
     _x_opt="-debug ${_x_opt}"
   fi
 
@@ -44,7 +44,6 @@ function ssh/gsi/init() {
     return ${_false_}
   fi
   export X509_USER_PROXY=${_x_lck}
-  msg "Grid Proxy initialized"
 }
 
 function ssh/gsi/destroy() {
@@ -60,4 +59,3 @@ function ssh/gsi/destroy() {
   unset X509_USER_PROXY
   msg "Grid Proxy destroyed"
 }
-
