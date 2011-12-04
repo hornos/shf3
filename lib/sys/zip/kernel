@@ -50,13 +50,13 @@ function sys/zip/svmvz() {
   # 2. move (rename)
   cp -fR "${_src}" "${_dir}"
   rm -fR "${_src}"
-  local _srcbn=$(basename "${_src}")
-  if ! test "${_srcbn}" = "${_dst}" ; then
-    mv "${_scrbn}" "${_dst}"
+  local _src_bn=$(basename "${_src}")
+  if ! test "${_src_bn}" = "${_dst}" ; then
+    mv "${_src_bn}" "${_dst}"
   fi
 
   # 3. compress
-  sys/zip/c "${_dst}"
+  sys/zip/comp "${_dst}"
 
   sys/dir/ldwd
   # end ${_dir}
@@ -98,7 +98,7 @@ function sys/zip/cpuzmv() {
   # 2. uncompress
   # begin ${_dir}
   sys/dir/svwd "${_dir}"
-  zip/unzip "${_src}"
+  sys/zip/decomp "${_src}"
   _dst=$(basename "${_dst}")
   _src=$(basename "${_src}")
 

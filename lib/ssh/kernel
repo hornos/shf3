@@ -44,7 +44,7 @@ function ssh/mgr() {
         msg "MID ${_h} exists, delete first"
         return ${_false_}
       fi
-      cp -f "${sys_mid_dir}/ssh.template" "${_mid}"
+      cp -f "${sys_mid_dir}/${ssh_template}" "${_mid}"
 
       # edit mid
       answer "Do you want to edit ${_h} now?"
