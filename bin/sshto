@@ -10,6 +10,7 @@ SSH login
 Usage: ${gbn} options
               -m MID
               -f - force
+              -v - verbose
 EOF
   exit ${_false_}
 }
@@ -24,7 +25,7 @@ while getopts hfvm: o; do
     f) _f=true;;
     v) gdbg=true;;
     h) sshto/help;;
-    *) sshto/help;;
+    *) _m=$OPTARG;;
   esac
 done
 
