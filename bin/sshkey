@@ -34,6 +34,11 @@ echo
 msg
 gui/line 84
 
+if test "${_m}" = "" ; then
+  echo -n "[${gbn}] Enter MID: "
+  read _m
+fi
+
 case ${_c} in
   CHANGE)
     answer "Change key for ${_m}?"

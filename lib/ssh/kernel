@@ -161,9 +161,8 @@ function ssh/mgr() {
       # delete
       local i
       for i in ${_h}.* ; do
-        echo $i
         if ! test -z "${i}" && test -e "${i}" ; then
-          rm -vf "${i}"
+          rm -f "${i}"
         fi
       done
       ;;

@@ -45,7 +45,7 @@ function ssh/key/gen() {
   local i
   for i in ${__sec} ${__pub} ; do
     if test -r "${i}" ; then
-      msg "Delete key ${i}"
+      msg "Delete keys of ${_h} manually"
       return ${_false_}
     fi
   done
@@ -76,7 +76,7 @@ function ssh/key/chg() {
 
   sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
-    msg "No MID"
+    msg "MID not found"
     return ${_false_}
   fi
 
