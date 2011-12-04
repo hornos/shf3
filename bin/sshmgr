@@ -10,6 +10,8 @@ SSH MID Manager
 Usage: ${gbn} options
               -n MID - new
               -d MID - delete
+              -e MID - edit
+              -p MID - change password
               -i MID - info
               -k - kill ssh agent
               -v - verbose
@@ -20,12 +22,14 @@ EOF
 ### args
 _c="LIST"
 _m=""
-while getopts hvki:n:d: o; do
+while getopts hvki:n:d:e:p: o; do
   case "$o" in
     k) _c="KILL";;
     d) _c="DELETE"; _m=$OPTARG;;
     n) _c="CREATE"; _m=$OPTARG;;
     i) _c="INFO"; _m=$OPTARG;;
+    e) _c="EDIT"; _m=$OPTARG;;
+    p) _c="PASS"; _m=$OPTARG;;
     v) gdbg=true;;
     h) sshmgr/help;;
     *) sshmgr/help;;
