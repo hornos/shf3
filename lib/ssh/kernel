@@ -52,9 +52,9 @@ function ssh/mgr() {
       fi
       local _csn=$(sys/cksum "${_mid}")
       if ! test "${_cso}" = "${_csn}" ; then
-        msg "MID not changed"
-      else
         msg "MID changed"
+      else
+        msg "MID not changed"
       fi
       ;;
     PASS)
