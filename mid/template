@@ -1,5 +1,5 @@
 # type of ssh auth: ssh | gsi
-mid_ssh_type=gsi
+mid_ssh_type=ssh
 
 # group host to cluster
 mid_ssh_cluster="default"
@@ -10,7 +10,8 @@ mid_ssh_fqdn="default"
 # username
 mid_ssh_user="${USER}"
 
-# SSH port 
+# SSH port
+# gsi: 2222
 mid_ssh_port=22
 
 # Valid proxy timeout for gsissh

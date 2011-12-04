@@ -16,7 +16,7 @@ function ssh/mgr() {
   case "${_m}" in
     LIST)
       # format
-      local _frm1="%-28s%-6s%-40s\n"
+      local _frm1="%-26s%-6s%-42s\n"
 
       # header
       echo
@@ -100,11 +100,13 @@ function ssh/mgr() {
       if $(installed nmap) ; then
         import net/port
         answer "Do you want to check connection to ${_h}?"
-        net/port/test ${mid_ssh_fqdn} ${mid_ssh_port}
-        if test $? -gt 0 ; then
-          msg "Connection failed"
-        else
-          msg "Connection success"
+        if test -eq 0 ; then
+          net/port/test ${mid_ssh_fqdn} ${mid_ssh_port} &>/dev/null
+          if test $? -gt 0 ; then
+            msg "Connection failed"
+          else
+            msg "Connection success"
+          fi
         fi
       fi
 
@@ -191,7 +193,7 @@ function ssh/info() {
   echo "SSH Env    : ${mid_ssh_env}"
   echo "SSH Tunnel : ${mid_ssh_tunnel}"
   echo "SCP Dest   : ${mid_ssh_scp_dst}"
-  echo "SSHFS Mnt  : ${mid_ssh_sshfs_src} -> ${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_sshfs_dst}"
+  echo "SSHFS Mnt  : ${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_sshfs_dst}"
   echo "SSHFS Opts : ${mid_ssh_sshfs_opt}"
   echo
 
@@ -199,7 +201,16 @@ function ssh/info() {
   if test ${mid_ssh_type} = "ssh" ; then
     local _pub="$(ssh/key/pub ${_h})"
     if test -r "${_pub}" ; then
-      ${ssh_key_gen} -v -l -f "${_pub}"
+      ${ssh_key_gen} -v -l -f "${_pub}" | \
+      awk '{
+        if(NR==1) {
+          print "Key length  : ",$1;
+          print "Fingerprint : ",$2;
+          print "Type        : ",$4;
+        }
+        else
+          print;
+      }'
     else
       msg/warn "Key not found ${_pub}"
     fi
