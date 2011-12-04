@@ -48,7 +48,7 @@ case "${_c}" in
   LIST)
     ssh/mgr "${_c}"
     ;;
-  INFO|CREATE|DELETE)
+  INFO|CREATE|DELETE|EDIT|PASS)
     ssh/mgr "${_c}" "${_m}"
     ;;
 esac

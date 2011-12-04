@@ -144,9 +144,7 @@ function ssh/info() {
   echo "SCP Opts   : ${mid_ssh_scp_opt}"
   echo "SSH Env    : ${mid_ssh_env}"
   echo "SSH Tunnel : ${mid_ssh_tunnel}"
-  echo
   echo "SCP Dest   : ${mid_ssh_scp_dst}"
-  echo
   echo "SSHFS Mnt  : ${mid_ssh_sshfs_src} -> ${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_sshfs_dst}"
   echo "SSHFS Opts : ${mid_ssh_sshfs_opt}"
   echo
@@ -159,7 +157,6 @@ function ssh/info() {
     else
       msg/warn "Key not found ${_pub}"
     fi
-    gui/line 84
     local _lck="${_h}.${gbn}"
     return ${_true_}
   fi
