@@ -14,7 +14,7 @@ function ssh/gsi/init() {
   local _crt="$(ssh/key/crt ${_h})"
 
   # check
-  if test -r "${_sec}" || test -r "${_crt}" ; then
+  if ! test -r "${_sec}" || ! test -r "${_crt}" ; then
     msg "Key not found"
     return ${_false_}
   fi

@@ -100,7 +100,7 @@ function ssh/mgr() {
       if $(installed nmap) ; then
         import net/port
         answer "Do you want to check connection to ${_h}?"
-        if test -eq 0 ; then
+        if test $? -eq 0 ; then
           net/port/test ${mid_ssh_fqdn} ${mid_ssh_port} &>/dev/null
           if test $? -gt 0 ; then
             msg "Connection failed"
