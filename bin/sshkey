@@ -1,5 +1,6 @@
 #!/bin/bash
 source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
 import ssh/key
 
 function sshkey/help() {
@@ -20,8 +21,8 @@ _m=""
 _c="NEW"
 while getopts hvc:n: o; do
   case "$o" in
-    n) _v="CHANGE"; _m=$OPTARG;;
-    c) _c="NEW"; _m=$OPTARG;;
+    n) _n="NEW"; _m=$OPTARG;;
+    c) _c="CHANGE"; _m=$OPTARG;;
     v) gdbg=true;;
     h) sshkey/help;;
     *) sshkey/help;;
@@ -29,6 +30,10 @@ while getopts hvc:n: o; do
 done
 
 ### main
+echo
+msg
+gui/line 84
+
 case ${_c} in
   CHANGE)
     answer "Change key for ${_m}?"

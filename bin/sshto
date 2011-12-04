@@ -1,5 +1,6 @@
 #!/bin/bash
 source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
 import ssh
 
 function sshto/help() {
@@ -30,6 +31,10 @@ while getopts hfvm: o; do
 done
 
 ### main
+echo
+msg
+gui/line 84
+
 if test "${_m}" = "" ; then
   echo -n "[${gbn}] Enter MID: "
   read _m

@@ -1,5 +1,6 @@
 #!/bin/bash
 source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
 import ssh
 
 function sshmgr/help() {
@@ -37,6 +38,10 @@ while getopts hvki:n:d:e:p: o; do
 done
 
 ### main
+echo
+msg
+gui/line 84
+
 case "${_c}" in
   KILL)
     _apid=$(ps ax | grep ssh-agent | awk '/\?\?/{print $1}')

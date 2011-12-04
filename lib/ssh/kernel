@@ -15,7 +15,11 @@ function ssh/mgr() {
   local _h="${2}"
   case "${_m}" in
     LIST)
+      # format
       local _frm1="%-28s%-6s%-40s\n"
+      
+      # header
+      echo
       printf "${_frm1}" "mid" "type" "url"
       gui/line 84
       local i
@@ -135,9 +139,9 @@ function ssh/info() {
     return ${_false_}
   fi
 
-  echo ""
+  echo
   msg "SSH MID info for ${_h} (${mid_ssh_fqdn})"
-  gui/line 84
+  echo
   echo "Type       : ${mid_ssh_type}"
   echo "URL        : ${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_port}"
   echo "SSH Opts   : ${mid_ssh_ssh_opt}"
