@@ -23,9 +23,9 @@ function ssh/mgr() {
         if test -r "${i}" ; then
           i=$(basename "${i}")
           sys/mid "ssh/${i}"
-          printf "${_frm1}" "${i}" "${mis_ssh_type}" "${mid_ssh_user}@${mid_ssh_fqdn}"
-        else
-          printf "${_frm1}" "${i}" "---" "---"
+          if ! test -z "${mid_ssh_type}" ; then
+            printf "${_frm1}" "${i}" "${mid_ssh_type}" "${mid_ssh_user}@${mid_ssh_fqdn}"
+          fi
         fi
       done
       ;;
