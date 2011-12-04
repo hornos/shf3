@@ -10,6 +10,7 @@ SSH key generator
 Usage: ${gbn} options
               -m MID
               -c - change
+              -v - verbose
 EOF
   exit ${_false_}
 }
@@ -17,10 +18,11 @@ EOF
 ### args
 _m=""
 _c=false
-while getopts hcm: o; do
+while getopts hvcm: o; do
   case "$o" in
     m) _m=$OPTARG;;
     c) _c=true;;
+    v) gdbg=true;;
     h) sshkey/help;;
     *) sshkey/help;;
   esac
@@ -28,7 +30,7 @@ done
 
 ### main
 if test "${_m}" = "" ; then
-  echo -n "[${gbn}] MID: "
+  echo -n "[${gbn}] Enter MID: "
   read _m
 fi
 

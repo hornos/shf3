@@ -25,13 +25,13 @@ while getopts hfvm: o; do
     f) _f=true;;
     v) gdbg=true;;
     h) sshto/help;;
-    *) _m=$OPTARG;;
+    *) sshto/help;;
   esac
 done
 
 ### main
 if test "${_m}" = "" ; then
-  echo -n "[${gbn}] MID: "
+  echo -n "[${gbn}] Enter MID: "
   read _m
 fi
 

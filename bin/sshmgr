@@ -12,6 +12,7 @@ Usage: ${gbn} options
               -d MID - delete
               -i MID - info
               -k - kill ssh agent
+              -v - verbose
 EOF
   exit ${_false_}
 }
@@ -19,12 +20,13 @@ EOF
 ### args
 _c="LIST"
 _m=""
-while getopts hki:n:d: o; do
+while getopts hvki:n:d: o; do
   case "$o" in
     k) _c="KILL";;
     d) _c="DELETE"; _m=$OPTARG;;
     n) _c="CREATE"; _m=$OPTARG;;
     i) _c="INFO"; _m=$OPTARG;;
+    v) gdbg=true;;
     h) sshmgr/help;;
     *) sshmgr/help;;
   esac
