@@ -558,6 +558,7 @@ function ssh/cmd() {
   ${_cmd}
   local _ret=$?
 
+  gui/line 84
   # grid proxy destroy
   if test "${mid_ssh_type}" = "gsi" ; then
     ssh/gsi/destroy
