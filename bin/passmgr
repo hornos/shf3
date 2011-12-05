@@ -10,6 +10,7 @@ Random password manager for the console
 Usage: ${gbn} options
               -l length
               -f database
+              -u uid - retrieve
               -c uid - change
               -n uid - new
               -d uid - delete

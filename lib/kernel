@@ -11,7 +11,7 @@ gcn="config"
 # initial include path
 gip="$(dirname ${BASH_SOURCE})"
 grd=$(cd "${gip}/..";pwd)
-gip="${grd}/lib:"
+gip=":${grd}/lib:"
 
 # loaded modules
 gim=""
@@ -142,7 +142,7 @@ function ns/inpath() {
   if test -z "${_p}" || test -z "${_m}" ; then
     return ${_false_}
   fi
-  if test "${_p}" = "${_p/${_m}:/}" ; then
+  if test "${_p}" = "${_p/:${_m}:/}" ; then
     return ${_false_}
   fi
   return ${_true_}
@@ -214,7 +214,7 @@ function include() {
   fi
 
   if test -z "${gip}" ; then
-    gip="${__p}:"
+    gip=":${__p}:"
     return ${_true_}
   fi
 
@@ -222,7 +222,7 @@ function include() {
     if $(ns/isop "${_p}" "+") ; then
       gip="${__p}${gip}:"
     else
-      gip="${gip}:${__p}"
+      gip=":${gip}${__p}"
     fi
   fi
   return ${_true_}
@@ -312,7 +312,7 @@ function import() {
   fi
   if ${_nl} ; then
     if test -z "${gim}" ; then
-      gim="${__m}:"
+      gim=":${__m}:"
     else
       gim="${gim}${__m}:"
     fi
