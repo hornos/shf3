@@ -24,16 +24,6 @@ function ssh/gsi/init() {
     return ${_false_}
   fi
 
-  if ! test -z "${mid_ssh_grid}" ; then
-    local _crt_dir="${ssh_key_crt_dir}/${mid_ssh_grid}"
-    if ! test -d "${_crt_dir}" ; then
-      msg "Gird certificate not found"
-      return ${_false_}
-    fi
-    _x_opt="${_x_opt} -certdir ${_crt_dir}"
-    export X509_CERT_DIR="${_crt_dir}"
-  fi
-
   # grid proxy init
   msg "Initialize Grid Proxy"
   local _x_opt=""
@@ -47,6 +37,16 @@ function ssh/gsi/init() {
   _x_opt="${_x_opt} -key ${_sec}"
   _x_opt="${_x_opt} -cert ${_crt}"
   _x_opt="${_x_opt} -out ${_x_lck}"
+
+  if ! test -z "${mid_ssh_grid}" ; then
+    local _crt_dir="${ssh_key_crt_dir}/${mid_ssh_grid}"
+    if ! test -d "${_crt_dir}" ; then
+      msg "Gird certificate not found"
+      return ${_false_}
+    fi
+    _x_opt="${_x_opt} -certdir ${_crt_dir}"
+    export X509_CERT_DIR="${_crt_dir}"
+  fi
 
   # debug
   if ${gdbg} ; then

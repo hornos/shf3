@@ -137,7 +137,7 @@ function ns/op/name() {
 function ns/inpath() {
   local _m="${1}"
   local _p="${2:-${gip}}"
-  if test -z "${_p}" || test "${_m}" ; then
+  if test -z "${_p}" || test -z "${_m}" ; then
     return ${_false_}
   fi
   if test "${_p}" = "${_p/${_m}/}" ; then
@@ -207,8 +207,8 @@ function include() {
     return ${_true_}
   fi
 
-  if ! $(ns/inpath "${__p}") ; then
-    if $(ns/op "${_p}" "+") ; then
+  if ! $(ns/inpath "${__p}" "${gip}") ; then
+    if $(ns/isop "${_p}" "+") ; then
       gip="${__p}:${gip}"
     else
       gip="${gip}:${__p}"
@@ -249,12 +249,11 @@ function import() {
   if test -z "${gip}" || test -z "${_m}" ; then
     return ${_false_}
   fi
-  msg/debug "${FUNCNAME}: ${_m}"
 
   # force reloading
   local __m=$(ns/op/name "${_m}" "+")
-  if $(ns/inpath "${__m}" ${gim}) ; then
-    if ! $(ns/op "${_m}" "+") ; then
+  if $(ns/inpath "${__m}" "${gim}") ; then
+    if ! $(ns/isop "${_m}" "+") ; then
       # skipped
       return ${_true_}
     fi
@@ -262,7 +261,8 @@ function import() {
     _nl=true
   fi
 
-  msg/debug "${FUNCNAME} loading: ${__m}"
+  msg/debug "${FUNCNAME} import : ${__m}"
+  msg/debug "${FUNCNAME} gim    : ${gim}"
   # search
   local __p=$(import/path "${__m}")
   if test -z "${__p}" ; then
@@ -291,14 +291,14 @@ function import() {
 
   # read lib
   if test -r "${_lib}" ; then
-    msg/debug "import lib: ${_lib}"
+    msg/debug "${FUNCNAME} source : ${_lib}"
     source "${_lib}"
   else
     return ${_false_}
   fi
-  if ${_nl} ;then
+  if ${_nl} ; then
     if test -z "${gim}" ; then
-      gim="${_np}"
+      gim="${__m}"
     else
       gim="${gim}:${__m}"
     fi

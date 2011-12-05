@@ -499,11 +499,13 @@ function ssh/cmd() {
 
   sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
-    msg "No MID"
+    msg "MID not found"
     return ${_false_}
   fi
 
-  local _opt="${mid_ssh_opt}"
+  # opts
+  local _opt="${mid_ssh_ssh_opt}"
+
   # force tty
   if ${_t} ; then
     _opt="-t ${_opt}"
@@ -527,6 +529,11 @@ function ssh/cmd() {
     fi
   fi
 
+  # debug
+  if ${gdbg} ; then
+    _opt="-v ${_opt}"
+  fi
+
   local _url="${mid_ssh_user}@${mid_ssh_fqdn}"
   msg "URL     : ${_url}"
   msg "Command : ${_x}"
@@ -536,7 +543,7 @@ function ssh/cmd() {
   if ! test -z "${mid_ssh_env}" ; then
     _x="source \${HOME}/${mid_ssh_env};echo;${_x}"
   fi
-  local _cmd="${ssh_ssh} ${_opt} ${_url} \"${_x}\""
+  local _cmd="${ssh_ssh} ${_opt} ${_url} ${_x}"
   ${_cmd}
   local _ret=$?
 
