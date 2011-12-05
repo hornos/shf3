@@ -1,5 +1,6 @@
 
 function ssh/gsi/init() {
+  import gui
   import sys
   import sys/lck
   import ssh/key
@@ -27,6 +28,7 @@ function ssh/gsi/init() {
 
   # grid proxy init
   msg "Initialize Grid Proxy"
+  gui/line 84
   local _x_opt=""
 
   # timeout

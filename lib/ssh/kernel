@@ -280,6 +280,7 @@ function ssh/login() {
     if test $? -gt 0 ; then
       return ${_false_}
     fi
+    gui/line 84
   else
     # ssh
     local _sec="$(ssh/key/sec ${_h})"
@@ -305,6 +306,7 @@ function ssh/login() {
   ${_cmd}
   local _ret=$?
 
+  gui/line 84
   # grid proxy destroy
   if test "${mid_ssh_type}" = "gsi" ; then
     ssh/gsi/destroy
@@ -403,6 +405,7 @@ function ssh/xfer() {
     if test $? -gt 0 ; then
       return ${_false_}
     fi
+    gui/line 84
   else
     # private key
     local _sec="$(ssh/key/sec ${_h})"
@@ -461,6 +464,7 @@ function ssh/xfer() {
   eval ${_cmd}
   local _ret=$?
 
+  gui/line 84
   # grid proxy destroy
   if test "${mid_ssh_type}" = "gsi" ; then
     ssh/gsi/destroy
@@ -530,6 +534,7 @@ function ssh/cmd() {
     if test $? -gt 0 ; then
       return ${_false_}
     fi
+    gui/line 84
   else
     # private key
     local _sec="$(ssh/key/sec ${_h})"
