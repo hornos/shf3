@@ -1,6 +1,7 @@
 
 function ssh/gsi/init() {
   import sys
+  import sys/lck
   import ssh/key
   import ssh/key/crt
 
