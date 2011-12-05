@@ -20,9 +20,11 @@ EOF
 _m=""
 _f=false
 _v=false
-while getopts hfvm: o; do
+_x=""
+while getopts hfvm:x: o; do
   case "$o" in
     m) _m=$OPTARG;;
+    x) _x=$OPTARG;;
     f) _f=true;;
     v) gdbg=true;;
     h) sshto/help;;
@@ -38,6 +40,11 @@ gui/line 84
 if test "${_m}" = "" ; then
   echo -n "[${gbn}] Enter MID: "
   read _m
+fi
+
+if ! test -z "${_x}" ; then
+  ssh/cmd "${_m}" "${_x}"
+  exit $?
 fi
 
 ssh/login "${_m}" ${_f}

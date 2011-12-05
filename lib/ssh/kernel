@@ -528,7 +528,8 @@ function ssh/cmd() {
   fi
 
   local _url="${mid_ssh_user}@${mid_ssh_fqdn}"
-  msg "Run ${_x} on ${_url}"
+  msg "URL     : ${_url}"
+  msg "Command : ${_x}"
   gui/line 84
 
   # ssh
