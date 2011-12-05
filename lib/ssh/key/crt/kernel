@@ -11,7 +11,7 @@ function ssh/key/crt/upd() {
   if test -z "${_m}" ; then
     return ${_false_}
   fi
-  mid/sys "crt/${_m}"
+  sys/mid "crt/${_m}"
   if test -z "${mid_crt_url}" ; then
     msg "MID not found"
     return ${_false_}
