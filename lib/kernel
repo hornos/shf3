@@ -427,8 +427,13 @@ function help() {
   fi
 
   msg "Available help:"
-  set | grep "^help/*\ *\(\)" | \
-  awk '{print $1}'
+  local i
+  for i in $(set | grep "^help/*\ *\(\)" | awk '{print $1}') ; do
+    i=${i##help}
+    if ! test -z "${i}" ; then
+      echo "${i##/}"
+    fi
+  done
 }
 
 ### binary check
