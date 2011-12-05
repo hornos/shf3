@@ -442,9 +442,9 @@ function ssh/xfer() {
     ;;
     2)
       if ${_put} ; then
-        _cmd="${ssh_tar} cvf - \"${_src}\" | ${ssh_ssh} ${_opt} ${_url} (cd \"${mid_ssh_scp_dst}\";tar xvf -)"
+        _cmd="${ssh_tar} cvf - \"${_src}\" | ${ssh_ssh} ${_opt} ${_url} \"(cd \"${mid_ssh_scp_dst}\";tar xvf -)\""
       else
-        _cmd="${ssh_ssh} ${_opt} ${_url} (cd \"${mid_ssh_scp_dst}\";tar cvf - \"${_src}\") | (cd \"${_dst}\"; ${ssh_tar} xvf -)"
+        _cmd="${ssh_ssh} ${_opt} ${_url} \"(cd \"${mid_ssh_scp_dst}\";tar cvf - \"${_src}\")\" | (cd \"${_dst}\"; ${ssh_tar} xvf -)"
       fi
     ;;
     3)
