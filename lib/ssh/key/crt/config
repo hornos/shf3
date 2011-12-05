@@ -1,1 +1,1 @@
-ssh_key_crt_dir="$(ns/dir)/../crt"
+ssh_key_crt_dir="${grd}/crt"

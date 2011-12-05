@@ -10,6 +10,8 @@ gcn="config"
 
 # import path
 gip="$(dirname ${BASH_SOURCE})"
+grd=$(cd "${gip}/..";pwd)
+gip="${grd}/lib"
 
 # loaded modules
 gim=""
@@ -140,7 +142,7 @@ function ns/inpath() {
   if test -z "${_p}" || test -z "${_m}" ; then
     return ${_false_}
   fi
-  if test "${_p}" = "${_p/${_m}/}" ; then
+  if test "${_p}" = "${_p/${_m}:/}" ; then
     return ${_false_}
   fi
   return ${_true_}
@@ -203,13 +205,13 @@ function include() {
   fi
 
   if test -z "${gip}" ; then
-    gip="${__p}"
+    gip="${__p}:"
     return ${_true_}
   fi
 
   if ! $(ns/inpath "${__p}" "${gip}") ; then
     if $(ns/isop "${_p}" "+") ; then
-      gip="${__p}:${gip}"
+      gip="${__p}${gip}:"
     else
       gip="${gip}:${__p}"
     fi
@@ -250,6 +252,9 @@ function import() {
     return ${_false_}
   fi
 
+  msg/debug "${FUNCNAME} gim    : ${gim}"
+  msg/debug "${FUNCNAME} import : ${_m}"
+
   # force reloading
   local __m=$(ns/op/name "${_m}" "+")
   if $(ns/inpath "${__m}" "${gim}") ; then
@@ -262,7 +267,7 @@ function import() {
   fi
 
   msg/debug "${FUNCNAME} import : ${__m}"
-  msg/debug "${FUNCNAME} gim    : ${gim}"
+
   # search
   local __p=$(import/path "${__m}")
   if test -z "${__p}" ; then
@@ -298,9 +303,9 @@ function import() {
   fi
   if ${_nl} ; then
     if test -z "${gim}" ; then
-      gim="${__m}"
+      gim="${__m}:"
     else
-      gim="${gim}:${__m}"
+      gim="${gim}${__m}:"
     fi
   fi
 }
@@ -376,12 +381,12 @@ function help() {
   gui/line
   case "${_h}" in
     "kernel")
-      local _nd=$(ns/dir)
+      local _nd="${grd}/lib"
       echo "Kernel functions:"
-      ns/func/dir ${_nd}/kernel
+      ns/func/dir "${_nd}/kernel"
     ;;
     "modules")
-      local _nd=$(ns/dir)
+      local _nd=""
       if ! test -z "${gip}" ; then
         echo
         local j

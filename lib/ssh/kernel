@@ -465,18 +465,24 @@ function ssh/xfer() {
 
 function ssh/put() {
   local _h="${1:-default}"
-  local _m="${2:-1}"
-  local _s="${3}"
+  local _s="${2}"
+  local _m="${3:-1}"
   local _r=${4:-false}
+  if test -z "${_h}" || test -z "${_s}" ; then
+    return ${_false_}
+  fi
   _m=$((_m%10))
   ssh/xfer "${_h}" ${_m} ${_r} "${_s}"
 }
 
 function ssh/get() {
   local _h="${1:-default}"
-  local _m="${2:-1}"
-  local _s="${3}"
+  local _s="${2}"
+  local _m="${3:-11}"
   local _r=${4:-false}
+  if test -z "${_h}" || test -z "${_s}" ; then
+    return ${_false_}
+  fi
   _m=$((_m%10+10))
   ssh/xfer "${_h}" ${_m} ${_r} "${_s}"
 }

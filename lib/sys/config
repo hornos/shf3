@@ -1,5 +1,5 @@
 sys_ifs=" "
-sys_mid_dir="$(ns/dir)/../mid"
-sys_img_dir="$(ns/dir)=../img"
+sys_mid_dir="${grd}/mid"
+sys_img_dir="${grd}/img"
 sys_editor="mcedit vim vi"
 sys_cksum="md5"

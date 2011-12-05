@@ -1,1 +1,1 @@
-sys_lck_dir="$(ns/dir)/../lck"
+sys_lck_dir="${grd}/lck"

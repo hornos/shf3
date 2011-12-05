@@ -3,50 +3,49 @@ gbn=$(basename ${BASH_SOURCE})
 gdn=$(dirname ${BASH_SOURCE})
 rc="${gdn}/.${gbn}rc"
 
-function shfcli/help() {
+function sshftp/help() {
   cat << EOF
 
 Shell Framework CLI
 
-Usage: ${gbn} [-h] [-v]
+Usage: ${gbn} options
+              -v - verbose
 EOF
   exit 1
 }
 
-function shfcli/stop() {
+function sshftp/stop() {
   if test -r "${rc}" ; then
     rm -f "${rc}"
   fi
   exit 1
 }
-trap shfcli/stop INT TERM EXIT
+trap sshftp/stop INT TERM EXIT
 
 ### args
 _v=false
 while getopts hv o; do
   case "$o" in
     v) _v=true;;
-    h) shfcli/help;;
-    *) shfcli/help;;
+    h) sshftp/help;;
+    *) sshftp/help;;
   esac
 done
 
 ### main
 cat << EOF > "${rc}"
 source $(dirname ${BASH_SOURCE})/../lib/header
-export PS1="SHF3(\$?)> "
+export PS1="SSHFTP(\$?)> "
 EOF
 if ${_v} ; then
   echo "gdbg=true" >> "${rc}"
 fi
 cat << EOF >> "${rc}"
 import gui
+import ssh/ftp
 
-gui/cline
-gui/txt "Shell Framework 3 Console" "white"
-gui/txt " -=Nano Group Budapest=-" "blue"
-gui/cline
-check
+msg "SSH FTP"
+gui/line 84
 EOF
 
 bash --noprofile --rcfile "${rc}"
