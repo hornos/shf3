@@ -8,10 +8,10 @@
 gkn="kernel"
 gcn="config"
 
-# import path
+# initial include path
 gip="$(dirname ${BASH_SOURCE})"
 grd=$(cd "${gip}/..";pwd)
-gip="${grd}/lib"
+gip="${grd}/lib:"
 
 # loaded modules
 gim=""
@@ -146,6 +146,15 @@ function ns/inpath() {
     return ${_false_}
   fi
   return ${_true_}
+}
+
+function ns/lspath() {
+  local _p="${1}"
+  if test -z "${_p}" ; then
+    return ${_false_}
+  fi
+  echo "${_p}" | \
+  awk '{split($0,a,":"); for(i in a) print a[i]}'
 }
 
 # associative arrays
@@ -373,60 +382,56 @@ function check() {
   msg "loaded modules = ${gim}"
 }
 
+
+### help system
+function help/kernel() {
+  local _l="${grd}/lib"
+  msg "Kernel functions:"
+  ns/func/dir "${_l}/${gkn}"
+}
+
+function help/modules() {
+  import sys/dir
+  local _l=""
+  if ! test -z "${gip}" ; then
+    echo
+    local j
+    for j in $(ns/lspath ${gip}); do
+      _l="${j}"
+      echo "Available modules in ${_l}:"
+      for i in $(sys/dir/rls "${_l}") ; do
+        i=${i##${_l}}
+        if ! test -z "${i}"; then
+          echo "${i##/}"
+        fi
+      done
+    done
+  fi
+}
+
 function help() {
   import sys/dir
   local _h="${1:-}"
   echo
-  echo "Shell Framework Help System"
+  msg "Shell Framework Help System"
   gui/line
-  case "${_h}" in
-    "kernel")
-      local _nd="${grd}/lib"
-      echo "Kernel functions:"
-      ns/func/dir "${_nd}/kernel"
-    ;;
-    "modules")
-      local _nd=""
-      if ! test -z "${gip}" ; then
-        echo
-        local j
-        _IFS="${IFS}"
-        IFS=":"
-        for j in ${gip}; do
-          _nd="${j}"
-          echo "Available modules in ${_nd}:"
-          for i in $(sys/dir/rls "${_nd}") ; do
-            i=${i##"${_nd}"}
-            if ! test -z "${i}"; then
-              echo "${i##/}"
-            fi
-          done
-        done
-        IFS="${_IFS}"
-      fi
-    ;;
-    "")
-      cat << EOF
-Available commands:
-  kernel  - show kernel functions
-  modules - show modules
-EOF
-    ;;
-    *)
-      import ${_h}
-      if test $? -gt 0 ; then
-        msg "Not found ${_h}"
-        return ${_false_}
-      fi
-      ${_h}/help
-      echo
-      echo "Available modules:"
-      ns/func/dir "$(ns/dir)/${_h}/${gkn}"
-    ;;
-  esac
+
+  if ! test -z "${_h}" ; then
+    local _f="help/${_h}"
+    if $(ns/isfunc "${_f}") ; then
+      ${_f}
+      return $?
+    fi
+    msg "Help not available for ${_h}"
+    return ${_false_}
+  fi
+
+  msg "Available help:"
+  set | grep "^help/*\ *\(\)" | \
+  awk '{print $1}'
 }
 
-# binary check
+### binary check
 if $(installed pv) ; then
   gpv=true
 else

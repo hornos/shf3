@@ -1,4 +1,4 @@
-function ssh/help() {
+function help/ssh() {
   cat << EOF
 SSH module
  - key management
@@ -21,7 +21,7 @@ function ssh/mgr() {
       # header
       echo
       printf "${_frm1}" "mid" "type" "url"
-      gui/line 84
+      gui/line
       local i
       for i in ${sys_mid_dir}/ssh/* ; do
         if test -r "${i}" ; then
@@ -227,7 +227,7 @@ function ssh/info() {
 }
 
 
-function ssh/login/help() {
+function help/ssh/login() {
   cat << EOF
 Logins to host
 
@@ -280,7 +280,7 @@ function ssh/login() {
     if test $? -gt 0 ; then
       return ${_false_}
     fi
-    gui/line 84
+    gui/line
   else
     # ssh
     local _sec="$(ssh/key/sec ${_h})"
@@ -300,13 +300,13 @@ function ssh/login() {
   # login
   local _url="${mid_ssh_user}@${mid_ssh_fqdn}"
   msg "Login to ${_url}"
-  gui/line 84
+  gui/line
   local _cmd="${ssh_ssh} ${_opt} ${_url}"
   msg/debug "${_cmd}"
   ${_cmd}
   local _ret=$?
 
-  gui/line 84
+  gui/line
   # grid proxy destroy
   if test "${mid_ssh_type}" = "gsi" ; then
     ssh/gsi/destroy
@@ -319,7 +319,7 @@ function ssh/login() {
   return ${_ret}
 }
 
-function ssh/xfer/help() {
+function help/ssh/xfer() {
   cat << EOF
 SSH transfer
 
@@ -405,7 +405,7 @@ function ssh/xfer() {
     if test $? -gt 0 ; then
       return ${_false_}
     fi
-    gui/line 84
+    gui/line
   else
     # private key
     local _sec="$(ssh/key/sec ${_h})"
@@ -425,13 +425,13 @@ function ssh/xfer() {
     msg "From : ${_src_url}"
     msg "To   : ${_dst} ($(pwd ${_dst}))"
   fi
-  gui/line 84
+  gui/line
 
   answer "Start transfer?"
   if test $? -gt 0 ; then 
     return ${_false_};
   fi
-  gui/line 84
+  gui/line
 
   local _cmd=""
   # xfer
@@ -464,7 +464,7 @@ function ssh/xfer() {
   eval ${_cmd}
   local _ret=$?
 
-  gui/line 84
+  gui/line
   # grid proxy destroy
   if test "${mid_ssh_type}" = "gsi" ; then
     ssh/gsi/destroy
@@ -497,7 +497,7 @@ function ssh/get() {
 }
 
 
-function ssh/cmd/help() {
+function help/ssh/cmd() {
   cat << EOF
 \$1 string  mid
 \$2 string  "command"
@@ -534,7 +534,7 @@ function ssh/cmd() {
     if test $? -gt 0 ; then
       return ${_false_}
     fi
-    gui/line 84
+    gui/line
   else
     # private key
     local _sec="$(ssh/key/sec ${_h})"
@@ -553,7 +553,7 @@ function ssh/cmd() {
   local _url="${mid_ssh_user}@${mid_ssh_fqdn}"
   msg "URL     : ${_url}"
   msg "Command : ${_x}"
-  gui/line 84
+  gui/line
 
   # ssh
   if ! test -z "${mid_ssh_env}" ; then
@@ -563,7 +563,7 @@ function ssh/cmd() {
   ${_cmd}
   local _ret=$?
 
-  gui/line 84
+  gui/line
   # grid proxy destroy
   if test "${mid_ssh_type}" = "gsi" ; then
     ssh/gsi/destroy

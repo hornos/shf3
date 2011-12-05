@@ -42,7 +42,7 @@ done
 ### main
 echo
 msg
-gui/line 84
+gui/line
 
 case "${_c}" in
   KILL)

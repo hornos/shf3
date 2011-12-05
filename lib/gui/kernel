@@ -1,10 +1,13 @@
 
-function gui/txt/help() {
+function help/gui/txt() {
   cat << EOF
-$1 string
-$2 string (fg color)
-$3 string (bg color)
-$4 string (font style)
+Print out a text
+
+Parameters:
+  \$1 string - text
+  \$2 string - fg color
+  \$3 string - bg color
+  \$4 string - font style
 EOF
 }
 
@@ -41,7 +44,7 @@ function gui/title() {
 }
 
 function gui/line() {
-  local _l=${1:-72}
+  local _l=${1:-84}
   local _ch="${2:--}"
   local i
   for ((i=0;i<_l;++i)) ; do

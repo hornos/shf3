@@ -44,7 +44,7 @@ function ssh/mnt() {
       msg "${_h} is not mounted"
       return ${_false_}
     fi
-    gui/line 84
+    gui/line
     ${ssh_mnt_umnt} ${_src} 2>/dev/null
     _ret=$?
     if ! test ${_ret} -gt 0 ; then

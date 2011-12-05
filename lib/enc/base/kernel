@@ -1,4 +1,4 @@
-function enc/base/help() {
+function help/enc/base() {
   cat << EOF
 BaseNN encode/decode
     NN = 64 | 85

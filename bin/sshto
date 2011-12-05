@@ -35,7 +35,7 @@ done
 ### main
 echo
 msg
-gui/line 84
+gui/line
 
 if test "${_m}" = "" ; then
   echo -n "[${gbn}] Enter MID: "

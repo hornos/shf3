@@ -1,4 +1,4 @@
-function enc/gpg/help() {
+function help/enc/gpg() {
   cat << EOF
 GPG encrypt/decrypt
 

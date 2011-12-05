@@ -42,7 +42,7 @@ sys/dir/svwd "${_d}"
 
 echo
 msg "Directory: ${PWD}"
-gui/line 84
+gui/line
 
 if ! $(vcs/git/hub/test) ; then
   msg "Not a git directory"
@@ -51,7 +51,7 @@ fi
 
 if ${_s} ; then
   msg "Status"
-  gui/line 84
+  gui/line
   ${vcs_git_hub_git} status
   exit $?
 fi

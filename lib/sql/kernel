@@ -1,5 +1,5 @@
 
-function sql/init/help() {
+function help/sql/init() {
   cat <<EOF
 \$1 CHARACTER(*) database
 \$2 CHARACTER(*) initfile
@@ -31,7 +31,7 @@ function sql/count() {
   ${sql_sqlite} "${_db}" "SELECT COUNT(*) FROM ${_tb}"
 }
 
-function sql/select/help() {
+function help/sql/select() {
   cat <<EOF
 \$1 CHARACTER(*) database
 \$2 CHARACTER(*) table

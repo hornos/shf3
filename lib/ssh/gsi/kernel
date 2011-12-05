@@ -28,7 +28,7 @@ function ssh/gsi/init() {
 
   # grid proxy init
   msg "Initialize Grid Proxy"
-  gui/line 84
+  gui/line
   local _x_opt=""
 
   # timeout

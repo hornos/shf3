@@ -1,8 +1,8 @@
-function sys/zip/help() {
+function help/sys/zip() {
   echo "Compression module"
 }
 
-function sys/zip/svmvz/help() {
+function help/sys/zip/svmvz() {
   cat << EOF
 Save and compress source to directory and rename to name
 
@@ -64,7 +64,7 @@ function sys/zip/svmvz() {
   return ${_true_}
 }
 
-function sys/zip/cpuzmv/help() {
+function help/sys/zip/cpuzmv() {
   cat << EOF
 Copy source to directory and uncompress then rename to name
 

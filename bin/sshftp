@@ -48,7 +48,7 @@ import gui
 import ssh/ftp
 
 msg "SSH FTP"
-gui/line 84
+gui/line
 EOF
 
 bash --noprofile --rcfile "${rc}"

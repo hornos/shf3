@@ -1,9 +1,9 @@
 
-function sys/help() {
+function help/sys() {
   echo "System module"
 }
 
-function sys/os/help() {
+function help/sys/os() {
   echo "Returns os string"
 }
 
@@ -15,7 +15,7 @@ function sys/os() {
   fi
 }
 
-function sys/mid/help() {
+function help/sys/mid() {
   echo "Reads mode id file"
 }
 
