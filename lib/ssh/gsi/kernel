@@ -2,6 +2,7 @@
 function ssh/gsi/init() {
   import sys
   import ssh/key
+  import ssh/key/crt
 
   local _h="${1}"
   local _x_lck="${2:-${sys_lck_dir}/${gbn}.gsi.$$}"
@@ -9,14 +10,28 @@ function ssh/gsi/init() {
     return ${_false_}
   fi
 
-  sys/mid "${_h}"
+  sys/mid "ssh/${_h}"
   local _sec="$(ssh/key/sec ${_h})"
   local _crt="$(ssh/key/crt ${_h})"
 
   # check
-  if ! test -r "${_sec}" || ! test -r "${_crt}" ; then
+  if ! test -r "${_sec}" ; then
     msg "Key not found"
     return ${_false_}
+  fi
+  if ! test -r "${_crt}" ; then
+    msg "Certificate not found"
+    return ${_false_}
+  fi
+
+  if ! test -z "${mid_ssh_grid}" ; then
+    local _crt_dir="${ssh_key_crt_dir}/${mid_ssh_grid}"
+    if ! test -d "${_crt_dir}" ; then
+      msg "Gird certificate not found"
+      return ${_false_}
+    fi
+    _x_opt="${_x_opt} -certdir ${_crt_dir}"
+    export X509_CERT_DIR="${_crt_dir}"
   fi
 
   # grid proxy init
@@ -43,7 +58,7 @@ function ssh/gsi/init() {
     msg "Grid Proxy failed"
     return ${_false_}
   fi
-  export X509_USER_PROXY=${_x_lck}
+  export X509_USER_PROXY="${_x_lck}"
 }
 
 function ssh/gsi/destroy() {
@@ -57,5 +72,6 @@ function ssh/gsi/destroy() {
     msg "Grid Proxy Failed"
   fi
   unset X509_USER_PROXY
+  unset X509_CERT_DIR
   msg "Grid Proxy destroyed"
 }

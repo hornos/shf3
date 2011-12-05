@@ -1,4 +1,5 @@
 ssh_key_dir="$(ns/dir)/../key/ssh"
+ssh_crt_dir="$(ns/dir)/../crt/ssh"
 ssh_key_sec="sec"
 ssh_key_pub="pub"
 ssh_key_crt="crt"

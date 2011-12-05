@@ -17,7 +17,6 @@ function ssh/key/crt() {
   ssh/key "${1:-default}" "${ssh_key_crt}"
 }
 
-
 function ssh/key/gen() {
   import sys
   import sys/dir

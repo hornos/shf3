@@ -168,6 +168,10 @@ function ssh/mgr() {
         fi
       done
       ;;
+    UPDATE)
+      import ssh/key/crt
+      ssh/key/crt/upd "${_h}"
+      ;;
   esac
 }
 

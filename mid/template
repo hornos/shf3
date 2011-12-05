@@ -17,6 +17,9 @@ mid_ssh_port=22
 # Valid proxy timeout for gsissh
 mid_ssh_valid="12:00"
 
+# Certificate MID for gsi
+mid_ssh_grid="prace"
+
 # Common options
 mid_ssh_opt="-o TCPKeepAlive=${ssh_TCPKeepAlive} -o ServerAliveInterval=${ssh_ServerAliveInterval}"
 

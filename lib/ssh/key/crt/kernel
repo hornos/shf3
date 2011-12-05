@@ -1,0 +1,50 @@
+
+function ssh/key/crt/upd() {
+  import sys
+  import sys/dir
+  import net
+
+  local _m="${1:-prace}"
+  local _out="c.tgz"
+  local _dir="${ssh_key_crt_dir}/${_m}"
+
+  if test -z "${_m}" ; then
+    return ${_false_}
+  fi
+  mid/sys "crt/${_m}"
+  if test -z "${mid_crt_url}" ; then
+    msg "MID not found"
+    return ${_false_}
+  fi
+
+  sys/dir/mk "${_dir}"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  msg "URL       : ${mid_crt_url}"
+  msg "Directory : ${_dir}"
+
+  # update
+  answer "Update certificates?"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  # download
+  sys/dir/svwd "${_dir}"
+  net/get "${mid_crt_url}" > "${_out}"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  tar xzf "${_out}"
+  local _ret=$?
+  rm -f "${_out}"
+
+  if test ${_ret} -gt 0 ; then
+    msg "Update failed"
+    return ${_ret}
+  fi
+  chmod 600 *
+  msg "Update success"
+  return ${_ret}
+}

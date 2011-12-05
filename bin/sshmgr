@@ -14,6 +14,7 @@ Usage: ${gbn} options
               -e MID - edit
               -p MID - change password
               -i MID - info
+              -u MID - update certificates
               -k - kill ssh agent
               -v - verbose
 EOF
@@ -23,7 +24,7 @@ EOF
 ### args
 _c="LIST"
 _m=""
-while getopts hvki:n:d:e:p: o; do
+while getopts hvki:n:d:e:p:u: o; do
   case "$o" in
     k) _c="KILL";;
     d) _c="DELETE"; _m=$OPTARG;;
@@ -31,6 +32,7 @@ while getopts hvki:n:d:e:p: o; do
     i) _c="INFO"; _m=$OPTARG;;
     e) _c="EDIT"; _m=$OPTARG;;
     p) _c="PASS"; _m=$OPTARG;;
+    u) _c="UPDATE"; _m=$OPTARG;;
     v) gdbg=true;;
     h) sshmgr/help;;
     *) sshmgr/help;;
@@ -53,7 +55,7 @@ case "${_c}" in
   LIST)
     ssh/mgr "${_c}"
     ;;
-  INFO|CREATE|DELETE|EDIT|PASS)
+  INFO|CREATE|DELETE|EDIT|PASS|UPDATE)
     ssh/mgr "${_c}" "${_m}"
     ;;
 esac
