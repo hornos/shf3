@@ -7,7 +7,7 @@ function PUT() {
   local i
   for i in ${_s} ; do
     if test -r "${i}" ; then
-      ssh/put "${_h}" "${i}" 3
+      ssh/put "${_h}" "${i}" ${_t}
     fi
   done
 }
@@ -19,6 +19,6 @@ function GET() {
   local _s=${*}
   local i
   for i in ${_s} ; do
-    ssh/get "${_h}" "${i}" 3
+    ssh/get "${_h}" "${i}" ${_t}
   done
 }

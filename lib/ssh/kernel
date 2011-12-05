@@ -373,7 +373,7 @@ function ssh/xfer() {
   # select mode
   case ${_mode} in
     1)
-      local _opt="${mis_ssh_scp_opt}"
+      local _opt="${mid_ssh_scp_opt}"
       local _url="${_src_url}"
       local _mtxt="scp"
       if ${_r} ; then
@@ -414,11 +414,14 @@ function ssh/xfer() {
   fi
 
   # info
-  local _dtxt="\n From: ${_src}\n   To: ${_url}"
-  if ! ${_put} ; then
-    _dtxt="\n From: ${_src_url}\n   To: ${_dst} ($(pwd ${_dst}))"
+  msg "Mode : ${_mtxt}"
+  if ${_put} ; then
+    msg "From : ${_src}"
+    msg "To   : ${_url}"
+  else
+    msg "From : ${_src_url}"
+    msg "To   : ${_dst} ($(pwd ${_dst}))"
   fi
-  echo "Transfer (${_mtxt})\n${_dtxt}\n"
   gui/line 84
 
   answer "Start transfer?"
@@ -453,7 +456,7 @@ function ssh/xfer() {
     ;;
   esac
   msg/debug "${_cmd}"
-  ${_cmd}
+  eval ${_cmd}
   local _ret=$?
 
   # grid proxy destroy

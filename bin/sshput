@@ -1,0 +1,51 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+import ssh/ftp
+
+function sshput/help() {
+  cat << EOF
+
+SSH login
+
+Usage: ${gbn} options
+              -m MID
+              -s sources
+              -t mode - transfer mode
+              -v - verbose
+EOF
+  exit ${_false_}
+}
+
+### args
+_m=""
+_s=""
+_t=3
+_v=false
+while getopts hvm:s:t: o; do
+  case "$o" in
+    m) _m=$OPTARG;;
+    s) _s=$OPTARG;;
+    t) _t=$OPTARG;;
+    v) gdbg=true;;
+    h) sshput/help;;
+    *) sshput/help;;
+  esac
+done
+
+### main
+echo
+msg
+gui/line 84
+
+if test "${_m}" = "" ; then
+  echo -n "[${gbn}] Enter MID: "
+  read _m
+fi
+
+if test -z "${_s}" ; then
+  msg "Source not specified"
+  exit ${_false_}
+fi
+
+PUT ${_m} ${_s}
