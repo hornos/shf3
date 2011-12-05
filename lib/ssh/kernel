@@ -458,11 +458,7 @@ function ssh/xfer() {
 
   # xfer
   msg/debug "${_cmd}"
-  if test ${_mode} -eq 3 ; then
-    eval ${_cmd}
-  else
-    ${_cmd}
-  fi
+  eval ${_cmd}
   local _ret=$?
 
   # grid proxy destroy
