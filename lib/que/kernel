@@ -1,0 +1,391 @@
+
+function help/que/sub() {
+  cat << EOF
+\$1 string  - mode
+\$2 string  - job file
+\$3 logical - check
+EOF
+}
+
+function que/sub() {
+  import gui
+  import que
+
+  local _mode=${1:-B}
+  local _job=${2:-${gbn}.job}
+  local _chk=${3:-false}
+
+  msg "Job submit: ${_job}"
+  gui/line
+  ### job file
+  if ! test -r "${_job}" ; then
+    msg "Job file not found"
+    return ${_false_}
+  fi
+  source ${_job}
+  msg "Job file imported"
+
+  # basic checks
+  if test -z "${COMMAND}" ; then
+    msg "No command"
+    return ${_false_}
+  fi
+  if test -z "${NAME}" ; then
+    msg "No job name"
+    return ${_false_}
+  fi
+
+  ### summary
+  if test "${_mode}" = "C" ; then
+    que/chk "${COMMAND}" "${_mode}"
+    return $?
+  fi
+
+  ### queue file
+  local _que="${que_dir}/${QUEUE:-default}"
+  if ! test -r "${_que}" ; then
+    msg "Queue file not found"
+    return ${_false_}
+  fi
+  source "${_que}"
+  msg "Queue file imported"
+
+  ### import scheduler
+  local _sch=${SCHEDULER}
+  import que/${_sch}
+  msg "Scheduler ${_sch} imported"
+
+  # scheduler batch file
+  local _bat="./${_sch}.batch.sh"
+  if test "${_mode}" = "L" ; then
+    _bat="./${_sch}.login.sh"
+  fi
+
+  ### write batch file
+  echo "#!${que/shell}"      > "${_bat}"
+  echo "### Date $(date)"   >> "${_bat}"
+
+  ### resource parameters
+  # nodes
+  local _nodes=${NODES:-1}
+  # sockets per node
+  local _sckts=${SCKTS:-2}
+  # cores per sockets
+  local _cores=${CORES:-4}
+  # slots per node (forced)
+  local _sltpn=${SLTPN:-0}
+  # threads per core (forced)
+  local _thrds=${THRDS:-0}
+
+  ### compound resource parameters
+  # forced slots
+  local __slots=$((_nodes*_sltpn))
+  # total sockets
+  local _sockets=$((_nodes*_sckts))
+  # tasks per node
+  local _tasks=$((_sckts*_cores))
+  # total slots
+  local _slots=$((_nodes*_tasks))
+  # threads
+  local _threads=${_cores}
+  # forced threads
+  if test ${_thrds} -gt 0 ; then
+    _threads=${_thrds}
+  fi
+
+  # global resources for SGE
+  SLOTS=${_slots}
+  if test ${__slots} -gt 0 ; then
+    SLOTS=${__slots}
+  fi
+  TASKS=${_tasks}
+
+  ### scheduler setup
+  echo "### Scheduler Setup for ${_sch}" >> "${_bat}"
+  que/${_sch} "${_mode}" "${_bat}"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  msg "Scheduler initialized"
+
+  ### login
+  if test "${_mode}" = "L" ; then
+    gui/line
+    answer "Show batch file?"
+    if test $? -eq 0 ; then
+      cat "${_bat}"
+      gui/line
+    fi
+
+    # login
+    answer "Queue login?"
+    if test $? -gt 0 ; then
+      return ${_false_}
+    fi
+    sh "${_bat}"
+    return $?
+  fi
+
+  ### batch
+  gui/line
+  # queue setup
+  if ! test -z "${QUEUE_SETUPS}" ; then
+    echo "### Queue Setup" >> "${_bat}"
+    local _s
+    for _s in ${QUEUE_SETUPS} ; do
+      echo "source ${_s}"  >> "${_bat}"
+    done
+  fi
+
+  # ulimit
+  if ! test -z "${QUEUE_ULIMIT}" ; then
+    echo "### ulimit"      >> "${_bat}"
+    echo "${QUEUE_ULIMIT}" >> "${_bat}"
+  fi
+
+  # mail
+  if test "${QUEUE_MAIL}" = "runprg" ; then
+    echo "### Internal mail notifications"       >> "${_bat}"
+    echo "export QUEUE_MAIL_TO=${QUEUE_MAIL_TO}" >> "${_bat}"
+    echo "Internal mail notifications"
+  fi
+
+  gui/line
+  # job setup
+  if ! test -z "${SETUPS}" ; then
+    echo "### Job Setup"  >> "${_bat}"
+    local _s
+    for _s in ${SETUPS} ; do
+      echo "source ${_s}" >> "${_bat}"
+    done
+  fi
+
+  # modules
+  if ! test -z "${MODULES}" ; then
+    echo "### Modules"         >> "${_bat}"
+    local _m
+    for _m in ${MODULES} ; do
+      echo "module load ${_m}" >> "${_bat}"
+    done
+  fi
+
+  local _v=${VERBOSE:-0}
+
+  ### OMP
+  if test "${MODE}" = "OMP" ; then
+    echo "### OMP Setup" >> "${_bat}"
+  else
+  ### begin MPI | MPIOMP
+    echo "### MPI Setup" >> "${_bat}"
+
+    ### basic checks
+    # SGI MPT Machines
+    if test -z "${MPI}" ; then
+      return ${_false_}
+    fi
+    if test "${MPI}" = "mpt" ; then
+      if test -z "${MACHINES}" ; then
+        msg "Set MACHINES for SGI MPT"
+        return ${_false_}
+      fi
+    fi
+
+    echo "MPI: ${MPI}"
+    # binding
+    local _bind=""
+    if ! test -z "${BIND}" ; then
+      _bind="${BIND}"
+      msg "Binding: ${_bind}"
+    fi
+
+    # SGI MPT Perfboost
+    local _mpt_pboost=""
+    if ! test -z "${MPT_PBOOST}" ; then
+      _mpt_pboost="${MPT_PBOOST}"
+      msg "SGI MPT Perfboost: ${_mpt_pboost}"
+    fi
+
+    # Profiler
+    local _prof=""
+    if ! test -z "${PROFILER}" ; then
+      _prof="${PROFILER}"
+      msg "Profiler: ${_prof}"
+    fi
+
+    ### begin MPIOMP
+    if test "${MODE}" = "MPIOMP" ; then
+      echo "### MPIOMP" >> "${_bat}"
+      case ${MPI} in
+        ompi)
+          # Open MPI
+          echo "export MPI_OPT=\"-np ${_sockets} -npernode ${_sckts} ${_bind} ${_prof}\""    >> "${_bat}"
+          ;;
+        impi)
+          # Intel MPI
+          echo "export MPI_OPT=\"-np ${_sockets} -perhost ${_sckts} ${_bind} ${_prof}\""     >> "${_bat}"
+          ;;
+        mpt)
+          # SGI MPT
+          echo "export MPI_OPT=\"\${MACHINES} ${_sckts} ${_bind} ${_mpt_pboost} ${_prof}\"" >> "${_bat}"
+          ;;
+        *)
+          msg "MPI: ${MPI} not implemented"
+          return ${_false_}
+          ;;
+      esac
+    else
+    ### MPI
+      echo "### MPI" >> "${_bat}"
+      # override by THRDS
+      if test ${_thrds} -gt 0 ; then
+        _threads=${_thrds}
+      else
+        _threads=1
+      fi
+
+      case ${MPI} in
+        ompi)
+          # Open MPI
+          echo "export MPI_OPT=\"-np ${_slots} -npernode ${_tasks} ${_bind} ${_prof}\""     >> "${_bat}"
+          ;;
+        impi)
+          # Intel MPI
+          echo "export MPI_OPT=\"-np ${_slots} -perhost ${_tasks} ${_bind} ${_prof}\""      >> "${_bat}"
+          ;;
+        mpt)
+          # SGI MPT
+          echo "export MPI_OPT=\"\${MACHINES} ${_tasks} ${_bind} ${_mpt_pboost} ${_prof}\"" >> "${_bat}"
+          ;;
+        *)
+          msg "MPI: ${MPI} not implemented"
+          return ${_false_}
+          ;;
+      esac
+    fi
+    ### end MPIOMP
+
+    ### verbose
+    if test ${_v} -gt 0 ; then
+      case ${MPI} in
+        ompi)
+          # Open MPI
+          MPI_OPT="-v ${MPI_OPT}"
+          ;;
+        impi)
+          # Intel MPI
+          echo "export I_MPI_DEBUG=${_verbose}"  >> "${_bat}"
+          ;;
+        mpt)
+          echo "export MPI_VERBOSE=1"            >> "${_bat}"
+          echo "export MPI_DSM_VERBOSE=1"        >> "${_bat}"
+          echo "export MPI_DISPLAY_SETTINGS=1"   >> "${_bat}"
+          if test ${_verbose} -gt 1 ; then
+            echo "export MPI_VERBOSE2=1"         >> "${_bat}"
+            echo "export MPI_IB_VERBOSE=1"       >> "${_bat}"
+            echo "export MPI_SHARED_VERBOSE=1"   >> "${_bat}"
+            echo "export MPI_XPMEM_VERBOSE=1"    >> "${_bat}"
+          fi
+          if test ${_verbose} -gt 2 ; then
+            echo "export MPI_IB_VERBOSE3=1"      >> "${_bat}"
+            echo "export MPI_COLL_OPT_VERBOSE=1" >> "${_bat}"
+            echo "export MPI_STATS=1"            >> "${_bat}"
+          fi
+          ;;
+        *)
+          msg "MPI: ${MPI} not implemented"
+          return ${_false_}
+          ;;
+      esac
+    fi
+
+    ### Toggle Options
+    if ! test -z "${TOGGLE}" ; then
+      echo "### Options"                      >> "${_bat}"
+      for i in ${TOGGLE} ; do
+        echo "export ${i}=1"                  >> "${_bat}"
+      done
+    fi
+  fi
+  ### end MPI | MPIOMP
+
+  ### OMP
+  echo "### OMP Setup"                      >> "${_bat}"
+  echo "export OMP_NUM_THREADS=${_threads}" >> "${_bat}"
+  echo "export MKL_NUM_THREADS=${_threads}" >> "${_bat}"
+
+  ### setup mail
+  echo "### Job Command" >> "${_bat}"
+  if test "${COMMAND/*runprg*/runprg}" = "runprg" ; then
+    # set scheduler
+    COMMAND="${COMMAND} -s ${SCHEDULER}"
+
+    # check
+    if ${_chk} ; then
+      que/chk "${COMMAND}"
+      if test $? -gt 0 ; then
+        msg "Job check failed"
+        return ${_false_}
+      fi
+    fi
+  fi
+  echo "${COMMAND}"      >> "${_bat}"
+
+  ### submit
+  gui/line
+  answer "Show batch file?"
+  if test $? -eq 0 ; then
+    cat "${_bat}"
+    gui/line
+  fi
+
+  # submit
+  answer "Submit job?"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  ${que_sub} "${_bat}"
+}
+
+
+function help/que/chk() {
+  cat << EOF
+\$1 string - command
+\$2 string - mode
+EOF
+}
+function que/chk() {
+  local _cmd="${1##runprg}"
+  local _mode="${2:-submit}"
+  local _prg=""
+  local _guide=""
+  local _sch=""
+
+  # reprocess args
+  OPTIND=1
+  local _o
+  while getopts p:g:s: _opt ${_cmd[@]}; do
+    case ${_opt} in
+      p) _prg=${OPTARG};;
+      g) _guide=${OPTARG};;
+      s) _sch=${OPTARG};;
+    esac
+  done
+
+  if test -z "${_prg}" ; then
+    msg "Program module not set"
+    return ${_false_}
+  fi
+  if test -z "${_guide}" || ! test -r "${_guide}" ; then
+    msg "Guide not found"
+    return ${_false_}
+  fi
+
+  import run
+  # summary
+  if test "${_mode}" = "S" ; then
+    run/sum "${_prg}" "${_guide}"
+    return $?
+  fi
+  # check
+  run/chk "${_prg}" "${_guide}"
+}

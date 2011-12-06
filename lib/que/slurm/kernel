@@ -1,0 +1,157 @@
+# TODO
+#/// \param mode
+#/// \param queue batch file
+function que/slurm() {
+  local _mode="${1:-S}"
+  local _con=""
+  local _const=""
+
+  local _bat="${2:-slurm.batch.sh}"
+  if test "${_mode}" = "L" ; then
+    _bat="${2:-slurm.login.sh}"
+  fi
+  if ! test -r "${_bat}" ; then
+    msg "Batch file not found"
+    return ${_false_}
+  fi
+
+  ### begin login
+  if test "${_mode}" = "L" ; then
+    local _qlogin="${que_slurm_qlogin}"
+
+    # name
+    _qlogin="${_qlogin} --job-name ${NAME}"
+
+    # time
+    if ! test -z "${TIME}" ; then
+      _qlogin="${_qlogin} --time=${TIME}"
+    fi
+
+    # memory
+    if ! test -z "${MEMORY}" ; then
+      _qlogin="${_qlogin} --mem-per-cpu=${MEMORY}${que_slurm_unit}"
+    fi
+
+    # nodes
+    if ! test -z "${NODES}" ; then
+      _qlogin="${_qlogin} --nodes=${NODES}"
+    fi
+
+    # tasks
+    if ! test -z "${TASKS}" ; then
+      _qlogin="${_qlogin} --ntasks-per-node=${TASKS}"
+    fi
+
+    # other constraints
+    _const=""
+    if ! test -z "${QUEUE_CONST}" ; then
+      _qlogin="${_qlogin} --constraint="
+      local _first=true
+      for _con in ${QUEUE_CONST} ; do
+        if ${_first} ; then
+          _const="${_con}"
+          _first=false
+        else
+          _const="${_const}\&${_con}"
+        fi
+      done
+      _qlogin="${_qlogin}${_const}"
+    fi
+
+    # partition
+    if ! test -z "${QUEUE_PART}" ; then
+      _qlogin="${_qlogin} --partition=${QUEUE_PART}"
+    fi
+
+    # project
+    if ! test -z "${QUEUE_PROJ}" ; then
+      _qlogin="${_qlogin} --account=${QUEUE_PROJ}"
+    fi
+
+    echo "${_qlogin}" >> "${_bat}"
+    return ${_true_}
+  fi
+  ### end login
+
+  ### begin batch
+  # name
+  echo "#${que_slurm} --job-name ${NAME}"                  >> "${_bat}"
+
+  # mail
+  if ! test -z "${QUEUE_MAIL}" && test "${QUEUE_MAIL}" != "runprg" ; then
+    echo "#${que_slurm} --mail-type=${QUEUE_MAIL}"         >> "${_bat}"
+    if ! test -z "${QUEUE_MAIL_TO}" ; then
+      echo "#${que_slurm} --mail-user=${QUEUE_MAIL_TO}"    >> "${_bat}"
+    fi
+  fi
+
+  # time
+  if ! test -z "${TIME}" ; then
+    echo "#${que_slurm} --time=${TIME}"                    >> "${_bat}"
+  fi
+
+  # memory
+  if ! test -z "${MEMORY}" ; then
+    local _mem="${MEMORY}${que_slurm_unit}"
+    echo "#${que_slurm} --mem-per-cpu=${_mem}"             >> "${_bat}"
+  fi
+
+  if ! test -z "${NODES}" ; then
+    echo "#${que_slurm} --nodes=${NODES}"                  >> "${_bat}"
+  fi
+
+  if ! test -z "${TASKS}" ; then
+      echo "#${que_slurm} --ntasks-per-node=${TASKS}"      >> "${_bat}"
+  fi
+
+  # other constraints
+  if ! test -z "${QUEUE_CONST}" ; then
+    for _con in ${QUEUE_CONST} ; do
+      echo "#${que_slurm} --constraint=${_con}"     >> "${_bat}"
+    done
+  fi
+
+  # partition
+  if ! test -z "${QUEUE_PART}" ; then
+    echo "#${que_slurm} --partition=${QUEUE_PART}"  >> "${_bat}"
+  fi
+
+  # project
+  if ! test -z "${QUEUE_PROJ}" ; then
+    echo "#${que_slurm} --account=${QUEUE_PROJ}"    >> "${_bat}"
+  fi
+
+  # qos
+  if ! test -z "${QUEUE_QOS}" ; then
+    echo "#${que_slurm} --qos=${QUEUE_QOS}"         >> "${_bat}"
+  fi
+
+  # exclusive
+  if test "${QUEUE_EXCL}" = "yes" ; then
+    echo "#${que_slurm} --exclusive"                >> "${_bat}"
+  fi
+
+  # outputs
+  echo "#${que_slurm} -o ${QUEUE_STDOUT:-StdOut}"   >> "${_bat}"
+  echo "#${que_slurm} -e ${QUEUE_ERROUT:-ErrOut}"   >> "${_bat}"
+
+  # other options
+  if ! test -z "${QUEUE_OPT}" ; then
+    echo "#${que_slurm} ${QUEUE_OPT}"               >> "${_bat}"
+  fi
+}
+
+# TODO
+function sp_f_qmail_sub() {
+  echo "Job ${SLURM_JOB_ID} (${SLURM_JOB_NAME})"
+}
+
+function sp_f_qmail_msg() {
+  local _m=""
+  _m=$(date)
+  if ! test -z "${SLURM_JOB_NUM_NODES}" ; then
+    echo "${_m}\nRunning on ${SLURM_JOB_NUM_NODES} nodes"
+  else
+    echo "${_m}"
+  fi
+}

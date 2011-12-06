@@ -1,0 +1,5 @@
+que_slurm='SBATCH'
+que_slurm_qsub="sbatch"
+que_slurm_qbca="sbcast"
+que_slurm_qlogin="qlogin"
+que_slurm_unit="M"
