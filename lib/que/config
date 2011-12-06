@@ -1,0 +1,2 @@
+que_dir="${grd}/que"
+que_shell="/bin/bash"
