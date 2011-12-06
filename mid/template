@@ -42,4 +42,4 @@ mid_ssh_tunnel="-L63128:localhost:3128"
 mid_ssh_sshfs_dst="/home/${mid_ssh_user}"
 
 # SSHFS options
-mid_ssh_sshfs_opt="-C ${mid_ssh_opt} -o Port=${mid_ssh_port} -o rw -o follow_symlinks"
+mid_ssh_sshfs_opt="-C -o Port=${mid_ssh_port} -o rw -o follow_symlinks"

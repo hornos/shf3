@@ -41,7 +41,7 @@ if test "${_m}" = "" ; then
   _c="LIST"
 fi
 
-case ${_m} in
+case ${_c} in
   LIST)
     ssh/mnt/ls
     ;;

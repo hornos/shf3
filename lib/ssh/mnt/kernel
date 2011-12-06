@@ -1,12 +1,14 @@
 
 function ssh/mnt/ls() {
   import gui
-  msg "Mounted SSHFS Volumes"
-  gui/line 84
+
+  printf "%-32s %s\n" "Local directory" "Remote url"
+  gui/line
   mount | egrep 'fusefs|fuse.sshfs' | \
           egrep -v 'encfs|fuse.encfs' | \
+          egrep -v 'TrueCrypt' | \
           egrep ${USER} | \
-          awk '{printf "%-32s => %s\n",$3,$1}'
+          awk '{printf "%-32s %s\n",$3,$1}'
   return ${_true_}
 }
 
@@ -47,7 +49,13 @@ function ssh/mnt() {
       msg "${_h} is not mounted"
       return ${_false_}
     fi
-    gui/line
+
+    msg "Mount directory : ${_src}"
+    answer "Unmount ${_h}?"
+    if test $? -gt 0 ; then
+      return ${_false_}
+    fi
+
     ${ssh_mnt_umnt} ${_src} 2>/dev/null
     _ret=$?
     if ! test ${_ret} -gt 0 ; then
@@ -63,13 +71,19 @@ function ssh/mnt() {
     return ${_false_}
   fi
 
+  msg "Mount directory : ${_src}"
+  answer "Mount ${_h}?"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
   sys/lck/mk "${_lck}"
 
   local _opt="${mid_ssh_sshfs_opt}"
+
   # key
   local _sec="$(ssh/key/sec ${_h})"
   if test -r "${_sec}" ; then
-    _opt="${_opt} -i ${_sec}"
+    _opt="${_opt} -o IdentityFile=${_sec}"
   else
     msg "Key not found ${_sec}"
   fi
@@ -77,9 +91,7 @@ function ssh/mnt() {
   local _url="${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_sshfs_dst}"
   sys/dir/mk "${_src}"
 
-  msg $(printf "%-32s => %s" "${_dst}" "${_url}")
-
-  if sys/osx ; then
+  if test "$(sys/os)" = "osx" ; then
     local _vol="${_h}:${mid_ssh_user}@${mid_ssh_fqdn}"
     _opt="${_opt} -o volname=${_vol}"
     local _ico="${sys_img_dir}/sshfs.icns"
@@ -92,12 +104,12 @@ function ssh/mnt() {
   msg/debug "${_cmd}"
 
   if ${gdbg} ; then
-    ${_cmd}
+    eval ${_cmd}
   else
-    ${_cmd} 2>/dev/null
+    eval ${_cmd} 2>/dev/null
   fi
   _ret=$?
-  if test $? -gt 0 ; then
+  if test ${_ret} -gt 0 ; then
     msg "Mount failed"
     sys/lck/rm "${_lck}"
   else
