@@ -1,5 +1,6 @@
 #!/bin/bash
 source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
 import enc/pass
 
 function passmgr/help() {
@@ -38,6 +39,10 @@ while getopts hf:l:c:n:d:u:v o; do
 done
 
 ### main
+echo
+msg
+gui/line
+
 enc_pass_db="$(ns/dir)/../sql/${enc_pass_db}"
 if ! test -z "${_f}" ; then
   enc_pass_db="${_f}"

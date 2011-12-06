@@ -1,5 +1,6 @@
 #!/bin/bash
 source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
 
 function shfmgr/help() {
   cat << EOF
@@ -35,6 +36,10 @@ function shfmgr/update() {
   fi
   bin/gitmgr -p ${_v}
 }
+
+echo
+msg
+gui/line
 
 case ${_c} in
   UPDATE)
