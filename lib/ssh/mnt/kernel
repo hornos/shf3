@@ -37,12 +37,12 @@ function ssh/mnt() {
   fi
 
   local _src="${ssh_mnt_dir}/${_h}"
-  if ! test -d "${_src}" ; then
-    return ${_false_}
-  fi
 
+  # unmount
   if ${_u} ; then
-    # unmount
+    if ! test -d "${_src}" ; then
+      return ${_false_}
+    fi
     if ! $(sys/lck "${_lck}") && ! ${_f}; then
       msg "${_h} is not mounted"
       return ${_false_}
