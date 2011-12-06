@@ -35,3 +35,9 @@ function shfmgr/update() {
   fi
   bin/gitmgr -p ${_v}
 }
+
+case ${_c} in
+  UPDATE)
+    shfmgr/update
+    ;;
+esac

@@ -1,3 +1,4 @@
 .DS*
 *.old
 *.sqlite
+.shfclirc
