@@ -41,8 +41,5 @@ mid_ssh_tunnel="-L63128:localhost:3128"
 # SSHFS remote destination
 mid_ssh_sshfs_dst="/home/${mid_ssh_user}"
 
-# SSHFS mount point
-mid_ssh_sshfs_src="${ssh_sshfs_dir}/${BASH_SOURCE}"
-
 # SSHFS options
 mid_ssh_sshfs_opt="-C ${mid_ssh_opt} -o Port=${mid_ssh_port} -o rw -o follow_symlinks"

@@ -36,7 +36,10 @@ function ssh/mnt() {
     sys/lck/rm "${_lck}"
   fi
 
-  local _src="${mid_ssh_sshfs_src}"
+  local _src="${ssh_mnt_dir}/${_h}"
+  if ! test -d "${_src}" ; then
+    return ${_false_}
+  fi
 
   if ${_u} ; then
     # unmount

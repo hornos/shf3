@@ -1,0 +1,54 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+import ssh/mnt
+
+function sshmnt/help() {
+  cat << EOF
+
+SSH login
+
+Usage: ${gbn} options
+              -m MID - mount
+              -u MID - unmount
+              -f - force
+              -v - verbose
+EOF
+  exit ${_false_}
+}
+
+### args
+_m=""
+_f=false
+_c="LIST"
+while getopts hfvm:u: o; do
+  case "$o" in
+    m) _c="MOUNT"; _m=$OPTARG;;
+    u) _c="UNMOUNT"; _m=$OPTARG;;
+    f) _f=true;;
+    v) gdbg=true;;
+    h) sshmnt/help;;
+    *) sshmnt/help;;
+  esac
+done
+
+### main
+echo
+msg
+gui/line
+
+if test "${_m}" = "" ; then
+  _c="LIST"
+fi
+
+case ${_m} in
+  LIST)
+    ssh/mnt/ls
+    ;;
+  MOUNT)
+    ssh/mnt "${_m}" ${_f} false
+    ;;
+  UNMOUNT)
+    ssh/mnt "${_m}" ${_f} true
+    ;;
+esac

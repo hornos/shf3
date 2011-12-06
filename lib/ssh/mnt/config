@@ -1,2 +1,3 @@
+ssh_mnt_dir="${HOME}/sshfs"
 ssh_mnt_mnt="sshfs"
 ssh_mnt_umnt="fusermount -u"
