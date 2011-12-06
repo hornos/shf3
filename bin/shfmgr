@@ -1,0 +1,37 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+
+function shfmgr/help() {
+  cat << EOF
+
+Shell Framework Manager
+
+Usage: ${gbn} options
+              -u - update
+              -v - verbose
+EOF
+  exit ${_false_}
+}
+
+### args
+_c="UPDATE"
+_v=false
+while getopts huv o; do
+  case "$o" in
+    u) _c="UPDATE";;
+    v) gdbg=true;;
+    h) shfmgr/help;;
+    *) shfmgr/help;;
+  esac
+done
+
+### main
+function shfmgr/update() {
+  cd ${grd}
+  if ${_v} ; then
+    _v="-v"
+  else
+    _v=""
+  fi
+  bin/gitmgr -p ${_v}
+}
