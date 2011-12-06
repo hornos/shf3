@@ -1,6 +1,7 @@
 
 function enc/pass() {
   import sql
+
   msg/debug "Database: ${enc_pass_db}"
   answer "Create database?"
   if test $? -gt 0 ; then
@@ -11,6 +12,9 @@ function enc/pass() {
 }
 
 function enc/pass/gen() {
+  import rnd/net
+  import enc/gpg
+
   local _l=${1:-12}
   local _p=$(rnd/net/str ${_l} false)
   if test "${_p}" = "" ; then
@@ -25,6 +29,9 @@ function enc/pass/gen() {
 }
 
 function enc/pass/pass() {
+  import sql
+  import enc/gpg
+
   local _u="${1}"
 
   if test -z "${_u}" ; then
@@ -46,7 +53,6 @@ function enc/pass/mgr() {
   import sql
   import gui
   import rnd/net
-  import enc/gpg
 
   local _m="${1:-LIST}"
   local _l=${2:-42}
