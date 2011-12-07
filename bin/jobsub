@@ -1,0 +1,47 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import que
+import gui
+
+function jobsub/help() {
+  cat << EOF
+
+Queue Job Submitter
+
+Usage: ${gbn} options
+              -s jobfile - submitt
+              -l jobfile - login
+              -n - no check
+              -v - verbose
+EOF
+  exit ${_false_}
+}
+
+### args
+_j="batch.job"
+_c="S"
+_n=false
+_v=false
+while getopts hvns:l: o; do
+  case "$o" in
+    s) _c="S"; _j=$OPTARG;;
+    l) _c="L"; _j=$OPTARG;;
+    n) _n=true;;
+    v) gdbg=true;;
+    h) sshto/help;;
+    *) sshto/help;;
+  esac
+done
+
+### main
+echo
+msg
+gui/line
+
+if ! test -r "${_j}" ; then
+  msg "Job file not found"
+  exit ${_false_}
+fi
+
+que/sub "${_c}" "${_j}" ${_n}
+

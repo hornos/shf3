@@ -23,17 +23,16 @@ function que/sub() {
     return ${_false_}
   fi
   source ${_job}
-  msg "Job file imported"
+  msg/debug "Job file imported"
 
   # basic checks
-  if test -z "${RUN}" ; then
-    msg "No run command"
-    return ${_false_}
-  fi
-  if test -z "${NAME}" ; then
-    msg "No job name"
-    return ${_false_}
-  fi
+  local i
+  for i in NAME QUEUE RUN ; do
+    if test -z "${!i}" ; then
+      msg "${i} not set"
+      return ${_false_}
+    fi
+  done
 
   ### summary
   if test "${_mode}" = "C" ; then
@@ -48,7 +47,14 @@ function que/sub() {
     return ${_false_}
   fi
   source "${_que}"
-  msg "Queue file imported"
+  msg/debug "Queue file imported"
+
+  for i in QSCHED ; do
+    if test -z "${!i}" ; then
+      msg "${i} not set"
+      return ${_false_}
+    fi
+  done
 
   ### import scheduler
   local _sch=${QSCHED}
