@@ -1,12 +1,8 @@
-# TODO
-#/// \param mode
-#/// \param queue batch file
+
 function que/slurm() {
   local _mode="${1:-S}"
-  local _con=""
-  local _const=""
-
   local _bat="${2:-slurm.batch.sh}"
+
   if test "${_mode}" = "L" ; then
     _bat="${2:-slurm.login.sh}"
   fi
@@ -43,29 +39,30 @@ function que/slurm() {
     fi
 
     # other constraints
-    _const=""
-    if ! test -z "${QUEUE_CONST}" ; then
+    if ! test -z "${QCONST}" ; then
+      local _const=""
       _qlogin="${_qlogin} --constraint="
       local _first=true
-      for _con in ${QUEUE_CONST} ; do
+      local _c
+      for _c in ${QCONST} ; do
         if ${_first} ; then
-          _const="${_con}"
+          _const="${_c}"
           _first=false
         else
-          _const="${_const}\&${_con}"
+          _const="${_const}\&${_c}"
         fi
       done
       _qlogin="${_qlogin}${_const}"
     fi
 
     # partition
-    if ! test -z "${QUEUE_PART}" ; then
-      _qlogin="${_qlogin} --partition=${QUEUE_PART}"
+    if ! test -z "${QPART}" ; then
+      _qlogin="${_qlogin} --partition=${QPART}"
     fi
 
     # project
-    if ! test -z "${QUEUE_PROJ}" ; then
-      _qlogin="${_qlogin} --account=${QUEUE_PROJ}"
+    if ! test -z "${QPROJ}" ; then
+      _qlogin="${_qlogin} --account=${QPROJ}"
     fi
 
     echo "${_qlogin}" >> "${_bat}"
@@ -75,78 +72,78 @@ function que/slurm() {
 
   ### begin batch
   # name
-  echo "#${que_slurm} --job-name ${NAME}"                  >> "${_bat}"
+  echo "#${que_slurm} --job-name ${NAME}"             >> "${_bat}"
 
   # mail
-  if ! test -z "${QUEUE_MAIL}" && test "${QUEUE_MAIL}" != "runprg" ; then
-    echo "#${que_slurm} --mail-type=${QUEUE_MAIL}"         >> "${_bat}"
-    if ! test -z "${QUEUE_MAIL_TO}" ; then
-      echo "#${que_slurm} --mail-user=${QUEUE_MAIL_TO}"    >> "${_bat}"
+  if ! test -z "${QMAIL}" && test "${QMAIL}" != "runprg" ; then
+    echo "#${que_slurm} --mail-type=${QMAIL}"         >> "${_bat}"
+    if ! test -z "${QMAILTO}" ; then
+      echo "#${que_slurm} --mail-user=${QMAILTO}"     >> "${_bat}"
     fi
   fi
 
   # time
   if ! test -z "${TIME}" ; then
-    echo "#${que_slurm} --time=${TIME}"                    >> "${_bat}"
+    echo "#${que_slurm} --time=${TIME}"               >> "${_bat}"
   fi
 
   # memory
   if ! test -z "${MEMORY}" ; then
     local _mem="${MEMORY}${que_slurm_unit}"
-    echo "#${que_slurm} --mem-per-cpu=${_mem}"             >> "${_bat}"
+    echo "#${que_slurm} --mem-per-cpu=${_mem}"        >> "${_bat}"
   fi
 
   if ! test -z "${NODES}" ; then
-    echo "#${que_slurm} --nodes=${NODES}"                  >> "${_bat}"
+    echo "#${que_slurm} --nodes=${NODES}"             >> "${_bat}"
   fi
 
   if ! test -z "${TASKS}" ; then
-      echo "#${que_slurm} --ntasks-per-node=${TASKS}"      >> "${_bat}"
+      echo "#${que_slurm} --ntasks-per-node=${TASKS}" >> "${_bat}"
   fi
 
   # other constraints
-  if ! test -z "${QUEUE_CONST}" ; then
-    for _con in ${QUEUE_CONST} ; do
-      echo "#${que_slurm} --constraint=${_con}"     >> "${_bat}"
+  if ! test -z "${QCONST}" ; then
+    local _c
+    for _c in ${QCONST} ; do
+      echo "#${que_slurm} --constraint=${_c}"         >> "${_bat}"
     done
   fi
 
   # partition
-  if ! test -z "${QUEUE_PART}" ; then
-    echo "#${que_slurm} --partition=${QUEUE_PART}"  >> "${_bat}"
+  if ! test -z "${QPART}" ; then
+    echo "#${que_slurm} --partition=${QPART}"         >> "${_bat}"
   fi
 
   # project
-  if ! test -z "${QUEUE_PROJ}" ; then
-    echo "#${que_slurm} --account=${QUEUE_PROJ}"    >> "${_bat}"
+  if ! test -z "${QPROJ}" ; then
+    echo "#${que_slurm} --account=${QPROJ}"           >> "${_bat}"
   fi
 
   # qos
-  if ! test -z "${QUEUE_QOS}" ; then
-    echo "#${que_slurm} --qos=${QUEUE_QOS}"         >> "${_bat}"
+  if ! test -z "${QQOS}" ; then
+    echo "#${que_slurm} --qos=${QQOS}"                >> "${_bat}"
   fi
 
   # exclusive
-  if test "${QUEUE_EXCL}" = "yes" ; then
-    echo "#${que_slurm} --exclusive"                >> "${_bat}"
+  if test "${QEXCL}" = "yes" ; then
+    echo "#${que_slurm} --exclusive"                  >> "${_bat}"
   fi
 
   # outputs
-  echo "#${que_slurm} -o ${QUEUE_STDOUT:-StdOut}"   >> "${_bat}"
-  echo "#${que_slurm} -e ${QUEUE_ERROUT:-ErrOut}"   >> "${_bat}"
+  echo "#${que_slurm} -o ${QSTD:-StdOut}"             >> "${_bat}"
+  echo "#${que_slurm} -e ${QERR:-ErrOut}"             >> "${_bat}"
 
   # other options
-  if ! test -z "${QUEUE_OPT}" ; then
-    echo "#${que_slurm} ${QUEUE_OPT}"               >> "${_bat}"
+  if ! test -z "${QOPT}" ; then
+    echo "#${que_slurm} ${QOPT}"                      >> "${_bat}"
   fi
 }
 
-# TODO
-function sp_f_qmail_sub() {
+function que/mail/sub() {
   echo "Job ${SLURM_JOB_ID} (${SLURM_JOB_NAME})"
 }
 
-function sp_f_qmail_msg() {
+function que/mail/msg() {
   local _m=""
   _m=$(date)
   if ! test -z "${SLURM_JOB_NUM_NODES}" ; then

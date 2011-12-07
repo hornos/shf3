@@ -1,0 +1,144 @@
+function que/sge() {
+  local _mode="${1:-S}"
+  local _bat="${2:-sge.batch.sh}"
+
+  if test "${_mode}" = "L" ; then
+    _bat="${2:-sge.login.sh}"
+  fi
+  if ! test -r "${_bat}" ; then
+    msg "Batch file not found"
+    return ${_false_}
+  fi
+
+  ### begin login
+  if test "${_mode}" = "L" ; then
+    local _qlogin="${que_sge_qlogin}"
+
+    # name
+    _qlogin="${_qlogin} -N ${NAME}"
+
+    # shell
+    _qlogin="${_qlogin} -S ${QSHELL:-${que_shell}}"
+
+    # time
+    if ! test -z "${TIME}" ; then
+      _qlogin="${_qlogin} -l h_cpu=${TIME}"
+    fi
+
+    # memory
+    if ! test -z "${MEMORY}" ; then
+      _qlogin="${_qlogin} -l h_vmem=${MEMORY}${que_slurm_unit}"
+    fi
+
+    # pe
+    if ! test -z "${QPE}" ; then
+      _qlogin="${_qlogin} -pe ${QPE} ${SLOTS}"
+    fi
+
+    # project
+    if ! test -z "${QPROJ}" ; then
+      _qlogin="${_qlogin} -A ${QPROJ}"
+    fi
+
+    # queue
+    if ! test -z "${QQUEUE}" ; then
+      _qlogin="${_qlogin} -q ${QQUEUE}"
+    fi
+
+    if test "${QEXCL}" = "yes" ; then
+      _qlogin="${_qlogin} -l exclusive=true"
+    fi
+
+    if ! test -z "${QOPT}" ; then
+      _qlogin="${_qlogin} ${QOPT}"
+    fi
+
+    echo "${_qlogin}" >> "${_bat}"
+    return ${_true_}
+  fi
+  ### end login
+
+  ### begin batch 
+  # name
+  echo "#${que_sge} -N ${NAME}"                         >> "${_bat}"
+
+  # shell
+  echo "#${que_sge} -S ${QSHELL:-${que_shell}}"         >> "${_bat}"
+
+  # mail
+  if ! test -z "${QMAIL}" && test "${QMAIL}" != "runprg" ; then
+    echo "#${que_sge} -m ${QMAIL}"                      >> "${_bat}"
+    if ! test -z "${QMAILTO}" ; then
+      echo "#${que_sge} -M ${QMAILTO}"                  >> "${_bat}"
+    fi
+  fi
+
+  # time
+  if ! test -z "${TIME}" ; then
+    echo "#${que_sge} -l h_cpu=${TIME}"                 >> "${_bat}"
+  fi
+
+  # memory
+  if ! test -z "${MEMORY}" ; then
+    local _mem=${MEMORY}
+    # _mem=$((SLOTS*_mem))
+    _mem=$((TASKS*_mem))
+    echo "#${que_sge} -l h_vmem=${_mem}${que_sge_unit}" >> "${_bat}"
+  fi
+
+  # binding
+  if ! test -z "${QBIND}" ; then
+    local _qbind="-binding ${QBIND}:${SLOTS}"
+    echo "#${que_sge} ${_qbind}"                        >> "${_bat}"
+  fi
+  
+  # arch
+  if ! test -z "${QARCH}" ; then
+    echo "#${que_sge} -l arch=${QARCH}"                 >> "${_bat}"
+  fi
+
+  # other constraints
+  if ! test -z "${QCONST}" ; then
+    echo "#${que_sge} -l ${QCONST}"                     >> "${_bat}"
+  fi
+
+  # pe
+  if ! test -z "${QPE}" ; then
+    echo "#${que_sge} -pe ${QPE} ${SLOTS}"              >> "${_bat}"
+  fi
+
+  # project
+  if ! test -z "${QPROJ}" ; then
+    echo "#${que_sge} -A ${QPROJ}"                      >> "${_bat}"
+  fi
+
+  # queue
+  if ! test -z "${QQUEUE}" ; then
+    echo "#${que_sge} -q ${QQUEUE}"                     >> "${_p_qbat}"
+  fi
+
+  if test "${QEXCL}" = "yes" ; then
+    echo "#${que_sge} -l exclusive=true"                >> "${_p_qbat}"
+  fi
+
+  echo "#${que_sge} -o ${QSTD:-StdOut}"                 >> "${_bat}"
+  echo "#${que_sge} -e ${QERR:-ErrOut}"                 >> "${_bat}"
+
+  if ! test -z "${QOPT}" ; then
+    echo "#${que_sge} ${QOPT}"                          >> "${_bat}"
+  fi
+}
+
+function que/mail/sub() {
+  echo "Job ${JOB_ID} (${JOB_NAME})"
+}
+
+function que/mail/msg() {
+  local _m=""
+  _msg=$(date)
+  if ! test -z "${NSLOTS}" ; then
+    echo "${_m}\nRunning on ${NSLOTS} nodes"
+  else
+    echo "${_m}"
+  fi
+}

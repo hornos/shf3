@@ -1,0 +1,142 @@
+
+function que/pbs() {
+  local _mode="${1:-S}"
+  local _bat="${2:-pbs.batch.sh}"
+
+  if test "${_mode}" = "L" ; then
+    _bat="${2:-pbs.login.sh}"
+  fi
+  if ! test -r "${_bat}" ; then
+    msg "Batch file not found"
+    return ${_false_}
+  fi
+
+  ### begin login
+  if test "${_mode}" = "L" ; then
+    local _qlogin="${que_pbs_qlogin}"
+
+    # name
+    _qlogin="${_qlogin} -N ${NAME}"
+
+    # time
+    if ! test -z "${TIME}" ; then
+      _qlogin="${_qlogin} -lwalltime=${TIME}"
+    fi
+
+    # memory
+    if ! test -z "${MEMORY}" ; then
+      _qlogin="${_qlogin} -lpmem=${MEMORY}${que_pbs_unit}"
+    fi
+
+    # other constraints
+    if ! test -z "${QCONST}" ; then
+      local _const=""
+      local _c=""
+      for _c in ${QCONST} ; do
+        _const="${_const}:${_c}"
+      done
+    fi
+
+    # tasks
+    local _tasks=""
+    if ! test -z "${TASKS}" ; then
+      _tasks=":ppn=${TASKS}"
+    fi
+
+    # nodes
+    if ! test -z "${NODES}" ; then
+      _qlogin="${_qlogin} -lnodes=${NODES}${_tasks}${_const}"
+    fi
+
+    # project
+    if ! test -z "${QPROJ}" ; then
+      _qlogin="${_qlogin} -A ${QPROJ}"
+    fi
+
+    # queue
+    if ! test -z "${QQUEUE}" ; then
+      _qlogin="${_qlogin} -q ${QQUEUE}"
+    fi
+
+    echo "${_qlogin}" >> "${_bat}"
+    return ${_true_}
+  fi
+  ### end login
+
+  ### begin batch
+  # name
+  echo "#${que_pbs_qsub} -N ${NAME}"                    >> "${_bat}"
+
+  # mail
+  if ! test -z "${QMAIL}" && test "${QMAIL}" != "runprg" ; then
+    echo "#${que_pbs_qsub} -m ${QMAIL}"                 >> "${_bat}"
+    if ! test -z "${QMAILTO}" ; then
+      echo "#${que_pbs_qsub} -M ${QMAILTO}"             >> "${_bat}"
+    fi
+  fi
+
+  # time
+  if ! test -z "${TIME}" ; then
+    echo "#${que_pbs_qsub} -lwalltime=${TIME}"          >> "${_bat}"
+  fi
+
+  # memory
+  if ! test -z "${MEMORY}" ; then
+    echo "#${que_pbs_qsub} -lpmem=${MEMORY}${sp_g_qms}" >> "${_bat}"
+  fi
+
+  # other constraints
+  local _const=""
+  local _c=""
+  if ! test -z "${QCONST}" ; then
+    for _c in ${QCONST} ; do
+      _const="${_const}:${_c}"
+    done
+  fi
+
+  local _tasks=""
+  if ! test -z "${TASKS}" ; then
+    _tasks=":ppn=${TASKS}"
+  fi
+
+  if ! test -z "${NODES}" ; then
+    echo "#${que_pbs_qsub} -lnodes=${NODES}${_tasks}${_const}" >> "${_bat}"
+  fi
+
+  # project
+  if ! test -z "${QPROJ}" ; then
+    echo "#${que_pbs_qsub} -A ${QUEUE_PROJECT}"                >> "${_bat}"
+  fi
+
+  if test "${QEXCL}" = "yes" ; then
+    echo "#${que_pbs_qsub} -W x=NACCESSPOLICY:SINGLEUSER"      >> "${_bat}"
+  fi
+
+  # queue
+  if ! test -z "${QQUEUE}" ; then
+    echo "#{que_pbs_qsub} -q ${QQUEUE}"                        >> "${_bat}"
+  fi
+
+  echo "#${que_pbs_qsub} -o ${QSTD:-StdOut}"                   >> "${_bat}"
+  echo "#${que_pbs_qsub} -e ${QERR:-ErrOut}"                   >> "${_bat}"
+
+  if ! test -z "${QOPT}" ; then
+    echo "#${que_pbs_qsub} ${QOPT}"                            >> "${_bat}"
+  fi
+
+  # echo 'cd "${PBS_O_WORKDIR}"'                               >> "${_bat}"
+}
+
+function que/mail/sub() {
+  echo "Job ${PBS_JOB_ID} (${PBS_JOBNAME})"
+}
+
+function que/mail/msg() {
+  local _m=""
+  _m=$(date)
+  if ! test -z "${PBS_NNODES}" ; then
+    echo "${_m}\nRunning on ${PBS_NNODES} nodes"
+  else
+    echo "${_m}"
+  fi
+}

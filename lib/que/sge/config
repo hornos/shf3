@@ -1,0 +1,5 @@
+que_sge='$'
+que_sge_qsub="qsub"
+que_sge_qbca="cp"
+que_sge_qlogin="qlogin"
+que_sge_unit="M"

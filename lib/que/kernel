@@ -26,8 +26,8 @@ function que/sub() {
   msg "Job file imported"
 
   # basic checks
-  if test -z "${COMMAND}" ; then
-    msg "No command"
+  if test -z "${RUN}" ; then
+    msg "No run command"
     return ${_false_}
   fi
   if test -z "${NAME}" ; then
@@ -37,7 +37,7 @@ function que/sub() {
 
   ### summary
   if test "${_mode}" = "C" ; then
-    que/chk "${COMMAND}" "${_mode}"
+    que/chk "${RUN}" "${_mode}"
     return $?
   fi
 
@@ -51,7 +51,7 @@ function que/sub() {
   msg "Queue file imported"
 
   ### import scheduler
-  local _sch=${SCHEDULER}
+  local _sch=${QSCHED}
   import que/${_sch}
   msg "Scheduler ${_sch} imported"
 
@@ -129,42 +129,42 @@ function que/sub() {
   ### batch
   gui/line
   # queue setup
-  if ! test -z "${QUEUE_SETUPS}" ; then
+  if ! test -z "${QSETUP}" ; then
     echo "### Queue Setup" >> "${_bat}"
     local _s
-    for _s in ${QUEUE_SETUPS} ; do
+    for _s in ${QSETUP} ; do
       echo "source ${_s}"  >> "${_bat}"
     done
   fi
 
   # ulimit
-  if ! test -z "${QUEUE_ULIMIT}" ; then
+  if ! test -z "${QULIMIT}" ; then
     echo "### ulimit"      >> "${_bat}"
-    echo "${QUEUE_ULIMIT}" >> "${_bat}"
+    echo "${QULIMIT}" >> "${_bat}"
   fi
 
   # mail
-  if test "${QUEUE_MAIL}" = "runprg" ; then
+  if test "${QMAIL}" = "runprg" ; then
     echo "### Internal mail notifications"       >> "${_bat}"
-    echo "export QUEUE_MAIL_TO=${QUEUE_MAIL_TO}" >> "${_bat}"
+    echo "export QMAILTO=${QMAILTO}" >> "${_bat}"
     echo "Internal mail notifications"
   fi
 
   gui/line
   # job setup
-  if ! test -z "${SETUPS}" ; then
+  if ! test -z "${SETUP}" ; then
     echo "### Job Setup"  >> "${_bat}"
     local _s
-    for _s in ${SETUPS} ; do
+    for _s in ${SETUP} ; do
       echo "source ${_s}" >> "${_bat}"
     done
   fi
 
   # modules
-  if ! test -z "${MODULES}" ; then
+  if ! test -z "${MODULE}" ; then
     echo "### Modules"         >> "${_bat}"
     local _m
-    for _m in ${MODULES} ; do
+    for _m in ${MODULE} ; do
       echo "module load ${_m}" >> "${_bat}"
     done
   fi
@@ -199,10 +199,10 @@ function que/sub() {
     fi
 
     # SGI MPT Perfboost
-    local _mpt_pboost=""
-    if ! test -z "${MPT_PBOOST}" ; then
-      _mpt_pboost="${MPT_PBOOST}"
-      msg "SGI MPT Perfboost: ${_mpt_pboost}"
+    local _pboost=""
+    if ! test -z "${PBOOST}" ; then
+      _pboost="${PBOOST}"
+      msg "SGI MPT Perfboost: ${_pboost}"
     fi
 
     # Profiler
@@ -226,7 +226,7 @@ function que/sub() {
           ;;
         mpt)
           # SGI MPT
-          echo "export MPI_OPT=\"\${MACHINES} ${_sckts} ${_bind} ${_mpt_pboost} ${_prof}\"" >> "${_bat}"
+          echo "export MPI_OPT=\"\${MACHINES} ${_sckts} ${_bind} ${_pboost} ${_prof}\"" >> "${_bat}"
           ;;
         *)
           msg "MPI: ${MPI} not implemented"
@@ -254,7 +254,7 @@ function que/sub() {
           ;;
         mpt)
           # SGI MPT
-          echo "export MPI_OPT=\"\${MACHINES} ${_tasks} ${_bind} ${_mpt_pboost} ${_prof}\"" >> "${_bat}"
+          echo "export MPI_OPT=\"\${MACHINES} ${_tasks} ${_bind} ${_pboost} ${_prof}\"" >> "${_bat}"
           ;;
         *)
           msg "MPI: ${MPI} not implemented"
@@ -314,21 +314,21 @@ function que/sub() {
   echo "export MKL_NUM_THREADS=${_threads}" >> "${_bat}"
 
   ### setup mail
-  echo "### Job Command" >> "${_bat}"
-  if test "${COMMAND/*runprg*/runprg}" = "runprg" ; then
+  echo "### Job run command" >> "${_bat}"
+  if test "${RUN/*runprg*/runprg}" = "runprg" ; then
     # set scheduler
-    COMMAND="${COMMAND} -s ${SCHEDULER}"
+    RUN="${RUN} -s ${QSCHED}"
 
     # check
     if ${_chk} ; then
-      que/chk "${COMMAND}"
+      que/chk "${RUN}"
       if test $? -gt 0 ; then
         msg "Job check failed"
         return ${_false_}
       fi
     fi
   fi
-  echo "${COMMAND}"      >> "${_bat}"
+  echo "${RUN}"      >> "${_bat}"
 
   ### submit
   gui/line

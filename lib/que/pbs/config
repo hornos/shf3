@@ -1,0 +1,5 @@
+que_pbs='PBS'
+que_pbs_qsub="qsub"
+que_pbs_qbca="cp"
+que_pbs_qlogin="qsub -I"
+que_pbs_unit="M"
