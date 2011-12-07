@@ -1,0 +1,45 @@
+
+function ssh/par() {
+  local _n="${1:-/etc/nodes}"
+  local _c="${2:-uptime}"
+  local _p=${3:-1}
+  local _opt="-i -v -p ${_p}"
+
+  if ! test -r "${_n}" ; then
+    msg "Node file not found"
+    return ${_false_}
+  fi
+
+  ${ssh_par} ${opt} -h "${_n}" "${_c}"
+}
+
+function ssh/par/ps() {
+  local _n="${1:-/etc/nodes}"
+  local _c="${2}"
+  
+  if test -z "${_c}" ; then
+    msg "Command not set"
+    return ${_false_}
+  fi
+  ssh/par "${_n}" "ps aux | grep ${_c} | grep -v grep"
+}
+
+function ssh/par/rc() {
+  local _n="${1:-/etc/nodes}"
+  local _c="${2:-gmond}"
+  local _a="${3:-restart}"
+
+  ssh/par "${_n}" "/etc/rc.d/${_c} ${_a}"
+}
+
+function ssh/par/kill() {
+  local _n="${1:-/etc/nodes}"
+  local _c="${2}"
+
+  if test -z "${_c}" ; then
+    msg "Command not set"
+    return ${_false_}
+  fi
+
+  ssh/par "${_n}" "killall ${_c}"
+}
