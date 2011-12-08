@@ -14,6 +14,10 @@ function que/slurm() {
   ### begin login
   if test "${_mode}" = "L" ; then
     local _qlogin="${que_slurm_qlogin}"
+    if ! $(installed "${_qlogin}") ; then
+       msg "${_qlogin} not found"
+       return ${_false_}
+    fi
 
     # name
     _qlogin="${_qlogin} --job-name ${NAME}"

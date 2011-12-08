@@ -15,8 +15,7 @@ function que/sub() {
   local _job=${2:-${gbn}.job}
   local _chk=${3:-false}
 
-  msg "Job submit: ${_job}"
-  gui/line
+  msg "Job file  : ${_job}"
   ### job file
   if ! test -r "${_job}" ; then
     msg "Job file not found"
@@ -59,7 +58,7 @@ function que/sub() {
   ### import scheduler
   local _sch=${QSCHED}
   import que/${_sch}
-  msg "Scheduler ${_sch} imported"
+  msg/debug "Scheduler ${_sch} imported"
 
   # scheduler batch file
   local _bat="./${_sch}.batch.sh"
@@ -68,16 +67,16 @@ function que/sub() {
   fi
 
   ### write batch file
-  echo "#!${que/shell}"      > "${_bat}"
+  echo "#!${que_shell}"      > "${_bat}"
   echo "### Date $(date)"   >> "${_bat}"
 
   ### resource parameters
   # nodes
   local _nodes=${NODES:-1}
   # sockets per node
-  local _sckts=${SCKTS:-2}
+  local _sckts=${SCKTS:-1}
   # cores per sockets
-  local _cores=${CORES:-4}
+  local _cores=${CORES:-2}
   # slots per node (forced)
   local _sltpn=${SLTPN:-0}
   # threads per core (forced)
@@ -107,18 +106,18 @@ function que/sub() {
   TASKS=${_tasks}
 
   ### scheduler setup
-  echo "### Scheduler Setup for ${_sch}" >> "${_bat}"
+  echo "### Scheduler: ${_sch}" >> "${_bat}"
   que/${_sch} "${_mode}" "${_bat}"
   if test $? -gt 0 ; then
     return ${_false_}
   fi
-  msg "Scheduler initialized"
+  msg "Scheduler : ${_sch}"
 
   ### login
   if test "${_mode}" = "L" ; then
-    gui/line
     answer "Show batch file?"
     if test $? -eq 0 ; then
+      gui/line
       cat "${_bat}"
       gui/line
     fi
@@ -133,7 +132,6 @@ function que/sub() {
   fi
 
   ### batch
-  gui/line
   # queue setup
   if ! test -z "${QSETUP}" ; then
     echo "### Queue Setup" >> "${_bat}"
@@ -156,7 +154,6 @@ function que/sub() {
     echo "Internal mail notifications"
   fi
 
-  gui/line
   # job setup
   if ! test -z "${SETUP}" ; then
     echo "### Job Setup"  >> "${_bat}"
@@ -175,13 +172,17 @@ function que/sub() {
     done
   fi
 
-  local _v=${VERBOSE:-0}
+  ### Parallel
+  # default
+  if test -z "${MODE}" ; then
+    MODE=OMP
+  fi
 
-  ### OMP
-  if test "${MODE}" = "OMP" ; then
-    echo "### OMP Setup" >> "${_bat}"
-  else
+  msg "Parallel  : ${MODE}"
+  local _v=${VERBOSE:-0}
   ### begin MPI | MPIOMP
+  if test "${MODE}" = "MPI" || \
+     test "${MODE}" = "MPIOMP" ; then
     echo "### MPI Setup" >> "${_bat}"
 
     ### basic checks
@@ -320,7 +321,7 @@ function que/sub() {
   echo "export MKL_NUM_THREADS=${_threads}" >> "${_bat}"
 
   ### setup mail
-  echo "### Job run command" >> "${_bat}"
+  echo "### Command" >> "${_bat}"
   if test "${RUN/*runprg*/runprg}" = "runprg" ; then
     # set scheduler
     RUN="${RUN} -s ${QSCHED}"
@@ -337,19 +338,25 @@ function que/sub() {
   echo "${RUN}"      >> "${_bat}"
 
   ### submit
-  gui/line
   answer "Show batch file?"
   if test $? -eq 0 ; then
+    gui/line
     cat "${_bat}"
     gui/line
   fi
 
+  local _sub="que_${_sch}_qsub"
+  _sub=${!_sub}
+  if ! $(installed "${_sub}") ; then
+    msg "${_sub} not found"
+    return ${_false_}
+  fi
   # submit
   answer "Submit job?"
   if test $? -gt 0 ; then
     return ${_false_}
   fi
-  ${que_sub} "${_bat}"
+  ${_sub} "${_bat}"
 }
 
 

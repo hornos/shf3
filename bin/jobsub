@@ -28,8 +28,8 @@ while getopts hvns:l: o; do
     l) _c="L"; _j=$OPTARG;;
     n) _n=true;;
     v) gdbg=true;;
-    h) sshto/help;;
-    *) sshto/help;;
+    h) jobsub/help;;
+    *) jobsub/help;;
   esac
 done
 
