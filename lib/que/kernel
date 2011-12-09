@@ -26,7 +26,7 @@ function que/sub() {
 
   # basic checks
   local i
-  for i in NAME QUEUE RUN ; do
+  for i in NAME MODE QUEUE RUN ; do
     if test -z "${!i}" ; then
       msg "${i} not set"
       return ${_false_}
@@ -71,6 +71,12 @@ function que/sub() {
   echo "### Date $(date)"   >> "${_bat}"
 
   ### resource parameters
+  if test "${MODE}" = "OMP" ; then
+    if test ${NODES} -gt 1 ; then
+      msg "OMP mode, set NODES=1"
+      return ${_false_}
+    fi
+  fi
   # nodes
   local _nodes=${NODES:-1}
   # sockets per node
@@ -92,14 +98,11 @@ function que/sub() {
   # total slots
   local _slots=$((_nodes*_tasks))
   # threads
-  local _threads=${_cores}
-  # forced threads
-  if test ${_thrds} -gt 0 ; then
-    _threads=${_thrds}
-  fi
+  local _threads=${_tasks}
 
   # global resources for SGE
   SLOTS=${_slots}
+  # over subscribe for SGE
   if test ${__slots} -gt 0 ; then
     SLOTS=${__slots}
   fi
@@ -173,14 +176,10 @@ function que/sub() {
   fi
 
   ### Parallel
-  # default
-  if test -z "${MODE}" ; then
-    MODE=OMP
-  fi
-
   msg "Parallel  : ${MODE}"
   local _v=${VERBOSE:-0}
-  ### begin MPI | MPIOMP
+
+  ### begin MPIOMP
   if test "${MODE}" = "MPI" || \
      test "${MODE}" = "MPIOMP" ; then
     echo "### MPI Setup" >> "${_bat}"
@@ -188,6 +187,7 @@ function que/sub() {
     ### basic checks
     # SGI MPT Machines
     if test -z "${MPI}" ; then
+      msg "Set MPI type"
       return ${_false_}
     fi
     if test "${MPI}" = "mpt" ; then
@@ -196,8 +196,7 @@ function que/sub() {
         return ${_false_}
       fi
     fi
-
-    echo "MPI: ${MPI}"
+    msg "MPI       : ${MPI}"
     # binding
     local _bind=""
     if ! test -z "${BIND}" ; then
@@ -206,119 +205,125 @@ function que/sub() {
     fi
 
     # SGI MPT Perfboost
-    local _pboost=""
-    if ! test -z "${PBOOST}" ; then
-      _pboost="${PBOOST}"
-      msg "SGI MPT Perfboost: ${_pboost}"
+    local _boost=""
+    if ! test -z "${BOOST}" ; then
+      _boost="${BOOST}"
+      msg "Perfboost : ${_boost}"
     fi
 
     # Profiler
     local _prof=""
-    if ! test -z "${PROFILER}" ; then
-      _prof="${PROFILER}"
-      msg "Profiler: ${_prof}"
+    if ! test -z "${PROF}" ; then
+      _prof="${PROF}"
+      msg "Profiler  : ${_prof}"
     fi
 
-    ### begin MPIOMP
-    if test "${MODE}" = "MPIOMP" ; then
-      echo "### MPIOMP" >> "${_bat}"
-      case ${MPI} in
-        ompi)
-          # Open MPI
-          echo "export MPI_OPT=\"-np ${_sockets} -npernode ${_sckts} ${_bind} ${_prof}\""    >> "${_bat}"
-          ;;
-        impi)
-          # Intel MPI
-          echo "export MPI_OPT=\"-np ${_sockets} -perhost ${_sckts} ${_bind} ${_prof}\""     >> "${_bat}"
-          ;;
-        mpt)
-          # SGI MPT
-          echo "export MPI_OPT=\"\${MACHINES} ${_sckts} ${_bind} ${_pboost} ${_prof}\"" >> "${_bat}"
-          ;;
-        *)
-          msg "MPI: ${MPI} not implemented"
-          return ${_false_}
-          ;;
-      esac
+    # default for MPIOMP
+    local _np=${_socktes}
+    local _pn=${_sckts}
+
+    ### begin MPI OMP hybrid
+    if test "${MODE}" = "MPI" ; then
+      echo "### MPI-only"       >> "${_bat}"
+      _np=${_slots}
+      _pn=${_tasks}
+      _threads=1
     else
-    ### MPI
-      echo "### MPI" >> "${_bat}"
-      # override by THRDS
-      if test ${_thrds} -gt 0 ; then
-        _threads=${_thrds}
-      else
-        _threads=1
-      fi
-
-      case ${MPI} in
-        ompi)
-          # Open MPI
-          echo "export MPI_OPT=\"-np ${_slots} -npernode ${_tasks} ${_bind} ${_prof}\""     >> "${_bat}"
-          ;;
-        impi)
-          # Intel MPI
-          echo "export MPI_OPT=\"-np ${_slots} -perhost ${_tasks} ${_bind} ${_prof}\""      >> "${_bat}"
-          ;;
-        mpt)
-          # SGI MPT
-          echo "export MPI_OPT=\"\${MACHINES} ${_tasks} ${_bind} ${_pboost} ${_prof}\"" >> "${_bat}"
-          ;;
-        *)
-          msg "MPI: ${MPI} not implemented"
-          return ${_false_}
-          ;;
-      esac
-    fi
-    ### end MPIOMP
-
-    ### verbose
-    if test ${_v} -gt 0 ; then
-      case ${MPI} in
-        ompi)
-          # Open MPI
-          MPI_OPT="-v ${MPI_OPT}"
-          ;;
-        impi)
-          # Intel MPI
-          echo "export I_MPI_DEBUG=${_verbose}"  >> "${_bat}"
-          ;;
-        mpt)
-          echo "export MPI_VERBOSE=1"            >> "${_bat}"
-          echo "export MPI_DSM_VERBOSE=1"        >> "${_bat}"
-          echo "export MPI_DISPLAY_SETTINGS=1"   >> "${_bat}"
-          if test ${_verbose} -gt 1 ; then
-            echo "export MPI_VERBOSE2=1"         >> "${_bat}"
-            echo "export MPI_IB_VERBOSE=1"       >> "${_bat}"
-            echo "export MPI_SHARED_VERBOSE=1"   >> "${_bat}"
-            echo "export MPI_XPMEM_VERBOSE=1"    >> "${_bat}"
-          fi
-          if test ${_verbose} -gt 2 ; then
-            echo "export MPI_IB_VERBOSE3=1"      >> "${_bat}"
-            echo "export MPI_COLL_OPT_VERBOSE=1" >> "${_bat}"
-            echo "export MPI_STATS=1"            >> "${_bat}"
-          fi
-          ;;
-        *)
-          msg "MPI: ${MPI} not implemented"
-          return ${_false_}
-          ;;
-      esac
+      echo "### MPI OMP hybrid" >> "${_bat}"
+      _threads=${_cores}
     fi
 
-    ### Toggle Options
-    if ! test -z "${TOGGLE}" ; then
-      echo "### Options"                      >> "${_bat}"
-      for i in ${TOGGLE} ; do
-        echo "export ${i}=1"                  >> "${_bat}"
-      done
-    fi
+    ### MPI OMP
+    case ${MPI} in
+      ompi)
+        # Open MPI
+        echo "export MPI_OPT=\"-np ${_np} -npernode ${_pn} ${_bind} ${_prof}\""   >> "${_bat}"
+        ;;
+      impi)
+        # Intel MPI
+        echo "export MPI_OPT=\"-np ${_np} -perhost ${_pn} ${_bind} ${_prof}\""    >> "${_bat}"
+        ;;
+      mpt)
+        # SGI MPT
+        echo "export MPI_OPT=\"\${MACHINES} ${_pn} ${_bind} ${_boost} ${_prof}\"" >> "${_bat}"
+        ;;
+      *)
+        msg "MPI: ${MPI} not implemented"
+        return ${_false_}
+        ;;
+    esac
   fi
-  ### end MPI | MPIOMP
+  ### end MPIOMP
+
+  ### threads
+  # forced by THRDS
+  if test ${_thrds} -gt 0 ; then
+    _threads=${_thrds}
+  fi
+
+  ### begin verbose
+  if test ${_v} -gt 0 ; then
+    case ${MPI} in
+      ompi)
+        # Open MPI
+        MPI_OPT="-v ${MPI_OPT}"
+        if test ${_v} -gt 1 ; then
+          MPI_OPT="-report-bindings ${MPI_OPT}" >> "${_bat}"
+        fi
+        if test ${_v} -gt 2 ; then
+          MPI_OPT="-d ${_v} ${MPI_OPT}"         >> "${_bat}"
+        fi
+        ;;
+      impi)
+        # Intel MPI
+        echo "export I_MPI_DEBUG=${_v}"         >> "${_bat}"
+        ;;
+      mpt)
+        echo "export MPI_VERBOSE=1"             >> "${_bat}"
+        echo "export MPI_DSM_VERBOSE=1"         >> "${_bat}"
+        echo "export MPI_DISPLAY_SETTINGS=1"    >> "${_bat}"
+        if test ${_v} -gt 1 ; then
+          echo "export MPI_VERBOSE2=1"          >> "${_bat}"
+          echo "export MPI_IB_VERBOSE=1"        >> "${_bat}"
+          echo "export MPI_SHARED_VERBOSE=1"    >> "${_bat}"
+          echo "export MPI_XPMEM_VERBOSE=1"     >> "${_bat}"
+        fi
+        if test ${_v} -gt 2 ; then
+          echo "export MPI_IB_VERBOSE3=1"       >> "${_bat}"
+          echo "export MPI_COLL_OPT_VERBOSE=1"  >> "${_bat}"
+          echo "export MPI_STATS=1"             >> "${_bat}"
+        fi
+        ;;
+      *)
+        msg "MPI: ${MPI} not implemented"
+        return ${_false_}
+        ;;
+    esac
+  fi
+  
+  ### end verbose
+
+  ### Toggle Options
+  if ! test -z "${TOGGLE}" ; then
+    echo "### Options"                      >> "${_bat}"
+    for i in ${TOGGLE} ; do
+      echo "export ${i}=1"                  >> "${_bat}"
+    done
+  fi
 
   ### OMP
   echo "### OMP Setup"                      >> "${_bat}"
   echo "export OMP_NUM_THREADS=${_threads}" >> "${_bat}"
   echo "export MKL_NUM_THREADS=${_threads}" >> "${_bat}"
+  if test ${_threads} -gt 1 ; then
+    echo "export KMP_LIBRARY=turaround"     >> "${_bat}"
+    if ! test -z "${KMPAFF}" ; then
+      echo "export KMP_AFFINITY=${KMPAFF}"  >> "${_bat}"
+    fi
+  else
+    echo "export KMP_LIBRARY=serial"        >> "${_bat}"
+  fi
+  # echo "export MKL_DYNAMIC=FALSE"         >> "${_bat}"
 
   ### setup mail
   echo "### Command" >> "${_bat}"
