@@ -1,5 +1,7 @@
 ssh_gsi_init="grid-proxy-init"
 ssh_gsi_destroy="grid-proxy-destroy"
+ssh_gsi_openssl="openssl"
 
+# override
 ssh_ssh="gsissh"
 ssh_scp="gsiscp"

@@ -201,31 +201,59 @@ function ssh/info() {
   echo "SSHFS Opts  : ${mid_ssh_sshfs_opt}"
   echo
 
-  # TODO: gsi
-  if test ${mid_ssh_type} = "ssh" ; then
-    local _pub="$(ssh/key/pub ${_h})"
-    if test -r "${_pub}" ; then
-      ${ssh_key_gen} -v -l -f "${_pub}" | \
-      awk '{
-        if(NR==1) {
-          print "Key length  :",$1;
-          print "Fingerprint :",$2;
-          print "Type        :",$4;
-          print "";
-        }
-        else
-          print;
-      }'
-    else
-      msg/warn "Key not found ${_pub}"
+  ### gsi
+  if test "${mid_ssh_type}" = "gsi" ; then
+    local _crt="$(ssh/key/crt ${_h})"
+    if ! test -r "${_crt}" ; then
+      msg "Certificate not found"
+      return ${_false_}
     fi
-    local _lck="${_h}.${gbn}"
-    return ${_true_}
+    import ssh/gsi
+    ${ssh_gsi_openssl} x509 -noout -issuer \
+                            -subject -dates \
+                            -fingerprint -in "${_crt}" | \
+    awk '{
+      if(match($0,"^issuer")) {
+        gsub(/issuer= */,"");
+        print "Issuer      :",$0;
+      }
+      if(match($0,"^subject")) {
+        gsub(/subject= */,"");
+        print "Subject     :",$0;
+      }
+      if(match($0,"^notBefore")) {
+        gsub(/notBefore= */,"");
+        print "Valid from  :",$0;
+      }
+      if(match($0,"^notAfter")) {
+        gsub(/notAfter= */,"");
+        print "Expiry      :",$0;
+      }
+      if(match($0,"Fingerprint")) {
+        gsub(/.*Fingerprint= */,"");
+        print "Fingerprint :",$0;
+      }
+    }'
+    return $?
   fi
-
-  return ${_true_}
+  ### ssh
+  local _pub="$(ssh/key/pub ${_h})"
+  if ! test -r "${_pub}" ; then
+    msg/warn "Key not found ${_pub}"
+    return ${_false_}
+  fi
+  ${ssh_key_gen} -v -l -f "${_pub}" | \
+  awk '{
+    if(NR==1) {
+      print "Key length  :",$1;
+      print "Fingerprint :",$2;
+      print "Type        :",$4;
+      print "";
+    }
+    else
+      print;
+  }'
 }
-
 
 function help/ssh/login() {
   cat << EOF
