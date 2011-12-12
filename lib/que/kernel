@@ -73,7 +73,7 @@ function que/sub() {
   ### resource parameters
   if test "${MODE}" = "OMP" ; then
     if test ${NODES} -gt 1 ; then
-      msg "OMP mode, set NODES=1"
+      msg "For OMP mode set NODES=1"
       return ${_false_}
     fi
   fi
@@ -118,6 +118,7 @@ function que/sub() {
 
   ### login
   if test "${_mode}" = "L" ; then
+    echo ""
     answer "Show batch file?"
     if test $? -eq 0 ; then
       gui/line
@@ -126,6 +127,7 @@ function que/sub() {
     fi
 
     # login
+    echo ""
     answer "Queue login?"
     if test $? -gt 0 ; then
       return ${_false_}
@@ -222,14 +224,14 @@ function que/sub() {
     local _np=${_socktes}
     local _pn=${_sckts}
 
+    echo "### Mode: ${MODE}" >> "${_bat}"
+
     ### begin MPI OMP hybrid
     if test "${MODE}" = "MPI" ; then
-      echo "### MPI-only"       >> "${_bat}"
       _np=${_slots}
       _pn=${_tasks}
       _threads=1
     else
-      echo "### MPI OMP hybrid" >> "${_bat}"
       _threads=${_cores}
     fi
 
@@ -343,6 +345,7 @@ function que/sub() {
   echo "${RUN}"      >> "${_bat}"
 
   ### submit
+  echo ""
   answer "Show batch file?"
   if test $? -eq 0 ; then
     gui/line

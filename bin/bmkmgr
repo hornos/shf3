@@ -1,0 +1,42 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+import sys/bmk
+
+function bmkmgr/help() {
+  cat << EOF
+
+Bookmark manager for directories
+
+Usage: ${gbn} options
+              -l - list
+              -b bookmark - create
+              -d bookmark - delete
+              -f database
+              -v - verbose
+EOF
+  exit ${_false_}
+}
+
+### args
+_m="LIST"
+_b=""
+_f=""
+while getopts hvlb:d:f: o; do
+  case "$o" in
+    f) _f=$OPTARG;;
+    l) _m="LIST";;
+    b) _m="CREATE"; _b=$OPTARG;;
+    d) _m="DELETE"; _b=$OPTARG;;
+    v) gdbg=true;;
+    h) bmkmgr/help;;
+    *) bmkmgr/help;;
+  esac
+done
+
+### main
+echo
+msg
+gui/line
+
+sys/bmk/mgr "${_m}" "${_b}"

@@ -1,0 +1,127 @@
+
+function sys/bmk/mk() {
+  local _b="${1}"
+  local _dir="${2}"
+  local _lnk="${sys_bmk_dir}/${_b}"
+  if test -z "${_b}" || ! test -d "${_dir}" ; then
+    return ${_false_}
+  fi
+  msg "Bookmark : ${_b}"
+  msg "Target   : ${_dir}"
+  answer "Create bookmark?"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  ln -fs "${_dir}" "${_lnk}"
+  if test $? -gt 0 ; then
+    msg "Bookmark failed"
+    return ${_false_}
+  fi
+  msg "Bookmarked"
+  return ${_true_}
+}
+
+function sys/bmk/rm() {
+  local _b="${1}"
+  local _lnk="${sys_bmk_dir}/${_b}"
+  if test -z "${_b}" || ! test -L "${_lnk}"; then
+    msg "Bookmark not found"
+    return ${_false_}
+  fi
+  msg "Bookmark : ${_b}"
+  msg "Target   : ${_dir}"
+  answer "Delete bookmark?"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  rm -f "${_lnk}"
+  if test $? -gt 0 ; then
+    msg "Bookmark delete failed"
+    return ${_false_}
+  fi
+  msg "Bookmark deleted"
+  return ${_true_}
+}
+
+function sys/bmk/mgr() {
+  import sql
+  import gui
+  import sys/lnk
+
+  local _m="${1:-LIST}"
+  local _b="${2}"
+
+  if ! test -d "${sys_bmk_dir}" ; then
+    msg "Bookmarks not found"
+    return ${_false_}
+  fi
+  case "${_m}" in
+    LIST)
+      if ! test -z "${_b}" ; then
+        local _lnk="${sys_bmk_dir}/${_b}"
+        if ! test -L "${_lnk}" ; then
+          msg "Bookmark not found"
+          return ${_false_}
+        fi
+        local _dir=$(sys/lnk "${_lnk}")
+        if ! test -d "${_dir}" ; then
+          msg "Bookmark target not found"
+        fi
+        msg "Bookmark : ${_b}"
+        msg "Target   : ${_dir}"
+        sys/bmk/rm "${_b}"
+        return $?
+      fi
+
+      local i
+      local _dir
+      local _frm1="%-16s% -42s\n"
+      for i in ${sys_bmk_dir}/* ; do
+        if test -L "${i}" ; then
+          _dir=$(sys/lnk "${i}")
+          i=$(basename "${i}")
+          printf "${_frm1}" "${i}" "${_dir}"
+        fi
+      done
+      ;;
+    CREATE)
+      if test -z "${_b}" ; then
+        return ${_false_}
+      fi
+      local _dir="${PWD}"
+      local _lnk="${sys_bmk_dir}/${_b}"
+
+      # check
+      if test -L "${_lnk}" ; then
+        local _lnk_dir=$(sys/lnk "${_lnk}")
+        if test "${_lnk_dir}" = "${_dir}" ; then
+          msg "Bookmarked"
+          return ${_true_}
+        fi
+        # relink
+        msg "Bookmark   : ${_b}"
+        msg "Old Target : ${_lnk_dir}"
+        answer "Relink bookmark?"
+        if test $? -gt 0 ; then
+          return ${_false_}
+        fi
+        rm -f "${_lnk}"
+        if test $? -gt 0 ; then
+          msg "Relink failed"
+          return ${_false_}
+        fi
+        sys/bmk/mk "${_b}" "${_dir}"
+        return $?
+      fi
+
+      # create
+      sys/bmk/mk "${_b}" "${_dir}"
+     ;;
+    DELETE)
+      if test -z "${_b}" ; then
+        return ${_false_}
+      fi
+      sys/bmk/rm "${_b}"
+      ;;
+  esac
+}

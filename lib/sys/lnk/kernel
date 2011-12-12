@@ -24,3 +24,12 @@ function sys/lnk/rm() {
   fi
   return ${_true_}
 }
+
+function sys/lnk() {
+  local _lnk="${1}"
+  if test -z "${_lnk}" || ! test -L "${_lnk}" ; then
+    return ${_false_}
+  fi
+  ls -l "${_lnk}" | \
+  awk '{gsub(/.*-> */,""); print}'
+}
