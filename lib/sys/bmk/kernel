@@ -133,7 +133,7 @@ function sys/bmk/mgr() {
         return ${_false_}
       fi
       local _lnk="${sys_bmk_dir}/${_b}"
-      fi ! test -d "${_lnk}" ; then
+      if ! test -d "${_lnk}" ; then
         msg "Bookmark target not found"
         sys/bmk/rm "${_b}"
         return $?
