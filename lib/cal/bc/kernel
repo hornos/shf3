@@ -1,0 +1,8 @@
+
+function cal/bc() {
+  local _c="${1}"
+  if test -z "${_c}" ; then
+    return ${_false_}
+  fi
+  echo "${_c}" | ${cal_bc}
+}
