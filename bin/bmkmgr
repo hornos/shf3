@@ -12,7 +12,6 @@ Usage: ${gbn} options
               -l - list
               -b bookmark - create
               -d bookmark - delete
-              -f database
               -v - verbose
 EOF
   exit ${_false_}
@@ -21,8 +20,7 @@ EOF
 ### args
 _m="LIST"
 _b=""
-_f=""
-while getopts hvlb:d:f: o; do
+while getopts hvlb:d: o; do
   case "$o" in
     f) _f=$OPTARG;;
     l) _m="LIST";;

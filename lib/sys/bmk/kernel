@@ -29,7 +29,7 @@ function sys/bmk/rm() {
     return ${_false_}
   fi
   msg "Bookmark : ${_b}"
-  msg "Target   : ${_dir}"
+  msg "Target   : ${_lnk}"
   answer "Delete bookmark?"
   if test $? -gt 0 ; then
     return ${_false_}
@@ -76,6 +76,11 @@ function sys/bmk/mgr() {
       local i
       local _dir
       local _frm1="%-16s% -42s\n"
+
+      # header
+      echo
+      printf "${_frm1}" "bookmark" "target"
+      gui/line
       for i in ${sys_bmk_dir}/* ; do
         if test -L "${i}" ; then
           _dir=$(sys/lnk "${i}")
@@ -116,12 +121,24 @@ function sys/bmk/mgr() {
 
       # create
       sys/bmk/mk "${_b}" "${_dir}"
-     ;;
+      ;;
     DELETE)
       if test -z "${_b}" ; then
         return ${_false_}
       fi
       sys/bmk/rm "${_b}"
+      ;;
+    CD)
+      if test -z "${_b}" ; then
+        return ${_false_}
+      fi
+      local _lnk="${sys_bmk_dir}/${_b}"
+      fi ! test -d "${_lnk}" ; then
+        msg "Bookmark target not found"
+        sys/bmk/rm "${_b}"
+        return $?
+      fi
+      cd "${_lnk}"
       ;;
   esac
 }
