@@ -128,17 +128,15 @@ function sys/bmk/mgr() {
       fi
       sys/bmk/rm "${_b}"
       ;;
-    CD)
+    TARGET)
       if test -z "${_b}" ; then
         return ${_false_}
       fi
       local _lnk="${sys_bmk_dir}/${_b}"
       if ! test -d "${_lnk}" ; then
-        msg "Bookmark target not found"
-        sys/bmk/rm "${_b}"
-        return $?
+        echo ""
       fi
-      cd "${_lnk}"
+      echo "${_lnk}"
       ;;
   esac
 }

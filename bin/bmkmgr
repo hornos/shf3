@@ -12,6 +12,7 @@ Usage: ${gbn} options
               -l - list
               -b bookmark - create
               -d bookmark - delete
+              -t bookmark - get target
               -v - verbose
 EOF
   exit ${_false_}
@@ -20,12 +21,13 @@ EOF
 ### args
 _m="LIST"
 _b=""
-while getopts hvlb:d: o; do
+while getopts hvlb:d:t: o; do
   case "$o" in
     f) _f=$OPTARG;;
     l) _m="LIST";;
     b) _m="CREATE"; _b=$OPTARG;;
     d) _m="DELETE"; _b=$OPTARG;;
+    t) _m="TARGET"; _b=$OPTARG;;
     v) gdbg=true;;
     h) bmkmgr/help;;
     *) bmkmgr/help;;
@@ -33,6 +35,11 @@ while getopts hvlb:d: o; do
 done
 
 ### main
+if test "${_m}" = "TARGET" ; then
+  sys/bmk/mgr "${_m}" "${_b}"
+  exit $?
+fi
+
 echo
 msg
 gui/line

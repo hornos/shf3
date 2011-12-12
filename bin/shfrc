@@ -1,0 +1,7 @@
+bmkcd_dir=$(cd $(dirname "${BASH_SOURCE}");echo $PWD)
+function bmkcd() {
+  local _dir=$(${bmkcd_dir}/bmkmgr -t "${1}")
+  if test -d "${_dir}" ; then
+    cd "${_dir}"
+  fi
+}
