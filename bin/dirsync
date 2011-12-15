@@ -1,0 +1,27 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import sys/dir
+
+function dirsync/help() {
+  cat << EOF
+
+Directory synchronizer
+
+Usage: ${gbn} source destination
+EOF
+  exit ${_false_}
+}
+
+### args
+if test "${1}" = "-h" ; then
+  dirsync/help
+fi
+
+_src="${1}"
+_dst="${2}"
+
+echo
+msg "${gbn}"
+gui/line
+
+sys/dir/sync "${_src}" "${_dst}" "-av --progress"

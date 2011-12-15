@@ -79,3 +79,27 @@ function sys/dir/ldwd() {
     cd "${_d}"
   fi
 }
+
+function sys/dir/sync() {
+  import gui
+
+  local _src="${1}"
+  local _dst="${2}"
+  local _opt="${3}"
+
+  local i
+  for i in "${_src}" "${_dst}" ; do
+    if test -z "${i}" || ! test -d "${i}" ; then
+      msg "Not found: ${i}"
+      return ${_false_}
+    fi
+  done
+
+  msg "Source : ${_src}"
+  msg "Dest.  : ${_dst}"
+  answer "Start sync?"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  ${sys_dir_sync} ${_opt} "${_src}" "${_dst}"
+}
