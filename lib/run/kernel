@@ -1,74 +1,23 @@
-# TODO: check levels
-# 0 program guide
-# 1 dirs inputs
-# 2 specific
-# 3 integrity
 
-function help/run/chk() {
-  cat << EOF
-Program check
+function run/mail() {
+  local _sub="${1:-${FUNCNAME}}"
+  local _sch="${2}"
+  local _msg=""
 
-\$1 integer - check level
-\$2 string  - program
-\$2 guide   - guide file
-
-Check level:
- 0 - program & guide
- 1 - input directories
- 2 - program specific
- 3 - specific integrity
-EOF
-}
-
-function run/chk() {
-  import gui
-
-  local _chk="${1:-0}"
-  local _prg="${2}"
-  local _guide="${3}"
-
-  # header & timestamp
-  gui/line
-  msg "${FUNCNAME} $(date)"
-
-  # check program
-  if test -z "${_prg}" || ! test -x "${_prg}" ; then
-    msg "Program not found: ${_prg}"
+  if test -z "${_sub}" || 
+     test -z "${QMAILTO}" ; then
     return ${_false_}
   fi
-  msg "Found program : ${_prg}"
 
-  # check guide
-  if test -z "${_guide}" || ! test -r "${_guide}" ; then
-    msg "Guide not found: ${_guide}"
-    return ${_false_}
-  fi
-  msg "Found guide   : ${_guide}"
-
-  # read guide
-  source "${_guide}"
-
-  # basic checks
-  if test ${_chk} -gt 0 ; then
-    for inp in INPUTDIR LIBDIR ; do
-      if ! test -d "${!inp}" ; then
-        msg "Not a directory: ${!inp}"
-        return ${_false_}
-      fi
-      msg "Found directory: ${inp}"
-    done
+  if ! test -z "${_sch}" ; then
+    import que/${_sch}
+    _sub="$(que/mail/sub) ${_sub}"
+    _msg=$(que/mail/msg)
   fi
 
-  # specific check
-  if test ${_chk} -gt 1 ; then
-    import run/${_prg}
-    run/${_prg}/chk ${_chk} "${_prg}" "${_guide}"
-    if test $? -gt 0 ; then
-      return ${_false_}
-    fi
-  fi
-
-  return ${_true_}
+  # send mail
+  import net/mail
+  net/mail "${QMAILTO}" "${_sub}" "${_msg}"
 }
 
 
@@ -128,6 +77,7 @@ EOF
 function run/prg() {
   import sys/dir
   import sys/lnk
+  import run/chk
   import gui
 
   local _chk=${1:-0}
@@ -205,7 +155,6 @@ function run/prg() {
     if test "${ONERR}" = "clean" ; then
       run/clean
     fi
-    msg "run/${_prg}/pre error code ${_r}"
     return ${_r}
   fi
 
@@ -246,7 +195,7 @@ function run/prg() {
     else
       export LD_LIBRARY_PATH="${LDLIB}:${LD_LIBRARY_PATH}"
     fi
-    msg "Override LD_LIBRARY_PATH: ${LDLIB}"
+    msg "LD_LIBRARY_PATH: ${LDLIB}"
   fi
 
   ### preload override
@@ -257,7 +206,7 @@ function run/prg() {
     else
       export LD_PRELOAD="${LDPRE} ${LD_PRELOAD}"
     fi
-    msg "Override LD_PRELOAD: ${LDPRE}"
+    msg "LD_PRELOAD: ${LDPRE}"
   fi
 
   local _inp=$(ns/op/name "${MAININPUT}")
@@ -304,7 +253,7 @@ function run/prg() {
     if test "${ONERR}" = "clean" ; then
       run/clean
     fi
-    local _emsg="run/${_prg}/finish Failed (exit  code ${_ret})"
+    local _emsg="run/${_prg}/finish Failed (exit code ${_ret})"
     msg "${_emsg}"
     run/mail "${_emsg}"
     return ${_ret}
@@ -331,11 +280,11 @@ function run/prg() {
     fi
     run/clean
   fi
-  msg "Program ${_prg} Complete"
-  run/mail "Program ${_prg} Complete"
+
+  local _emsg="Program ${_prg} Complete"
+  msg "${_emsg}"
+  run/mail "${_emsg}"
 }
-
-
 
 function run/sum() {
   # options
@@ -352,12 +301,6 @@ function run/sum() {
   import run/${_prg}
   run/${_prg}/sum
 }
-
-
-
-
-
-
 
 
 #/// \fn sp_f_run_fsv
@@ -413,26 +356,6 @@ function sp_f_run_collect() {
 
 
 
-#/// \fn sp_f_run_mail
-#/// \brief mailer for the run
-#///
-#/// \param 1 CHARACTER(*) message
-#///
-#/// Remark: _sched is global
-function sp_f_run_mail() {
-  local _act=${1:-Started}
-
-  if ! test -z "${QUEUE_MAIL_TO}" ; then
-    local _sub="${_act}"
-    local _msg="${_act}"
-    if ! test -z "${_sched}" ; then
-      _sub=$(sp_f_qmail_sub)
-      _msg=$(sp_f_qmail_msg)
-      _sub="${_sub} ${_act}"
-    fi
-    sp_f_mail "${QUEUE_MAIL_TO}" "${_sub}" "${_msg}"
-  fi
-}
 
 #/// \fn sp_f_run_bcast
 #/// \brief local or remote boradcast a file
@@ -528,23 +451,6 @@ function sp_f_run_prepare_libs() {
   return ${_TRUE_}
 }
 
-#/// \fn sp_f_run_check_others
-#/// \brief check other inputs
-function sp_f_run_check_others() {
-  local _p_if=""
-  local _oin=""
-
-  for _oin in ${OTHERINPUTS}; do
-    _p_if="${INPUTDIR}/${_oin}"
-    # if ! test -f "${_p_if}" ; then
-    if ! test -r "${_p_if}" ; then
-      sp_f_err_fnf "${_p_if}"
-      return ${_FALSE_}
-    fi
-  done
-  return ${_TRUE_}
-}
-
 #/// \fn sp_f_run_prepare_others
 #/// \brief prepare and broadcast other inputs
 #///
@@ -569,4 +475,3 @@ function sp_f_run_prepare_others() {
   done
   return ${_TRUE_}
 }
-

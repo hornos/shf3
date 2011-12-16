@@ -1,0 +1,41 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import run
+import gui
+
+function help/runprg() {
+  cat << EOF
+
+Program wrapper
+
+Usage: ${gbn} options
+              -p program
+              -g guide
+              -s scheduler
+              -v - verbose
+EOF
+  exit ${_false_}
+}
+
+### args
+_p=""
+_g=""
+_s=""
+_v=false
+while getopts hvp:g:s: o; do
+  case "$o" in
+    p) _p=$OPTARG;;
+    g) _g=$OPTARG;;
+    s) _s=$OPTARG;;
+    v) gdbg=true;;
+    h) help/runprg;;
+    *) help/runprg;;
+  esac
+done
+
+### main
+echo
+msg "${gbn}"
+gui/line
+
+run/prg "${_p}" "${_g}" "${_s}"

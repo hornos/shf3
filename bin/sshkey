@@ -3,7 +3,7 @@ source $(dirname ${BASH_SOURCE})/../lib/header
 import gui
 import ssh/key
 
-function sshkey/help() {
+function help/sshkey() {
   cat << EOF
 
 SSH key generator
@@ -24,8 +24,7 @@ while getopts hvc:n: o; do
     n) _n="NEW"; _m=$OPTARG;;
     c) _c="CHANGE"; _m=$OPTARG;;
     v) gdbg=true;;
-    h) sshkey/help;;
-    *) sshkey/help;;
+    h|*) help/sshkey;;
   esac
 done
 

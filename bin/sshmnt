@@ -3,7 +3,7 @@ source $(dirname ${BASH_SOURCE})/../lib/header
 import gui
 import ssh/mnt
 
-function sshmnt/help() {
+function help/sshmnt() {
   cat << EOF
 
 SSH login
@@ -27,8 +27,7 @@ while getopts hfvm:u: o; do
     u) _c="UNMOUNT"; _m=$OPTARG;;
     f) _f=true;;
     v) gdbg=true;;
-    h) sshmnt/help;;
-    *) sshmnt/help;;
+    h|*) help/sshmnt;;
   esac
 done
 

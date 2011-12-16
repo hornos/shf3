@@ -3,7 +3,7 @@ source $(dirname ${BASH_SOURCE})/../lib/header
 import que
 import gui
 
-function jobsub/help() {
+function help/jobsub() {
   cat << EOF
 
 Queue Job Submitter
@@ -28,8 +28,7 @@ while getopts hvns:l: o; do
     l) _c="L"; _j=$OPTARG;;
     n) _n=true;;
     v) gdbg=true;;
-    h) jobsub/help;;
-    *) jobsub/help;;
+    h|*) help/jobsub;;
   esac
 done
 
@@ -44,4 +43,3 @@ if ! test -r "${_j}" ; then
 fi
 
 que/sub "${_c}" "${_j}" ${_n}
-

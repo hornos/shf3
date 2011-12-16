@@ -2,7 +2,7 @@
 source $(dirname ${BASH_SOURCE})/../lib/header
 import net/chk
 
-function identme/help() {
+function help/identme() {
   cat << EOF
 
 Network fingering
@@ -19,12 +19,12 @@ EOF
 ### args
 _m=1
 _q=""
-while getopts hm:q: o; do
+while getopts hvm:q: o; do
   case "$o" in
     m) _m=$OPTARG;;
     q) _q=$OPTARG;;
-    h) identme/help;;
-    *) identme/help;;
+    v) gdbg=true;;
+    h|*) help/identme;;
   esac
 done
 

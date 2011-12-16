@@ -3,7 +3,7 @@ source $(dirname ${BASH_SOURCE})/../lib/header
 import gui
 import ssh
 
-function sshto/help() {
+function help/sshto() {
   cat << EOF
 
 SSH login
@@ -27,8 +27,7 @@ while getopts hfvm:x: o; do
     x) _x=$OPTARG;;
     f) _f=true;;
     v) gdbg=true;;
-    h) sshto/help;;
-    *) sshto/help;;
+    h|*) help/sshto;;
   esac
 done
 

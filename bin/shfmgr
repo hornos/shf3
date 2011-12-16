@@ -2,7 +2,7 @@
 source $(dirname ${BASH_SOURCE})/../lib/header
 import gui
 
-function shfmgr/help() {
+function help/shfmgr() {
   cat << EOF
 
 Shell Framework Manager
@@ -21,8 +21,7 @@ while getopts huv o; do
   case "$o" in
     u) _c="UPDATE";;
     v) gdbg=true;;
-    h) shfmgr/help;;
-    *) shfmgr/help;;
+    h|*) help/shfmgr;;
   esac
 done
 

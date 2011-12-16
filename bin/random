@@ -2,7 +2,7 @@
 source $(dirname ${BASH_SOURCE})/../lib/header
 import rnd/net
 
-function random/help() {
+function help/random() {
   cat << EOF
 
 Random generator
@@ -20,13 +20,14 @@ EOF
 _m=0
 _l=12
 _q=true
-while getopts hl:qsi o; do
+while getopts hvl:qsi o; do
   case "$o" in
     l) _l=$OPTARG;;
     s) _m=0;;
     i) _m=1;;
     q) _q=false;;
     h) random/help;;
+    v) gdbg=true;;
     *) random/help;;
   esac
 done

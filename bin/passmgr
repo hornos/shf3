@@ -3,7 +3,7 @@ source $(dirname ${BASH_SOURCE})/../lib/header
 import gui
 import enc/pass
 
-function passmgr/help() {
+function help/passmgr() {
   cat << EOF
 
 Random password manager for the console
@@ -33,8 +33,7 @@ while getopts hf:l:c:n:d:u:v o; do
     n) _m="CREATE"; _u=$OPTARG;;
     d) _m="DELETE"; _u=$OPTARG;;
     v) gdbg=true;;
-    h) passmgr/help;;
-    *) passmgr/help;;
+    h|*) help/passmgr;;
   esac
 done
 

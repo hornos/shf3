@@ -3,7 +3,7 @@ gbn=$(basename ${BASH_SOURCE})
 gdn=$(dirname ${BASH_SOURCE})
 rc="${gdn}/.${gbn}rc"
 
-function shfcli/help() {
+function help/shfcli() {
   cat << EOF
 
 Shell Framework CLI
@@ -26,8 +26,7 @@ _v=false
 while getopts hv o; do
   case "$o" in
     v) _v=true;;
-    h) shfcli/help;;
-    *) shfcli/help;;
+    h|*) help/shfcli;;
   esac
 done
 

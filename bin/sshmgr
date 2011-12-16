@@ -3,7 +3,7 @@ source $(dirname ${BASH_SOURCE})/../lib/header
 import gui
 import ssh
 
-function sshmgr/help() {
+function help/sshmgr() {
   cat << EOF
 
 SSH MID Manager
@@ -34,8 +34,7 @@ while getopts hvki:n:d:e:p:u: o; do
     p) _c="PASS"; _m=$OPTARG;;
     u) _c="UPDATE"; _m=$OPTARG;;
     v) gdbg=true;;
-    h) sshmgr/help;;
-    *) sshmgr/help;;
+    h|*) help/sshmgr;;
   esac
 done
 

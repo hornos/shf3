@@ -2,7 +2,7 @@
 source $(dirname ${BASH_SOURCE})/../lib/header
 import sys/dir
 
-function dirsync/help() {
+function help/dirsync() {
   cat << EOF
 
 Directory synchronizer
@@ -13,8 +13,9 @@ EOF
 }
 
 ### args
-if test "${1}" = "-h" ; then
-  dirsync/help
+if test "${1}" = "-h" || \
+   test $# -eq 0; then
+  help/dirsync
 fi
 
 _src="${1}"

@@ -3,7 +3,7 @@ source $(dirname ${BASH_SOURCE})/../lib/header
 import gui
 import ssh/ftp
 
-function sshput/help() {
+function help/sshput() {
   cat << EOF
 
 SSH login
@@ -28,8 +28,7 @@ while getopts hvm:s:t: o; do
     s) _s=$OPTARG;;
     t) _t=$OPTARG;;
     v) gdbg=true;;
-    h) sshget/help;;
-    *) sshget/help;;
+    h|*) help/sshget;;
   esac
 done
 

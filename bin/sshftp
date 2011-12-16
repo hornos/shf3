@@ -3,7 +3,7 @@ gbn=$(basename ${BASH_SOURCE})
 gdn=$(dirname ${BASH_SOURCE})
 rc="${gdn}/.${gbn}rc"
 
-function sshftp/help() {
+function help/sshftp() {
   cat << EOF
 
 Simple SSH FTP
@@ -30,8 +30,7 @@ while getopts hvt: o; do
   case "$o" in
     v) _v=true;;
     t) _t=$OPTARG;;
-    h) sshftp/help;;
-    *) sshftp/help;;
+    h|*) help/sshftp;;
   esac
 done
 

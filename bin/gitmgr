@@ -4,7 +4,7 @@ import vcs/git/hub
 import sys/dir
 import gui
 
-function gitmgr/help() {
+function help/gitmgr() {
   cat << EOF
 
 Github Manager
@@ -25,15 +25,15 @@ _m=""
 _p=false
 _r=false
 _s=false
-while getopts hprsm:d: o; do
+while getopts hvprsm:d: o; do
   case "$o" in
     m) _m=$OPTARG;;
     d) _d=$OPTARG;;
     p) _p=true;;
     r) _r=true;;
     s) _s=true;;
-    h) gitmgr/help;;
-    *) gitmgr/help;;
+    v) gdbg=true;;
+    h|*) help/gitmgr;;
   esac
 done
 
@@ -49,6 +49,7 @@ if ! $(vcs/git/hub/test) ; then
   exit ${_false_}
 fi
 
+# status
 if ${_s} ; then
   msg "Status"
   gui/line
@@ -69,16 +70,17 @@ if ${_p} ; then
   exit $?
 fi
 
+# commit
 if test "${_m}" = "" ; then
   echo -n "[${gbn}] Commit Message: "
   read _m
 fi
+git add .
+git commit -a -m "${_m}"
 
+# push
 answer "Push to gtihub?"
 if test $? -gt 0 ; then
   exit ${_false_}
 fi
-
-git add .
-git commit -a -m "${_m}"
 git push origin master

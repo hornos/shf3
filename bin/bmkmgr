@@ -3,7 +3,7 @@ source $(dirname ${BASH_SOURCE})/../lib/header
 import gui
 import sys/bmk
 
-function bmkmgr/help() {
+function help/bmkmgr() {
   cat << EOF
 
 Bookmark manager for directories
@@ -29,8 +29,7 @@ while getopts hvlb:d:t: o; do
     d) _m="DELETE"; _b=$OPTARG;;
     t) _m="TARGET"; _b=$OPTARG;;
     v) gdbg=true;;
-    h) bmkmgr/help;;
-    *) bmkmgr/help;;
+    h|*) help/bmkmgr;;
   esac
 done
 
