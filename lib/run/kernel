@@ -1,71 +1,71 @@
 # TODO: check levels
 # 0 program guide
 # 1 dirs inputs
-# 3 specific
-# 4 integrity
-# 5 test
+# 2 specific
+# 3 integrity
 
-function run/sum() {
-  # options
-  local _prg=${1}
-  local _guide=${2}
+function help/run/chk() {
+  cat << EOF
+Program check
 
-  # read guide
-  if ! test -r "${_guide}" ; then
-    sp_f_err_fnf "${_guide}"
-    return ${_FALSE_}
-  fi
-  source "${_guide}"
+\$1 integer - check level
+\$2 string  - program
+\$2 guide   - guide file
 
-  import run/${_prg}
-  run/${_prg}/sum
+Check level:
+ 0 - program & guide
+ 1 - input directories
+ 2 - program specific
+ 3 - specific integrity
+EOF
 }
 
 function run/chk() {
   import gui
-  local _prg="${1}"
-  local _guide="${2}"
 
-  if test -z "${_prg}" || ! $(installed "${_prg}"); then
+  local _chk="${1:-0}"
+  local _prg="${2}"
+  local _guide="${3}"
+
+  # header & timestamp
+  gui/line
+  msg "${FUNCNAME} $(date)"
+
+  # check program
+  if test -z "${_prg}" || ! test -x "${_prg}" ; then
     msg "Program not found: ${_prg}"
     return ${_false_}
   fi
+  msg "Found program : ${_prg}"
 
+  # check guide
   if test -z "${_guide}" || ! test -r "${_guide}" ; then
     msg "Guide not found: ${_guide}"
     return ${_false_}
   fi
-
-  msg "${FUNCNAME}"
-  gui/line
-  msg "Program : ${_prg}"
-  msg "Guide   : ${_guide}"
+  msg "Found guide   : ${_guide}"
 
   # read guide
   source "${_guide}"
 
   # basic checks
-  local inp
-  for inp in PRGBIN ; do
-    if ! test -x "${!inp}" ; then
-      msg "Not an executable: ${!inp}"
+  if test ${_chk} -gt 0 ; then
+    for inp in INPUTDIR LIBDIR ; do
+      if ! test -d "${!inp}" ; then
+        msg "Not a directory: ${!inp}"
+        return ${_false_}
+      fi
+      msg "Found directory: ${inp}"
+    done
+  fi
+
+  # specific check
+  if test ${_chk} -gt 1 ; then
+    import run/${_prg}
+    run/${_prg}/chk ${_chk} "${_prg}" "${_guide}"
+    if test $? -gt 0 ; then
       return ${_false_}
     fi
-  done
-
-  for inp in INPUTDIR LIBDIR ; do
-    if ! test -d "${!inp}" ; then
-      msg "Not a directory: ${!inp}"
-      return ${_false_}
-    fi
-  done
-  msg "Basic checks passed"
-
-  # program module
-  import run/${_prg}
-  run/${_prg}/chk
-  if test $? -gt 0 ; then
-    return ${_false_}
   fi
 
   return ${_true_}
@@ -73,23 +73,58 @@ function run/chk() {
 
 
 function run/clean() {
+  import gui
   import sys/dir
   import sys/lnk
 
-  if ! test -d "${INPUTDIR}" ; then
-    msg "Cleanup failed"
+  # header
+  msg "${FUNCNAME}: $(date)"
+  gui/line
+
+  if test -z "${INPUTDIR}" || \
+   ! test -d "${INPUTDIR}" ; then
+    msg "Not found: ${INPUTDIR}"
     return ${_false_}
   fi
-  cd "${INPUTDIR}"
 
-  local _wdir=$(ns/op/name "${WORKDIR}" "@")
-  sys/dir/rm "${_wdir}"
-  sys/dir/rm "${STAGEDIR}"
+  # enter input dir
+  local _idir="${INPUTDIR}"
+  sys/dir/svwd "${_idir}"
+
+  # workdir
+  local i
+  for i in "${WORKDIR}" ; do
+    if ! test -z "${i}" && \
+         test -d "${i}" ; then
+      local _dir=$(ns/op/name "${i}" "@")
+      sys/dir/rm "${_dir}"
+    fi
+  done
+
+  # stage dir
+  for i in "${STAGEDIR}" ; do
+    if ! test -z "${i}" && \
+         test -d "${i}" ; then
+      sys/dir/rm "${i}"
+    fi
+  done
+  # TODO link
   sys/lnk/rm "${WORKDIRLINK}"
   return ${_true_}
 }
 
-# TODO: timestamps / check
+
+function help/run/prg() {
+  cat << EOF
+Program run wrapper
+
+\$1 - check level
+\$2 - program
+\$3 - guide file
+\$4 - scheduler
+EOF
+}
+
 function run/prg() {
   import sys/dir
   import sys/lnk
@@ -100,12 +135,13 @@ function run/prg() {
   local _guide=${3}
   local _sch=${4}
 
-  # checks
+  ### check
   run/chk ${_chk} "${_prg}" "${_guide}"
   if test $? -gt 0 ; then
     return ${_false_}
   fi
 
+  ### import
   # program
   import run/${_prg}
 
@@ -118,7 +154,6 @@ function run/prg() {
   fi
 
   ### begin run
-
   # enter inputdir
   sys/dir/svwd "${INPUTDIR}"
 
@@ -299,6 +334,28 @@ function run/prg() {
   msg "Program ${_prg} Complete"
   run/mail "Program ${_prg} Complete"
 }
+
+
+
+function run/sum() {
+  # options
+  local _prg=${1}
+  local _guide=${2}
+
+  # read guide
+  if ! test -r "${_guide}" ; then
+    sp_f_err_fnf "${_guide}"
+    return ${_FALSE_}
+  fi
+  source "${_guide}"
+
+  import run/${_prg}
+  run/${_prg}/sum
+}
+
+
+
+
 
 
 
