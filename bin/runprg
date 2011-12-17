@@ -12,6 +12,7 @@ Usage: ${gbn} options
               -p program
               -g guide
               -s scheduler
+              -i interactive
               -c level - check
               -v - verbose
 EOF
@@ -22,14 +23,16 @@ EOF
 _p=""
 _g=""
 _s=""
+_m="B"
 _c=3
 _v=false
-while getopts hvp:g:s:c: o; do
+while getopts hvip:g:s:c: o; do
   case "$o" in
     p) _p=$OPTARG;;
     g) _g=$OPTARG;;
     s) _s=$OPTARG;;
     c) _c=$OPTARG;;
+    i) _m="I";;
     v) gdbg=true;;
     h) help/runprg;;
     *) help/runprg;;
@@ -41,4 +44,4 @@ echo
 msg $(date)
 gui/line
 
-run/prg ${_c} "${_p}" "${_g}" "${_s}"
+run/prg "${_m}" ${_c} "${_p}" "${_g}" "${_s}"

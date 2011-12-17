@@ -20,9 +20,20 @@ function run/general/chk() {
   return ${_true_}
 }
 
+function run/general/finish() {
+  return ${_true_}
+}
+
+
+function run/general/save() {
+  run/save false
+}
+
 
 function run/general/init() {
-  return ${_false_}
+  msg "${FUNCNAME} Failed"
+  # return ${_false_}
+  return ${_true_}
 }
 
 function sp_f_siesta_prepare() {
@@ -61,11 +72,3 @@ function sp_f_siesta_prepare() {
 }
 
 
-function sp_f_siesta_finish() {
-  return ${_TRUE_}
-}
-
-
-function sp_f_siesta_collect() {
-  sp_f_run_collect false
-}

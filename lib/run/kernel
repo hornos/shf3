@@ -26,9 +26,14 @@ function run/clean() {
   import sys/dir
   import sys/lnk
 
+  local _dirs="${*}"
+  if test -z "${_dirs}" ; then
+    return ${_false_}
+  fi
+
   # header
-  msg "${FUNCNAME}: $(date)"
   gui/line
+  msg "${FUNCNAME}: $(date)"
 
   if test -z "${INPUTDIR}" || \
    ! test -d "${INPUTDIR}" ; then
@@ -40,26 +45,21 @@ function run/clean() {
   local _idir="${INPUTDIR}"
   sys/dir/svwd "${_idir}"
 
-  # workdir
-  local i
-  for i in "${WORKDIR}" ; do
-    if ! test -z "${i}" && \
-         test -d "${i}" ; then
-      local _dir=$(ns/op/name "${i}" "@")
+  # clean dirs
+  local dir
+  local _dir
+  local _pwd=$(pwd)
+  for dir in ${_dirs} ; do
+    _dir=$(ns/op/name "${!dir}" "+")
+    _dir=$(cd "${_dir}";pwd)
+    if test "${_pwd}" = "${_dir}" ; then
+      continue
+    fi
+    if test -d "${_dir}" ; then
+      msg "Clean : ${_dir}"
       sys/dir/rm "${_dir}"
     fi
   done
-
-  # stage dir
-  for i in "${STAGEDIR}" ; do
-    if ! test -z "${i}" && \
-         test -d "${i}" ; then
-      sys/dir/rm "${i}"
-    fi
-  done
-  # TODO link
-  sys/lnk/rm "${WORKDIRLINK}"
-  return ${_true_}
 }
 
 
@@ -67,10 +67,15 @@ function help/run/prg() {
   cat << EOF
 Program run wrapper
 
-\$1 - check level
-\$2 - program
-\$3 - guide file
-\$4 - scheduler
+\$1 string  - mode
+\$2 integer - check level
+\$3 string  - program
+\$4 string  - guide file
+\$5 string  - scheduler
+
+mode:
+ B - batch
+ I - interacitve
 EOF
 }
 
@@ -80,16 +85,20 @@ function run/prg() {
   import run/chk
   import gui
 
-  local _chk=${1:-0}
-  local _prg=${2}
-  local _guide=${3}
-  local _sch=${4}
+  local _mode=${1:-B}
+  local _chk=${2:-0}
+  local _prg=${3}
+  local _guide=${4}
+  local _sch=${5}
 
   ### check
   run/chk ${_chk} "${_prg}" "${_guide}"
   if test $? -gt 0 ; then
     return ${_false_}
   fi
+
+  # read guide
+  source "${_guide}"
 
   ### import
   # program
@@ -108,73 +117,82 @@ function run/prg() {
     fi
   fi
 
-  # read guide
-  source "${_guide}"
 
   ### begin run
 
   # enter inputdir
-  local _idir=$(ns/op/name "${INPUTDIR}")
+  local _idir=$(ns/op/name "${INPUTDIR}" "+")
   sys/dir/svwd "${_idir}"
+  msg "Input     : ${_idir}"
 
   # create workdir
-  local _wdir=$(ns/op/name "${WORKDIR}")
+  local _wdir=$(ns/op/name "${WORKDIR}" "+")
   if ! $(sys/dir/mk "${_wdir}") ; then
     return ${_false_}
   fi
+  msg "Work      : ${_wdir}"
 
   # create resultdir
-  local _rdir=$(ns/op/name "${RESULTDIR}")
+  local _rdir=$(ns/op/name "${RESULTDIR}" "+")
   if ! $(sys/dir/mk "${_rdir}") ; then
-    run/clean
+    run/clean WORKDIR
     return ${_false_}
   fi
+  msg "Result    : ${_rdir}"
 
-  # tempdir
-  local _tdir="${_prg}-${USER}-${HOSTNAME}-${$}"
 
   ### broadcast
 
   # create stagedir for broadcast
-  if $(ns/isop "${WORKDIR}" "+" ) ; then
-    local _sdir="${run_stage_dir}/stage-${_tdir}"
+  if $(ns/isop "${WORKDIR}" "+") ; then
+    local _sdir="${run_stage_dir}/stage-${_prg}-${USER}-$$"
     if ! test -z "${STAGEDIR}" ; then
       _sdir="${STAGEDIR}"
     else
       STAGEDIR="${_sdir}"
     fi
     if ! $(sys/dir/mk "${_sdir}") ; then
-      run/clean
+      run/clean WORKDIR RESULTDIR
       return ${_false_}
     fi
-    msg "Input broadcast"
-    msg "Stage : ${_sdir}"
-    msg "Check local node scratch for output!"
+    msg "Broadcast : ${_sdir}"
   fi
 
   # workdir link
   WORKDIRLINK="${_idir}/${_prg}-${$}"
-  if ! $(ns/isop "${WORKDIR}" "+" ) ; then
-    sys/lnk "${_wdir}" "${WORKDIRLINK}"
+  if ! $(ns/isop "${WORKDIR}" "+") ; then
+    sys/lnk/mk "${_wdir}" "${WORKDIRLINK}"
   fi
 
   ### program init
+  echo ""
+  if test "${_mode}" = "I" ; then
+    answer "run/${_prg}/init?"
+    if test $? -gt 0 ; then
+      return ${_false_}
+    fi
+  fi
 
   run/${_prg}/init
   if test $? -gt 0 ; then
     if test "${ONERR}" = "clean" ; then
-      run/clean
+      run/clean WORKDIR STAGEDIR RESULTDIR
+      sys/lnk/rm "${WORKDIRLINK}"
     fi
     return ${_false_}
   fi
 
   # delete stage dir
-  sys/dir/rm "${_sdir}"
+  if $(ns/isop "${WORKDIR}" "+") ; then
+    sys/dir/rm "${_sdir}"
+  fi
 
   ### program run
+
   sys/dir/svwd "${_wdir}"
 
   # list inputs
+  echo ""
   msg "Inputs in ${_wdir}"
   gui/line
   ls -lR
@@ -192,9 +210,7 @@ function run/prg() {
     _cmd="${_cmd} ${PRGOPT}"
   fi
 
-  # start program
-  run/mail "Program ${_prg} Started"
-
+  echo ""
   msg "Command: ${_cmd}"
 
   ### lib override
@@ -219,6 +235,18 @@ function run/prg() {
     msg "LD_PRELOAD: ${LDPRE}"
   fi
 
+
+  # interactive
+  if test "${_mode}" = "I" ; then
+    answer "Run command?"
+    if test $? -gt 0 ; then
+      return ${_false_}
+    fi
+  fi
+
+  # mail program start
+  run/mail "Program ${_prg} started"
+
   local _inp=$(ns/op/name "${MAININPUT}")
   if $(ns/isop "${MAININPUT}" "<") ; then
     ${_cmd} < "${_inp}" &> "${_out}"
@@ -229,48 +257,62 @@ function run/prg() {
   fi
   _ret=$?
 
-  # temp save mode
-  msg "Temporary directory save mode"
-  local _oemsg=" error: not saved   success: saved"
+  # work dir  save mode
+  local _oemsg="error cleaned / success saved"
   case "${ONERR}" in 
-    "clean") _oemsg=" error: cleaned     success: saved";;
-    "save")  _oemsg=" error: saved       success: saved";;
-    "leave") _oemsg=" error: not saved   success: not saved";;
+    "clean") _oemsg="error cleaned / success saved";;
+    "save")  _oemsg="error saved   / success saved";;
   esac
-  msg "${_oemsg}"
+  msg "Work directory in ${_oemsg}"
 
-  ### list output
+  # list output
+  echo ""
   msg "Outputs in ${_wdir}"
   gui/line
   ls -lR
   gui/line
 
-  ### exit status
-  if test ${_ret} -gt 0 && ! test "${ONERR}" = "save" ; then
-    if test "${ONERR}" = "clean" ; then
-      run/clean
-    fi
-    local _emsg="Program ${_prg} Failed (exit code ${_ret})"
+  # exit status
+  if test ${_ret} -gt 0 && \
+     test "${ONERR}" = "clean" ; then
+    run/clean WORKDIR STAGEDIR RESULTDIR
+    sys/lnk/rm "${WORKDIRLINK}"
+
+    local _emsg="Program failed (exit code ${_ret})"
     msg "${_emsg}"
     run/mail "${_emsg}"
     return ${_ret}
   fi
+
 
   ### finish
+
+  # interactive
+  if test "${_mode}" = "I" ; then
+    answer "run/${_prg}/finish?"
+    if test $? -gt 0 ; then
+      return ${_false_}
+    fi
+  fi
+
   run/${_prg}/finish
   _ret=$?
-  if test ${_ret} -gt 0 && ! test "${ONERR}" = "save" ; then
-    if test "${ONERR}" = "clean" ; then
-      run/clean
-    fi
-    local _emsg="run/${_prg}/finish Failed (exit code ${_ret})"
+  if test ${_ret} -gt 0 && \
+     test "${ONERR}" = "clean" ; then
+    run/clean WORKDIR STAGEDIR RESULTDIR
+    sys/lnk/rm "${WORKDIRLINK}"
+
+    local _emsg="run/${_prg}/finish failed (exit code ${_ret})"
     msg "${_emsg}"
     run/mail "${_emsg}"
     return ${_ret}
   fi
 
+
   ### save
-  ### list output
+
+  # list output
+  echo ""
   msg "Saved outputs in ${_wdir}"
   gui/line
   ls -lR ${RESULTS}
@@ -291,10 +333,11 @@ function run/prg() {
     run/clean
   fi
 
-  local _emsg="Program ${_prg} Complete"
+  local _emsg="Program ${_prg} complete"
   msg "${_emsg}"
   run/mail "${_emsg}"
 }
+
 
 function run/sum() {
   # options

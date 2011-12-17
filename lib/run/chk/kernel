@@ -4,8 +4,8 @@ function help/run/chk() {
 Program check
 
 \$1 integer - check level
-\$2 string  - program
-\$2 guide   - guide file
+\$2 program - program
+\$3 guide   - guide file
 
 Check level:
  0 - program & guide
@@ -22,12 +22,6 @@ function run/chk() {
   local _prg="${2}"
   local _guide="${3}"
 
-  # check program
-  if test -z "${_prg}" || ! test -x "${_prg}" ; then
-    msg "Program ${_prg} not found"
-    return ${_false_}
-  fi
-
   # check guide
   if test -z "${_guide}" || ! test -r "${_guide}" ; then
     msg "Guide ${_guide} not found"
@@ -37,11 +31,17 @@ function run/chk() {
   # read guide
   source "${_guide}"
 
+  # check program binary
+  if ! test -x "${PRGBIN}" ; then
+    msg "Program binary ${PRGBIN} not found"
+    return ${_false_}
+  fi
+
   # basic dir checks
   if test ${_chk} -gt 0 ; then
     local dir
     local _dir
-    for dir in INPUTDIR WORKDIR RESULTDIR; do
+    for dir in INPUTDIR; do
       # operator clean name
       _dir=$(ns/op/name "${!dir}" "+")
       if ! test -d "${_dir}" ; then
@@ -64,7 +64,7 @@ function run/chk() {
     fi
   fi
 
-  msg "All checks passed (${_chk})"
+  msg "${FUNCNAME}: All checks passed (${_chk})"
   return ${_true_}
 }
 
