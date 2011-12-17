@@ -22,70 +22,109 @@ function run/chk() {
   local _prg="${2}"
   local _guide="${3}"
 
-  # header & timestamp
-  gui/line
-  msg "${FUNCNAME} $(date)"
-
   # check program
   if test -z "${_prg}" || ! test -x "${_prg}" ; then
-    msg "Program not found: ${_prg}"
+    msg "Program ${_prg} not found"
     return ${_false_}
   fi
-  msg "Found program : ${_prg}"
 
   # check guide
   if test -z "${_guide}" || ! test -r "${_guide}" ; then
-    msg "Guide not found: ${_guide}"
+    msg "Guide ${_guide} not found"
     return ${_false_}
   fi
-  msg "Found guide   : ${_guide}"
 
   # read guide
   source "${_guide}"
 
-  # basic checks
+  # basic dir checks
   if test ${_chk} -gt 0 ; then
-    for inp in INPUTDIR LIBDIR ; do
-      if ! test -d "${!inp}" ; then
-        msg "Not a directory: ${!inp}"
+    local dir
+    local _dir
+    for dir in INPUTDIR WORKDIR RESULTDIR; do
+      # operator clean name
+      _dir=$(ns/op/name "${!dir}" "+")
+      if ! test -d "${_dir}" ; then
+        msg "Directory \$${dir} not found"
         return ${_false_}
       fi
-      msg "Found directory: ${inp}"
     done
   fi
 
   # specific check
   if test ${_chk} -gt 1 ; then
     import run/${_prg}
+    if test $? -gt 0 ; then
+      msg "Module run/${_prg} not found"
+      return ${_false_}
+    fi
     run/${_prg}/chk ${_chk} "${_prg}" "${_guide}"
     if test $? -gt 0 ; then
       return ${_false_}
     fi
   fi
 
+  msg "All checks passed (${_chk})"
   return ${_true_}
 }
 
 
-function run/chk/input() {
-  local _input="${1:-OTHERINPUTS}"
+function run/chk/main() {
+  # operator clean name
+  local _inp=$(ns/op/name "${MAININPUT}")
+  local _idir=$(ns/op/name "${INPUTDIR}")
+  _inp="${_idir}/${_inp}"
 
-  if test -z "${OTHERINPUTS}" || \
-     test -z "${INPUTDIR}" ; then
+  if ! test -r "${_inp}" ; then
+    msg "Main input Not found ${_inp}"
     return ${_false_}
   fi
+}
 
-  local i
+
+function run/chk/other() {
+  local _input="${1:-OTHERINPUT}"
+
+  # continue
+  if test -z "${OTHERINPUT}" ; then
+    return ${_true_}
+  fi
+
+  # operator clean name
+  local _idir=$(ns/op/name "${INPUTDIR}")
+
+  local inp
   local _inp
-  for i in ${!_input}; do
-    _inp="${INPUTDIR}/${i}"
+  for inp in ${!_input}; do
+    _inp="${_idir}/${inp}"
     if ! test -r "${_inp}" ; then
-      msg "Not found: ${_inp}"
+      msg "Input not found: ${_inp}"
       return ${_false_}
-    else
-      msg "Found: ${_inp}"
     fi
   done
   return ${_true_}
 }
 
+
+function run/chk/data() {
+  # continue
+  if test -z "${DATADIR}" ; then
+    return ${_true_}
+  fi
+  if test -z "${DATA}" ; then
+    return ${_true_}
+  fi
+
+  # operator clean name
+  local _ddir=$(ns/op/name "${DATADIR}")
+
+  local _dat
+  for _dat in ${DATA}; do
+    _dat="${_ddir}/${_dat}"
+    if ! test -r "${_dat}" ; then
+      msg "Data not found: ${_dat}"
+      return ${_false_}
+    fi
+  done
+  return ${_true_}
+}
