@@ -3,3 +3,4 @@
 *.sqlite
 .shfclirc
 scr/*
+_*
