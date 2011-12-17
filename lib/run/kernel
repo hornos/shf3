@@ -4,6 +4,7 @@ function run/mail() {
   local _sch="${2}"
   local _msg=""
 
+  # no subject or address
   if test -z "${_sub}" || 
      test -z "${QMAILTO}" ; then
     return ${_false_}
@@ -11,6 +12,10 @@ function run/mail() {
 
   if ! test -z "${_sch}" ; then
     import que/${_sch}
+    if test $? -gt 0 ; then
+      msg "Module que/${_sch} not found"
+      return ${_false_}
+    fi
     _sub="$(que/mail/sub) ${_sub}"
     _msg=$(que/mail/msg)
   fi
@@ -31,9 +36,7 @@ function run/clean() {
     return ${_false_}
   fi
 
-  # header
-  gui/line
-  msg "${FUNCNAME}: $(date)"
+  echo ""
 
   if test -z "${INPUTDIR}" || \
    ! test -d "${INPUTDIR}" ; then
@@ -51,11 +54,11 @@ function run/clean() {
   local _pwd=$(pwd)
   for dir in ${_dirs} ; do
     _dir=$(ns/op/name "${!dir}" "+")
-    _dir=$(cd "${_dir}";pwd)
-    if test "${_pwd}" = "${_dir}" ; then
-      continue
-    fi
     if test -d "${_dir}" ; then
+      _dir=$(cd "${_dir}";pwd)
+      if test "${_pwd}" = "${_dir}" ; then
+        continue
+      fi
       msg "Clean : ${_dir}"
       sys/dir/rm "${_dir}"
     fi
@@ -100,11 +103,13 @@ function run/prg() {
   # read guide
   source "${_guide}"
 
+
   ### import
+
   # program
-  import run/${_prg}
+  import run/prg/${_prg}
   if test $? -gt 0 ; then
-    msg "Program module run/${_prg} not found"
+    msg "Program module run/prg/${_prg} not found"
     return ${_false_}
   fi
 
@@ -123,14 +128,14 @@ function run/prg() {
   # enter inputdir
   local _idir=$(ns/op/name "${INPUTDIR}" "+")
   sys/dir/svwd "${_idir}"
-  msg "Input     : ${_idir}"
+  msg "Input  : ${_idir}"
 
   # create workdir
   local _wdir=$(ns/op/name "${WORKDIR}" "+")
   if ! $(sys/dir/mk "${_wdir}") ; then
     return ${_false_}
   fi
-  msg "Work      : ${_wdir}"
+  msg "Work   : ${_wdir}"
 
   # create resultdir
   local _rdir=$(ns/op/name "${RESULTDIR}" "+")
@@ -138,7 +143,7 @@ function run/prg() {
     run/clean WORKDIR
     return ${_false_}
   fi
-  msg "Result    : ${_rdir}"
+  msg "Result : ${_rdir}"
 
 
   ### broadcast
@@ -155,7 +160,7 @@ function run/prg() {
       run/clean WORKDIR RESULTDIR
       return ${_false_}
     fi
-    msg "Broadcast : ${_sdir}"
+    msg "Stage  : ${_sdir}"
   fi
 
   # workdir link
@@ -165,15 +170,18 @@ function run/prg() {
   fi
 
   ### program init
+
   echo ""
   if test "${_mode}" = "I" ; then
-    answer "run/${_prg}/init?"
+    answer "run/prg/${_prg}/init?"
     if test $? -gt 0 ; then
       return ${_false_}
     fi
+    echo ""
   fi
 
-  run/${_prg}/init
+  # init inputs & data file
+  run/prg/${_prg}/init
   if test $? -gt 0 ; then
     if test "${ONERR}" = "clean" ; then
       run/clean WORKDIR STAGEDIR RESULTDIR
@@ -187,8 +195,10 @@ function run/prg() {
     sys/dir/rm "${_sdir}"
   fi
 
+
   ### program run
 
+  # enter work dir
   sys/dir/svwd "${_wdir}"
 
   # list inputs
@@ -213,7 +223,7 @@ function run/prg() {
   echo ""
   msg "Command: ${_cmd}"
 
-  ### lib override
+  # lib override
   # Format: colon separated list
   if ! test -z "${LDLIB}" ; then
     if test -z "${LD_LIBRARY_PATH}" ; then
@@ -224,7 +234,7 @@ function run/prg() {
     msg "LD_LIBRARY_PATH: ${LDLIB}"
   fi
 
-  ### preload override
+  # preload override
   # Format: space separated list
   if ! test -z "${LDPRE}" ; then
     if test -z "${LD_PRELOAD}" ; then
@@ -235,17 +245,18 @@ function run/prg() {
     msg "LD_PRELOAD: ${LDPRE}"
   fi
 
-
-  # interactive
+  echo ""
   if test "${_mode}" = "I" ; then
     answer "Run command?"
     if test $? -gt 0 ; then
       return ${_false_}
     fi
+    echo ""
   fi
 
   # mail program start
   run/mail "Program ${_prg} started"
+  msg "Program started $(date)"
 
   local _inp=$(ns/op/name "${MAININPUT}")
   if $(ns/isop "${MAININPUT}" "<") ; then
@@ -257,13 +268,15 @@ function run/prg() {
   fi
   _ret=$?
 
+  msg "Program finished $(date)"
+
   # work dir  save mode
   local _oemsg="error cleaned / success saved"
   case "${ONERR}" in 
     "clean") _oemsg="error cleaned / success saved";;
     "save")  _oemsg="error saved   / success saved";;
   esac
-  msg "Work directory in ${_oemsg}"
+  msg "Work directory in case of ${_oemsg}"
 
   # list output
   echo ""
@@ -287,22 +300,23 @@ function run/prg() {
 
   ### finish
 
-  # interactive
+  echo ""
   if test "${_mode}" = "I" ; then
-    answer "run/${_prg}/finish?"
+    answer "run/prg/${_prg}/finish?"
     if test $? -gt 0 ; then
       return ${_false_}
     fi
+    echo ""
   fi
 
-  run/${_prg}/finish
+  run/prg/${_prg}/finish
   _ret=$?
   if test ${_ret} -gt 0 && \
      test "${ONERR}" = "clean" ; then
     run/clean WORKDIR STAGEDIR RESULTDIR
     sys/lnk/rm "${WORKDIRLINK}"
 
-    local _emsg="run/${_prg}/finish failed (exit code ${_ret})"
+    local _emsg="run/prg/${_prg}/finish failed (exit code ${_ret})"
     msg "${_emsg}"
     run/mail "${_emsg}"
     return ${_ret}
@@ -319,18 +333,20 @@ function run/prg() {
   gui/line
 
   if test "${ONERR}" != "leave" ; then
-    run/${_prg}/save
+    run/prg/${_prg}/save
     _ret=$?
     if test ${_ret} -gt 0 ; then
       if test "${ONERR}" = "clean" ; then
-        run/clean
+        run/clean WORKDIR STAGEDIR RESULTDIR
+        sys/lnk/rm "${WORKDIRLINK}"
       fi
-      local _emsg="run/${_prg}/save Failed (exit  code ${_ret})"
+      local _emsg="run/prg/${_prg}/save Failed (exit code ${_ret})"
       msg "${_emsg}"
       run/mail "${_emsg}"
       return ${_ret}
     fi
-    run/clean
+    run/clean WORKDIR STAGEDIR RESULTDIR
+    sys/lnk/rm "${WORKDIRLINK}"
   fi
 
   local _emsg="Program ${_prg} complete"
@@ -351,8 +367,6 @@ function run/sum() {
   fi
   source "${_guide}"
 
-  import run/${_prg}
-  run/${_prg}/sum
+  import run/prg/${_prg}
+  run/prg/${_prg}/sum
 }
-
-

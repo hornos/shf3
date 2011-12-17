@@ -53,12 +53,12 @@ function run/chk() {
 
   # specific check
   if test ${_chk} -gt 1 ; then
-    import run/${_prg}
+    import run/prg/${_prg}
     if test $? -gt 0 ; then
-      msg "Module run/${_prg} not found"
+      msg "Module run/$prg/{_prg} not found"
       return ${_false_}
     fi
-    run/${_prg}/chk ${_chk} "${_prg}" "${_guide}"
+    run/prg/${_prg}/chk ${_chk}
     if test $? -gt 0 ; then
       return ${_false_}
     fi
@@ -70,13 +70,18 @@ function run/chk() {
 
 
 function run/chk/main() {
+  if test -z "${MAININPUT}" ; then
+    msg "\$MAININPUT not set"
+    return ${_false_}
+  fi
+
   # operator clean name
   local _inp=$(ns/op/name "${MAININPUT}")
   local _idir=$(ns/op/name "${INPUTDIR}")
   _inp="${_idir}/${_inp}"
 
   if ! test -r "${_inp}" ; then
-    msg "Main input Not found ${_inp}"
+    msg "Main input not found ${_inp}"
     return ${_false_}
   fi
 }

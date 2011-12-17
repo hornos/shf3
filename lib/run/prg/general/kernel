@@ -1,0 +1,51 @@
+
+function run/prg/general/chk() {
+  # main input check
+  run/chk/main
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  # other input check
+  run/chk/other
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  # common data check
+  run/chk/data
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  return ${_true_}
+}
+
+function run/prg/general/finish() {
+  return ${_true_}
+}
+
+
+function run/prg/general/save() {
+  run/save false
+}
+
+function run/prg/general/init() {
+  run/init/main
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  # init data
+  run/init/data
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  # init other
+  run/init/other
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  return ${_true_}
+}

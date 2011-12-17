@@ -1,0 +1,38 @@
+function run/init/data() {
+  if test -z "${DATA}" ; then
+    return ${_true_}
+  if
+
+  # operator clean name
+  local _ddir=$(ns/op/name "${DATADIR}")
+
+  local dat
+  local _dat
+  for dat in ${DATA}; do
+    _dat="${_ddir}/${dat}"
+    if ! test -r "${_dat}" ; then
+      continue
+    fi
+    run/bcast "${_dat}"
+  done
+  return ${_TRUE_}
+}
+
+function sp_f_run_prepare_others() {
+  local _isd=${1}
+  local _p_wdir="${2}"
+  local _p_sdir="${3}"
+  local _p_if=""
+  local _oin=""
+
+  for _oin in ${OTHERINPUTS}; do
+    _p_if="${INPUTDIR}/${_oin}"
+    # if ! test -f "${_p_if}" ; then
+    if ! test -r "${_p_if}" ; then
+      sp_f_err_fnf "${_p_if}"
+      return ${_FALSE_}
+    fi
+    sp_f_run_bcast ${_isd} "${_p_wdir}" "${_p_sdir}" "${_p_if}"
+  done
+  return ${_TRUE_}
+}
