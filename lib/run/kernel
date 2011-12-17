@@ -221,7 +221,7 @@ function run/prg() {
   fi
 
   echo ""
-  msg "Command: ${_cmd}"
+  msg "Program: ${_cmd}"
 
   # lib override
   # Format: colon separated list
@@ -276,7 +276,7 @@ function run/prg() {
     "clean") _oemsg="error cleaned / success saved";;
     "save")  _oemsg="error saved   / success saved";;
   esac
-  msg "Work directory in case of ${_oemsg}"
+  msg "Outputs in case of ${_oemsg}"
 
   # list output
   echo ""

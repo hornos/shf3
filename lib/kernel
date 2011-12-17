@@ -118,21 +118,36 @@ function ns/func/dir() {
 # operators
 function ns/isop() {
   local _s="${1}"
-  local _m="${2:-<}"
-  if test "${_s:0:1}" = "${_m}" ; then
-    return ${_true_}
+  local _m="${2}"
+  if test -z "${_m}" ; then
+    _m="< + -"
   fi
+
+  local o
+  for o in ${_m} ; do
+    if test "${_s:0:1}" = "${_m}" ; then
+      return ${_true_}
+    fi
+  done
   return ${_false_}
 }
 
 function ns/op/name() {
   local _s="${1}"
-  local _m="${2:-<}"
-  if $(ns/isop "${_s}" "${_m}") ; then
-    echo "${_s:1}"
-  else
-    echo "${_s}"
+  local _m="${2}"
+  if test -z "${_m}" ; then
+    _m="< + -"
   fi
+
+  local o
+  for o in ${_m} ; do
+    if $(ns/isop "${_s}" "${_m}") ; then
+      echo "${_s:1}"
+      return ${_true_}
+    fi
+  done
+  echo "${_s}"
+  return ${_false_}
 }
 
 # path

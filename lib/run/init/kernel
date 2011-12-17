@@ -1,7 +1,53 @@
+function run/init/bcast() {
+  msg "BCAST: ${1}"
+  return ${_true_}
+
+  local _isd=${1}
+  local _p_wdir="${2}"
+  local _p_sdir="${3}"
+  local _p_if="${4}"
+  local _dst="${5}"
+  local _n_dst=$(sp_f_zbn "${_p_if}")
+
+  if test -d "${_p_if}" ; then
+    cp -R "${_p_if}" "${_p_wdir}"
+    local __p_if=$(basename ${_p_if})
+    sp_f_uzd "${_p_wdir}/${__p_if}"
+    return ${_TRUE_}
+  elif test -f "${_p_if}" ; then
+    if ${_isd} ; then
+      sp_f_zcpumv "${_p_if}" "${_p_sdir}" "${_dst}"
+      if test -z "${_dst}" ; then
+        _dst="${_n_dst}"
+      fi
+      ${sp_b_qbca} "${_p_sdir}/${_dst}" "${_p_wdir}/${_dst}"
+    else
+      sp_f_zcpumv "${_p_if}" "${_p_wdir}" "${_dst}"
+    fi
+  else
+    sp_f_err_fnf "${_p_if}"
+    return ${_FALSE_}
+  fi
+  return ${_TRUE_}
+}
+
+
+function run/init/main() {
+  if test -z "${MAININPUT}" ; then
+    return ${_false_}
+  fi
+
+  # operator clean name
+  local _idir=$(ns/op/name "${INPUTDIR}")
+  local _inp=$(ns/op/name "${MAININPUT}")
+  _inp="${_idir}/${_inp}"
+  run/init/bcast "${_inp}"
+}
+
 function run/init/data() {
   if test -z "${DATA}" ; then
     return ${_true_}
-  if
+  fi
 
   # operator clean name
   local _ddir=$(ns/op/name "${DATADIR}")
@@ -11,28 +57,37 @@ function run/init/data() {
   for dat in ${DATA}; do
     _dat="${_ddir}/${dat}"
     if ! test -r "${_dat}" ; then
-      continue
+      msg "Data not found: ${_dat}"
+      return ${_false_}
     fi
-    run/bcast "${_dat}"
+    run/init/bcast "${_dat}"
+    if test $? -gt 0 ; then
+      return ${_false_}
+    fi
   done
-  return ${_TRUE_}
+  return ${_true_}
 }
 
-function sp_f_run_prepare_others() {
-  local _isd=${1}
-  local _p_wdir="${2}"
-  local _p_sdir="${3}"
-  local _p_if=""
-  local _oin=""
+function run/init/other() {
+  if test -z "${OTHERINPUT}" ; then
+    return ${_true_}
+  fi
 
-  for _oin in ${OTHERINPUTS}; do
-    _p_if="${INPUTDIR}/${_oin}"
-    # if ! test -f "${_p_if}" ; then
-    if ! test -r "${_p_if}" ; then
-      sp_f_err_fnf "${_p_if}"
-      return ${_FALSE_}
+  # operator clean name
+  local _idir=$(ns/op/name "${INPUTDIR}")
+
+  local inp
+  local _inp
+  for inp in ${OTHERINPUT}; do
+    _inp="${INPUTDIR}/${inp}"
+    if ! test -r "${_inp}" ; then
+      msg "Input not found: ${_inp}"
+      return ${_false_}
     fi
-    sp_f_run_bcast ${_isd} "${_p_wdir}" "${_p_sdir}" "${_p_if}"
+    run/init/bcast "${_inp}"
+    if test $? -gt 0 ; then
+      return ${_false_}
+    fi
   done
-  return ${_TRUE_}
+  return ${_true_}
 }
