@@ -1,34 +1,74 @@
 function run/init/bcast() {
-  msg "BCAST: ${1}"
-  return ${_true_}
+  import sys/zip
+  local _src="${1}"
+  local _dst="${2}"
 
-  local _isd=${1}
-  local _p_wdir="${2}"
-  local _p_sdir="${3}"
-  local _p_if="${4}"
-  local _dst="${5}"
-  local _n_dst=$(sp_f_zbn "${_p_if}")
-
-  if test -d "${_p_if}" ; then
-    cp -R "${_p_if}" "${_p_wdir}"
-    local __p_if=$(basename ${_p_if})
-    sp_f_uzd "${_p_wdir}/${__p_if}"
-    return ${_TRUE_}
-  elif test -f "${_p_if}" ; then
-    if ${_isd} ; then
-      sp_f_zcpumv "${_p_if}" "${_p_sdir}" "${_dst}"
-      if test -z "${_dst}" ; then
-        _dst="${_n_dst}"
-      fi
-      ${sp_b_qbca} "${_p_sdir}/${_dst}" "${_p_wdir}/${_dst}"
-    else
-      sp_f_zcpumv "${_p_if}" "${_p_wdir}" "${_dst}"
-    fi
-  else
-    sp_f_err_fnf "${_p_if}"
-    return ${_FALSE_}
+  if test -z "${_src}" ; then
+    return ${_false_}
   fi
-  return ${_TRUE_}
+  if test -z "${_dst}" ; then
+    _dst=$(basename "${_src}")
+  fi
+
+  # directories
+  local _wdir=$(ns/op/name "${WORKDIR}")
+
+  if test -d "${_src}" ; then
+    # broadcast
+    if $(ns/isop "${WORKDIR}" "+") ; then
+      msg "Broadcast is not supported for directories"
+      return ${_false_}
+    fi
+
+    # normal copy
+    sys/zip/cpuzmv "${_src}" "${_wdir}" "${_dst}"
+    if test $? -gt 0 ; then
+      msg "Copy failed: ${_src}"
+      return ${_false_}
+    fi
+    return ${_true_}
+  fi
+
+  # files
+  if test -f "${_src}" ; then
+    # broadcast
+    if $(ns/isop "${WORKDIR}" "+") ; then
+      local _sdir=$(ns/op/name "${STAGEDIR}")
+
+      if test -z "${BROADCAST}" ; then
+        msg "\$BROADCAST not set"
+        return ${_false_}
+      fi
+
+      if ! test -d "${_sdir}" ; then
+        msg "Stage dir not found: ${_sdir}"
+        return ${_false_}
+      fi
+
+      sys/zip/cpuzmv "${_src}" "${_sdir}" "${_dst}"
+      if test $? -gt 0 ; then
+        msg "Stage failed: ${_src}"
+        return ${_false_}
+      fi
+
+      ${BROADCAST} "${_sdir}/${_dst}" "${_wdir}/${_dst}"
+      if test $? -gt 0 ; then
+        msg "Broadcast failed: ${_src}"
+        return ${_false_}
+      fi
+      return ${_true_}
+    fi
+
+    # normal copy
+    sys/zip/cpuzmv "${_src}" "${_wdir}" "${_dst}"
+    if test $? -gt 0 ; then
+      msg "Copy failed: ${_src}"
+      return ${_false_}
+    fi
+  fi
+
+  msg "File type not supported: ${_src}"
+  return ${_false_}
 }
 
 

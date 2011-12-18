@@ -98,10 +98,9 @@ function sys/zip/cpuzmv() {
   # 2. uncompress
   # begin ${_dir}
   sys/dir/svwd "${_dir}"
-  sys/zip/decomp "${_src}"
+  #### sys/zip/decomp "${_src}"
   _dst=$(basename "${_dst}")
   _src=$(basename "${_src}")
-
   # 3. move (rename)
   if ! test -z "${_dst}" ; then
     if test -d "${_src}" && test -d "${_dst}" ; then

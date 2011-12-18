@@ -125,7 +125,7 @@ function ns/isop() {
 
   local o
   for o in ${_m} ; do
-    if test "${_s:0:1}" = "${_m}" ; then
+    if test "${_s:0:1}" = "${o}" ; then
       return ${_true_}
     fi
   done
@@ -141,7 +141,7 @@ function ns/op/name() {
 
   local o
   for o in ${_m} ; do
-    if $(ns/isop "${_s}" "${_m}") ; then
+    if $(ns/isop "${_s}" "${o}") ; then
       echo "${_s:1}"
       return ${_true_}
     fi
