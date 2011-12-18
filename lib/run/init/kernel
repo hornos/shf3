@@ -6,9 +6,6 @@ function run/init/bcast() {
   if test -z "${_src}" ; then
     return ${_false_}
   fi
-  if test -z "${_dst}" ; then
-    _dst=$(basename "${_src}")
-  fi
 
   # directories
   local _wdir=$(ns/op/name "${WORKDIR}")
@@ -51,6 +48,9 @@ function run/init/bcast() {
         return ${_false_}
       fi
 
+      if test -z "${_dst}" ; then
+        _dst=$(basename "${_src}")
+      fi
       ${BROADCAST} "${_sdir}/${_dst}" "${_wdir}/${_dst}"
       if test $? -gt 0 ; then
         msg "Broadcast failed: ${_src}"
@@ -65,6 +65,7 @@ function run/init/bcast() {
       msg "Copy failed: ${_src}"
       return ${_false_}
     fi
+    return $?
   fi
 
   msg "File type not supported: ${_src}"

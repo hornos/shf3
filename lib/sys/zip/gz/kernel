@@ -1,9 +1,0 @@
-
-function sys/zip/gz/c() {
-  ns/var/cmd "${FUNCNAME}" "${_inp}" "${_out}"
-}
-
-function sys/zip/gz/d() {
-  ns/var/cmd "${FUNCNAME}" "${_inp}" "${_out}"
-}
-

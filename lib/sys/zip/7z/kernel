@@ -1,0 +1,44 @@
+
+function sys/zip/7z() {
+  local _m="${1:-x}"
+  local _f="${2}"
+  local _d="${3}"
+  local _o=""
+
+  if test -z "${_f}" || ! test -r "${_f}" ; then
+    return ${_false_}
+  fi
+
+  if test -d "${_d}" ; then
+    _o="-o${_d}"
+  fi
+
+  # extract
+  if test "${_m}" = "x" ; then
+    # check allowed suffixes
+    local s
+    for s in ${sys_zip_7z_s} ; do
+      if test "${_f}" != "${_f%%.${s}}" ; then
+        ${sys_zip_7z} ${sys_zip_7z_x} ${_o} "${_f}"
+        # &> /dev/null
+        if test $? -gt 0 ; then
+          return ${_false_}
+        fi
+        rm -f "${_f}"
+        return $?
+      fi
+      continue
+    done
+    # unknown
+    return ${_true_}
+  fi
+
+  # compress
+  local _z="${_f}.${sys_zip_7z_t}"
+  ${sys_zip_7z} ${sys_zip_7z_c} ${_o} "${_z}" "${_f}"
+  # &> /dev/null
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  rm -f "${_f}"
+}

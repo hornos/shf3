@@ -1,2 +1,1 @@
-sys_zip_old="old"
-sys_zip_def="gz"
+sys_zip_cmp="7z"

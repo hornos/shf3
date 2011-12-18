@@ -2,6 +2,62 @@ function help/sys/zip() {
   echo "Compression module"
 }
 
+function help/sys/zip/cpuzmv() {
+  cat << EOF
+Copy source to directory and uncompress then rename to name
+
+\$1 string source
+\$2 string directory
+\$3 string name
+EOF
+}
+
+function sys/zip/cpuzmv() {
+  import sys/dir
+  local _src="${1}"
+  local _dir="${2}"
+  local _dst="${3}"
+  local _ret=${_true_}
+
+  if test -z "${_src}" || \
+     test -z "${_dir}" ; then
+    return ${_false_}
+  fi
+  if ! test -r "${_src}" || \
+     ! test -d "${_dir}" ; then
+    return ${_false_}
+  fi
+  # 1. recursive copy
+  cp -Rf "${_src}" "${_dir}"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  # 2. decompress
+  _dst=$(basename "${_dst}")
+  _src=$(basename "${_src}")
+
+  sys/zip/x "${_dir}/${_src}" "${_dir}"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  # 3. move (rename)
+  if ! test -z "${_dst}" ; then
+    # directory
+    if test -d "${_dir}/${_src}" ; then
+      # remove destination
+      if test -d "${_dir}/${_dst}" ; then
+        rm -fR "${_dir}/${_dst}"
+        if test $? -gt 0 ; then
+          return ${_false_}
+        fi
+      fi
+    fi
+    mv -f "${_dir}/${_src}" "${_dir}/${_dst}"
+  fi
+}
+
 function help/sys/zip/svmvz() {
   cat << EOF
 Save and compress source to directory and rename to name
@@ -64,54 +120,108 @@ function sys/zip/svmvz() {
   return ${_true_}
 }
 
-function help/sys/zip/cpuzmv() {
-  cat << EOF
-Copy source to directory and uncompress then rename to name
+# extract wrapper
+function sys/zip/x() {
+  local _f="${1}"
+  local _d="${2}"
+  local _m=$(ns/func ${FUNCNAME})
 
-\$1 string source
-\$2 string directory
-\$3 string name
-EOF
+  if test -z "${_f}" ; then
+    return ${_false_}
+  fi
+  if test -d "${_f}" ; then
+    sys/zip/dir ${_m} "${_f}" "${_d}"
+    return $?
+  fi
+  if test -f "${_f}" ; then
+    sys/zip/file ${_m} "${_f}" "${_d}"
+    return $?
+  fi
+  return ${_false_}
 }
 
-function sys/zip/cpuzmv() {
-  import sys/dir
-  local _src="${1}"
-  local _dir="${2}"
-  local _dst="${3}"
-  local _ret=${_true_}
+# compress wrapper
+function sys/zip/c() {
+  local _f="${1}"
+  local _d="${2}"
+  local _m=$(ns/func ${FUNCNAME})
 
-  if test -z "${_src}" || \
-     test -z "${_dir}" ; then
+  if test -z "${_f}" ; then
     return ${_false_}
   fi
-  if ! test -r "${_src}" || \
-     ! test -d "${_dir}" ; then
+  if test -d "${_f}" ; then
+    sys/zip/dir ${_m} "${_f}" "${_d}"
+    return $?
+  fi
+  if test -f "${_f}" ; then
+    sys/zip/file ${_m} "${_f}" "${_d}"
+    return $?
+  fi
+  return ${_false_}
+}
+
+function sys/zip/file() {
+  local _m="${1:-x}"
+  local _f="${2}"
+  local _d="${3}"
+
+  if test -z "${_f}" || ! test -f "${_f}" ; then
     return ${_false_}
   fi
-  # 1. recursive copy
-  cp -Rf "${_src}" "${_dir}"
+
+  # set compressor
+  local _cmp="sys/zip/${sys_zip_cmp}"
+  import ${_cmp}
   if test $? -gt 0 ; then
+    msg "Module ${_cmp} not found"
+    return ${_false_}
+  fi
+  ${_cmp} ${_m} "${_f}" "${_d}"
+}
+
+function sys/zip/dir() {
+  import sys/dir
+
+  local _m="${1:-x}"
+  local _f="${2}"
+  local _d="${3}"
+
+  if test -z "${_f}" || ! test -d "${_f}" ; then
     return ${_false_}
   fi
 
-  # 2. uncompress
-  # begin ${_dir}
-  sys/dir/svwd "${_dir}"
-  #### sys/zip/decomp "${_src}"
-  _dst=$(basename "${_dst}")
-  _src=$(basename "${_src}")
-  # 3. move (rename)
-  if ! test -z "${_dst}" ; then
-    if test -d "${_src}" && test -d "${_dst}" ; then
-      rm -fR "${_dst}"
-    fi
-    mv -f "${_src}" "${_dst}"
-    if test $? -gt 0; then
-      _ret=${_false_}
-    fi
+  # set compressor
+  local _cmp="sys/zip/${sys_zip_cmp}"
+  import ${_cmp}
+  if test $? -gt 0 ; then
+    msg "Module ${_cmp} not found"
+    return ${_false_}
   fi
+
+  sys/dir/svwd "${_f}"
+  sys/zip/rd "${_cmp}" "${_m}" "${_f}"
+  local _ret=$?
   sys/dir/ldwd
-  # end ${_dir}
   return ${_ret}
+}
+
+function sys/zip/rd() {
+  local _cmp="${1}"
+  local _m="${2}"
+  local _f="${3}"
+
+  cd "${_f}"
+  local f
+  for f in * ; do
+    if test -d "${f}" ; then
+      # recursive
+      (sys/zip/rd "${_cmp}" "${_m}" "${_f}")
+      return $?
+    fi
+    if test -f "${f}" ; then
+      ${_cmp} ${_m} "${f}"
+    else
+      return ${_false_}
+    fi
+  done
 }
