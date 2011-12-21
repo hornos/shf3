@@ -58,7 +58,8 @@ function sys/zip/cpuzmv() {
   fi
 }
 
-function help/sys/zip/svmvz() {
+
+function help/sys/zip/zsvmv() {
   cat << EOF
 Save and compress source to directory and rename to name
 
@@ -68,11 +69,13 @@ Save and compress source to directory and rename to name
 EOF
 }
 
-function sys/zip/svmvz() {
+
+function sys/zip/zsvmv() {
   import sys/dir
+
   local _src="${1}"
+  local _src_dir=$(dirname "${_src}")
   local _dir="${2}"
-  local _dst="${3}"
 
   if test -z "${_src}" || \
      test -z "${_dir}" ; then
@@ -83,42 +86,71 @@ function sys/zip/svmvz() {
     return ${_false_}
   fi
 
-  # begin ${_dir}
-  sys/dir/svwd "${_dir}"
-  if test -z "${_dst}" ; then
-    _dst=$(basename "${_src}")
-  fi
-  local _sav="${sys_zip_old}.${_dst}"
-
-  # 1. save
   # directories
   if test -d "${_src}" ; then
-    if test -d "${_dst}" ; then
-      sys/dir/mv "${_dst}" "${_sav}"
+    sys/zip/dir c "${_src}"
+    if test $? -gt 0 ; then
+      msg "Compress failed: ${_src}"
+      return ${_false_}
     fi
-  # files
-  else
-    if test -r "${_dst}" ; then
-      mv -f "${_dst}" "${_sav}"
+
+    # save old
+    local _dst=$(basename "${_src}")
+    local _old="${sys_zip_old}.${_dst}"
+    if test -d "${_dir}/${_dst}" ; then
+      if test -d "${_dir}/${_old}" ; then
+        rm -Rf "${_dir}/${_old}"
+        if test $? -gt 0 ; then
+          msg "Delete failed: ${_dir}/${_old}"
+          return ${_false_}
+        fi
+      fi
+
+      # move
+      mv -f "${_dir}/${_dst}" "${_dir}/${_old}"
+      if test $? -gt 0 ; then
+        msg "Move failed: ${_dir}/${_dst}"
+        return ${_false_}
+      fi
     fi
+    # goto copy
+  elif test -f "${_src}" ; then
+    # compress
+    sys/zip/file c "${_src}" "${_src_dir}"
+    if test $? -gt 0 ; then
+      msg "Compress failed: ${_src}"
+      return ${_false_}
+    fi
+
+    if ! test -f "${_src}".?? ; then
+      return ${_false_}
+    fi
+    _src=$(ls "${_src}".?? 2>/dev/null)
+
+    # save
+    local _dst=$(basename "${_src}")
+    local _old="${sys_zip_old}.${_dst}"
+
+    if test -f "${_dir}/${_dst}" ; then
+      # backup
+      mv -f "${_dir}/${_dst}" "${_dir}/${_old}"
+      if test $? -gt 0 ; then
+        msg "Save failed: ${_dir}/${_dst}"
+        return ${_false_}
+      fi
+    fi
+    # goto copy
   fi
 
-  # 2. move (rename)
-  cp -fR "${_src}" "${_dir}"
-  rm -fR "${_src}"
-  local _src_bn=$(basename "${_src}")
-  if ! test "${_src_bn}" = "${_dst}" ; then
-    mv "${_src_bn}" "${_dst}"
+#:copy
+  cp -fR "${_src}" "${_dir}/${_dst}"
+  if test $? -gt 0 ; then
+    msg "Copy failed: ${_src}"
+    return ${_false_}
   fi
-
-  # 3. compress
-  sys/zip/comp "${_dst}"
-
-  sys/dir/ldwd
-  # end ${_dir}
-
   return ${_true_}
 }
+
 
 # extract wrapper
 function sys/zip/x() {
@@ -130,7 +162,7 @@ function sys/zip/x() {
     return ${_false_}
   fi
   if test -d "${_f}" ; then
-    sys/zip/dir ${_m} "${_f}" "${_d}"
+    sys/zip/dir ${_m} "${_f}"
     return $?
   fi
   if test -f "${_f}" ; then
@@ -150,7 +182,7 @@ function sys/zip/c() {
     return ${_false_}
   fi
   if test -d "${_f}" ; then
-    sys/zip/dir ${_m} "${_f}" "${_d}"
+    sys/zip/dir ${_m} "${_f}"
     return $?
   fi
   if test -f "${_f}" ; then
@@ -184,7 +216,6 @@ function sys/zip/dir() {
 
   local _m="${1:-x}"
   local _f="${2}"
-  local _d="${3}"
 
   if test -z "${_f}" || ! test -d "${_f}" ; then
     return ${_false_}
@@ -198,30 +229,14 @@ function sys/zip/dir() {
     return ${_false_}
   fi
 
-  sys/dir/svwd "${_f}"
-  sys/zip/rd "${_cmp}" "${_m}" "${_f}"
-  local _ret=$?
-  sys/dir/ldwd
-  return ${_ret}
-}
-
-function sys/zip/rd() {
-  local _cmp="${1}"
-  local _m="${2}"
-  local _f="${3}"
-
-  cd "${_f}"
-  local f
-  for f in * ; do
-    if test -d "${f}" ; then
-      # recursive
-      (sys/zip/rd "${_cmp}" "${_m}" "${_f}")
-      return $?
-    fi
-    if test -f "${f}" ; then
-      ${_cmp} ${_m} "${f}"
-    else
+  # recursive compressor
+  local d
+  for f in $(find "${_f}" -type f) ; do
+    d=$(dirname "${f}")
+    ${_cmp} ${_m} "${f}" "${d}" &> /dev/null
+    if test $? -gt 0 ; then
       return ${_false_}
     fi
   done
+  return ${_true_}
 }

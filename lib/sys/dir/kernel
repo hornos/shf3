@@ -1,3 +1,16 @@
+function sys/dir/lsl() {
+  import gui
+
+  local _d="${1:-.}"
+  local _s="${2}"
+  if ! test -z "${_s}" ; then
+    msg "${_s}"
+  fi
+  gui/line
+  ls -lhR ${_d}
+  echo ""
+  gui/line
+}
 
 function sys/dir/rls() {
   local _d="${1:-.}"

@@ -1,5 +1,5 @@
 sys_zip_7z="7z"
-sys_zip_7z_x="x"
-sys_zip_7z_t="7z"
+sys_zip_7z_x="x -y"
+sys_zip_7z_t="xz"
 sys_zip_7z_s="7z gz xz"
-sys_zip_7z_c="a -t${sys_zip_7z_t} -mx9"
+sys_zip_7z_c="a -y -txz -mx9"

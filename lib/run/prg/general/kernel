@@ -26,7 +26,9 @@ function run/prg/general/finish() {
 
 
 function run/prg/general/save() {
-  run/save false
+  import run/save
+
+  run/save
 }
 
 function run/prg/general/init() {

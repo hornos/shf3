@@ -210,10 +210,7 @@ function run/prg() {
 
   # list inputs
   echo ""
-  msg "Inputs in ${_wdir}"
-  gui/line
-  ls -lR
-  gui/line
+  sys/dir/lsl . "Inputs in ${_wdir}"
 
   # MPI & options
   local _out=${_prg}.output
@@ -287,10 +284,7 @@ function run/prg() {
 
   # list output
   echo ""
-  msg "Outputs in ${_wdir}"
-  gui/line
-  ls -lR
-  gui/line
+  sys/dir/lsl . "Outputs in ${_wdir}"
 
   # exit status
   if test ${_ret} -gt 0 && \
@@ -333,11 +327,11 @@ function run/prg() {
   ### save
 
   # list output
+  if test -z "${RESULT}" ; then
+    RESULT="*"
+  fi
   echo ""
-  msg "Saved outputs in ${_wdir}"
-  gui/line
-  ls -lR ${RESULTS}
-  gui/line
+  sys/dir/lsl "${RESULT}" "Saved outputs in ${_wdir}"
 
   if test "${ONERR}" != "leave" ; then
     run/prg/${_prg}/save
