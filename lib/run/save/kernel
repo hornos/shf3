@@ -1,37 +1,4 @@
 
-function sp_f_svzmv() {
-  local _rs="${1}"
-  local _p_dst="${2}"
-  local _p_sav="${_p_dst%%${sp_s_z}}${sp_s_oz}"
-
-  if test -z "${_rs}" || test -z "${_p_dst}" ; then
-    return ${_FALSE_}
-  fi
-  if test -f "${_p_dst}" ; then
-    mv -f "${_p_dst}" "${_p_sav}"
-    if test $? -gt 0 ; then
-      sp_f_err "cannot rename ${_p_dst}"
-      return ${_FALSE_}
-    fi
-  fi
-
-  local _zrs="${_rs}${sp_s_z}"
-  ${sp_b_z} "${_rs}"
-  cp -f "${_zrs}" "${_p_dst}"
-  if test $? -gt 0 ; then
-    sp_f_err "cannot copy ${_zrs}"
-    return ${_FALSE_}
-  fi
-  chmod u-w "${_p_dst}"
-  rm -f "${_zrs}"
-  if test $? -gt 0 ; then
-    sp_f_err_cad "${_zrs}"
-    return ${_FALSE_}
-  fi
-  return ${_TRUE_}
-}
-
-
 function sp_f_run_fsv() {
   local _rs="${1}"
   local _inp="${2}"

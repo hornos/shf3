@@ -37,7 +37,11 @@ function sys/zip/cpuzmv() {
   _dst=$(basename "${_dst}")
   _src=$(basename "${_src}")
 
-  sys/zip/x "${_dir}/${_src}" "${_dir}"
+  if ${gdbg} ; then
+    sys/zip/x "${_dir}/${_src}" "${_dir}"
+  else
+    sys/zip/x "${_dir}/${_src}" "${_dir}" &> /dev/null
+  fi
   if test $? -gt 0 ; then
     return ${_false_}
   fi
@@ -88,7 +92,11 @@ function sys/zip/zsvmv() {
 
   # directories
   if test -d "${_src}" ; then
-    sys/zip/dir c "${_src}"
+    if ${gdbg} ; then
+      sys/zip/dir c "${_src}"
+    else
+      sys/zip/dir c "${_src}" &> /dev/null
+    fi
     if test $? -gt 0 ; then
       msg "Compress failed: ${_src}"
       return ${_false_}
@@ -116,7 +124,11 @@ function sys/zip/zsvmv() {
     # goto copy
   elif test -f "${_src}" ; then
     # compress
-    sys/zip/file c "${_src}" "${_src_dir}"
+    if ${gdbg} ; then
+      sys/zip/file c "${_src}" "${_src_dir}"
+    else
+      sys/zip/file c "${_src}" "${_src_dir}" &> /dev/null
+    fi
     if test $? -gt 0 ; then
       msg "Compress failed: ${_src}"
       return ${_false_}
@@ -233,7 +245,7 @@ function sys/zip/dir() {
   local d
   for f in $(find "${_f}" -type f) ; do
     d=$(dirname "${f}")
-    ${_cmp} ${_m} "${f}" "${d}" &> /dev/null
+    ${_cmp} ${_m} "${f}" "${d}"
     if test $? -gt 0 ; then
       return ${_false_}
     fi

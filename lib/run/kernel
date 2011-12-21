@@ -260,9 +260,16 @@ function run/prg() {
 
   # mail program start
   run/mail "Program ${_prg} started"
-  msg "Program started $(date)"
+  msg "== Begin == $(date) =="
+  msg "Program : ${_cmd}"
+  msg "Input   : ${_inp}"
+  msg "Output  : ${_out}"
 
   local _inp=$(ns/op/name "${MAININPUT}")
+
+  # start timer
+  local _t0=$(epoch)
+  # start program
   if $(ns/isop "${MAININPUT}" "<") ; then
     ${_cmd} < "${_inp}" &> "${_out}"
   elif $(ns/isop "${MAININPUT}" "-") ; then
@@ -271,8 +278,11 @@ function run/prg() {
     ${_cmd} "${_inp}" &> "${_out}"
   fi
   _ret=$?
+  # stop timer
+  local _t1=$(epoch)
 
-  msg "Program finished $(date)"
+  msg "==  End  == $(date) =="
+  msg "Elapsed time: $((_t1-_t0))"
 
   # work dir  save mode
   local _oemsg="error cleaned / success saved"

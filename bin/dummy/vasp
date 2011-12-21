@@ -1,0 +1,15 @@
+#!/bin/bash
+
+gbn=$(basename "${BASH_SOURCE}")
+echo "${gbn} $$"
+
+out=(CHG CHGCAR CONTCAR DOSCAR \
+     EIGENVAL OSZICAR OUTCAR \
+     PCDAT WAVECAR XDATCAR \
+     vasprun.xml)
+
+for i in ${out[@]} ; do
+  echo ""
+  echo "Generating ${i}"
+  dd bs=1k count=1000 if=/dev/random of="${i}"
+done
