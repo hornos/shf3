@@ -1,0 +1,43 @@
+
+function help/run/mail() {
+  cat << EOF
+Description:
+Send mail
+
+Parameters:
+\$1 string - subject
+
+Environment:
+QMAILTO    - email
+SCHEDULER  - scheduler
+EOF
+}
+
+function run/mail() {
+  local _sub="${1:-${FUNCNAME}}"
+  local _msg=""
+
+  # no subject or address
+  if test -z "${_sub}" || 
+     test -z "${QMAILTO}" ; then
+    return ${_false_}
+  fi
+
+  # get subject & messgae from scheduler
+  local _sch="${SCHEDULER}"
+  if ! test -z "${_sch}" ; then
+    import que/${_sch}
+    if test $? -gt 0 ; then
+      msg "Module que/${_sch} not found"
+      return ${_false_}
+    fi
+    _sub="$(que/mail/sub) ${_sub}"
+    _msg=$(que/mail/msg)
+  fi
+
+  # send mail
+  import net/mail
+  net/mail "${QMAILTO}" "${_sub}" "${_msg}"
+}
+
+

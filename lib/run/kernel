@@ -1,97 +1,4 @@
 
-function help/run/mail() {
-  cat << EOF
-Description:
-Send mail
-
-Parameters:
-\$1 string - subject
-
-Environment:
-QMAILTO    - email
-SCHEDULER  - scheduler
-EOF
-}
-
-function run/mail() {
-  local _sub="${1:-${FUNCNAME}}"
-  local _msg=""
-
-  # no subject or address
-  if test -z "${_sub}" || 
-     test -z "${QMAILTO}" ; then
-    return ${_false_}
-  fi
-
-  # get subject & messgae from scheduler
-  local _sch="${SCHEDULER}"
-  if ! test -z "${_sch}" ; then
-    import que/${_sch}
-    if test $? -gt 0 ; then
-      msg "Module que/${_sch} not found"
-      return ${_false_}
-    fi
-    _sub="$(que/mail/sub) ${_sub}"
-    _msg=$(que/mail/msg)
-  fi
-
-  # send mail
-  import net/mail
-  net/mail "${QMAILTO}" "${_sub}" "${_msg}"
-}
-
-
-function help/run/clean() {
-  cat << EOF
-Description:
-Clean directories
-
-Parameters:
-\$* strings - directories
-EOF
-}
-
-function run/clean() {
-  import gui
-  import sys/dir
-  import sys/lnk
-
-  local _dirs="${*}"
-  if test -z "${_dirs}" ; then
-    return ${_false_}
-  fi
-
-  echo ""
-  if test -z "${INPUTDIR}" || \
-   ! test -d "${INPUTDIR}" ; then
-    msg "Not found: ${INPUTDIR}"
-    return ${_false_}
-  fi
-
-  # enter input dir
-  local _idir="${INPUTDIR}"
-  sys/dir/svwd "${_idir}"
-
-  # clean dirs
-  local dir
-  local _dir
-  local _pwd=$(pwd)
-  for dir in ${_dirs} ; do
-    _dir=$(ns/op/name "${!dir}" "+")
-    if test -d "${_dir}" ; then
-      _dir=$(cd "${_dir}";pwd)
-
-      # avoid delete of inputdir
-      if test "${_pwd}" = "${_dir}" ; then
-        continue
-      fi
-      msg "Clean : ${_dir}"
-      sys/dir/rm "${_dir}"
-    fi
-  done
-}
-
-
 function help/run/prg() {
   cat << EOF
 Program run wrapper
@@ -112,6 +19,8 @@ function run/prg() {
   import sys/dir
   import sys/lnk
   import run/chk
+  import run/mail
+  import run/clean
   import gui
 
   local _mode=${1:-B}
@@ -200,7 +109,7 @@ function run/prg() {
       STAGEDIR="${_sdir}"
     fi
     if ! $(sys/dir/mk "${_sdir}") ; then
-      run/clean WORKDIR RESULTDIR
+      run/clean WORKDIR
       return ${_false_}
     fi
     msg "Stage  : ${_sdir}"
@@ -228,7 +137,7 @@ function run/prg() {
   run/prg/${_prg}/init
   if test $? -gt 0 ; then
     if test "${ONERR}" = "clean" ; then
-      run/clean WORKDIR STAGEDIR RESULTDIR
+      run/clean WORKDIR STAGEDIR
       sys/lnk/rm "${WORKDIRLINK}"
     fi
     return ${_false_}
@@ -296,7 +205,9 @@ function run/prg() {
     echo ""
   fi
 
-  # mail program start
+
+  ### run
+
   run/mail "Program ${_prg} started"
   msg "== Begin == $(date) =="
   msg "Program : ${_cmd}"
@@ -315,7 +226,7 @@ function run/prg() {
   else
     ${_cmd} "${_inp}" &> "${_out}"
   fi
-  _ret=$?
+  _exit=$?
   # stop timer
   local _t1=$(epoch)
   msg "==  End  == $(date) =="
@@ -323,35 +234,47 @@ function run/prg() {
   msg "Elapsed : $((_t1-_t0)) s"
 
   # exit check
-  if test ${_ret} -gt 0 ; then
-    msg "Exit    : ${_ret}"
+  if test ${_exit} -gt 0 ; then
+    msg "Exit    : ${_exit}"
   else
     msg "Success"
   fi
 
+  # output save mode
   echo ""
-  # work dir save mode
   if test -z "${ONERR}" ; then
     ONERR="clean"
   fi
   local _oemsg=""
   case "${ONERR}" in 
-    "clean") _oemsg="error cleaned / success saved";;
-    "save")  _oemsg="error saved   / success saved";;
+    "clean")
+      if test ${_exit} -gt 0 ; then
+        _oemsg="cleaned"
+      else
+        _oemsg="saved"
+      fi
+    ;;
+    "save")
+      if test ${_exit} -gt 0 ; then
+        _oemsg="saved"
+      else
+        _oemsg="saved"
+      fi
+    ;;
   esac
-  msg "Outputs in case of ${_oemsg}"
+  msg "Outputs are ${_oemsg}"
 
   # list output
-  echo ""
+  # echo ""
   sys/dir/lsl . "Outputs in ${_wdir}"
 
-  # exit status
-  if test ${_ret} -gt 0 && \
+  # program exit check
+  if test ${_exit} -gt 0 && \
      test "${ONERR}" = "clean" ; then
-    run/clean WORKDIR STAGEDIR RESULTDIR
+    run/clean WORKDIR STAGEDIR
     sys/lnk/rm "${WORKDIRLINK}"
 
-    local _emsg="Program failed (exit code ${_ret})"
+    local _emsg="Program failed (exit code ${_exit})"
     msg "${_emsg}"
     run/mail "${_emsg}"
     return ${_ret}
@@ -373,7 +296,7 @@ function run/prg() {
   _ret=$?
   if test ${_ret} -gt 0 && \
      test "${ONERR}" = "clean" ; then
-    run/clean WORKDIR STAGEDIR RESULTDIR
+    run/clean WORKDIR STAGEDIR
     sys/lnk/rm "${WORKDIRLINK}"
 
     local _emsg="run/prg/${_prg}/finish failed (exit code ${_ret})"
@@ -392,24 +315,29 @@ function run/prg() {
   echo ""
   sys/dir/lsl "${RESULT}" "Saved outputs in ${_wdir}"
 
-  if test "${ONERR}" != "leave" ; then
-    run/prg/${_prg}/save
-    _ret=$?
-    if test ${_ret} -gt 0 ; then
-      if test "${ONERR}" = "clean" ; then
-        run/clean WORKDIR STAGEDIR RESULTDIR
-        sys/lnk/rm "${WORKDIRLINK}"
-      fi
-      local _emsg="run/prg/${_prg}/save Failed (exit code ${_ret})"
-      msg "${_emsg}"
-      run/mail "${_emsg}"
-      return ${_ret}
+  run/prg/${_prg}/save
+  _ret=$?
+  if test ${_ret} -gt 0 ; then
+    if test "${ONERR}" = "clean" ; then
+      run/clean WORKDIR STAGEDIR
+      sys/lnk/rm "${WORKDIRLINK}"
     fi
-    run/clean WORKDIR STAGEDIR RESULTDIR
-    sys/lnk/rm "${WORKDIRLINK}"
+    local _emsg="run/prg/${_prg}/save failed (exit code ${_ret})"
+    msg "${_emsg}"
+    run/mail "${_emsg}"
+    return ${_ret}
   fi
 
+  # final clean
+  run/clean WORKDIR STAGEDIR
+  sys/lnk/rm "${WORKDIRLINK}"
+
   local _emsg="Program ${_prg} complete"
+  if test ${_exit} -gt 0 ; then
+    local _emsg="Program failed (exit code ${_exit})"
+  fi
+
   msg "${_emsg}"
   run/mail "${_emsg}"
+  return ${_exit}
 }

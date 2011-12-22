@@ -1,0 +1,51 @@
+
+function help/run/clean() {
+  cat << EOF
+Description:
+Clean directories
+
+Parameters:
+\$* strings - directories
+EOF
+}
+
+function run/clean() {
+  import gui
+  import sys/dir
+  import sys/lnk
+
+  local _dirs="${*}"
+  if test -z "${_dirs}" ; then
+    return ${_false_}
+  fi
+
+  echo ""
+  if test -z "${INPUTDIR}" || \
+   ! test -d "${INPUTDIR}" ; then
+    msg "Not found: ${INPUTDIR}"
+    return ${_false_}
+  fi
+
+  # enter input dir
+  local _idir="${INPUTDIR}"
+  sys/dir/svwd "${_idir}"
+
+  # clean dirs
+  local dir
+  local _dir
+  local _pwd=$(pwd -P)
+  for dir in ${_dirs} ; do
+    _dir=$(ns/op/name "${!dir}" "+")
+    if test -d "${_dir}" ; then
+      _dir=$(cd "${_dir}";pwd -P)
+
+      # avoid delete of inputdir
+      if test "${_pwd}" = "${_dir}" ; then
+        continue
+      fi
+      msg "Clean : ${_dir}"
+      sys/dir/rm "${_dir}"
+    fi
+  done
+}
+
