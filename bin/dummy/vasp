@@ -1,6 +1,17 @@
 #!/bin/bash
 
 gbn=$(basename "${BASH_SOURCE}")
+
+_e=0
+### args
+while getopts e: o; do
+  case "$o" in
+    e) _e=$OPTARG;;
+  esac
+done
+
+
+### main
 echo "${gbn} $$"
 
 out=(CHG CHGCAR CONTCAR DOSCAR \
@@ -13,3 +24,5 @@ for i in ${out[@]} ; do
   echo "Generating ${i}"
   dd bs=1k count=1000 if=/dev/random of="${i}"
 done
+
+exit ${_e}

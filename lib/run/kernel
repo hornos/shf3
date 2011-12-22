@@ -1,7 +1,20 @@
 
+function help/run/mail() {
+  cat << EOF
+Description:
+Send mail
+
+Parameters:
+\$1 string - subject
+
+Environment:
+QMAILTO    - email
+SCHEDULER  - scheduler
+EOF
+}
+
 function run/mail() {
   local _sub="${1:-${FUNCNAME}}"
-  local _sch="${2}"
   local _msg=""
 
   # no subject or address
@@ -10,6 +23,8 @@ function run/mail() {
     return ${_false_}
   fi
 
+  # get subject & messgae from scheduler
+  local _sch="${SCHEDULER}"
   if ! test -z "${_sch}" ; then
     import que/${_sch}
     if test $? -gt 0 ; then
@@ -26,6 +41,16 @@ function run/mail() {
 }
 
 
+function help/run/clean() {
+  cat << EOF
+Description:
+Clean directories
+
+Parameters:
+\$* strings - directories
+EOF
+}
+
 function run/clean() {
   import gui
   import sys/dir
@@ -37,7 +62,6 @@ function run/clean() {
   fi
 
   echo ""
-
   if test -z "${INPUTDIR}" || \
    ! test -d "${INPUTDIR}" ; then
     msg "Not found: ${INPUTDIR}"
@@ -56,6 +80,8 @@ function run/clean() {
     _dir=$(ns/op/name "${!dir}" "+")
     if test -d "${_dir}" ; then
       _dir=$(cd "${_dir}";pwd)
+
+      # avoid delete of inputdir
       if test "${_pwd}" = "${_dir}" ; then
         continue
       fi
@@ -109,23 +135,25 @@ function run/prg() {
   # program
   import run/prg/${_prg}
   if test $? -gt 0 ; then
-    msg "Program module run/prg/${_prg} not found"
+    msg "Module not found: run/prg/${_prg}"
     return ${_false_}
   fi
 
-  # scheduler
+  # set scheduler
   if ! test -z "${_sch}" ; then
     import que/${_sch}
     if test $? -gt 0 ; then
-      msg "Scheduler module que/${_sch} not found"
+      msg "Module not found: que/${_sch}"
       return ${_false_}
     fi
 
     SCHEDULER=${_sch}
+
     # set broadcast
     local _bca="que_${_sch}_qbca"
     BROADCAST=${!_bca}
   fi
+
 
   ### begin run
 
@@ -135,15 +163,26 @@ function run/prg() {
   msg "Input  : ${_idir}"
 
   # create workdir
+  if test -z "${WORKDIR}" ; then
+    msg "Directory not found: \$WORKDIR"
+    return ${_false_}
+  fi
   local _wdir=$(ns/op/name "${WORKDIR}" "+")
   if ! $(sys/dir/mk "${_wdir}") ; then
+    msg "Create directory failed: ${WORKDIR}"
     return ${_false_}
   fi
   msg "Work   : ${_wdir}"
 
   # create resultdir
+  if test -z "${RESULTDIR}" ; then
+    msg "Directory not found: \$RESULTDIR"
+    run/clean WORKDIR
+    return ${_false_}
+  fi
   local _rdir=$(ns/op/name "${RESULTDIR}" "+")
   if ! $(sys/dir/mk "${_rdir}") ; then
+    msg "Create directory failed: ${RESULTDIR}"
     run/clean WORKDIR
     return ${_false_}
   fi
@@ -172,6 +211,7 @@ function run/prg() {
   if ! $(ns/isop "${WORKDIR}" "+") ; then
     sys/lnk/mk "${_wdir}" "${WORKDIRLINK}"
   fi
+
 
   ### program init
 
@@ -225,8 +265,6 @@ function run/prg() {
   fi
 
   echo ""
-  msg "Program: ${_cmd}"
-
   # lib override
   # Format: colon separated list
   if ! test -z "${LDLIB}" ; then
@@ -250,11 +288,11 @@ function run/prg() {
   fi
 
   if test "${_mode}" = "I" ; then
-    echo ""
     answer "Run command?"
     if test $? -gt 0 ; then
       return ${_false_}
     fi
+    echo ""
     echo ""
   fi
 
@@ -280,12 +318,23 @@ function run/prg() {
   _ret=$?
   # stop timer
   local _t1=$(epoch)
-
   msg "==  End  == $(date) =="
-  msg "Elapsed time: $((_t1-_t0))"
 
-  # work dir  save mode
-  local _oemsg="error cleaned / success saved"
+  msg "Elapsed : $((_t1-_t0)) s"
+
+  # exit check
+  if test ${_ret} -gt 0 ; then
+    msg "Exit    : ${_ret}"
+  else
+    msg "Success"
+  fi
+
+  echo ""
+  # work dir save mode
+  if test -z "${ONERR}" ; then
+    ONERR="clean"
+  fi
+  local _oemsg=""
   case "${ONERR}" in 
     "clean") _oemsg="error cleaned / success saved";;
     "save")  _oemsg="error saved   / success saved";;

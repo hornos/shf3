@@ -24,7 +24,7 @@ function run/chk() {
 
   # check guide
   if test -z "${_guide}" || ! test -r "${_guide}" ; then
-    msg "Guide ${_guide} not found"
+    msg "Guide not found: ${guide}"
     return ${_false_}
   fi
 
@@ -33,7 +33,7 @@ function run/chk() {
 
   # check program binary
   if ! test -x "${PRGBIN}" ; then
-    msg "Program binary ${PRGBIN} not found"
+    msg "Program binary not found: ${PRGBIN}"
     return ${_false_}
   fi
 
@@ -45,7 +45,7 @@ function run/chk() {
       # operator clean name
       _dir=$(ns/op/name "${!dir}" "+")
       if ! test -d "${_dir}" ; then
-        msg "Directory \$${dir} not found"
+        msg "Directory not found: \$${dir}"
         return ${_false_}
       fi
     done
@@ -55,7 +55,7 @@ function run/chk() {
   if test ${_chk} -gt 1 ; then
     import run/prg/${_prg}
     if test $? -gt 0 ; then
-      msg "Module run/$prg/{_prg} not found"
+      msg "Module not found: run/$prg/{_prg}"
       return ${_false_}
     fi
     run/prg/${_prg}/chk ${_chk}
@@ -64,7 +64,7 @@ function run/chk() {
     fi
   fi
 
-  msg "${FUNCNAME}: All checks passed (${_chk})"
+  msg "All checks passed (${_chk})"
   return ${_true_}
 }
 
@@ -81,7 +81,7 @@ function run/chk/main() {
   _inp="${_idir}/${_inp}"
 
   if ! test -r "${_inp}" ; then
-    msg "Main input not found ${_inp}"
+    msg "Main input not found: ${_inp}"
     return ${_false_}
   fi
 }
