@@ -129,11 +129,11 @@ function que/sge() {
   fi
 }
 
-function que/mail/sub() {
+function que/sge/mail/sub() {
   echo "Job ${JOB_ID} (${JOB_NAME})"
 }
 
-function que/mail/msg() {
+function que/sge/mail/msg() {
   local _m=""
   _msg=$(date)
   if ! test -z "${NSLOTS}" ; then

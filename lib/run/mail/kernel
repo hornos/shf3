@@ -14,8 +14,8 @@ EOF
 }
 
 function run/mail() {
-  local _sub="${1:-${FUNCNAME}}"
-  local _msg=""
+  local _sub="${1}"
+  local _msg="${FUNCNAME}"
 
   # no subject or address
   if test -z "${_sub}" || 
@@ -31,13 +31,12 @@ function run/mail() {
       msg "Module que/${_sch} not found"
       return ${_false_}
     fi
-    _sub="$(que/mail/sub) ${_sub}"
-    _msg=$(que/mail/msg)
+    _sub="$(que/${_sch}/mail/sub) ${_sub}"
+    _msg=$(que/${_sch}/mail/msg)
   fi
 
   # send mail
   import net/mail
+
   net/mail "${QMAILTO}" "${_sub}" "${_msg}"
 }
-
-

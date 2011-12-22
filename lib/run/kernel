@@ -61,6 +61,8 @@ function run/prg() {
     # set broadcast
     local _bca="que_${_sch}_qbca"
     BROADCAST=${!_bca}
+
+    msg "Scheduler : ${SCHEDULER}"
   fi
 
 
@@ -69,7 +71,7 @@ function run/prg() {
   # enter inputdir
   local _idir=$(ns/op/name "${INPUTDIR}" "+")
   sys/dir/svwd "${_idir}"
-  msg "Input  : ${_idir}"
+  msg "Input     : ${_idir}"
 
   # create workdir
   if test -z "${WORKDIR}" ; then
@@ -81,7 +83,7 @@ function run/prg() {
     msg "Create directory failed: ${WORKDIR}"
     return ${_false_}
   fi
-  msg "Work   : ${_wdir}"
+  msg "Work      : ${_wdir}"
 
   # create resultdir
   if test -z "${RESULTDIR}" ; then
@@ -95,7 +97,7 @@ function run/prg() {
     run/clean WORKDIR
     return ${_false_}
   fi
-  msg "Result : ${_rdir}"
+  msg "Result    : ${_rdir}"
 
 
   ### broadcast

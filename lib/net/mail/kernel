@@ -1,0 +1,19 @@
+
+function net/mail() {
+  local _to="${1}"
+  local _sub="${2}"
+  local _msg="${3}"
+
+  if test -z "${_to}"  || \
+     test -z "${_sub}" || \
+     test -z "${_msg}" ; then
+    return ${_false_}
+  fi
+
+  msg "Send mail to ${_to}"
+  echo -e "${_msg}" | ${net_mail} -s "${_sub}" "${_to}"
+  if test $? -gt 0 ; then
+    msg "Network error"
+    return ${_false_}
+  fi
+}
