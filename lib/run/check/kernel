@@ -1,5 +1,5 @@
 
-function help/run/chk() {
+function help/run/check() {
   cat << EOF
 Program check
 
@@ -15,7 +15,7 @@ Check level:
 EOF
 }
 
-function run/chk() {
+function run/check() {
   import gui
 
   local _chk="${1:-0}"
@@ -43,7 +43,7 @@ function run/chk() {
     local _dir
     for dir in INPUTDIR; do
       # operator clean name
-      _dir=$(ns/op/name "${!dir}" "+")
+      _dir=$(ns/op/value "${!dir}" "+")
       if ! test -d "${_dir}" ; then
         msg "Directory not found: \$${dir}"
         return ${_false_}
@@ -58,7 +58,7 @@ function run/chk() {
       msg "Module not found: run/$prg/{_prg}"
       return ${_false_}
     fi
-    run/prg/${_prg}/chk ${_chk}
+    run/prg/${_prg}/check ${_chk}
     if test $? -gt 0 ; then
       return ${_false_}
     fi
@@ -69,15 +69,15 @@ function run/chk() {
 }
 
 
-function run/chk/main() {
-  if test -z "${MAININPUT}" ; then
-    msg "\$MAININPUT not set"
+function run/check/main() {
+  if test -z "${MAIN}" ; then
+    msg "\$MAIN not set"
     return ${_false_}
   fi
 
   # operator clean name
-  local _inp=$(ns/op/name "${MAININPUT}")
-  local _idir=$(ns/op/name "${INPUTDIR}")
+  local _inp=$(ns/op/value "${MAIN}")
+  local _idir=$(ns/op/value "${INPUTDIR}")
   _inp="${_idir}/${_inp}"
 
   if ! test -r "${_inp}" ; then
@@ -87,16 +87,16 @@ function run/chk/main() {
 }
 
 
-function run/chk/other() {
-  local _input="${1:-OTHERINPUT}"
+function run/check/other() {
+  local _input="${1:-OTHER}"
 
   # continue
-  if test -z "${OTHERINPUT}" ; then
+  if test -z "${OTHER}" ; then
     return ${_true_}
   fi
 
   # operator clean name
-  local _idir=$(ns/op/name "${INPUTDIR}")
+  local _idir=$(ns/op/value "${INPUTDIR}")
 
   local inp
   local _inp
@@ -111,7 +111,7 @@ function run/chk/other() {
 }
 
 
-function run/chk/data() {
+function run/check/data() {
   # continue
   if test -z "${DATADIR}" ; then
     return ${_true_}
@@ -121,7 +121,7 @@ function run/chk/data() {
   fi
 
   # operator clean name
-  local _ddir=$(ns/op/name "${DATADIR}")
+  local _ddir=$(ns/op/value "${DATADIR}")
 
   local _dat
   for _dat in ${DATA}; do

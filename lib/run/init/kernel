@@ -8,11 +8,11 @@ function run/init/bcast() {
   fi
 
   # directories
-  local _wdir=$(ns/op/name "${WORKDIR}")
+  local _wdir=$(ns/op/value "${WORKDIR}")
 
   if test -d "${_src}" ; then
     # broadcast
-    if $(ns/isop "${WORKDIR}" "+") ; then
+    if $(ns/op "${WORKDIR}" "+") ; then
       msg "Broadcast is not supported for directories"
       return ${_false_}
     fi
@@ -29,8 +29,8 @@ function run/init/bcast() {
   # files
   if test -f "${_src}" ; then
     # broadcast
-    if $(ns/isop "${WORKDIR}" "+") ; then
-      local _sdir=$(ns/op/name "${STAGEDIR}")
+    if $(ns/op "${WORKDIR}" "+") ; then
+      local _sdir=$(ns/op/value "${STAGEDIR}")
 
       if test -z "${BROADCAST}" ; then
         msg "\$BROADCAST not set"
@@ -68,19 +68,19 @@ function run/init/bcast() {
     return $?
   fi
 
-  msg "File type not supported: ${_src}"
+  msg "Broadcast failed: ${_src}"
   return ${_false_}
 }
 
 
 function run/init/main() {
-  if test -z "${MAININPUT}" ; then
+  if test -z "${MAIN}" ; then
     return ${_false_}
   fi
 
   # operator clean name
-  local _idir=$(ns/op/name "${INPUTDIR}")
-  local _inp=$(ns/op/name "${MAININPUT}")
+  local _idir=$(ns/op/value "${INPUTDIR}")
+  local _inp=$(ns/op/value "${MAIN}")
   _inp="${_idir}/${_inp}"
   run/init/bcast "${_inp}"
 }
@@ -91,7 +91,7 @@ function run/init/data() {
   fi
 
   # operator clean name
-  local _ddir=$(ns/op/name "${DATADIR}")
+  local _ddir=$(ns/op/value "${DATADIR}")
 
   local dat
   local _dat
@@ -110,16 +110,16 @@ function run/init/data() {
 }
 
 function run/init/other() {
-  if test -z "${OTHERINPUT}" ; then
+  if test -z "${OTHER}" ; then
     return ${_true_}
   fi
 
   # operator clean name
-  local _idir=$(ns/op/name "${INPUTDIR}")
+  local _idir=$(ns/op/value "${INPUTDIR}")
 
   local inp
   local _inp
-  for inp in ${OTHERINPUT}; do
+  for inp in ${OTHER}; do
     _inp="${INPUTDIR}/${inp}"
     if ! test -r "${_inp}" ; then
       msg "Input not found: ${_inp}"

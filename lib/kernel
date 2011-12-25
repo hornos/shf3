@@ -116,7 +116,7 @@ function ns/func/dir() {
 }
 
 # operators
-function ns/isop() {
+function ns/op() {
   local _s="${1}"
   local _m="${2}"
   if test -z "${_m}" ; then
@@ -132,7 +132,7 @@ function ns/isop() {
   return ${_false_}
 }
 
-function ns/op/name() {
+function ns/op/value() {
   local _s="${1}"
   local _m="${2}"
   if test -z "${_m}" ; then
@@ -141,7 +141,7 @@ function ns/op/name() {
 
   local o
   for o in ${_m} ; do
-    if $(ns/isop "${_s}" "${o}") ; then
+    if $(ns/op "${_s}" "${o}") ; then
       echo "${_s:1}"
       return ${_true_}
     fi
@@ -221,7 +221,7 @@ function include() {
     return ${_false_}
   fi
 
-  local __p=$(ns/op/name "${_p}" "+")
+  local __p=$(ns/op/value "${_p}" "+")
   msg/debug "${FUNCNAME} ${__p}"
 
   if ! test -d "${__p}" ; then
@@ -234,7 +234,7 @@ function include() {
   fi
 
   if ! $(ns/inpath "${__p}" "${gip}") ; then
-    if $(ns/isop "${_p}" "+") ; then
+    if $(ns/op "${_p}" "+") ; then
       gip="${__p}${gip}:"
     else
       gip=":${gip}${__p}"
@@ -280,9 +280,9 @@ function import() {
   msg/debug "${FUNCNAME} import : ${_m}"
 
   # force reloading
-  local __m=$(ns/op/name "${_m}" "+")
+  local __m=$(ns/op/value "${_m}" "+")
   if $(ns/inpath "${__m}" "${gim}") ; then
-    if ! $(ns/isop "${_m}" "+") ; then
+    if ! $(ns/op "${_m}" "+") ; then
       # skipped
       return ${_true_}
     fi

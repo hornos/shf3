@@ -217,7 +217,7 @@ function sys/zip/file() {
   local _cmp="sys/zip/${sys_zip_cmp}"
   import ${_cmp}
   if test $? -gt 0 ; then
-    msg "Module ${_cmp} not found"
+    msg "Module not found: ${_cmp}"
     return ${_false_}
   fi
   ${_cmp} ${_m} "${_f}" "${_d}"
@@ -237,7 +237,7 @@ function sys/zip/dir() {
   local _cmp="sys/zip/${sys_zip_cmp}"
   import ${_cmp}
   if test $? -gt 0 ; then
-    msg "Module ${_cmp} not found"
+    msg "Module not found: ${_cmp}"
     return ${_false_}
   fi
 

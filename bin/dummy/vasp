@@ -3,10 +3,13 @@
 gbn=$(basename "${BASH_SOURCE}")
 
 _e=0
+_t=10
 ### args
-while getopts e: o; do
+while getopts he:t: o; do
   case "$o" in
     e) _e=$OPTARG;;
+    t) _t=$OPTARG;;
+    h|*) exit 1;;
   esac
 done
 
@@ -18,6 +21,10 @@ out=(CHG CHGCAR CONTCAR DOSCAR \
      EIGENVAL OSZICAR OUTCAR \
      PCDAT WAVECAR XDATCAR \
      vasprun.xml)
+
+if test ${_t} -gt 0 ; then
+  sleep ${_t}
+fi
 
 for i in ${out[@]} ; do
   echo ""

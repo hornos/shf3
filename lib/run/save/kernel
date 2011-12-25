@@ -1,15 +1,4 @@
 
-function sp_f_run_fsv() {
-  local _rs="${1}"
-  local _inp="${2}"
-  if ! test -z "${_inp}" ; then
-    _inp="${_inp}."
-  fi
-  local _p_dst="${RESULTDIR}/${_inp}${_rs}${sp_s_z}"
-  sp_f_svzmv "${_rs}" "${_p_dst}"
-}
-
-
 function run/save() {
   import sys/dir
 
@@ -20,8 +9,8 @@ function run/save() {
   fi
 
   # operator clean names
-  local _wdir=$(ns/op/name "${WORKDIR}")
-  local _sdir=$(ns/op/name "${RESULTDIR}")
+  local _wdir=$(ns/op/value "${WORKDIR}")
+  local _sdir=$(ns/op/value "${RESULTDIR}")
 
   sys/dir/svwd "${_wdir}"
 

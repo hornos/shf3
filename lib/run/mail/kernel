@@ -8,8 +8,8 @@ Parameters:
 \$1 string - subject
 
 Environment:
-QMAILTO    - email
-SCHEDULER  - scheduler
+MAILTO    - email
+SCHEDULER - scheduler
 EOF
 }
 
@@ -19,7 +19,7 @@ function run/mail() {
 
   # no subject or address
   if test -z "${_sub}" || 
-     test -z "${QMAILTO}" ; then
+     test -z "${MAILTO}" ; then
     return ${_false_}
   fi
 
@@ -38,5 +38,5 @@ function run/mail() {
   # send mail
   import net/mail
 
-  net/mail "${QMAILTO}" "${_sub}" "${_msg}"
+  net/mail "${MAILTO}" "${_sub}" "${_msg}"
 }

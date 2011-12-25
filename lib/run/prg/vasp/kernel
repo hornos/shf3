@@ -1,0 +1,203 @@
+
+function run/prg/vasp/check() {
+  local _chk=${1:-1}
+
+
+  ### main
+
+  if test -z "${MAIN}" ; then
+    msg "\$MAIN not set"
+    return ${_false_}
+  fi
+
+  # operator clean name
+  local _inp=$(ns/op/value "${MAIN}")
+  local _idir=$(ns/op/value "${INPUTDIR}")
+  _inp="${_idir}/${_inp}"
+
+  # check main control input
+  if ! test -r "${_inp}" ; then
+    msg "Main input not found: ${_inp}"
+    return ${_false_}
+  fi
+
+  # check geometry and kpoints
+  local _inp=${_inp%%cntl}
+  local __inp=""
+  local s
+  for s in "geom" "kpts" ; do
+    __inp="${_inp}${s}"
+    if ! test -r "${__inp}" ; then
+      msg "Main input not found: ${__inp}"
+      return ${_false_}
+    fi
+  done
+
+  # check gw input
+  if ! test -z "${GW}" && ${GW} ; then
+    __inp="${_inp}qpts"
+    if ! test -r "${__inp}" ; then
+      msg "Main input not found: ${__inp}"
+      return ${_false_}
+    fi
+  fi
+
+
+  ### other
+
+  run/check/other
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+
+  ### data
+
+  if test -z "${DATADIR}" ; then
+    return ${_false_}
+  fi
+  if test -z "${DATA}" ; then
+    return ${_false_}
+  fi
+
+  # operator clean name
+  local _ddir=$(ns/op/value "${DATADIR}")
+
+  local dat
+  for dat in ${DATA}; do
+    _dat="${_ddir}/${dat}/POTCAR"
+    if ! test -r "${_dat}".?? ; then
+      msg "Data not found: ${_dat}.??"
+      return ${_false_}
+    fi
+    if ! test -z "${GW}" && ${GW} ; then
+      _dat="${_ddir}/${dat}/POTSIC"
+      if ! test -r "${_dat}".?? ; then
+        msg "Data not found: ${_dat}.??"
+        return ${_false_}
+      fi
+    fi
+  done
+
+  return ${_true_}
+}
+
+function run/prg/general/finish() {
+  return ${_true_}
+}
+
+
+function run/prg/general/save() {
+  import run/save
+
+  run/save
+}
+
+function run/prg/vasp/init() {
+  import run/init
+  import sys/zip/x
+
+  ### main
+
+  if test -z "${MAIN}" ; then
+    return ${_false_}
+  fi
+
+  # operator clean name
+  local _idir=$(ns/op/value "${INPUTDIR}")
+  local _inp=$(ns/op/value "${MAIN}")
+  _inp="${_idir}/${_inp}"
+  _inp=${_inp%%.cntl}
+
+  # INCAR
+  run/init/bcast "${_inp}.cntl" "INCAR"
+  if test $? -gt 0 ; then
+    msg "${FUNCNAME} INCAR failed"
+    return ${_false_}
+  fi
+  # POSCAR
+  run/init/bcast "${_inp}.geom" "POSCAR"
+  if test $? -gt 0 ; then
+    msg "${FUNCNAME} POSCAR failed"
+    return ${_false_}
+  fi
+  # KPOINTS
+  run/init/bcast "${_inp}.kpts" "KPOINTS"
+  if test $? -gt 0 ; then
+    msg "${FUNCNAME} KPOINTS failed"
+    return ${_false_}
+  fi
+
+  if ! test -z "${GW}" && ${GW} ; then
+    # QPOINTS
+    run/init/bcast "${_inp}.qpts" "QPOINTS"
+    if test $? -gt 0 ; then
+      msg "${FUNCNAME} QPOINTS failed"
+      return ${_false_}
+    fi
+  fi
+
+
+  ### data
+
+  if test -z "${DATA}" ; then
+    msg "\$DATA not found"
+    return ${_false_}
+  fi
+
+  # operator clean name
+  local _idir=$(ns/op/value "${INPUTDIR}")
+  if ! test -d "${_idir}" ; then
+    msg "Input directory not found: ${INPUTDIR}"
+    return ${_false_}
+  fi
+  local _ddir=$(ns/op/value "${DATADIR}")
+  if ! test -d "${_ddir}" ; then
+    msg "Data directory not found: ${DATADIR}"
+    return ${_false_}
+  fi
+
+  local dat
+  local _dat
+  local _tmp
+  local _dst="${_idir}/$$.POTCAR"
+
+  # create temp POTCAR
+  if test -r "${_dst}" ; then
+    rm -f "${_dst}"
+    if test $? -gt 0 ; then
+      msg "Delete failed: ${_dst}"
+      return ${_false_}
+    fi
+  fi
+  # TODO
+  for dat in ${DATA}; do
+    _dat="${_ddir}/${dat}"
+    if ! test -r "${_dat}/POTCAR".?? ; then
+      msg "Data not found: ${_dat}/POTCAR.??"
+      return ${_false_}
+    fi
+    _dat=$(ls "${_dat}/POTCAR".??)
+    _tmp="${_idir}/$$.${dat}.POTCAR"
+    cp -f "${_dat}" "${_tmp}"
+    sys/zip/x "${_dat}/POTCAR".?? "${_idir}/${_tmp}"
+    if test $? -gt 0 ; then
+      msg "Extract failed: ${_dat}/POTCAR".??
+    fi
+    cat "${_idir}/${_tmp}" >> "${_dst}"
+  done
+
+  run/init/bcast "${_dst}" "POTCAR"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  # init other
+  run/init/other
+  if test $? -gt 0 ; then
+    msg "run/init/other failed"
+    return ${_false_}
+  fi
+
+  return ${_true_}
+}

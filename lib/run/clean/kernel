@@ -35,7 +35,7 @@ function run/clean() {
   local _dir
   local _pwd=$(pwd -P)
   for dir in ${_dirs} ; do
-    _dir=$(ns/op/name "${!dir}" "+")
+    _dir=$(ns/op/value "${!dir}" "+")
     if test -d "${_dir}" ; then
       _dir=$(cd "${_dir}";pwd -P)
 
@@ -48,4 +48,3 @@ function run/clean() {
     fi
   done
 }
-

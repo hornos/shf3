@@ -1,19 +1,19 @@
 
-function run/prg/general/chk() {
+function run/prg/general/check() {
   # main input check
-  run/chk/main
+  run/check/main
   if test $? -gt 0 ; then
     return ${_false_}
   fi
 
   # other input check
-  run/chk/other
+  run/check/other
   if test $? -gt 0 ; then
     return ${_false_}
   fi
 
   # common data check
-  run/chk/data
+  run/check/data
   if test $? -gt 0 ; then
     return ${_false_}
   fi
