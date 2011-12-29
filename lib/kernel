@@ -392,6 +392,13 @@ function epoch() {
   fi
 }
 
+function elapsed() {
+  local _t0=${1}
+  local _t1=${2}
+  local _dt=$((_t1-_t0))
+  date -r ${_dt} -u +%T
+}
+
 function check() {
   msg "import path    = ${gip}"
   msg "loaded modules = ${gim}"

@@ -82,15 +82,16 @@ function run/prg/vasp/check() {
   return ${_true_}
 }
 
-function run/prg/general/finish() {
+function run/prg/vasp/finish() {
   return ${_true_}
 }
 
 
-function run/prg/general/save() {
+function run/prg/vasp/save() {
   import run/save
 
-  run/save
+  local _pre="${MAIN%%.*}"
+  run/save "${_pre}"
 }
 
 function run/prg/vasp/init() {
@@ -170,27 +171,47 @@ function run/prg/vasp/init() {
       return ${_false_}
     fi
   fi
-  # TODO
+  touch "${_dst}"
+
   for dat in ${DATA}; do
     _dat="${_ddir}/${dat}"
     if ! test -r "${_dat}/POTCAR".?? ; then
       msg "Data not found: ${_dat}/POTCAR.??"
       return ${_false_}
     fi
+
     _dat=$(ls "${_dat}/POTCAR".??)
-    _tmp="${_idir}/$$.${dat}.POTCAR"
-    cp -f "${_dat}" "${_tmp}"
-    sys/zip/x "${_dat}/POTCAR".?? "${_idir}/${_tmp}"
+    _datbn=$(basename "${_dat}")
+    _tmp="$$.${dat}.${_datbn}"
+
+    # copy
+    cp -f "${_dat}" "${_idir}/${_tmp}"
     if test $? -gt 0 ; then
-      msg "Extract failed: ${_dat}/POTCAR".??
+      msg "Copy failed: ${_dat}"
+      return ${_false_}
     fi
+
+    # extract
+    if ${gdbg} ; then
+      sys/zip/x "${_idir}/${_tmp}" "${_idir}"
+    else
+      sys/zip/x "${_idir}/${_tmp}" "${_idir}" &> /dev/null
+    fi
+    if test $? -gt 0 ; then
+      msg "Extract failed: ${_dat}"
+    fi
+    _tmp=${_tmp%.*}
+
     cat "${_idir}/${_tmp}" >> "${_dst}"
+    rm -r "${_idir}/${_tmp}"
   done
 
   run/init/bcast "${_dst}" "POTCAR"
   if test $? -gt 0 ; then
+    rm -f "${_dst}"
     return ${_false_}
   fi
+  rm -f "${_dst}"
 
   # init other
   run/init/other

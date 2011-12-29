@@ -71,7 +71,7 @@ function run/prg() {
   # enter inputdir
   local _idir=$(ns/op/value "${INPUTDIR}" "+")
   sys/dir/svwd "${_idir}"
-  msg "Input     : ${_idir}"
+  msg "Inputdir  : ${_idir}"
 
   # create workdir
   if test -z "${WORKDIR}" ; then
@@ -83,7 +83,7 @@ function run/prg() {
     msg "Create directory failed: ${WORKDIR}"
     return ${_false_}
   fi
-  msg "Work      : ${_wdir}"
+  msg "Workdir   : ${_wdir}"
 
   # create resultdir
   if test -z "${RESULTDIR}" ; then
@@ -97,7 +97,7 @@ function run/prg() {
     run/clean WORKDIR
     return ${_false_}
   fi
-  msg "Result    : ${_rdir}"
+  msg "Resultdir : ${_rdir}"
 
 
   ### broadcast
@@ -210,13 +210,13 @@ function run/prg() {
 
   ### run
 
+  local _inp=$(ns/op/value "${MAIN}")
+
   run/mail "Program ${_prg} started"
   msg "== Begin == $(date) =="
   msg "Program : ${_cmd}"
   msg "Input   : ${_inp}"
   msg "Output  : ${_out}"
-
-  local _inp=$(ns/op/value "${MAIN}")
 
   # start timer
   local _t0=$(epoch)
@@ -233,11 +233,11 @@ function run/prg() {
   local _t1=$(epoch)
   msg "==  End  == $(date) =="
 
-  msg "Elapsed : $((_t1-_t0)) s"
+  msg "Elapsed : $(elapsed ${_t0} ${_t1})"
 
   # exit check
   if test ${_exit} -gt 0 ; then
-    msg "Exit    : ${_exit}"
+    msg "Error   : ${_exit}"
     if test "${ERROR}" = "stop" ; then
       exit ${_exit}
     fi
@@ -251,7 +251,7 @@ function run/prg() {
     ERROR="clean"
   fi
   local _oemsg=""
-  case "${ONERR}" in 
+  case "${ERROR}" in 
     "clean")
       if test ${_exit} -gt 0 ; then
         _oemsg="cleaned"

@@ -1,5 +1,8 @@
 
 function run/save() {
+  # prefix
+  local _pre="${1}"
+
   import sys/dir
 
   if test -z "${WORKDIR}" || \
@@ -10,7 +13,7 @@ function run/save() {
 
   # operator clean names
   local _wdir=$(ns/op/value "${WORKDIR}")
-  local _sdir=$(ns/op/value "${RESULTDIR}")
+  local _rdir=$(ns/op/value "${RESULTDIR}")
 
   sys/dir/svwd "${_wdir}"
 
@@ -18,7 +21,11 @@ function run/save() {
   local _r
   for r in ${RESULT}; do
     for _res in ${r} ; do
-      sys/zip/zsvmv "${_wdir}/${_res}" "${_sdir}"
+      if ! test -z "${_pre}" ; then
+        mv -f "${_wdir}/${_res}" "${_wdir}/{_pre}.${_res}"
+        _res="${_pre}.${_res}"
+      fi
+      sys/zip/zsvmv "${_wdir}/${_res}" "${_rdir}"
     done
   done
 
