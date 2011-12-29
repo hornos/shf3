@@ -22,7 +22,7 @@ function run/save() {
   for r in ${RESULT}; do
     for _res in ${r} ; do
       if ! test -z "${_pre}" ; then
-        mv -f "${_wdir}/${_res}" "${_wdir}/{_pre}.${_res}"
+        mv -f "${_wdir}/${_res}" "${_wdir}/${_pre}.${_res}"
         _res="${_pre}.${_res}"
       fi
       sys/zip/zsvmv "${_wdir}/${_res}" "${_rdir}"
