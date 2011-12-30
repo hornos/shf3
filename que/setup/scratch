@@ -1,0 +1,17 @@
+#!/bin/bash
+
+### system environments
+scratch="PRACE_SCRATCH ESZR_SCRATCH"
+
+### default
+export SCRATCH="/tmp"
+
+### set
+for _scr in ${scratch} ; do
+  if ! test -z "${!_scr}" ; then
+    export SCRATCH="${!_scr}"
+    break
+  fi
+done
+
+echo "Scratch  : ${SCRATCH}"

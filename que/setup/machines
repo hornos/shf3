@@ -1,0 +1,39 @@
+#!/bin/bash
+
+### PBS
+if ! test -z "${PBS_NODEFILE}" && \
+     test -r "${PBS_NODEFILE}" ; then
+  _nodelist=$(cat "${PBS_NODEFILE}" | uniq)
+fi
+
+### SGE
+if ! test -z "${PE_HOSTFILE}" && \
+     test -r "${PE_HOSTFILE}" ; then
+  _nodelist=$(cat "${PE_HOSTFILE}" | awk '{sub(/\..*/,"",$1); print $1;}')
+fi
+
+### Slurm
+if ! test -z "${SLURM_JOB_NODELIST}" ; then
+  _nodelist=$(scontrol show hostname ${SLURM_JOB_NODELIST})
+fi
+
+### nodelist
+export MACHINES=""
+
+if ! test -z "${_nodelist}" ; then
+  first=true
+  for node in ${_nodelist} ; do
+    if ! $first ; then
+      _machines="${_machines},$node"
+    else
+      _machines=$node
+      first=false
+    fi
+  done
+  MACHINES="${_machines}"
+fi
+if test -z "${MACHINES}" ; then
+  echo "Machines : not set"
+else
+  echo "Machines : ${MACHINES}"
+fi
