@@ -139,32 +139,31 @@ function que/sub() {
   ### batch
   # queue setup
   if ! test -z "${QSETUP}" ; then
-    echo "### Queue Setup" >> "${_bat}"
+    echo "### Queue Setup"     >> "${_bat}"
     local _s
     for _s in ${QSETUP} ; do
-      echo "source ${_s}"  >> "${_bat}"
+      echo "source ${_s}"      >> "${_bat}"
     done
   fi
 
   # ulimit
   if ! test -z "${QULIMIT}" ; then
-    echo "### ulimit"      >> "${_bat}"
-    echo "${QULIMIT}" >> "${_bat}"
+    echo "${QULIMIT}"          >> "${_bat}"
   fi
 
   # mail
   if test "${QMAIL}" = "runprg" ; then
-    echo "### Internal mail notifications"       >> "${_bat}"
+    echo "### Mail Setup"            >> "${_bat}"
     echo "export QMAILTO=${QMAILTO}" >> "${_bat}"
     echo "Internal mail notifications"
   fi
 
   # job setup
   if ! test -z "${SETUP}" ; then
-    echo "### Job Setup"  >> "${_bat}"
+    echo "### Job Setup"       >> "${_bat}"
     local _s
     for _s in ${SETUP} ; do
-      echo "source ${_s}" >> "${_bat}"
+      echo "source ${_s}"      >> "${_bat}"
     done
   fi
 
@@ -177,13 +176,18 @@ function que/sub() {
     done
   fi
 
-  ### Parallel
-  msg "Parallel  : ${MODE}"
+  if ! test -z "${MPI}" ; then
+    msg "Parallel  : ${MODE}/${MPI}"
+  else
+    msg "Parallel  : ${MODE}"
+  fi
+
   local _v=${VERBOSE:-0}
 
   ### begin MPIOMP
   if test "${MODE}" = "mpi" || \
      test "${MODE}" = "mpiomp" ; then
+
     echo "### MPI Setup" >> "${_bat}"
 
     ### basic checks
@@ -199,12 +203,12 @@ function que/sub() {
     #     return ${_false_}
     #   fi
     # fi
-    msg "MPI       : ${MPI}"
+
     # binding
     local _bind=""
     if ! test -z "${BIND}" ; then
       _bind="${BIND}"
-      msg "Binding: ${_bind}"
+      msg "Binding : ${_bind}"
     fi
 
     # SGI MPT Perfboost
@@ -224,8 +228,6 @@ function que/sub() {
     # default for MPIOMP
     local _np=${_socktes}
     local _pn=${_sckts}
-
-    echo "### Mode: ${MODE}" >> "${_bat}"
 
     ### begin MPI OMP hybrid
     if test "${MODE}" = "mpi" ; then
