@@ -6,9 +6,13 @@ function help/sys/zip/cpuzmv() {
   cat << EOF
 Copy source to directory and uncompress then rename to name
 
+Arguments:
 \$1 string source
 \$2 string directory
 \$3 string name
+
+Environment:
+PREFIX
 EOF
 }
 
@@ -17,6 +21,7 @@ function sys/zip/cpuzmv() {
   local _src="${1}"
   local _dir="${2}"
   local _dst="${3}"
+  local _pre="${PREFIX}"
   local _ret=${_true_}
 
   if test -z "${_src}" || \
@@ -33,27 +38,32 @@ function sys/zip/cpuzmv() {
     return ${_false_}
   fi
 
-  local _isdir=false
-  if test -d "${_dir}/${_src}" ; then
-    _isdir=true
-  fi
-
   # 2. decompress
   _dst=$(basename "${_dst}")
   _src=$(basename "${_src}")
 
-  # TODO: is compressed
-  if ${gdbg} ; then
+  if test -d "${_dir}/${_src}" ; then
     sys/zip/x "${_dir}/${_src}" "${_dir}"
+  elif test -f "${_dir}/${_src}" ; then
+    sys/zip/x "${_dir}/${_src}" "${_dir}"
+    if test -f "${_dir}/${_src%.??}" ; then
+      _src=${_src%.??}
+    fi
   else
-    sys/zip/x "${_dir}/${_src}" "${_dir}" &> /dev/null
+    msg "Not supported type: ${_dir}/${_src}"
+    return ${_false_}
   fi
+
   if test $? -gt 0 ; then
     return ${_false_}
   fi
 
-  if ! ${_isdir} ; then
-    _src="${_src%.*}"
+  # prefix
+  if ! test -z "${_pre}" ; then
+    if test -z "${_dst}" ; then
+      _dst="${_src}"
+    fi
+    _dst=${_dst##${_pre}.}
   fi
 
   # 3. move (rename)

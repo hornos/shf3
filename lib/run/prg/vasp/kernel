@@ -89,8 +89,8 @@ function run/prg/vasp/finish() {
 function run/prg/vasp/save() {
   import run/save
 
-  local _pre="${MAIN%%.*}"
-  run/save "${_pre}"
+  PREFIX="${MAIN%%.*}"
+  run/save
 }
 
 function run/prg/vasp/init() {
@@ -191,11 +191,7 @@ function run/prg/vasp/init() {
     fi
 
     # extract
-    if ${gdbg} ; then
-      sys/zip/x "${_idir}/${_tmp}" "${_idir}"
-    else
-      sys/zip/x "${_idir}/${_tmp}" "${_idir}" &> /dev/null
-    fi
+    sys/zip/x "${_idir}/${_tmp}" "${_idir}"
     if test $? -gt 0 ; then
       msg "Extract failed: ${_dat}"
     fi
@@ -213,8 +209,8 @@ function run/prg/vasp/init() {
   rm -f "${_dst}"
 
   # init other
-  local _pre="${MAIN%%.*}"
-  run/init/other "${_pre}"
+  PREFIX="${MAIN%%.*}"
+  run/init/other
   if test $? -gt 0 ; then
     msg "run/init/other failed"
     return ${_false_}

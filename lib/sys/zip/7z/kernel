@@ -19,8 +19,11 @@ function sys/zip/7z() {
     local s
     for s in ${sys_zip_7z_s} ; do
       if test "${_f}" != "${_f%%.${s}}" ; then
-        ${sys_zip_7z} ${sys_zip_7z_x} ${_o} "${_f}"
-        # &> /dev/null
+        if ${gdbg} ; then
+          ${sys_zip_7z} ${sys_zip_7z_x} ${_o} "${_f}"
+        else
+          ${sys_zip_7z} ${sys_zip_7z_x} ${_o} "${_f}" &> /dev/null
+        fi
         if test $? -gt 0 ; then
           return ${_false_}
         fi
@@ -35,8 +38,11 @@ function sys/zip/7z() {
 
   # compress
   local _z="${_f}.${sys_zip_7z_t}"
-  ${sys_zip_7z} ${sys_zip_7z_c} ${_o} "${_z}" "${_f}"
-  # &> /dev/null
+  if ${gdbg} ; then
+    ${sys_zip_7z} ${sys_zip_7z_c} ${_o} "${_z}" "${_f}"
+  else
+    ${sys_zip_7z} ${sys_zip_7z_c} ${_o} "${_z}" "${_f}" &> /dev/null
+  fi
   if test $? -gt 0 ; then
     return ${_false_}
   fi

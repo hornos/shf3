@@ -110,8 +110,6 @@ function run/init/data() {
 }
 
 function run/init/other() {
-  local _pre="${1}"
-
   if test -z "${OTHER}" ; then
     return ${_true_}
   fi
@@ -121,20 +119,13 @@ function run/init/other() {
 
   local inp
   local _inp
-  local _dst=""
+  local _dst
   for inp in ${OTHER}; do
+    _dst=""
     _inp="${INPUTDIR}/${inp}"
     if ! test -r "${_inp}" ; then
       msg "Input not found: ${_inp}"
       return ${_false_}
-    fi
-
-    # remove prefix
-    if ! test -z "${_pre}" ; then
-      _dst=${inp##${_pre}.}
-      if test "${inp}" = "${_dst}" ; then
-        _dst=""
-      fi
     fi
 
     run/init/bcast "${_inp}" "${_dst}"

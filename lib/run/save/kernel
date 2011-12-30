@@ -1,7 +1,7 @@
 
 function run/save() {
   # prefix
-  local _pre="${1}"
+  local _pre="${PREFIX}"
 
   import sys/dir
 

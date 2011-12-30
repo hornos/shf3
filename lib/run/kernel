@@ -213,7 +213,6 @@ function run/prg() {
   local _inp=$(ns/op/value "${MAIN}")
 
   run/mail "Program ${_prg} started"
-  msg "== Begin == $(date) =="
   msg "Program : ${_cmd}"
   msg "Input   : ${_inp}"
   msg "Output  : ${_out}"
@@ -231,7 +230,6 @@ function run/prg() {
   _exit=$?
   # stop timer
   local _t1=$(epoch)
-  msg "==  End  == $(date) =="
 
   msg "Elapsed : $(elapsed ${_t0} ${_t1})"
 
