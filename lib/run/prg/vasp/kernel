@@ -90,9 +90,6 @@ function run/prg/vasp/save() {
   import run/save
 
   local _pre="${MAIN%%.*}"
-  if ! test -z "${_pre}" ; then
-    msg "Save prefix : ${_pre}"
-  fi
   run/save "${_pre}"
 }
 
@@ -216,7 +213,8 @@ function run/prg/vasp/init() {
   rm -f "${_dst}"
 
   # init other
-  run/init/other
+  local _pre="${MAIN%%.*}"
+  run/init/other "${_pre}"
   if test $? -gt 0 ; then
     msg "run/init/other failed"
     return ${_false_}
