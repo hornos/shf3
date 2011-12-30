@@ -117,7 +117,7 @@ function que/pbs() {
     echo "#{que_pbs_qsub} -q ${QQUEUE}"                        >> "${_bat}"
   fi
 
-  echo "#${que_pbs_qsub} -o ${QSTD:-StdOut}"                   >> "${_bat}"
+  echo "#${que_pbs_qsub} -o ${QOUT:-StdOut}"                   >> "${_bat}"
   echo "#${que_pbs_qsub} -e ${QERR:-ErrOut}"                   >> "${_bat}"
 
   if ! test -z "${QOPT}" ; then
@@ -127,11 +127,11 @@ function que/pbs() {
   # echo 'cd "${PBS_O_WORKDIR}"'                               >> "${_bat}"
 }
 
-function que/mail/sub() {
+function que/pbs/mail/sub() {
   echo "Job ${PBS_JOB_ID} (${PBS_JOBNAME})"
 }
 
-function que/mail/msg() {
+function que/pbs/mail/msg() {
   local _m=""
   _m=$(date)
   if ! test -z "${PBS_NNODES}" ; then

@@ -121,7 +121,7 @@ function que/sge() {
     echo "#${que_sge} -l exclusive=true"                >> "${_p_qbat}"
   fi
 
-  echo "#${que_sge} -o ${QSTD:-StdOut}"                 >> "${_bat}"
+  echo "#${que_sge} -o ${QOUT:-StdOut}"                 >> "${_bat}"
   echo "#${que_sge} -e ${QERR:-ErrOut}"                 >> "${_bat}"
 
   if ! test -z "${QOPT}" ; then

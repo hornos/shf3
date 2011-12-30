@@ -134,7 +134,7 @@ function que/slurm() {
   fi
 
   # outputs
-  echo "#${que_slurm} -o ${QSTD:-StdOut}"             >> "${_bat}"
+  echo "#${que_slurm} -o ${QOUT:-StdOut}"             >> "${_bat}"
   echo "#${que_slurm} -e ${QERR:-ErrOut}"             >> "${_bat}"
 
   # other options
@@ -143,11 +143,11 @@ function que/slurm() {
   fi
 }
 
-function que/mail/sub() {
+function que/slurm/mail/sub() {
   echo "Job ${SLURM_JOB_ID} (${SLURM_JOB_NAME})"
 }
 
-function que/mail/msg() {
+function que/slurm/mail/msg() {
   local _m=""
   _m=$(date)
   if ! test -z "${SLURM_JOB_NUM_NODES}" ; then
