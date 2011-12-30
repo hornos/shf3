@@ -11,7 +11,7 @@ function que/sub() {
   import gui
   import que
 
-  local _mode=${1:-B}
+  local _sub=${1:-B}
   local _job=${2:-${gbn}.job}
   local _chk=${3:-false}
 
@@ -34,8 +34,8 @@ function que/sub() {
   done
 
   ### summary
-  if test "${_mode}" = "C" ; then
-    que/chk "${RUN}" "${_mode}"
+  if test "${_sub}" = "C" ; then
+    que/chk "${RUN}" "${_sub}"
     return $?
   fi
 
@@ -62,7 +62,7 @@ function que/sub() {
 
   # scheduler batch file
   local _bat="./${_sch}.batch.sh"
-  if test "${_mode}" = "L" ; then
+  if test "${_sub}" = "L" ; then
     _bat="./${_sch}.login.sh"
   fi
 
@@ -110,14 +110,14 @@ function que/sub() {
 
   ### scheduler setup
   echo "### Scheduler: ${_sch}" >> "${_bat}"
-  que/${_sch} "${_mode}" "${_bat}"
+  que/${_sch} "${_sub}" "${_bat}"
   if test $? -gt 0 ; then
     return ${_false_}
   fi
   msg "Scheduler : ${_sch}"
 
   ### login
-  if test "${_mode}" = "L" ; then
+  if test "${_sub}" = "L" ; then
     echo ""
     answer "Show batch file?"
     if test $? -eq 0 ; then
@@ -376,7 +376,7 @@ EOF
 }
 function que/chk() {
   local _cmd="${1##runprg}"
-  local _mode="${2:-submit}"
+  local _sub="${2:-B}"
   local _prg=""
   local _guide=""
   local _sch=""
@@ -403,7 +403,7 @@ function que/chk() {
 
   import run
   # summary
-  if test "${_mode}" = "S" ; then
+  if test "${_sub}" = "S" ; then
     run/sum "${_prg}" "${_guide}"
     return $?
   fi
