@@ -192,12 +192,13 @@ function que/sub() {
       msg "Set MPI type"
       return ${_false_}
     fi
-    if test "${MPI}" = "mpt" ; then
-      if test -z "${MACHINES}" ; then
-        msg "Set MACHINES for SGI MPT"
-        return ${_false_}
-      fi
-    fi
+    # setup scripts has to do it
+    # if test "${MPI}" = "mpt" ; then
+    #   if test -z "${MACHINES}" ; then
+    #     msg "Set MACHINES for SGI MPT"
+    #     return ${_false_}
+    #   fi
+    # fi
     msg "MPI       : ${MPI}"
     # binding
     local _bind=""
