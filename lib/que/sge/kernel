@@ -1,8 +1,8 @@
 function que/sge() {
-  local _mode="${1:-S}"
+  local _sub="${1:-S}"
   local _bat="${2:-sge.batch.sh}"
 
-  if test "${_mode}" = "L" ; then
+  if test "${_sub}" = "L" ; then
     _bat="${2:-sge.login.sh}"
   fi
   if ! test -r "${_bat}" ; then
@@ -11,7 +11,7 @@ function que/sge() {
   fi
 
   ### begin login
-  if test "${_mode}" = "L" ; then
+  if test "${_sub}" = "L" ; then
     local _qlogin="${que_sge_qlogin}"
 
     # name

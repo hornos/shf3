@@ -1,11 +1,11 @@
 
 function que/ll() {
-  local _mode="${1:-S}"
+  local _sub="${1:-S}"
   local _qbat="${2:-ll.batch.sh}"
 #  local _con=""
 #  local _const=""
 
-  if test "${_mode}" = "L" ; then
+  if test "${_sub}" = "L" ; then
     _bat="${2:-ll.login.sh}"
   fi
   if ! test -r "${_bat}" ; then
@@ -14,7 +14,7 @@ function que/ll() {
   fi
 
   ### begin login
-  if test "${_mode}" = "L" ; then
+  if test "${_sub}" = "L" ; then
     echo "Login is not implemented"
     return ${_false_}
   fi

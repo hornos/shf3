@@ -71,7 +71,7 @@ function que/sub() {
   echo "### Date $(date)"   >> "${_bat}"
 
   ### resource parameters
-  if test "${MODE}" = "OMP" ; then
+  if test "${MODE}" = "omp" ; then
     if test ${NODES} -gt 1 ; then
       msg "For OMP mode set NODES=1"
       return ${_false_}
@@ -182,8 +182,8 @@ function que/sub() {
   local _v=${VERBOSE:-0}
 
   ### begin MPIOMP
-  if test "${MODE}" = "MPI" || \
-     test "${MODE}" = "MPIOMP" ; then
+  if test "${MODE}" = "mpi" || \
+     test "${MODE}" = "mpiomp" ; then
     echo "### MPI Setup" >> "${_bat}"
 
     ### basic checks
@@ -227,7 +227,7 @@ function que/sub() {
     echo "### Mode: ${MODE}" >> "${_bat}"
 
     ### begin MPI OMP hybrid
-    if test "${MODE}" = "MPI" ; then
+    if test "${MODE}" = "mpi" ; then
       _np=${_slots}
       _pn=${_tasks}
       _threads=1
