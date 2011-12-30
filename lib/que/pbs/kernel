@@ -49,8 +49,8 @@ function que/pbs() {
     fi
 
     # project
-    if ! test -z "${QPROJ}" ; then
-      _qlogin="${_qlogin} -A ${QPROJ}"
+    if ! test -z "${QACC}" ; then
+      _qlogin="${_qlogin} -A ${QACC}"
     fi
 
     # queue
@@ -104,8 +104,8 @@ function que/pbs() {
   fi
 
   # project
-  if ! test -z "${QPROJ}" ; then
-    echo "#${que_pbs_qsub} -A ${QUEUE_PROJECT}"                >> "${_bat}"
+  if ! test -z "${QACC}" ; then
+    echo "#${que_pbs_qsub} -A ${QACC}"                         >> "${_bat}"
   fi
 
   if test "${QEXCL}" = "yes" ; then

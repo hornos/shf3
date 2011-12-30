@@ -68,8 +68,8 @@ function que/ll() {
   fi
 
   # project
-  if ! test -z "${QPROJ}" ; then
-    echo "#${que_ll_qsub} account_no = ${QPROJ}"            >> "${_bat}"
+  if ! test -z "${QACC}" ; then
+    echo "#${que_ll_qsub} account_no = ${QACC}"             >> "${_bat}"
   fi
 
   # qos

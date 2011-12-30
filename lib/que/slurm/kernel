@@ -65,8 +65,8 @@ function que/slurm() {
     fi
 
     # project
-    if ! test -z "${QPROJ}" ; then
-      _qlogin="${_qlogin} --account=${QPROJ}"
+    if ! test -z "${QACC}" ; then
+      _qlogin="${_qlogin} --account=${QACC}"
     fi
 
     echo "${_qlogin}" >> "${_bat}"
@@ -119,8 +119,8 @@ function que/slurm() {
   fi
 
   # project
-  if ! test -z "${QPROJ}" ; then
-    echo "#${que_slurm} --account=${QPROJ}"           >> "${_bat}"
+  if ! test -z "${QACC}" ; then
+    echo "#${que_slurm} --account=${QACC}"            >> "${_bat}"
   fi
 
   # qos

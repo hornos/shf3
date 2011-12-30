@@ -36,8 +36,8 @@ function que/sge() {
     fi
 
     # project
-    if ! test -z "${QPROJ}" ; then
-      _qlogin="${_qlogin} -A ${QPROJ}"
+    if ! test -z "${QACC}" ; then
+      _qlogin="${_qlogin} -A ${QACC}"
     fi
 
     # queue
@@ -108,8 +108,8 @@ function que/sge() {
   fi
 
   # project
-  if ! test -z "${QPROJ}" ; then
-    echo "#${que_sge} -A ${QPROJ}"                      >> "${_bat}"
+  if ! test -z "${QACC}" ; then
+    echo "#${que_sge} -A ${QACC}"                       >> "${_bat}"
   fi
 
   # queue
