@@ -208,7 +208,7 @@ function que/sub() {
     local _bind=""
     if ! test -z "${BIND}" ; then
       _bind="${BIND}"
-      msg "Binding : ${_bind}"
+      msg "Binding   : ${_bind}"
     fi
 
     # SGI MPT Perfboost
