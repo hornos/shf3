@@ -396,7 +396,11 @@ function elapsed() {
   local _t0=${1}
   local _t1=${2}
   local _dt=$((_t1-_t0))
-  date -r ${_dt} -u +%T
+
+  h=$(( _dt / 3600 ))
+  m=$(( ( _dt / 60 ) % 60 ))
+  s=$(( _dt % 60 ))
+  printf "%02d:%02d:%02d" $h $m $s
 }
 
 function check() {
