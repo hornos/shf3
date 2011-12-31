@@ -258,6 +258,7 @@ function que/sub() {
         ;;
     esac
   fi
+  echo "export PRERUN=\"${que_mpirun} \${MPI_OPT}\"" >> "${_bat}"
   ### end MPIOMP
 
   ### threads
