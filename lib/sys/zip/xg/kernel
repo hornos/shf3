@@ -1,0 +1,47 @@
+
+function sys/zip/xg() {
+  local _m="${1:-x}"
+  local _f="${2}"
+  local _d="${3}"
+  local _cmp
+
+  if test -z "${_f}" || ! test -r "${_f}" ; then
+    return ${_false_}
+  fi
+
+  # extract
+  if test "${_m}" = "x" ; then
+    # check allowed suffixes
+    local s
+    for s in ${sys_zip_xg_s} ; do
+      if test "${_f}" != "${_f%%.${s}}" ; then
+        _cmp="sys_zip_xg_${s}"
+        _cmp=${!_cmp}
+        if ${gdbg} ; then
+          ${_cmp} ${sys_zip_xg_x} "${_f}"
+        else
+          ${_cmp} ${sys_zip_xg_x} "${_f}" &> /dev/null
+        fi
+        if test $? -gt 0 ; then
+          return ${_false_}
+        fi
+        return $?
+      fi
+      continue
+    done
+    # unknown
+    return ${_true_}
+  fi
+
+  # compress
+  _cmp="sys_zip_xg_${sys_zip_xg_t}"
+  _cmp=${!_cmp}
+  if ${gdbg} ; then
+    ${_cmp} ${sys_zip_xg_c} ${_o} "${_f}"
+  else
+    ${_cmp} ${sys_zip_xg_c} ${_o} "${_f}" &> /dev/null
+  fi
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+}
