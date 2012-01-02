@@ -1,0 +1,4 @@
+enc_encfs_mnt="/opt/local/bin/encfs"
+enc_encfs_ctl="/opt/local/bin/encfsctl"
+enc_encfs_umnt="umount -f"
+
