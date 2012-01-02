@@ -18,14 +18,14 @@ EOF
 }
 
 ### args
-_m=""
-_s=""
+mid=""
+src=""
 _t=3
 _v=false
 while getopts hvm:s:t: o; do
   case "$o" in
-    m) _m=$OPTARG;;
-    s) _s=$OPTARG;;
+    m) mid=$OPTARG;;
+    s) src=$OPTARG;;
     t) _t=$OPTARG;;
     v) gdbg=true;;
     h|*) help/sshput;;
@@ -37,14 +37,18 @@ echo
 msg
 gui/line
 
-if test "${_m}" = "" ; then
+if test -r "./.${gbn}" ; then
+  source "./.${gbn}"
+fi
+
+if test "${mid}" = "" ; then
   echo -n "[${gbn}] Enter MID: "
   read _m
 fi
 
-if test -z "${_s}" ; then
+if test -z "${src}" ; then
   msg "Source not specified"
   exit ${_false_}
 fi
 
-PUT ${_m} ${_s}
+PUT ${mid} ${src}
