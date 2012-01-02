@@ -176,10 +176,10 @@ function que/sub() {
     done
   fi
 
-  if ! test -z "${MPI}" ; then
-    msg "Parallel  : ${MODE}/${MPI}"
-  else
+  if test "${MODE}" = "omp" ; then
     msg "Parallel  : ${MODE}"
+  else
+    msg "Parallel  : ${MODE}/${MPI}"
   fi
 
   local _v=${VERBOSE:-0}
@@ -257,6 +257,7 @@ function que/sub() {
         return ${_false_}
         ;;
     esac
+    echo "export PRERUN=\"${que_mpirun} \${MPI_OPT}\"" >> "${_bat}"
   fi
   ### end MPIOMP
 
@@ -321,7 +322,7 @@ function que/sub() {
   echo "export OMP_NUM_THREADS=${_threads}" >> "${_bat}"
   echo "export MKL_NUM_THREADS=${_threads}" >> "${_bat}"
   if test ${_threads} -gt 1 ; then
-    echo "export KMP_LIBRARY=turaround"     >> "${_bat}"
+    echo "export KMP_LIBRARY=turnaround"    >> "${_bat}"
     if ! test -z "${KMPAFF}" ; then
       echo "export KMP_AFFINITY=${KMPAFF}"  >> "${_bat}"
     fi

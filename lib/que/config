@@ -1,2 +1,3 @@
 que_dir="${grd}/que"
 que_shell="/bin/bash"
+que_mpirun="mpirun"

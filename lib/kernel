@@ -247,7 +247,8 @@ function include() {
 function import/path() {
   local _m="${1}"
   if test -z "${_m}" ; then
-    echo "${_m}"
+    echo ""
+    return ${_false_}
   fi
 
   local _kn="${_m}/${gkn}"
@@ -257,6 +258,9 @@ function import/path() {
     local i
     for i in ${gip}; do
       local _p="${i}"
+      if test -z "${_p}" ; then
+        continue
+      fi
       if test -r "${_p}/${_kn}" ; then
         echo "${_p}/${_m}"
       fi
