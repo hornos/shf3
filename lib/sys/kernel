@@ -25,6 +25,7 @@ function sys/mid() {
   fi
   local _mid="${sys_mid_dir}/${1}"
   if ! test -r "${_mid}" ; then
+    msg "MID not found: ${_mid}"
     return ${_false_}
   fi
   source "${_mid}"

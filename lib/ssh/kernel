@@ -92,7 +92,6 @@ function ssh/mgr() {
       # load mid
       sys/mid "ssh/${_h}"
       if test $? -gt 0 ; then
-        msg "MID not found"
         return ${_false_}
       fi
 
@@ -183,7 +182,6 @@ function ssh/info() {
 
   sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
-    msg "MID not found"
     return ${_false_}
   fi
 
@@ -275,7 +273,6 @@ function ssh/login() {
   # init
   sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
-    msg "MID not found"
     return ${_false_}
   fi
 
@@ -384,7 +381,6 @@ function ssh/xfer() {
   # init
   sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
-    msg "MID not found"
     return ${_false_}
   fi
 
@@ -542,7 +538,6 @@ function ssh/cmd() {
 
   sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
-    msg "MID not found"
     return ${_false_}
   fi
 
