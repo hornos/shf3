@@ -54,7 +54,7 @@ function shf3/alias() {
     source "${_rc}"
   else
     local i
-    for i in $(cat alias | grep ^alias | sed s/^alias\ *// | sed s/=.*//) ; do
+    for i in $(cat "${_rc}" | grep ^alias | sed s/^alias\ *// | sed s/=.*//) ; do
       unalias ${i}
     done
   fi
