@@ -114,11 +114,11 @@ function que/sge() {
 
   # queue
   if ! test -z "${QQUEUE}" ; then
-    echo "#${que_sge} -q ${QQUEUE}"                     >> "${_p_qbat}"
+    echo "#${que_sge} -q ${QQUEUE}"                     >> "${_bat}"
   fi
 
   if test "${QEXCL}" = "yes" ; then
-    echo "#${que_sge} -l exclusive=true"                >> "${_p_qbat}"
+    echo "#${que_sge} -l exclusive=true"                >> "${_bat}"
   fi
 
   echo "#${que_sge} -o ${QOUT:-StdOut}"                 >> "${_bat}"
