@@ -43,7 +43,7 @@ fi
 
 if test "${mid}" = "" ; then
   echo -n "[${gbn}] Enter MID: "
-  read _m
+  read mid
 fi
 
 if test -z "${src}" ; then
