@@ -1,22 +1,61 @@
-### global functions
-bmkcd_dir=$(cd $(dirname "${BASH_SOURCE}");pwd -P)
+### global
+shf3_root=$(cd $(dirname "${BASH_SOURCE}");cd ..;pwd -P)
+
+PATH=${PATH}:${shf3_root}/bin
+
+### bookmark
 function bmkcd() {
-  local _dir=$(${bmkcd_dir}/bmkmgr -t "${1}")
+  local _dir=$(${shf3_root}/bin/bmkmgr -t "${1}")
   if test -d "${_dir}" ; then
     cd "${_dir}"
   fi
 }
 
-function mc_color() {
-  local _t="${1}"
-  if test -z "${_t}" ; then
+### midnight commander
+function shf3/mc/color() {
+  local _f="${1:-yes}"
+  if test "${_f}" = "yes" ; then
     export MC_COLOR_TABLE="base_color=lightgray,blue:normal=lightgray,blue:selected=black,cyan:marked=yellow,blue:markselect=yellow,cyan:errors=white,red:menu=white,cyan:reverse=black,lightgray:dnormal=black,lightgray:dfocus=black,cyan:dhotnormal=blue,lightgray:dhotfocus=blue,cyan:viewunderline=brightred,blue:menuhot=yellow,cyan:menusel=white,black:menuhotsel=yellow,black:helpnormal=black,lightgray:helpitalic=red,lightgray:helpbold=blue,lightgray:helplink=black,cyan:helpslink=yellow,blue:gauge=white,black:input=black,cyan:directory=white,blue:executable=brightgreen,blue:link=lightgray,blue:stalelink=brightred,blue:device=brightmagenta,blue:core=red,blue:special=black,blue:editnormal=lightgray,blue:editbold=yellow,blue:editmarked=black,cyan:errdhotnormal=yellow,red:errdhotfocus=yellow,lightgray"
   else
-    export MC_COLOR_TABLE="${_t}"
+    unset MC_COLOR_TABLE
   fi
 }
 
-function ps1() {
+### PS1
+function shf3/ps1() {
   local _h=${1:-${HOSTNAME}}
   PS1="${_h} \W (\$?)\$ "
+}
+
+### screen
+function shf3/screen() {
+  local _f="${1:-yes}"
+  local _rc="${shf3_root}/bin/screenrc"
+  if ! test -r "${_rc}" ; then
+    echo "Not found: ${_rc}"
+    return 1
+  fi
+  if test "${_f}" = "yes" ; then
+    export SCREENRC="${_rc}"
+  else
+    unset SCREENRC
+  fi
+}
+
+### alias
+function shf3/alias() {
+  local _f="${1:-yes}"
+  local _rc="${shf3_root}/bin/alias"
+  if ! test -r "${_rc}" ; then
+    echo "Not found: ${_rc}"
+    return 1
+  fi
+  if test "${_f}" = "yes" ; then
+    source "${_rc}"
+  else
+    local i
+    for i in $(cat alias | grep ^alias | sed s/^alias\ *// | sed s/=.*//) ; do
+      unalias ${i}
+    done
+  fi
 }

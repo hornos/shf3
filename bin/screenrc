@@ -1,0 +1,9 @@
+# $SCREENRC
+# caption always "%n(%t) : %C"
+# caption always "%3n %t%? @%u%?%? [%h]%?%=%c"
+caption always "%{= kc}%H (system load: %l)%-21=%{= .m}%D %d.%m.%Y %0c"
+defscrollback 1024
+startup_message off
+hardstatus on
+hardstatus alwayslastline
+bind ' ' windowlist -b

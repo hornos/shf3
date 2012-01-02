@@ -1,0 +1,6 @@
+### module environment
+alias mld="module load"
+alias mlu="module unload"
+alias mls="module list"
+alias mla="module avail"
+alias mdp="module display"
