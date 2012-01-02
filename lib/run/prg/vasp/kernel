@@ -34,7 +34,7 @@ function run/prg/vasp/check() {
   done
 
   # check gw input
-  if ! test -z "${GW}" && ${GW} ; then
+  if test -z "${VASP_GW}" = "yes" ; then
     __inp="${_inp}qpts"
     if ! test -r "${__inp}" ; then
       msg "Main input not found: ${__inp}"
@@ -70,7 +70,7 @@ function run/prg/vasp/check() {
       msg "Data not found: ${_dat}.??"
       return ${_false_}
     fi
-    if ! test -z "${GW}" && ${GW} ; then
+    if test -z "${VASP_GW}" = "yes" ; then
       _dat="${_ddir}/${dat}/POTSIC"
       if ! test -r "${_dat}".?? ; then
         msg "Data not found: ${_dat}.??"
@@ -128,7 +128,7 @@ function run/prg/vasp/init() {
     return ${_false_}
   fi
 
-  if ! test -z "${GW}" && ${GW} ; then
+  if test -z "${VASP_GW}" = "yes" ; then
     # QPOINTS
     run/init/bcast "${_inp}.qpts" "QPOINTS"
     if test $? -gt 0 ; then
