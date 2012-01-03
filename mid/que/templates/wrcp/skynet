@@ -1,0 +1,8 @@
+QSCHED="slurm"
+# QMAILTO=""
+QMAIL="ALL"
+# QPROJ=""
+QCONST="ib"
+QPART="batch"
+QSETUP="$HOME/shf3/bin/machines $HOME/shf3/bin/scratch"
+QULIMIT="ulimit -s unlimited; ulimit -l unlimited"

@@ -1,0 +1,11 @@
+NAME=test
+TIME=00:30:00
+MEMORY=2000
+NODES=1
+SCKTS=2
+CORES=4
+QUEUE=skynet.test
+MODE=mpiomp
+MPI=mpt
+BIND="omplace -s 1"
+# RUN=""

@@ -1,0 +1,9 @@
+NAME=test
+TIME=00:30:00
+NODES=1
+SCKTS=4
+CORES=12
+QUEUE=szeged.test
+MPI=impi
+MODE=mpi
+# RUN=""

@@ -1,0 +1,10 @@
+NAME=test
+TIME=00:30:00
+NODES=1
+SCKTS=2
+CORES=6
+QUEUE=debrecen.test
+MPI="mpt"
+MODE="mpi"
+BIND="dplace -s1"
+# RUN=""
