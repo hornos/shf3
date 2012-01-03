@@ -4,3 +4,7 @@ alias mlu="module unload"
 alias mls="module list"
 alias mla="module avail"
 alias mdp="module display"
+
+### shell framework
+alias jobsub="jobmgr -s"
+alias shfupd="shfmgr -u"
