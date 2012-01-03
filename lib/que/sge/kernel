@@ -62,9 +62,6 @@ function que/sge() {
   # name
   echo "#${que_sge} -N ${NAME}"                         >> "${_bat}"
 
-  # shell
-  echo "#${que_sge} -S ${QSHELL:-${que_shell}}"         >> "${_bat}"
-
   # mail
   if ! test -z "${QMAIL}" && test "${QMAIL}" != "runprg" ; then
     echo "#${que_sge} -m ${QMAIL}"                      >> "${_bat}"
