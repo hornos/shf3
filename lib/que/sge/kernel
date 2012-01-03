@@ -17,8 +17,6 @@ function que/sge() {
     # name
     _qlogin="${_qlogin} -N ${NAME}"
 
-    # shell
-    _qlogin="${_qlogin} -S ${QSHELL:-${que_shell}}"
 
     # time
     if ! test -z "${TIME}" ; then
@@ -61,6 +59,11 @@ function que/sge() {
   ### begin batch 
   # name
   echo "#${que_sge} -N ${NAME}"                         >> "${_bat}"
+
+  # shell
+  if ! test -z "${QSHELL}" ; then
+    echo "#${que_sge} -S ${QSHELL}"                     >> "${_bat}"
+  fi
 
   # mail
   if ! test -z "${QMAIL}" && test "${QMAIL}" != "runprg" ; then
