@@ -33,8 +33,12 @@ while getopts hvns:l: o; do
 done
 
 ### main
+_msg="Submit"
+if test "${_c}" = "L" ; then
+  _msg="Login"
+fi
 echo
-msg
+msg "${_c}"
 gui/line
 
 if ! test -r "${_j}" ; then
