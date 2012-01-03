@@ -44,7 +44,7 @@ echo
 msg "Directory: ${PWD}"
 gui/line
 
-if test -r "./.${gbn}" ; then
+if ${_p} && test -r "./.${gbn}" ; then
   cat "./.${gbn}"
   gui/line
 fi
