@@ -47,10 +47,6 @@ function que/sge() {
       _qlogin="${_qlogin} -l exclusive=true"
     fi
 
-    if ! test -z "${QOPT}" ; then
-      _qlogin="${_qlogin} ${QOPT}"
-    fi
-
     echo "${_qlogin}" >> "${_bat}"
     return ${_true_}
   fi
