@@ -134,8 +134,8 @@ function que/slurm() {
   fi
 
   # outputs
-  echo "#${que_slurm} -o ${QOUT:-StdOut}"             >> "${_bat}"
-  echo "#${que_slurm} -e ${QERR:-ErrOut}"             >> "${_bat}"
+  echo "#${que_slurm} -o ${QOUT}"                     >> "${_bat}"
+  echo "#${que_slurm} -e ${QERR}"                     >> "${_bat}"
 
   # other options
   if ! test -z "${QOPT}" ; then

@@ -117,8 +117,8 @@ function que/pbs() {
     echo "#{que_pbs_qsub} -q ${QQUEUE}"                        >> "${_bat}"
   fi
 
-  echo "#${que_pbs_qsub} -o ${QOUT:-StdOut}"                   >> "${_bat}"
-  echo "#${que_pbs_qsub} -e ${QERR:-ErrOut}"                   >> "${_bat}"
+  echo "#${que_pbs_qsub} -o ${QOUT}"                           >> "${_bat}"
+  echo "#${que_pbs_qsub} -e ${QERR}"                           >> "${_bat}"
 
   if ! test -z "${QOPT}" ; then
     echo "#${que_pbs_qsub} ${QOPT}"                            >> "${_bat}"

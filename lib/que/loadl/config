@@ -1,0 +1,4 @@
+que_loadl_qsub=' @ '
+que_loadl_qsub="llsubmit"
+que_loadl_qbca="cp"
+que_loadl_unit="M"

@@ -48,6 +48,11 @@ function que/sub() {
   source "${_que}"
   msg/debug "Queue file imported"
 
+  # defaults
+  QIN=${QIN:-/dev/null}
+  QERR=${QERR:-ErrOut}
+  QOUT=${QOUT:-StdOut}
+
   for i in QSCHED ; do
     if test -z "${!i}" ; then
       msg "${i} not set"

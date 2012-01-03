@@ -1,4 +1,0 @@
-que_load_qsub=' @ '
-que_load_qsub="llsubmit"
-que_load_qbca="cp"
-que_load_unit="M"
