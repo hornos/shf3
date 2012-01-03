@@ -38,7 +38,7 @@ if test "${_c}" = "L" ; then
   _msg="Login"
 fi
 echo
-msg "${_c}"
+msg "${_msg}"
 gui/line
 
 if ! test -r "${_j}" ; then
