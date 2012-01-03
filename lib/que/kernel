@@ -363,12 +363,27 @@ function que/sub() {
     msg "${_sub} not found"
     return ${_false_}
   fi
+
   # submit
   answer "Submit job?"
   if test $? -gt 0 ; then
     return ${_false_}
   fi
+
+  # clean stderr/out
+  local i
+  for i in "${QERR}" "${QOUT}" ; do
+    if test -f "${i}" ; then
+      rm -f "${i}"
+    fi
+  done
   ${_sub} "${_bat}"
+  if test $? -gt 0 ; then
+    msg "Submit failed"
+    return ${_false_}
+  fi
+  msg "Submit success"
+  return ${_true_}
 }
 
 
