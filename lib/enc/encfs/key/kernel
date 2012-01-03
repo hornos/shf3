@@ -1,0 +1,103 @@
+function enc/encfs/key/sec() {
+  local _h="${1:-default}"
+  echo "${enc_encfs_key_dir}/${_h}.${enc_encfs_key_sec}
+}
+
+
+
+function enc/encfs/key/gen() {
+  import sys
+
+  local _h="${1:-default}"
+
+  sys/mid "encfs/${_h}"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  local _sec=$(enc/encfs/key "${_h}")
+
+  local _etmp="${enc_encfs_mnt_dir}/.etmp"
+  local _utmp="${enc_encfs_mnt_dir}/.utmp"
+  mkdir -p "${_etmp}" "${_utmp}"
+
+  for _d in  "{_etmp}" "${_utmp}" ; do
+    if test -d "{_d}" ; then
+      msg "Key generation failed"
+      return ${_false_}
+    fi
+  done
+
+  ${enc_encfs_mnt} ${enc_encfs_opt} "${_etmp}" "${_utmp}"
+  if test $? -gt 0 ; then
+    msg "Key generation failed"
+    rm -fR "${_etmp}" "${_utmp}"
+    return ${_false_}
+  fi
+
+  sleep 1
+  ${enc_encfs_umnt} "${_utmp}"
+  if test $? -gt 0 ; then
+  rm -fR "${_etmp}" "${_utmp}"
+    msg "Key generation failed"
+    return ${_false_}
+  fi
+
+  local _key="${_etmp}/${enc_encfs_key_xml}"
+  if ! test -r "${_key}" ; then
+    rm -fR "${_etmp}" "${_utmp}"
+    msg Key generation failed"
+    return ${_false_}
+  fi
+
+  mv -f "${_key}" "${_sec}"
+  chmod 600 "${_sec}"
+  rm -fR "${_etmp}" "${_utmp}"
+  msg "Password generated"
+  return ${_true_}
+}
+
+
+function enc/encfs/key/chg() {
+  import sys
+
+  local _h="${1:-default}"
+
+  sys/mid "encfs/${_h}"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  local _sec=$(enc/encfs/key "${_h}")
+
+  local _etmp="${enc_encfs_mnt_dir}/.etmp"
+  local _utmp="${enc_encfs_mnt_dir}/.utmp"
+  mkdir -p "${_etmp}" "${_utmp}"
+
+  for _d in  "{_etmp}" "${_utmp}" ; do
+    if test -d "{_d}" ; then
+      msg "Key generation failed"
+      return ${_false_}
+    fi
+  done
+  if ! test -r "${_sec}" ; then
+    msg "Key not found: ${_sec}"
+    return ${_false_}
+  fi
+
+  ENCFS6_CONFIG="${_sec}" ${enc_encfs_ctl} "${_etmp}"
+  if test $? -gt 0 ; then
+    msg "Password change failed"
+    rm -fR "${_etmp}" "${_utmp}"
+    return ${_false_}
+  fi
+  ENCFS6_CONFIG="${_sec}" ${enc_encfs_ctl} passwd "${_etmp}"
+  if test $? -gt 0 ; then
+    msg "Password change failed"
+    rm -fR "${_etmp}" "${_utmp}"
+    return ${_false_}
+  fi
+  rm -fR "${_etmp}" "${_utmp}"
+  msg "Password changed"
+  return ${_true_}
+}

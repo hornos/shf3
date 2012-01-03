@@ -27,7 +27,6 @@ function ssh/mnt() {
 
   sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
-    msg "MID not found"
     return ${_false_}
   fi
 

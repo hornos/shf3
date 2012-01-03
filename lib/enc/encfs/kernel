@@ -28,71 +28,55 @@ function enc/encfs/mgr() {
       return ${_false_}
     fi
   done
-# TODO:
-  case ${_c} in
+
+  case "${_c}" in
+    CREATE)
+      ${enc_encfs_mnt} ${enc_encfs_opt} "${_etmp}" "${_utmp}"
+      if test $? -gt 0 ; then
+        rm -fR "${_etmp}" "${_utmp}"
+        return ${_false_}
+      fi
+
+      msg "Generating key..."
+      sleep 1
+      ${enc_encfs_umnt} "${_utmp}"
+      if test $? -gt 0 ; then
+        rm -fR "${_etmp}" "${_utmp}"
+        msg "Generation failed"
+        return ${_false_}
+      fi
+
+      local _key="${_etmp}/.encfs6.xml"
+      if ! test -r "${_key}" ; then
+        rm -fR "${_etmp}" "${_utmp}"
+        msg "Generation failed"
+        retutn ${_false_}
+      fi
+
+      mv "${_key}" "${_sec}"
+      rm -fR "${_etmp}" "${_utmp}"
+      echo ""
+      ;;
     CHANGE)
-  if test -r "${_sec}" ; then
-    msg "Key found: ${_sec}"
-    return ${_false_}
-  fi
+      if ! test -r "${_sec}" ; then
+        msg "Key not found: ${_sec}"
+        return ${_false_}
+      fi
 
-  if ${_p} && ! ${_force}; then
-    if ! test -r "${_p_key}" ; then
-      sp_f_err_fnf "${_p_key}"
-      return ${_FALSE_}
-    fi
-    ENCFS6_CONFIG="${_p_key}" ${sp_b_efsctl} "${_etmp}"
-    ENCFS6_CONFIG="${_p_key}" ${sp_b_efsctl} passwd "${_etmp}"
-    _r=$?
-    rm -fR "${_etmp}"
-    rm -fR "${_utmp}"
-    echo ""
-    return ${_r}
-  fi
-  
-  # generate new
-  if test -r "${_p_key}" ; then
-    echo "${_p_key}"
-    sp_f_yesno "Delete key?"
-    _r=$?
-    if test ${_r} -gt 0 ; then
-      return ${_r}
-    else
-      rm -f "${_p_key}"
-    fi
-  fi
-  ${sp_b_efs} ${sp_g_efs_opts} "${_etmp}" "${_utmp}"
-  _r=$?
-  if test ${_r} -gt 0 ; then
-    rm -fR "${_etmp}"
-    rm -fR "${_utmp}"
-    return ${_r}
-  fi
-
-  echo "Generating key..."
-  sleep 2
-  ${sp_b_fsumnt} "${_utmp}"
-  _r=$?
-  if test ${_r} -gt 0 ; then
-    return ${_r}
-  fi
-
-  mv "${_etmp}/${sp_s_ekey}" "${_p_key}"
-  rm -fR "${_etmp}"
-  rm -fR "${_utmp}"
-  echo ""
-  return ${_r}
+      ENCFS6_CONFIG="${_sec}" ${enc_encfs_ctl} "${_etmp}"
+      if test $? -gt 0 ; then
+        rm -fR "${_etmp}" "${_utmp}"
+        return ${_false_}
+      fi
+      ENCFS6_CONFIG="${_sec}" ${enc_encfs_ctl} passwd "${_etmp}"
+      if test $? -gt 0 ; then
+        msg "Password change failed"
+        rm -fR "${_etmp}" "${_utmp}"
+        return ${_false_}
+      fi
+      ;;
+  esac
 }
-
-
-
-
-
-
-function sp_f_efs_p_key() {
-  echo "${sp_p_key}/${sp_p_efs_key}${1}${sp_s_ekey}"
-}
-
 
 
 function sp_f_efsmnt() {

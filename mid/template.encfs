@@ -1,0 +1,10 @@
+mid_encfs_cluster="default"
+
+# TODO
+# full path to the encrypted dir
+mid_encfs_enc="${sp_p_encfs}/.test.encfs"
+
+# full path of the unencrypted dir
+mid_encfs_dst="${sp_p_encfs}/test"
+
+mid_encfs_opt=""
