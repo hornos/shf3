@@ -3,6 +3,6 @@ sys_zip_xg_gz="gzip"
 sys_zip_xg_xz="xz"
 # parallel
 sys_zip_xg_x="-d"
-sys_zip_xg_t="xz"
+sys_zip_xg_t="gz"
 sys_zip_xg_s="gz xz"
 sys_zip_xg_c="-z -9"
