@@ -44,6 +44,11 @@ echo
 msg "Directory: ${PWD}"
 gui/line
 
+if test -r "./.${gbn}" ; then
+  cat "./.${gbn}"
+  gui/line
+fi
+
 if ! $(vcs/git/hub/test) ; then
   msg "Not a git directory"
   exit ${_false_}
