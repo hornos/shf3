@@ -89,7 +89,8 @@ function run/prg/vasp/finish() {
 function run/prg/vasp/save() {
   import run/save
 
-  PREFIX="${MAIN%%.*}"
+  local _main=$(ns/op/value "${MAIN}")
+  PREFIX="${_main%%.*}"
   run/save
 }
 
@@ -209,7 +210,8 @@ function run/prg/vasp/init() {
   rm -f "${_dst}"
 
   # init other
-  PREFIX="${MAIN%%.*}"
+  local _main=$(ns/op/value "${MAIN}")
+  PREFIX="${_main%%.*}"
   run/init/other
   if test $? -gt 0 ; then
     msg "run/init/other failed"
