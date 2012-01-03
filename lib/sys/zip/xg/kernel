@@ -37,9 +37,9 @@ function sys/zip/xg() {
   _cmp="sys_zip_xg_${sys_zip_xg_t}"
   _cmp=${!_cmp}
   if ${gdbg} ; then
-    ${_cmp} ${sys_zip_xg_c} ${_o} "${_f}"
+    ${_cmp} ${sys_zip_xg_c} "${_f}"
   else
-    ${_cmp} ${sys_zip_xg_c} ${_o} "${_f}" &> /dev/null
+    ${_cmp} ${sys_zip_xg_c} "${_f}" &> /dev/null
   fi
   if test $? -gt 0 ; then
     return ${_false_}
