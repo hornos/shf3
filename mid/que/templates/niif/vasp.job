@@ -1,0 +1,10 @@
+NAME=sic3200
+TIME=192:00:00
+NODES=1
+SCKTS=32
+CORES=6
+QUEUE=pecs
+MPI="mpt"
+MODE="mpi"
+BIND="dplace -s1"
+RUN="runprg -p vasp -g vasp.guide"

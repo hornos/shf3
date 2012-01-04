@@ -1,0 +1,8 @@
+QSCHED="sge"
+# QMAILTO=""
+QMAIL="abe"
+QQUEUE="test.q"
+QPE="mpi"
+QSHELL="/bin/bash"
+QOPT="-cwd -V"
+QSETUP="${HOME}/shf3/bin/machines ${HOME}/shf3/bin/scratch"
