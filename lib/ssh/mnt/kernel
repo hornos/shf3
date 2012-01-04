@@ -91,7 +91,7 @@ function ssh/mnt() {
   sys/dir/mk "${_src}"
 
   if test "$(sys/os)" = "osx" ; then
-    local _vol="${_h}:${mid_ssh_user}@${mid_ssh_fqdn}"
+    local _vol="ssh/${_h}:${mid_ssh_user}@${mid_ssh_fqdn}"
     _opt="${_opt} -o volname=${_vol}"
     local _ico="${sys_img_dir}/sshfs.icns"
     if test -r "${_ico}" ; then
