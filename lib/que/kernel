@@ -60,6 +60,16 @@ function que/sub() {
     fi
   done
 
+  # mode
+  local _mode=$(field "${MODE}" 1 /)
+  local _mpi=$(field "${MODE}" 2 /)
+  if test "${_mode}" = "${_mpi}" ; then
+    _mpi=""
+  fi
+  if ! test -z "${MPI}" ; then
+    _mpi="${MPI}"
+  fi
+
   ### import scheduler
   local _sch=${QSCHED}
   import que/${_sch}
@@ -76,7 +86,7 @@ function que/sub() {
   echo "### Date $(date)"   >> "${_bat}"
 
   ### resource parameters
-  if test "${MODE}" = "omp" ; then
+  if test "${_mode}" = "omp" ; then
     if test ${NODES} -gt 1 ; then
       msg "For OMP mode set NODES=1"
       return ${_false_}
@@ -181,33 +191,22 @@ function que/sub() {
     done
   fi
 
-  if test "${MODE}" = "omp" ; then
-    msg "Parallel  : ${MODE}"
-  else
-    msg "Parallel  : ${MODE}/${MPI}"
-  fi
+  msg "Parallel  : ${MODE}"
 
   local _v=${VERBOSE:-0}
 
   ### begin MPIOMP
-  if test "${MODE}" = "mpi" || \
-     test "${MODE}" = "mpiomp" ; then
+  if test "${_mode}" = "mpi" || \
+     test "${_mode}" = "mpiomp" ; then
 
     echo "### MPI Setup" >> "${_bat}"
 
     ### basic checks
     # SGI MPT Machines
-    if test -z "${MPI}" ; then
+    if test -z "${_mpi}" ; then
       msg "Set MPI type"
       return ${_false_}
     fi
-    # setup scripts has to do it
-    # if test "${MPI}" = "mpt" ; then
-    #   if test -z "${MACHINES}" ; then
-    #     msg "Set MACHINES for SGI MPT"
-    #     return ${_false_}
-    #   fi
-    # fi
 
     # binding
     local _bind=""
@@ -235,7 +234,7 @@ function que/sub() {
     local _pn=${_sckts}
 
     ### begin MPI OMP hybrid
-    if test "${MODE}" = "mpi" ; then
+    if test "${_mode}" = "mpi" ; then
       _np=${_slots}
       _pn=${_tasks}
       _threads=1
@@ -244,7 +243,7 @@ function que/sub() {
     fi
 
     ### MPI OMP
-    case ${MPI} in
+    case ${_mpi} in
       ompi)
         # Open MPI
         echo "export MPI_OPT=\"-np ${_np} -npernode ${_pn} ${_bind} ${_prof}\""   >> "${_bat}"
@@ -258,7 +257,7 @@ function que/sub() {
         echo "export MPI_OPT=\"\${MACHINES} ${_pn} ${_bind} ${_boost} ${_prof}\"" >> "${_bat}"
         ;;
       *)
-        msg "MPI: ${MPI} not implemented"
+        msg "MPI: ${_mpi} not implemented"
         return ${_false_}
         ;;
     esac
@@ -274,7 +273,7 @@ function que/sub() {
 
   ### begin verbose
   if test ${_v} -gt 0 ; then
-    case ${MPI} in
+    case ${_mpi} in
       ompi)
         # Open MPI
         MPI_OPT="-v ${MPI_OPT}"
@@ -306,7 +305,7 @@ function que/sub() {
         fi
         ;;
       *)
-        msg "MPI: ${MPI} not implemented"
+        msg "MPI: ${_mpi} not implemented"
         return ${_false_}
         ;;
     esac

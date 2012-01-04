@@ -339,6 +339,14 @@ function import() {
 }
 
 ### misc
+function help/field() {
+  cat << EOF
+${FUNCNAME}:
+\$1 string    - field string
+\$2 integer   - filed id
+\$3 character - separator
+EOF
+}
 function field() {
   local _s="${1}"
   local _f=${2:-1}
