@@ -1,0 +1,41 @@
+
+fucntion help/net/google/trans() {
+  cat << EOF
+Google translator
+EOF
+}
+
+function net/google/trans() {
+  import sys
+
+  # http://www.devharb.com/a-handy-bash-function-leveraging-google-api-to-do-translation-job-in-terminal/
+  local _s="${1:-alma}"
+  local _f=${2:-hu}
+  local _t=${3:-en}
+  local _x=${4:-3}
+  local _q=${5:-false}
+  local _res=""
+  local _sede="sed -r"
+  local _os=$(sys/os)
+
+  if test "${_os}" = "osx" ; then
+    _sede="sed -E"
+  fi
+
+  _res=$(wget -T ${_x} -qO- \
+  "${net_google_trans}&q=\"${_s}\"&langpair=${_f}|${_t}" \
+  | ${_sede} -n 's/[[:alnum:]": {}]+"translatedText":"([^"]+)".*/\1/p' \
+  | sed s/\u0026//g | sed s/\\\\quot\;//g )
+  if test "${_res}" = "" ; then
+    if ! ${_q} ; then
+      msg "Translate error"
+    fi
+    return ${_false_}
+  fi
+  if ! ${_q} ; then
+    msg "Translation: ${_res}"
+  else
+    echo "${_res}"
+  fi
+  return ${_true_}
+}

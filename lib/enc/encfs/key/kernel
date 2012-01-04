@@ -4,7 +4,6 @@ function enc/encfs/key/sec() {
 }
 
 
-
 function enc/encfs/key/gen() {
   import sys
 

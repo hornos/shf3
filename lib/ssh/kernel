@@ -143,7 +143,6 @@ function ssh/mgr() {
       # mid
       local _mid="${sys_mid_dir}/ssh/${_h}"
       if ! test -r "${_mid}" ; then
-        msg "MID not found"
         return ${_false_}
       fi
       rm -f "${_mid}"
@@ -170,6 +169,15 @@ function ssh/mgr() {
     UPDATE)
       import ssh/key/crt
       ssh/key/crt/upd "${_h}"
+      ;;
+    PUBKEY)
+      import ssh/key
+      local _pub=$(ssh/key "${_h}" "${ssh_key_pub}")
+      if ! test -r "${_pub}" ; then
+        msg "Key not found: ${_pub}"
+        return ${_false_}
+      fi
+      cat "${_pub}"
       ;;
   esac
 }

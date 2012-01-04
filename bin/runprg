@@ -3,10 +3,10 @@ source $(dirname ${BASH_SOURCE})/../lib/header
 import run
 import gui
 
-function help/runprg() {
+function help/runmgr() {
   cat << EOF
 
-Program wrapper
+Program Manager
 
 Usage: ${gbn} options
               -p program
@@ -34,8 +34,8 @@ while getopts hvip:g:s:c: o; do
     c) _c=$OPTARG;;
     i) _m="I";;
     v) gdbg=true;;
-    h) help/runprg;;
-    *) help/runprg;;
+    h) help/runmgr;;
+    *) help/runmgr;;
   esac
 done
 

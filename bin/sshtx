@@ -1,0 +1,30 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+import ssh
+import ssh/ftp
+
+function help/sshtx() {
+  cat << EOF
+
+SSH Transfer
+
+Usage: ${gbn} CMD MID files
+
+EOF
+  exit 1
+}
+
+### args
+if test $# -lt 3 ; then
+  help/sshtx
+fi
+_t=3
+
+### main
+_c="${1}"
+shift
+_m="${1}"
+shift
+
+${_c} ${_m} ${*}
