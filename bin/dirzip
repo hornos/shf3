@@ -1,0 +1,48 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+import sys/zip
+
+function help/dirzip() {
+  cat << EOF
+
+Recursive Directory Compressor
+
+Usage: ${gbn} options
+              -x file/directory - extract
+              -c file/directory - compress
+              -v - verbose
+              -h - help
+EOF
+  exit ${_false_}
+}
+
+### args
+_c="c"
+_d=""
+while getopts hvx:c: o; do
+  case "$o" in
+    c) _c="c"; _d=$OPTARG;;
+    x) _c="x"; _d=$OPTARG;;
+    v) gdbg=true;;
+    h|*) help/dirzip;;
+  esac
+done
+
+
+### main
+echo
+if test "${_c}" = "c" ; then
+  msg "${gbn} Compress"
+else
+  msg "${gbn} Extract"
+fi
+gui/line
+
+if ! test -d "${_d}" ; then
+  msg "Directory not found: ${_d}"
+  return ${_false_}
+fi
+
+sys_zip_dir_dbg=true
+sys/zip/${_c} "${_d}"

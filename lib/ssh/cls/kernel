@@ -1,40 +1,46 @@
 
 function ssh/cls/cmd() {
-  import ssh
+  import sys
+  import ssh/cmd
 
   local _cls="${1:-default}"
   local _cmd="${2:-ls}"
-  local _hi
-  local _hibn
-  for _hi in ${sp_p_mid}/${sp_p_ssh_key}* ; do
-    _hibn=$(basename ${_hi})
-    sp_g_cluster=""
-    . ${_hi}
-    if test "${sp_g_cluster}" = "${_c}" ; then
-      sshcmd -m "${_hibn}" -x "${_cmd}"
-      echo
-      echo
+
+  local i
+  for i in ${sys_mid_dir}/ssh/* ; do
+    i=$(basename "${i}")
+    mid_ssh_cluster=""
+    sys/mid "${i}"
+    if test "${mid_ssh_cluster}" != "${_cls}" ; then
+      continue
     fi
+    ssh/cmd "${i}" "${_cmd}"
+    msg "Return: $?"
   done
 }
 
 function ssh/cls/put() {
-  sp_f_load ssh
+  import sys
+  import ssh
+
   local _c="${1:-default}"
   local _s="${2}"
   local _t=${3:-3}
-  local _hi
-  local _hibn
+
   if ! test -r "${_s}" ; then
-    sp_f_err "missing: ${_s}"
-    return ${_FALSE_}
+    msg "Not found: ${_s}"
+    return ${_false_}
   fi
-  for _hi in ${sp_p_mid}/${sp_p_ssh_key}* ; do
-    _hibn=$(basename ${_hi})
-    sp_g_cluster=""
-    . ${_hi}
-    if test "${sp_g_cluster}" = "${_c}" ; then
-      sshpush -m "${_hibn}" -s "${_s}" -t ${_t}
+
+  local i
+  for i in ${sys_mid_dir}/ssh/* ; do
+    i=$(basename "${i}")
+    mid_ssh_cluster=""
+    sys/mid "${i}"
+    if test "${mid_ssh_cluster}" != "${_cls}" ; then
+      continue
     fi
+    ssh/put "${i}" "${_s}" ${_t}
+    msg "Return: $?"
   done
 }

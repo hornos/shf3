@@ -269,6 +269,9 @@ function sys/zip/dir() {
     if test $? -gt 0 ; then
       return ${_false_}
     fi
+    if ${sys_zip_dir_dbg} ; then
+      echo "${f}"
+    fi
   done
   return ${_true_}
 }
