@@ -1,7 +1,7 @@
 
 function vcs/git/hub/test() {
   ${vcs_git_hub_git} status &> /dev/null
-  if test $? -gt 0 ; then
+  if test $? -ge 128 ; then
     return ${_false_}
   fi
   return ${_true_}
