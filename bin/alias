@@ -6,10 +6,16 @@ alias mla="module avail"
 alias mdp="module display"
 
 ### shell framework
-alias jobsub="jobmgr -s"
 alias shfupd="shfmgr -u"
+
 alias sshpub="sshmgr -s"
 alias sshin="sshto -m"
 alias sshmount="sshmnt -m"
 alias sshumount="sshmnt -u"
+
+alias encfsmount="encfsmnt -m"
+alias encfsumount="encfsmnt -u"
+
 alias book="bmkmgr -b"
+
+alias jobsub="jobmgr -s"

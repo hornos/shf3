@@ -21,12 +21,17 @@ function enc/encfs/mnt() {
     sys/lck/rm "${_lck}"
   fi
 
-  local _dst="${mid_encfs_dst}"
+  local _dst="${enc_encfs_mnt_dir}/${_h}"
 
   # unmount
   if ${_u} ; then
     if ! $(sys/lck "${_lck}") && ! ${_f}; then
       msg "Not mounted: ${_h}"
+      return ${_false_}
+    fi
+
+    if ! test -d "${_dst}" ; then
+      msg "Directory not found: ${_dst}"
       return ${_false_}
     fi
 
@@ -48,7 +53,7 @@ function enc/encfs/mnt() {
   fi
 
   # mount
-  local _dst="${mid_encfs_dst}"
+  local _dst="${enc_encfs_mnt_dir}/${_h}"
   local _enc="${mid_encfs_enc}"
 
   if ! $(sys/lck/mk "${_lck}") ; then
@@ -77,8 +82,8 @@ function enc/encfs/mnt() {
   if ! test -d "${_dst}" ; then
     sys/dir/mk "${_dst}"
   fi
-  if ! test -d "${_sec}" ; then
-    sys/dir/mk "${_sec}"
+  if ! test -d "${_enc}" ; then
+    sys/dir/mk "${_enc}"
   fi
 
   # osx
@@ -111,9 +116,14 @@ function enc/encfs/umnt() {
   enc/encfs/mnt "${_h}" "${_f}" true
 }
 
-# TODO
-function enc/encfs/ls() {
-  sp_f_ptt "${sp_g_bn}: encfs volumes"
-  mount | grep fusefs | grep encfs | awk '{printf "%-32s\n",$3}'
-  return ${_TRUE_}
+function enc/encfs/mnt/ls() {
+  import gui
+
+  printf "%-16s %-s\n" "Channel" "Directory"
+  gui/line
+  mount | egrep 'fusefs|fuse.sshfs' | \
+          egrep 'encfs|fuse.encfs' | \
+          egrep ${USER} | \
+          awk '{printf "%-16s %-s\n",$1,$3}'
+  return ${_true_}
 }

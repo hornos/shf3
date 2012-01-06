@@ -1,0 +1,45 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+import enc/encfs
+
+function help/encfsmgr() {
+  cat << EOF
+
+SSH MID Manager
+
+Usage: ${gbn} options
+              -n MID - new
+              -p MID - change password
+              -l - list
+              -v - verbose
+EOF
+  exit ${_false_}
+}
+
+### args
+_c="LIST"
+_m=""
+while getopts hvln:p: o; do
+  case "$o" in
+    n) _c="CREATE"; _m=$OPTARG;;
+    p) _c="PASS"; _m=$OPTARG;;
+    l) _c="LIST";;
+    v) gdbg=true;;
+    h|*) help/encfsmgr;;
+  esac
+done
+
+### main
+echo
+msg
+gui/line
+
+case "${_c}" in
+  LIST)
+    enc/encfs/mgr "${_c}"
+    ;;
+  CREATE|PASS)
+    enc/encfs/mgr "${_c}" "${_m}"
+    ;;
+esac

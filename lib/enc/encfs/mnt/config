@@ -2,4 +2,4 @@ enc_encfs_mnt="encfs"
 enc_encfs_ctl="encfsctl"
 enc_encfs_umnt="fusermount -u"
 enc_encfs_mnt_dir="${HOME}/encfs"
-
+# TODO mnt dir

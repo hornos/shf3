@@ -1,15 +1,81 @@
 
 function enc/encfs/mgr() {
+  import gui
+  import sys
+  import sys/dir
   import enc/encfs/key
 
-  local _h="${1:-default}"
-  local _c="${2:-CREATE}"
+  local _c="${1:-LIST}"
+  local _h="${2:-default}"
 
   case "${_c}" in
-    CREATE)
-      enc/encfs/key/gen "${_h}"
+    LIST)
+      # format
+      local _frm1="%-26s%-42s\n"
+
+      # header
+      echo
+      printf "${_frm1}" "mid" "directory"
+      gui/line
+      local i
+      for i in ${sys_mid_dir}/encfs/* ; do
+        if test -r "${i}" ; then
+          i=$(basename "${i}")
+          sys/mid "encfs/${i}"
+          if ! test -z "${mid_encfs_enc}" ; then
+            printf "${_frm1}" "${i}" "${mid_encfs_enc}"
+          fi
+        fi
+      done
       ;;
-    CHANGE)
+    CREATE)
+      answer "Create new MID ${_h}?"
+      if test $? -gt 0 ; then
+        return ${_false_}
+      fi
+
+      # check mid
+      local _mid="${sys_mid_dir}/encfs/${_h}"
+      if test -r "${_mid}" ; then
+        msg "MID ${_h} exists, delete first"
+        return ${_false_}
+      fi
+      cp -f "${sys_mid_dir}/${enc_encfs_template}" "${_mid}"
+
+      # edit mid
+      answer "Do you want to edit ${_h} now?"
+      if test $? -eq 0 ; then
+        sys/edit "${_mid}"
+        if test $? -gt 0 ; then
+          msg "Editor failed"
+          return ${_false_}
+        fi
+      fi
+
+      # load mid
+      sys/mid "encfs/${_h}"
+      if test $? -gt 0 ; then
+        return ${_false_}
+      fi
+
+      # check encrypted directory
+      if test -d "${mid_encfs_enc}" ; then
+        msg "Encrypted directory found: ${mid_encfs_enc}"
+        return ${_false_}
+      fi
+
+      answer "Generate key?"
+      if test $? -gt 0 ; then
+        return ${_false_}
+      fi
+
+      enc/encfs/key/gen "${_h}"
+      if test $? -gt 0 ; then
+        return ${_false_}
+      fi
+      sys/dir/mk "${mid_encfs_enc}"
+      ;;
+    PASS)
       enc/encfs/key/chg "${_h}"
       ;;
   esac

@@ -1,12 +1,12 @@
 #!/bin/bash
 source $(dirname ${BASH_SOURCE})/../lib/header
 import gui
-import ssh/mnt
+import enc/encfs/mnt
 
-function help/sshmnt() {
+function help/encfsmnt() {
   cat << EOF
 
-SSH Mount
+Encfs Mount
 
 Usage: ${gbn} options
               -m MID - mount
@@ -29,7 +29,7 @@ while getopts hfvlm:u: o; do
     l) _c="LIST";;
     f) _f=true;;
     v) gdbg=true;;
-    h|*) help/sshmnt;;
+    h|*) help/encfsmnt;;
   esac
 done
 
@@ -44,12 +44,12 @@ fi
 
 case ${_c} in
   LIST)
-    ssh/mnt/ls
+    enc/encfs/mnt/ls
     ;;
   MOUNT)
-    ssh/mnt "${_m}" ${_f} false
+    enc/encfs/mnt "${_m}" ${_f} false
     ;;
   UNMOUNT)
-    ssh/mnt "${_m}" ${_f} true
+    enc/encfs/mnt "${_m}" ${_f} true
     ;;
 esac

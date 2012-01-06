@@ -1,0 +1,40 @@
+
+function ssh/cls/cmd() {
+  import ssh
+
+  local _cls="${1:-default}"
+  local _cmd="${2:-ls}"
+  local _hi
+  local _hibn
+  for _hi in ${sp_p_mid}/${sp_p_ssh_key}* ; do
+    _hibn=$(basename ${_hi})
+    sp_g_cluster=""
+    . ${_hi}
+    if test "${sp_g_cluster}" = "${_c}" ; then
+      sshcmd -m "${_hibn}" -x "${_cmd}"
+      echo
+      echo
+    fi
+  done
+}
+
+function ssh/cls/put() {
+  sp_f_load ssh
+  local _c="${1:-default}"
+  local _s="${2}"
+  local _t=${3:-3}
+  local _hi
+  local _hibn
+  if ! test -r "${_s}" ; then
+    sp_f_err "missing: ${_s}"
+    return ${_FALSE_}
+  fi
+  for _hi in ${sp_p_mid}/${sp_p_ssh_key}* ; do
+    _hibn=$(basename ${_hi})
+    sp_g_cluster=""
+    . ${_hi}
+    if test "${sp_g_cluster}" = "${_c}" ; then
+      sshpush -m "${_hibn}" -s "${_s}" -t ${_t}
+    fi
+  done
+}

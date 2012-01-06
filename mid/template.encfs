@@ -4,7 +4,4 @@ mid_encfs_cluster="default"
 # full path to the encrypted dir
 mid_encfs_enc="${HOME}/.enctest"
 
-# full path of the unencrypted dir
-mid_encfs_dst="${HOME}/enctest"
-
 mid_encfs_opt=""

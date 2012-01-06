@@ -1,11 +1,12 @@
 function enc/encfs/key/sec() {
   local _h="${1:-default}"
-  echo "${enc_encfs_key_dir}/${_h}.${enc_encfs_key_sec}
+  echo "${enc_encfs_key_dir}/${_h}.${enc_encfs_key_sec}"
 }
 
 
 function enc/encfs/key/gen() {
   import sys
+  import enc/encfs/mnt
 
   local _h="${1:-default}"
 
@@ -14,7 +15,7 @@ function enc/encfs/key/gen() {
     return ${_false_}
   fi
 
-  local _sec=$(enc/encfs/key "${_h}")
+  local _sec=$(enc/encfs/key/sec "${_h}")
 
   local _etmp="${enc_encfs_mnt_dir}/.etmp"
   local _utmp="${enc_encfs_mnt_dir}/.utmp"
@@ -44,8 +45,8 @@ function enc/encfs/key/gen() {
 
   local _key="${_etmp}/${enc_encfs_key_xml}"
   if ! test -r "${_key}" ; then
-    rm -fR "${_etmp}" "${_utmp}"
-    msg Key generation failed"
+    rm -R "${_etmp}" "${_utmp}"
+    msg "Key generation failed"
     return ${_false_}
   fi
 
@@ -59,6 +60,7 @@ function enc/encfs/key/gen() {
 
 function enc/encfs/key/chg() {
   import sys
+  import enc/encfs/mnt
 
   local _h="${1:-default}"
 
@@ -67,7 +69,7 @@ function enc/encfs/key/chg() {
     return ${_false_}
   fi
 
-  local _sec=$(enc/encfs/key "${_h}")
+  local _sec=$(enc/encfs/key/sec "${_h}")
 
   local _etmp="${enc_encfs_mnt_dir}/.etmp"
   local _utmp="${enc_encfs_mnt_dir}/.utmp"
