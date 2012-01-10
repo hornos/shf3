@@ -45,7 +45,7 @@ function ssh/mnt() {
       return ${_false_}
     fi
     if ! $(sys/lck "${_lck}") && ! ${_f}; then
-      msg "${_h} is not mounted"
+      msg "Not mounted: ${_h}"
       return ${_false_}
     fi
 
@@ -59,14 +59,14 @@ function ssh/mnt() {
     _ret=$?
     if ! test ${_ret} -gt 0 ; then
       sys/lck/rm "${_lck}"
-      msg "${_h} is unmounted"
+      msg "Unmount success"
     fi
     return ${_ret}
   fi
 
   # mount
   if $(sys/lck "${_lck}") && ! ${_f} ; then
-    msg "${_h} is mounted"
+    msg "Mounted: ${_h}"
     return ${_false_}
   fi
 
@@ -112,7 +112,7 @@ function ssh/mnt() {
     msg "Mount failed"
     sys/lck/rm "${_lck}"
   else
-    msg "${_h} mounted"
+    msg "Mount success"
   fi
   return ${_ret}
 }
