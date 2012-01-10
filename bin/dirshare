@@ -22,7 +22,7 @@ _d="${1:-.}"
 
 ### main
 echo
-msg "Sharing Directory: ${PWD}"
+msg "Sharing Directory: ${_d}"
 gui/line
 if ! test -d "${_d}" ; then
   msg "Not found: ${_d}"
@@ -35,11 +35,11 @@ chmod -R o-rwx "${_d}"
 _dn=$(pwd "${i}")
 _hd=${_dn%%/${USER}*}
 
-msg "Home directory: ${_hd}"
+msg "Home Directory  : ${_hd}"
 _hp=${_dn##${_hd}}
 _hp=$(echo ${_hp} | sed s/\\//\ /g)
 for j in ${_hp} ; do
   _hd="${_hd}/${j}"
-  msg "Group Share (X): ${_hd}"
+  msg "Group Share (X) : ${_hd}"
   chmod g+X ${_hd}
 done
