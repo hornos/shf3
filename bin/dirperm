@@ -1,8 +1,7 @@
 #!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
 import gui
 import sys/dir
-
-source $(dirname ${BASH_SOURCE})/../lib/header
 
 function help/dirperm() {
   cat << EOF
