@@ -127,11 +127,12 @@ function sys/dir/perm() {
   local d
   local _p
   for d in $(find "${_d}" -type d) ; do
-    _p="${_d}/${sys_dir_perm}"
+    _p="${d}/${sys_dir_perm}"
     if test -r "${_p}" ; then
-      msg "Permissions: ${_d}"
-      cd "${_d}"
+      msg "Permissions: ${d}"
+      sys/dir/svwd "${d}"
       source $(basename "${_p}")
+      sys/dir/ldwd
     fi
   done
 }
