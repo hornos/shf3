@@ -1,0 +1,35 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+
+function help/shftest() {
+  cat << EOF
+
+Shell Framework Test
+
+Usage: ${gbn} options
+              -m module - module to test
+              -v - verbose
+EOF
+  exit ${_false_}
+}
+
+### args
+_m="gui"
+_v=false
+while getopts hvm: o; do
+  case "$o" in
+    m) _m=${OPTARG};;
+    v) gdbg=true;;
+    h|*) help/shftest;;
+  esac
+done
+
+### main
+import "${_m}/test"
+if test $? -gt 0 ; then
+  msg "Module not found: ${_m}/test"
+  exit 1
+fi
+
+test/${_m}

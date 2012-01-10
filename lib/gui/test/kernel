@@ -1,3 +1,15 @@
+function test/gui() {
+  answer "Test colors?"
+  if test $? -eq 0 ; then
+    gui/test/colors
+  fi
+
+  echo ""
+  answer "Test characters?"
+  if test $? -eq 0 ; then
+    gui/test/esc
+  fi
+}
 
 function gui/test/colors() {
   import gui

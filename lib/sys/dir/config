@@ -1,2 +1,3 @@
 sys_dir_wd=${PWD}
 sys_dir_sync="rsync"
+sys_dir_perm=".perm"

@@ -116,3 +116,22 @@ function sys/dir/sync() {
   fi
   ${sys_dir_sync} ${_opt} "${_src}" "${_dst}"
 }
+
+function sys/dir/perm() {
+  local _d="${1:-.}"
+
+  if test -z "${_d}" ; then
+    return ${_false_}
+  fi
+
+  local d
+  local _p
+  for d in $(find "${_d}" -type d) ; do
+    _p="${_d}/${sys_dir_perm}"
+    if test -r "${_p}" ; then
+      msg "Permissions: ${_d}"
+      cd "${_d}"
+      source $(basename "${_p}")
+    fi
+  done
+}

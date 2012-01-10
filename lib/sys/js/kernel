@@ -1,0 +1,31 @@
+
+function sys/js/array() {
+  local _aa=${1:-'{one:1,two:2,three:3}'}
+  local _key=${2:-one}
+  local _oby=${3:-1}
+  local _ie=${4:-0}
+
+  echo ${_aa} | awk -v key=${_key} -v oby=${_oby} -v ie=${_ie} \
+  '{
+    sub(/^[[:space:]]*{[[:space:]]*/,"")
+    sub(/[[:space:]]*}[[:space:]]*/,"")
+    split($0,va,"[[:space:]]*,[[:space:]]*")
+    for( k in va ) {
+      sub(/^[[:space:]]*/,"",va[v])
+      sub(/[[:space:]]*$/,"",va[v])
+      split(va[k],vva,"[[:space:]]*:[[:space:]]*")
+      sub(/^'\''/,"",vva[1])
+      sub(/'\''$/,"",vva[1])
+      if(oby==1)
+        aa[vva[1]]=vva[2]
+      else
+        aa[vva[2]]=vva[1]
+    }
+    # check key
+    if(aa[key]=="") {
+      print ie
+      exit 1
+    }
+    print aa[key]
+  }'
+}

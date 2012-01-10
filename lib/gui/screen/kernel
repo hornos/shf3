@@ -1,6 +1,6 @@
 
-function sp_f_scrls() {
-  ${sp_p_scr} -ls | awk \
+function gui/screen/ls() {
+  ${gui_screen} -ls | awk \
   'BEGIN{ses="{";c=1;f=1}
   /^[[:space:]]+[0-9]+\./{
     split($0, arr, " ");
@@ -13,31 +13,14 @@ function sp_f_scrls() {
     ++c;
     f=0;
   }
-  END{ses=ses "}"; print ses;}
-  '
+  END{ses=ses "}"; print ses;}'
 }
 
-function sp_f_scrid() {
-  sp_f_spl "${1}" 1
-}
 
-function sp_f_scrst() {
-  sp_f_spl "${1}" 2
-}
+function gui/screen() {
+  import sys/js
 
-# TODO: logout
-function sp_f_scrpd() {
-  local _r
-  ${sp_b_scr} $*
-  _r=$?
-  if test ${_r} -eq 129 ; then
-    logout
-  fi
-  return ${_r}
-}
-
-function sp_f_scr() {
-  local _aa="$(sp_f_scrls)"
+  local _aa="$(gui/screen/ls)"
   local _c=0
   local _r=""
   local _msg="${1:-Choose}"
@@ -48,25 +31,25 @@ function sp_f_scr() {
   local _st
   local _f=true
 
-  ${sp_p_scr} -q -ls
+  ${gui_screen} -q -ls
   if test $? -lt 10 ; then
-    sp_f_yesno "Open a new screen"
+    answer "Open a new screen?"
     if test $? -gt 0 ; then
-      return ${_FALSE_}
+      return ${_false_}
     fi
-    sp_f_scrpd
+    gui/screen/open
     return $?
   fi
 
   while true; do
     _c=$((++_c))
-    _r=$(sp_f_aa "${_aa}" ${_c})
+    _r=$(sys/js/aa "${_aa}" ${_c})
     if test $? -gt 0 ; then
       break
     fi
 
-    _id="$(sp_f_scrid ${_r})"
-    _st="$(sp_f_scrst ${_r})"
+    _id="$(gui/screen/id ${_r})"
+    _st="$(gui/screen/st ${_r})"
     if ${_f} && test "${_st}" == "D" ; then
       _fid="${_id}"
       _f=false
@@ -75,7 +58,7 @@ function sp_f_scr() {
       echo "${_c}:   ${_st} ${_id}"
     fi
   done
-
+# TODO
   while true ; do
     echo -en "\n${_msg} (1-$((${_c}-1)) / n / q) [${_flt}]: "
     read _ans
@@ -111,4 +94,24 @@ function sp_f_scr() {
       return ${_FALSE_}
     fi
   done
+}
+
+
+function sp_f_scrid() {
+  sp_f_spl "${1}" 1
+}
+
+function sp_f_scrst() {
+  sp_f_spl "${1}" 2
+}
+
+# TODO: logout
+function sp_f_scrpd() {
+  local _r
+  ${sp_b_scr} $*
+  _r=$?
+  if test ${_r} -eq 129 ; then
+    logout
+  fi
+  return ${_r}
 }

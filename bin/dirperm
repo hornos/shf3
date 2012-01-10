@@ -1,0 +1,23 @@
+#!/bin/bash
+import sys/dir
+
+source $(dirname ${BASH_SOURCE})/../lib/header
+
+function help/dirperm() {
+  cat << EOF
+
+Usage: ${gbn} directory
+
+EOF
+  exit ${_false_}
+}
+
+### args
+_d="${1:-.}"
+
+### main
+echo
+msg "Directory: ${PWD}"
+gui/line
+
+sys/dir/perm "${_d}"
