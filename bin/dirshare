@@ -29,6 +29,11 @@ if ! test -d "${_d}" ; then
   exit 1
 fi
 
+answer "Share directory?"
+if test $? -gt 0 ; then
+  exit 1
+fi
+
 chmod -R g+rX "${_d}"
 chmod -R o-rwx "${_d}"
 

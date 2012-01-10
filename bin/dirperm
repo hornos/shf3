@@ -25,4 +25,9 @@ echo
 msg "Permissions on Directory: ${PWD}"
 gui/line
 
+answer "Set permissions?"
+if test $? -gt 0 ; then
+  exit 1
+fi
+
 sys/dir/perm "${_d}"
