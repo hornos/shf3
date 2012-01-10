@@ -13,6 +13,11 @@ EOF
 }
 
 ### args
+if test $# -lt 1 || \
+   test "${1}" = "-h" ; then
+  help/dirperm
+fi
+
 _d="${1:-.}"
 
 ### main

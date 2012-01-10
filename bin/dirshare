@@ -14,7 +14,7 @@ EOF
 
 ### args
 if test $# -lt 1 || \
- ! test "${1}" = "-h" ; then
+   test "${1}" = "-h" ; then
  help/dirshare
 fi
 
