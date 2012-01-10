@@ -1,4 +1,5 @@
 #!/bin/bash
+import gui
 import sys/dir
 
 source $(dirname ${BASH_SOURCE})/../lib/header
@@ -17,7 +18,7 @@ _d="${1:-.}"
 
 ### main
 echo
-msg "Directory: ${PWD}"
+msg "Permissions on Directory: ${PWD}"
 gui/line
 
 sys/dir/perm "${_d}"

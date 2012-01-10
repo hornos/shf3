@@ -1,0 +1,46 @@
+#!/bin/bash
+import gui
+import sys/dir
+
+source $(dirname ${BASH_SOURCE})/../lib/header
+
+function help/dirshare() {
+  cat << EOF
+
+Usage: ${gbn} directory
+
+EOF
+  exit ${_false_}
+}
+
+### args
+if test $# -lt 1 || \
+ ! test "${1}" = "-h" ; then
+ help/dirshare
+fi
+
+_d="${1:-.}"
+
+### main
+echo
+msg "Sharing Directory: ${PWD}"
+gui/line
+if ! test -d "${_d}" ; then
+  msg "Not found: ${_d}"
+  exit 1
+fi
+
+chmod -R g+rX "${_d}"
+chmod -R o-rwx "${_d}"
+
+_dn=$(pwd "${i}")
+_hd=${_dn%%/${USER}*}
+
+msg "Home directory: ${_hd}"
+_hp=${_dn##${_hd}}
+_hp=$(echo ${_hp} | sed s/\\//\ /g)
+for j in ${_hp} ; do
+  _hd="${_hd}/${j}"
+  msg "Group Share (X): ${_hd}"
+  chmod g+X ${_hd}
+done
