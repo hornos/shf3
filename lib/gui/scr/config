@@ -1,0 +1,2 @@
+gui_scr="screen"
+gui_scr_opt="-A -a -U"

@@ -1,0 +1,122 @@
+
+function gui/scr/ls() {
+  local _st="${1:-D}"
+  ${gui_scr} -ls | \
+  awk -v st="${_st}" \
+  'BEGIN{ses="{";c=1;f=1}
+  /^[[:space:]]+[0-9]+\./{
+    split($0, arr, " ");
+    gsub("\\(","",arr[2]);
+    gsub("\\)","",arr[2]);
+    _st=substr(arr[2],1,1);
+    if( _st == st ) {
+      if( f )
+        ses = ses c ":" arr[1] "|" _st
+      else
+        ses = ses "," c ":" arr[1] "|" _st
+      ++c;
+      f=0;
+    }
+  }
+  END{ses=ses "}"; print ses;}'
+}
+
+function gui/scr/id() {
+  field "${1}" 1
+}
+
+function gui/scr/st() {
+  field "${1}" 2
+}
+
+function gui/scr/open() {
+  ${gui_scr} $*
+  _r=$?
+  if test ${_r} -eq 129 ; then
+    logout
+  fi
+  return ${_false_}
+}
+
+
+function gui/scr/mgr() {
+  import sys/js
+
+  local _scr_a="$(gui/scr/ls D)"
+  local _scr_d="$(gui/scr/ls A)"
+  local _c=0
+  local _r=""
+  local _msg="${1:-Choose}"
+  local _flt=${2:-3}
+  local _id
+  local _fid=""
+  local _st
+  local _f=true
+
+  # first screen
+  ${gui_scr} -q -ls
+  if test $? -lt 10 ; then
+    answer "Open a new screen?"
+    if test $? -gt 0 ; then
+      return ${_false_}
+    fi
+    gui/scr/open
+    return $?
+  fi
+  # TODO for
+  echo $_scr_a
+  # return ${_false_}
+
+  # attached
+  msg "Attached Screens:"
+  local i
+  for i in $(sys/js/aai "${_scr_a}") ; do
+    _id=$(field "${i}" 1 ":")
+    _st=$(field "${i}" 2)
+
+    echo "${_id}"
+  done
+
+  # detached
+
+  while true; do
+    _c=$((++_c))
+    _r=$(sys/js/aa "${_aa}" ${_c})
+    if test $? -gt 0 ; then
+      break
+    fi
+
+    _id="$(gui/scr/id ${_r})"
+    _st="$(gui/scr/st ${_r})"
+    if ${_f} && test "${_st}" == "D" ; then
+      _fid="${_id}"
+      _f=false
+      echo "${_c}: * ${_st} ${_id}"
+    else
+      echo "${_c}:   ${_st} ${_id}"
+    fi
+  done
+
+  _c=$((--_c))
+  choose "Select screen" ${_c}
+  local _a=$?
+
+  # abort
+  if test ${_a} -gt 254 ; then
+    return ${_false_}
+  fi
+
+  # open
+  if test ${_a} -eq 0 ; then
+    if test "${_fid}" == "" ; then
+      gui/scr/open
+    else
+      gui/scr/open -D -r "${_fid}"
+    fi
+    return $?
+  fi
+
+  # attach
+  _id=$(gui/scr/id "$(sys/js/aa "${_aa}" ${_ans})")
+  gui/scr/open -D -r "${_id}"
+}

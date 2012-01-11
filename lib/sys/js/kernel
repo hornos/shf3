@@ -1,5 +1,11 @@
+function sys/js/aai() {
+  local _aa=${1:-'{one:1,two:2,three:3}'}
+  echo "${_aa}" | \
+  sed s/[{}]//g | \
+  sed s/,/\ /g
+}
 
-function sys/js/array() {
+function sys/js/aa() {
   local _aa=${1:-'{one:1,two:2,three:3}'}
   local _key=${2:-one}
   local _oby=${3:-1}

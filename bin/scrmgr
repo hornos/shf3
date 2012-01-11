@@ -1,0 +1,25 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+import gui/scr
+
+function help/scrmgr() {
+  cat << EOF
+
+Screen Manager
+
+Usage: ${gbn}
+EOF
+  exit ${_false_}
+}
+
+### args
+
+### main
+echo
+msg "Screen Manager"
+gui/line
+echo "You can open a new screen with 'n' or ENTER. If there"
+echo "are sessions the first detached (D) screen is joined."
+gui/scr/mgr
+

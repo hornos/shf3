@@ -19,6 +19,7 @@ gim=""
 # return values
 _true_=0
 _false_=1
+_abort_=255
 
 ### messages
 function msg() {
@@ -369,11 +370,11 @@ function installed() {
 function answer() {
   import str
   local _m="${1:-Answer}"
-  local _f=${2:-3}
+  local _t=${2:-3}
   local _a
 
   while true ; do
-    echo -en "[${gbn}] ${_m} (y/n/q) [${_f}]: "
+    echo -en "[${gbn}] ${_m} (y/n/q) [${_t}]: "
     read _a
     _a=$(str/tolower ${_a})
     case "${_a}" in
@@ -386,11 +387,46 @@ function answer() {
       ;;
       *)
         echo -e "[${gbn}] Invalid\n"
-        _f=$((_f-1))
+        _t=$((_t-1))
       ;;
     esac
-    if test ${_f} -lt 1 ; then
+    if test ${_t} -lt 1 ; then
       return ${_false_}
+    fi
+  done
+}
+
+function choose() {
+  import str
+  local _m="${1:-Answer}"
+  local _n=${2:-3}
+  local _t=${2:-3}
+  local _a
+
+  while true ; do
+    echo -en "[${gbn}] ${_m} (1-${_n}/n/q) [${_t}]: "
+    read _a
+    _a=$(str/tolower ${_a})
+    case "${_a}" in
+      "y" | "case" | "yes" )
+        return ${_true_}
+      ;;
+      "n" | "no" | "q"  )
+        echo -e "[${gbn}] Abort\n"
+        return ${_abort_}
+      ;;
+      *)
+        if test ${_a} -le ${_n} && \
+           test ${_a} -gt 0 ; then
+          return ${_a}
+        else
+          echo -e "[${gbn}] Invalid\n"
+          _t=$((_t-1))
+        fi
+      ;;
+    esac
+    if test ${_t} -lt 1 ; then
+      return ${_abort_}
     fi
   done
 }
