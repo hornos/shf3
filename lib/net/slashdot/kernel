@@ -1,0 +1,5 @@
+
+function net/slashdot/quote() {
+  # http://www.shell-fu.org - Tip #122
+  curl -Is "${net_slashdot}" | egrep '^X-(F|B|L)' | cut -d \- -f 2
+}

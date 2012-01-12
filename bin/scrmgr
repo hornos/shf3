@@ -8,18 +8,38 @@ function help/scrmgr() {
 
 Screen Manager
 
-Usage: ${gbn}
+Usage: ${gbn} options
+              -n - open
+              -h - help
+              -v - verbose
 EOF
   exit ${_false_}
 }
 
 ### args
+_c="LIST"
+case "${1}" in
+  -n)
+    _c="NEW"
+  ;;
+  -v)
+    gdbg=true
+  ;;
+  -h)
+    help/scrmgr
+  ;;
+esac
 
 ### main
 echo
 msg "Screen Manager"
 gui/line
-echo "You can open a new screen with 'n' or ENTER. If there"
-echo "are sessions the first detached (D) screen is joined."
-gui/scr/mgr
+case "${_c}" in
+  NEW)
+    gui/scr/open
+  ;;
+  LIST)
+    gui/scr/mgr
+  ;;
+esac
 

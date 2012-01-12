@@ -1,0 +1,70 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+
+function help/mailit() {
+  cat << EOF
+Usage: ${gbn} options
+              -t recepient
+              -a attachment
+              -s subject
+              -v - verbose
+              -h - help
+EOF
+  exit 1
+}
+
+### args
+_to=""
+_at=""
+_atz=""
+_su=""
+while getopts hvt:a:s: o; do
+  case "$o" in
+    t) _to=$OPTARG;;
+    a) _at=$OPTARG;;
+    s) _su=$OPTARG;;
+    v) gdbg=true;;
+    h|*) help/mailit;;
+  esac
+done
+
+echo
+msg "Mailit"
+gui/line
+
+if test -z "${_to}" ; then
+  echo -n "[${gbn}] To: "
+  read _to
+fi
+
+if test -z "${_su}" ; then
+  echo -n "[${gbn}] Subject: "
+  read _su
+fi
+# TODO
+if ! test -z "${_at}" ; then
+  if test -d "${_at}" ; then
+    _atz="${_at}.tgz"
+    tar cf - "${_at}" | gzip -9 -c - > "${_atz}"
+  else
+    _atz="${_at}.gz"
+    gzip -9 -c "${_at}" > "${_atz}"
+  fi
+  echo "Attachment:"
+  du -sh ${_atz}
+  _at="-a ${_atz}"
+else
+  echo "No attachment"
+fi
+
+echo
+echo -n "Message: "
+read _msg
+sp_f_yesno "Send message to ${_to}? "
+if ! test $? -gt 0 ; then
+  echo "${_msg}" | mail -s "${_su}" ${_at} "${_to}"
+fi
+
+if test -r "${_atz}" ; then
+  rm -f "${_atz}"
+fi

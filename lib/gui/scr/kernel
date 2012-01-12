@@ -30,7 +30,14 @@ function gui/scr/st() {
 }
 
 function gui/scr/open() {
-  ${gui_scr} $*
+  # TODO set name
+  local _s
+  echo -n "[${gbn}] Session name? "
+  read _s
+  if ! test -z "${_s}" ; then
+    _s="-S ${_s}"
+  fi
+  ${gui_scr} ${_s} $*
   _r=$?
   if test ${_r} -eq 129 ; then
     logout
@@ -42,14 +49,12 @@ function gui/scr/open() {
 function gui/scr/mgr() {
   import sys/js
 
-  local _scr_a="$(gui/scr/ls D)"
-  local _scr_d="$(gui/scr/ls A)"
-  local _c=0
-  local _r=""
+  local _scr_a="$(gui/scr/ls A)"
+  local _scr_d="$(gui/scr/ls D)"
   local _msg="${1:-Choose}"
   local _flt=${2:-3}
   local _id
-  local _fid=""
+  local _no
   local _st
   local _f=true
 
@@ -63,41 +68,56 @@ function gui/scr/mgr() {
     gui/scr/open
     return $?
   fi
-  # TODO for
-  echo $_scr_a
-  # return ${_false_}
 
-  # attached
-  msg "Attached Screens:"
+  local _isa=true
+  if test "${_scr_a}" = "{}" ; then
+    _isa=false
+  fi
+  local _isd=true
+  if test "${_scr_d}" = "{}" ; then
+    _isd=false
+  fi
+
   local i
-  for i in $(sys/js/aai "${_scr_a}") ; do
-    _id=$(field "${i}" 1 ":")
-    _st=$(field "${i}" 2)
+  # attached
+  if ${_isa} ; then
+    msg "Attached Screens:"
+    for i in $(sys/js/aai "${_scr_a}") ; do
+      _id=$(field "${i}" 1)
+      _id=${_id##*:}
+      _no=$(field "${i}" 1 ":")
+      _st=$(field "${i}" 2)
+      printf "%3d %s\n" "${_no}" "${_id}"
+    done
+  fi
 
-    echo "${_id}"
-  done
-
-  # detached
-
-  while true; do
-    _c=$((++_c))
-    _r=$(sys/js/aa "${_aa}" ${_c})
+  # no detached
+  if ! ${_isd} ; then
+    answer "Open a new screen?"
     if test $? -gt 0 ; then
-      break
+      return ${_false_}
     fi
+    gui/scr/open
+    return $?
+  fi
 
-    _id="$(gui/scr/id ${_r})"
-    _st="$(gui/scr/st ${_r})"
-    if ${_f} && test "${_st}" == "D" ; then
+  # attach
+  local _c=0
+  local _fid=""
+  echo ""
+  msg "Detached Screens:"
+  for i in $(sys/js/aai "${_scr_d}") ; do
+    _id=$(field "${i}" 1)
+    _id=${_id##*:}
+    _no=$(field "${i}" 1 ":")
+    _st=$(field "${i}" 2)
+    printf "%3d %s\n" "${_no}" "${_id}"
+    _c=$((++_c))
+    if test ${_c} -eq 1 ; then
       _fid="${_id}"
-      _f=false
-      echo "${_c}: * ${_st} ${_id}"
-    else
-      echo "${_c}:   ${_st} ${_id}"
     fi
   done
 
-  _c=$((--_c))
   choose "Select screen" ${_c}
   local _a=$?
 
@@ -106,17 +126,18 @@ function gui/scr/mgr() {
     return ${_false_}
   fi
 
-  # open
   if test ${_a} -eq 0 ; then
-    if test "${_fid}" == "" ; then
-      gui/scr/open
-    else
-      gui/scr/open -D -r "${_fid}"
-    fi
-    return $?
+    # attach first
+    _id="${_fid}"
+  else
+    # attach selected
+    _id=$(gui/scr/id "$(sys/js/aa "${_scr_d}" ${_a})")
   fi
 
-  # attach
-  _id=$(gui/scr/id "$(sys/js/aa "${_aa}" ${_ans})")
+  answer "Attach to ${_fid}?"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
   gui/scr/open -D -r "${_id}"
 }
