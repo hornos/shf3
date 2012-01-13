@@ -55,7 +55,7 @@ function run/check() {
   if test ${_chk} -gt 1 ; then
     import run/prg/${_prg}
     if test $? -gt 0 ; then
-      msg "Module not found: run/$prg/{_prg}"
+      msg "Module not found: run/prg/${_prg}"
       return ${_false_}
     fi
     run/prg/${_prg}/check ${_chk}

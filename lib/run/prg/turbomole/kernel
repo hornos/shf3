@@ -1,0 +1,104 @@
+
+function run/prg/turbomole/check() {
+  local _chk=${1:-1}
+
+
+  ### main
+
+  if test -z "${MAIN}" ; then
+    msg "\$MAIN not set"
+    return ${_false_}
+  fi
+
+  # operator clean name
+  local _inp=$(ns/op/value "${MAIN}")
+  local _idir=$(ns/op/value "${INPUTDIR}")
+  _inp="${_idir}/${_inp}"
+
+  # check main control input
+  if ! test -r "${_inp}" ; then
+    msg "Main input not found: ${_inp}"
+    return ${_false_}
+  fi
+
+
+  ### other
+
+  run/check/other
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+
+  ### data
+
+  # common data check
+  run/check/data
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  return ${_true_}
+}
+
+function run/prg/turbomole/finish() {
+  return ${_true_}
+}
+
+function run/prg/turbomole/save() {
+  import run/save
+
+  local _main=$(ns/op/value "${MAIN}")
+  PREFIX="${_main%%.*}"
+  run/save
+}
+
+function run/prg/turbomole/init() {
+  import run/init
+  import sys/zip/x
+
+  ### main
+
+  if test -z "${MAIN}" ; then
+    return ${_false_}
+  fi
+
+  # operator clean name
+  local _idir=$(ns/op/value "${INPUTDIR}")
+  local _inp=$(ns/op/value "${MAIN}")
+  _inp="${_idir}/${_inp}"
+  _inp=${_inp%%.cntl}
+
+
+  ### main
+
+  run/init/bcast "${_inp}.cntl" "control"
+  if test $? -gt 0 ; then
+    msg "${FUNCNAME} control failed"
+    return ${_false_}
+  fi
+
+
+  ### data
+
+  # init data
+  run/init/data
+  if test $? -gt 0 ; then
+    msg "run/init/data failed"
+    return ${_false_}
+  fi
+
+
+  ### other
+
+  # init other
+  local _main=$(ns/op/value "${MAIN}")
+  PREFIX="${_main%%.*}"
+  run/init/other
+  if test $? -gt 0 ; then
+    msg "run/init/other failed"
+    return ${_false_}
+  fi
+
+  return ${_true_}
+}

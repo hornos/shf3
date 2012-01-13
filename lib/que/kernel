@@ -260,12 +260,19 @@ function que/sub() {
         # SGI MPT
         echo "export MPI_OPT=\"\${MACHINES} ${_pn} ${_bind} ${_boost} ${_prof}\"" >> "${_bat}"
         ;;
+      self)
+        echo "# Internal MPI used" >> "${_bat}"
+        ;;
       *)
         msg "MPI: ${_mpi} not implemented"
         return ${_false_}
         ;;
     esac
-    echo "export PRERUN=\"${que_mpirun} \${MPI_OPT}\"" >> "${_bat}"
+
+    # prerun
+    if test "${_mpi}" != "self" ; then
+      echo "export PRERUN=\"${que_mpirun} \${MPI_OPT}\"" >> "${_bat}"
+    fi
   fi
   ### end MPIOMP
 
@@ -312,13 +319,16 @@ function que/sub() {
           echo "export MPI_STATS=1"             >> "${_bat}"
         fi
         ;;
+      self)
+        echo "# Internal MPI used"              >> "${_bat}"
+        ;;
       *)
         msg "MPI: ${_mpi} not implemented"
         return ${_false_}
         ;;
     esac
   fi
-  
+
   ### end verbose
 
   ### Toggle Options
