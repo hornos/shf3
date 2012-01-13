@@ -261,7 +261,9 @@ function que/sub() {
         echo "export MPI_OPT=\"\${MACHINES} ${_pn} ${_bind} ${_boost} ${_prof}\"" >> "${_bat}"
         ;;
       self)
-        echo "# Internal MPI used" >> "${_bat}"
+        echo "# Internal MPI used"         >> "${_bat}"
+        echo "export MPI_NUM_SLOTS=${_np}" >> "${_bat}"
+        echo "export MPI_NUM_TASKS=${_pn}" >> "${_bat}"
         ;;
       *)
         msg "MPI: ${_mpi} not implemented"
