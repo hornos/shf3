@@ -50,20 +50,23 @@ if ! test -z "${_at}" ; then
     _atz="${_at}.gz"
     gzip -9 -c "${_at}" > "${_atz}"
   fi
-  echo "Attachment:"
+  msg "Attachment:"
   du -sh ${_atz}
   _at="-a ${_atz}"
 else
-  echo "No attachment"
+  msg "No attachment"
 fi
 
-echo
-echo -n "Message: "
+echo ""
+echo -n "[${gbn}] Message: "
 read _msg
-sp_f_yesno "Send message to ${_to}? "
-if ! test $? -gt 0 ; then
-  echo "${_msg}" | mail -s "${_su}" ${_at} "${_to}"
+answer "Send message to ${_to}?"
+if test $? -gt 0 ; then
+  exit 1
 fi
+
+echo "${_msg}" | \
+mail -s "${_su}" ${_at} "${_to}"
 
 if test -r "${_atz}" ; then
   rm -f "${_atz}"

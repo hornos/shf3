@@ -1,0 +1,173 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import que
+import gui
+
+function help/jobmon() {
+  cat << EOF
+Usage: ${gbn} options
+              -j jobid
+              -n nodefile
+              -a - node average
+              -t - total memory
+              -h - help
+              -v - verbose
+EOF
+  exit 1
+}
+
+### trap
+function jobmon/exit() {
+  if test -z "${_n}" && \
+     test -r "${_out}"; then
+    rm -f "${_out}"
+  fi
+  exit $?
+}
+trap jobmon/exit INT TERM EXIT
+
+
+### args
+_job=0
+_t=false
+_a=false
+_n=""
+while getopts htaj:n: o; do
+  case "$o" in
+    j) _job=$OPTARG;;
+    t) _t=true;;
+    a) _a=true;;
+    n) _n=$OPTARG;;
+    v) gdbg=true;;
+    h|*) help/jobmon;;
+  esac
+done
+
+### main
+if ! $(installed pmstat) ; then
+  msg "Not found: pmstat"
+  exit 1
+fi
+
+_stat=""
+
+if ! test -z "${_n}" && \
+     test -r "${_n}" ; then
+  _out="${_n}"
+else
+  _out="./.${_job}.nodes"
+  for i in "qstat" "scontrol" ; do
+    which "${i}" &> /dev/null
+    if test $? -eq 0 ; then
+      _stat="${i}"
+    fi
+  done
+  if test "${_stat}" = "" ; then
+    exit 1
+  fi
+
+  ### SGE
+  if test "${_stat}" = "qstat" ; then
+    _nodes=$(${_stat} -g t -r -u ${USER} | \
+           grep ${_job} | \
+           awk '{print $8}' | \
+           sed s/.*@// | \
+           sed s/\\..*//)
+
+    if test "${_nodes}" = "(null)" ; then
+      msg "Job not started"
+      exit 1
+    fi
+
+    for i in ${_nodes} ; do
+      echo ${i} >> ${_out}
+    done
+  fi
+
+  ### Slurm
+  if test "${_stat}" = "scontrol" ; then
+    ${_stat} show job ${_job}
+    if test $? -gt 0 ; then
+      exit 1
+    fi
+    _nodes=$(${_stat} show job ${_job} | egrep "^ *NodeList" | sed s/\ *NodeList=//)
+
+    if test "${_nodes}" = "(null)" ; then
+      msg "Job not started"
+      exit 1
+    fi
+
+    ${_stat} show hostnames ${_nodes} > ${_out}
+  fi
+fi
+
+if ! ${_a} ; then
+  pmstat -H ${_out}
+fi
+
+_n=$(cat ${_out} | wc -l)
+pmstat -H ${_out} | \
+awk -v t=${_t} -v n=${_n} 'BEGIN {
+  av[0]=0; # loadavg 1min
+  av[1]=0; # memory swpd
+  av[2]=0; # memory buff
+  av[3]=0; # memory cache
+  av[4]=0; # swap pi
+  av[5]=0; # swap po
+  av[6]=0; # io bi
+  av[7]=0; # io bo
+  av[8]=0; # system in
+  av[9]=0; # system cs
+  av[10]=0; # cpu us
+  av[11]=0; # cpu sy
+  av[12]=0; # cpu id
+  nc=1;
+  tc=0;
+}
+{
+  if( nc > n ) {
+    if( t == "true" ) {
+      av[1] = av[1]/1024.0;
+      av[2] = av[2]/1024.0;
+      av[3] = av[3]/1024.0;
+    }
+    for(i=0;i<13;i++) {
+      if( t == "true" ) {
+        if( i < 1 || i > 3 )
+          av[i] = av[i]/n;
+      }
+      else
+         av[i] = av[i]/n;
+    }
+    printf "Avg %3d%8.2f",n,av[0];
+    if( t == "true" )
+      printf "%6dg%6dg%6dg",av[1],av[2],av[3];
+    else
+      printf "%6dm%6dm%6dm",av[1],av[2],av[3];
+    printf "%5d%5d%5d%5d",av[4],av[5],av[6],av[7];
+    printf "%5d%5d%4d%4d%4d\n",av[8],av[9],av[10],av[11],av[12];
+
+    for(i=0;i<13;i++)
+      av[i] = 0;
+    nc=1;
+    tc=tc+1;
+  }
+
+  if(tc > 500 ) {
+    tc=0;
+  }
+
+  if( ! tc % 10 ) {
+    if( match($0,"^node") )
+      print;
+    if( match($0,"^ +1 min") )
+      print;
+  }
+
+  if( match($0,"^[a-z][0-9]+") ) {
+    for(i=2;i<14;i++) {
+      av[i-2] = av[i-2] + $i;
+    }
+    nc=nc+1;
+  }
+}'

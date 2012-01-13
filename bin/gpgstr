@@ -1,0 +1,34 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+import enc/gpg
+
+function help/gpgstr() {
+  cat << EOF
+Usage: ${gbn} options
+              -d - decrypt
+              -s string
+              -v - verbose
+EOF
+  exit 1
+}
+
+### args
+_s="secret"
+_d=false
+
+while getopts hvds: o; do
+  case "$o" in
+    d) _d=true;;
+    s) _s=$OPTARG;;
+    v) gdbg=true;;
+    h|*) help/gpgstr;;
+  esac
+done
+
+### main
+if ${_d} ; then
+  enc/gpg/dec "${_s}"
+else
+  enc/gpg/enc "${_s}"
+fi
