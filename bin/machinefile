@@ -1,0 +1,44 @@
+#!/bin/bash
+
+_machinefile="${PWD}/machinefile"
+if test -r "${_machinefile}" ; then
+  rm -f "${_machinefile}"
+  if test $? -gt 0 ; then
+    echo "Machine file failed"
+    exit 1
+  fi
+fi
+
+### PBS
+# default
+
+### SGE
+if ! test -z "${PE_HOSTFILE}" && \
+     test -r "${PE_HOSTFILE}" ; then
+  cat "${PE_HOSTFILE}" | \
+  awk '{
+    c=0;
+    sub(/\..*/,"",$1);
+    for(c<$2) {
+      print $1;
+    }
+  }' > "${_machinefile}"
+  export PBS_NODEFILE="${_machinefile}"
+fi
+
+### Slurm
+if ! test -z "${SLURM_JOB_NODELIST}" ; then
+  _nodelist=$(scontrol show hostname ${SLURM_JOB_NODELIST})
+  _ntasks=1
+  if ! test -z "${SLURM_NTASKS_PER_NODE}" ; then
+    _ntasks=${SLURM_NTASKS_PER_NODE}
+  fi
+
+  echo -n > "${_machinefile}"
+  for node in ${_nodelist} ; do
+    for ((c=0; c<_ntasks; ++c)) ; do
+      echo "${node}" >> "${_machinefile}"
+    done
+  done
+  export PBS_NODEFILE="${_machinefile}"
+fi
