@@ -252,6 +252,10 @@ function que/sub() {
         # Intel MPI
         echo "export MPI_OPT=\"-np ${_np} -perhost ${_pn} ${_bind} ${_prof}\""    >> "${_bat}"
         ;;
+      pmpi)
+        # Platform MPI
+        echo "export MPI_OPT=\"-hostlist \${MACHINES} ${_pn} -np ${_np} ${_bind} ${_prof}\"" >> "${_bat}"
+        ;;
       mpt)
         # SGI MPT
         echo "export MPI_OPT=\"\${MACHINES} ${_pn} ${_bind} ${_boost} ${_prof}\"" >> "${_bat}"
@@ -287,6 +291,10 @@ function que/sub() {
       impi)
         # Intel MPI
         echo "export I_MPI_DEBUG=${_v}"         >> "${_bat}"
+        ;;
+      pmpi)
+        # Platform MPI
+        echo "export MPI_ERROR_LEVEL=${_v}"     >> "${_bat}"
         ;;
       mpt)
         echo "export MPI_VERBOSE=1"             >> "${_bat}"
