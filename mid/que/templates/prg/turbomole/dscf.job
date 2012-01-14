@@ -1,0 +1,11 @@
+NAME=dscf
+TIME=00:30:00
+MEMORY=1500
+NODES=1
+SCKTS=2
+CORES=4
+QUEUE=test
+MODE=mpi/self
+# MODE=omp
+SETUP="${HOME}/shf3/bin/machinefile"
+RUN="runprg -p turbomole -g dscf.guide"

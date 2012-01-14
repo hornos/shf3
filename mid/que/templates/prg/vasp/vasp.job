@@ -1,0 +1,10 @@
+NAME=vasp
+TIME=01:00:00
+MEMORY=1500
+NODES=1
+SCKTS=2
+CORES=4
+QUEUE=test
+MODE=mpi/mpt
+BIND="dplace -s1"
+RUN="runprg -p vasp -g vasp.guide"

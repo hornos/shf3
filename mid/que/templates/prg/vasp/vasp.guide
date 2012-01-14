@@ -1,0 +1,17 @@
+INPUTDIR="${PWD}"
+WORKDIR="${SCRATCH}/vasp-${USER}-${HOSTNAME}-$$"
+RESULTDIR="${INPUTDIR}"
+
+PRGBIN="${VASP_BIN}/vasp"
+
+# VASP_GW="no"
+PRGOPT=""
+
+DATADIR="${VASP_PROJ_HOME}/POTCAR_PBE"
+DATA=""
+
+MAIN="input.cntl"
+# OTHER=""
+
+ERROR="save"
+RESULT="*"
