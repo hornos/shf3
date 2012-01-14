@@ -17,9 +17,8 @@ if ! test -z "${PE_HOSTFILE}" && \
      test -r "${PE_HOSTFILE}" ; then
   cat "${PE_HOSTFILE}" | \
   awk '{
-    c=0;
     sub(/\..*/,"",$1);
-    for(c<$2) {
+    for(c=0;c<$2;++c) {
       print $1;
     }
   }' > "${_machinefile}"
