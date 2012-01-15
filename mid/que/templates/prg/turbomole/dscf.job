@@ -6,6 +6,7 @@ SCKTS=2
 CORES=4
 QUEUE=test
 MODE=mpi/self
+MPIRUN_OPT="-cpu_bind"
 # MODE=omp
 SETUP="${HOME}/shf3/bin/machinefile"
 RUN="runprg -p turbomole -g dscf.guide"
