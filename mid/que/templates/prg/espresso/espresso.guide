@@ -1,0 +1,15 @@
+INPUTDIR="${PWD}"
+WORKDIR="${SCRATCH}/espresso-${USER}-${HOSTNAME}-$$"
+RESULTDIR="${INPUTDIR}"
+
+PRGBIN="${ESPRESSO_BIN}/espresso-pw.x"
+PRGOPT=""
+
+DATADIR="${ESPRESSO_PSEUDO_HOME}/all"
+DATA=""
+
+MAIN="<main.in"
+# OTHER=""
+
+ERROR="save"
+RESULT="*"
