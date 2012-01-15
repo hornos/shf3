@@ -10,7 +10,7 @@ PRGOPT=""
 DATADIR="${VASP_PROJ_HOME}/POTCAR_PBE"
 DATA=""
 
-MAIN="input.cntl"
+MAIN="-input.cntl"
 # OTHER=""
 
 ERROR="save"

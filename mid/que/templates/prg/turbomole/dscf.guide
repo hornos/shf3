@@ -5,10 +5,8 @@ RESULTDIR="${INPUTDIR}"
 PRGBIN="${TURBOMOLE_BIN}/dscf"
 # MPI
 PRGOPT="-n ${MPI_NUM_SLOTS}"
-# SMP
-# PRGOPT=""
 
-MAIN="input.cntl"
+MAIN="-input.cntl"
 OTHER=""
 
 ERROR="save"
