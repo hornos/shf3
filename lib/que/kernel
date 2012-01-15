@@ -229,6 +229,15 @@ function que/sub() {
       msg "Profiler  : ${_prof}"
     fi
 
+    # mpirun
+    if test -z "${MPIRUN}" ; then
+      MPIRUN="${que_mpirun}"
+    fi
+    local _mpirun_opt=""
+    if ! test -z "${MPIRUN_OPT}" ; then
+      _mpirun_opt="${MPIRUN_OPT}"
+    fi
+
     # default for MPIOMP
     local _np=${_socktes}
     local _pn=${_sckts}
@@ -246,24 +255,29 @@ function que/sub() {
     case ${_mpi} in
       ompi)
         # Open MPI
-        echo "export MPI_OPT=\"-np ${_np} -npernode ${_pn} ${_bind} ${_prof}\""   >> "${_bat}"
+        echo "export MPI_OPT=\"${_mpirun_opt} -np ${_np} -npernode ${_pn} ${_bind} ${_prof}\""   >> "${_bat}"
         ;;
       impi)
         # Intel MPI
-        echo "export MPI_OPT=\"-np ${_np} -perhost ${_pn} ${_bind} ${_prof}\""    >> "${_bat}"
+        echo "export MPI_OPT=\"${_mpirun_opt} -np ${_np} -perhost ${_pn} ${_bind} ${_prof}\""    >> "${_bat}"
         ;;
       pmpi)
         # Platform MPI
-        echo "export MPI_OPT=\"-hostlist \${MACHINES} ${_pn} -np ${_np} ${_bind} ${_prof}\"" >> "${_bat}"
+        echo "export MPI_OPT=\"${_mpirun_opt} -hostlist \${MACHINES} ${_pn} -np ${_np} ${_bind} ${_prof}\"" >> "${_bat}"
         ;;
       mpt)
         # SGI MPT
-        echo "export MPI_OPT=\"\${MACHINES} ${_pn} ${_bind} ${_boost} ${_prof}\"" >> "${_bat}"
+        echo "export MPI_OPT=\"${_mpirun_opt} \${MACHINES} ${_pn} ${_bind} ${_boost} ${_prof}\"" >> "${_bat}"
         ;;
       self)
-        echo "# Internal MPI used"         >> "${_bat}"
-        echo "export MPI_NUM_SLOTS=${_np}" >> "${_bat}"
-        echo "export MPI_NUM_TASKS=${_pn}" >> "${_bat}"
+        local _mpi_opt=""
+        echo "# Internal MPI used"                    >> "${_bat}"
+        echo "export MPI_NUM_SLOTS=${_np}"            >> "${_bat}"
+        echo "export MPI_NUM_TASKS=${_pn}"            >> "${_bat}"
+
+        if ! test -z "${_mpirun_opt}" ; then
+          echo "export MPIRUN_OPTIONS=${_mpirun_opt}" >> "${_bat}"
+        fi
         ;;
       *)
         msg "MPI: ${_mpi} not implemented"
@@ -273,7 +287,7 @@ function que/sub() {
 
     # prerun
     if test "${_mpi}" != "self" ; then
-      echo "export PRERUN=\"${que_mpirun} \${MPI_OPT}\"" >> "${_bat}"
+      echo "export PRERUN=\"${MPIRUN} \${MPI_OPT}\"" >> "${_bat}"
     fi
   fi
   ### end MPIOMP
