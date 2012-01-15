@@ -12,6 +12,19 @@ function PUT() {
   done
 }
 
+function RPUT() {
+  import ssh
+  local _h=${1:-default}
+  shift
+  local _s=${*}
+  local i
+  for i in ${_s} ; do
+    if test -r "${i}" ; then
+      ssh/put "${_h}" "${i}" ${_t} true
+    fi
+  done
+}
+
 function GET() {
   import ssh
   local _h=${1:-default}
@@ -20,5 +33,16 @@ function GET() {
   local i
   for i in ${_s} ; do
     ssh/get "${_h}" "${i}" ${_t}
+  done
+}
+
+function RGET() {
+  import ssh
+  local _h=${1:-default}
+  shift
+  local _s=${*}
+  local i
+  for i in ${_s} ; do
+    ssh/get "${_h}" "${i}" ${_t} true
   done
 }
