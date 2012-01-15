@@ -424,6 +424,10 @@ function ssh/xfer() {
       local _opt="-p ${mid_ssh_port}"
       local _url="${_src_url}"
       local _mtxt="rsync/ssh"
+      local _rsync_opt=""
+      if ${_r} ; then
+        _rsync_opt="-r -k -L"
+      fi
     ;;
     *) sp_f_err "Invalid mode"
        return ${_false_}
@@ -485,9 +489,9 @@ function ssh/xfer() {
     ;;
     3)
       if ${_put} ; then
-        _cmd="${ssh_rsync} -a -z -v --partial --progress -e \"${ssh_ssh} ${_opt}\" \"${_src}\" ${_url}"
+        _cmd="${ssh_rsync} -a -z -v ${_rsync_opt} --partial --progress -e \"${ssh_ssh} ${_opt}\" \"${_src}\" ${_url}"
       else
-        _cmd="${ssh_rsync} -a -z -v --partial --progress -e \"${ssh_ssh} ${_opt}\" ${_url} \"${_dst}\""
+        _cmd="${ssh_rsync} -a -z -v ${_rsync_opt} --partial --progress -e \"${ssh_ssh} ${_opt}\" ${_url} \"${_dst}\""
       fi
     ;;
   esac
