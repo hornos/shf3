@@ -271,12 +271,12 @@ function que/sub() {
         ;;
       self)
         local _mpi_opt=""
-        echo "# Internal MPI used"                    >> "${_bat}"
-        echo "export MPI_NUM_SLOTS=${_np}"            >> "${_bat}"
-        echo "export MPI_NUM_TASKS=${_pn}"            >> "${_bat}"
+        echo "# Internal MPI used"                        >> "${_bat}"
+        echo "export MPI_NUM_SLOTS=${_np}"                >> "${_bat}"
+        echo "export MPI_NUM_TASKS=${_pn}"                >> "${_bat}"
 
         if ! test -z "${_mpirun_opt}" ; then
-          echo "export MPIRUN_OPTIONS=${_mpirun_opt}" >> "${_bat}"
+          echo "export MPIRUN_OPTIONS=\"${_mpirun_opt}\"" >> "${_bat}"
         fi
         ;;
       *)
