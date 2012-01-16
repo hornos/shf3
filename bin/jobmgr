@@ -20,13 +20,13 @@ EOF
 ### args
 _j="batch.job"
 _c="S"
-_n=false
+_n=true
 _v=false
 while getopts hvns:l: o; do
   case "$o" in
     s) _c="S"; _j=$OPTARG;;
     l) _c="L"; _j=$OPTARG;;
-    n) _n=true;;
+    n) _n=false;;
     v) gdbg=true;;
     h|*) help/jobmgr;;
   esac
