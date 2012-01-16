@@ -35,7 +35,7 @@ function que/sub() {
 
   ### summary
   if test "${_sub}" = "C" ; then
-    que/chk "${RUN}" "${_sub}"
+    que/check "${RUN}" "${_sub}"
     return $?
   fi
 
@@ -382,7 +382,7 @@ function que/sub() {
 
     # check
     if ${_chk} ; then
-      que/chk "${RUN}"
+      que/check "${RUN}"
       if test $? -gt 0 ; then
         msg "Job check failed"
         return ${_false_}
@@ -430,13 +430,13 @@ function que/sub() {
 }
 
 
-function help/que/chk() {
+function help/que/check() {
   cat << EOF
 \$1 string - command
 \$2 string - mode
 EOF
 }
-function que/chk() {
+function que/check() {
   local _cmd="${1##runprg}"
   local _sub="${2:-B}"
   local _prg=""
@@ -470,5 +470,6 @@ function que/chk() {
     return $?
   fi
   # check
-  run/chk "${_prg}" "${_guide}"
+  import run/check
+  run/check "${_prg}" "${_guide}"
 }
