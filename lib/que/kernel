@@ -458,18 +458,21 @@ function que/check() {
     msg "Program module not set"
     return ${_false_}
   fi
-  if test -z "${_guide}" || ! test -r "${_guide}" ; then
-    msg "Guide not found"
+
+  if test -z "${_guide}" || \
+   ! test -r "${_guide}" ; then
+    msg "Guide not found: ${_guide}"
     return ${_false_}
   fi
 
   import run
   # summary
   if test "${_sub}" = "S" ; then
+    import run
     run/sum "${_prg}" "${_guide}"
     return $?
   fi
   # check
   import run/check
-  run/check "${_prg}" "${_guide}"
+  run/check 2 "${_prg}" "${_guide}"
 }
