@@ -252,14 +252,19 @@ function que/sub() {
     fi
 
     ### MPI OMP
+    local _machines=""
     case ${_mpi} in
       ompi)
         # Open MPI
-        echo "export MPI_OPT=\"${_mpirun_opt} -np ${_np} -npernode ${_pn} ${_bind} ${_prof}\""   >> "${_bat}"
+        _machines="-np ${_np} -npernode ${_pn}"
+        # machinefile support: SGE, PBS/Torque, SLURM, LoadLeveler
+        echo "export MPI_OPT=\"${_mpirun_opt} ${_machines} ${_bind} ${_prof}\""   >> "${_bat}"
         ;;
       impi)
         # Intel MPI
-        echo "export MPI_OPT=\"${_mpirun_opt} -np ${_np} -perhost ${_pn} ${_bind} ${_prof}\""    >> "${_bat}"
+        _machines="-np ${_np} -perhost ${_pn}"
+        # machinefile support: SGE, PBS/Torque, SLURM
+        echo "export MPI_OPT=\"${_mpirun_opt} ${_machines} ${_bind} ${_prof}\""    >> "${_bat}"
         ;;
       pmpi)
         # Platform MPI

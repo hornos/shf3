@@ -1,0 +1,41 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+import sys/mac
+
+function help/macmgr() {
+  cat << EOF
+
+MAC Manager
+
+Usage: ${gbn} options
+              -f database
+              -i database - init
+              -s - select
+EOF
+  exit ${_false_}
+}
+
+### args
+_m="SELECT"
+_f=""
+while getopts hvgf:i: o; do
+  case "$o" in
+    f) _f=$OPTARG;;
+    i) _m="INIT"; _f=$OPTARG;;
+    s) _m="SELECT";;
+    v) gdbg=true;;
+    h|*) help/macmgr;;
+  esac
+done
+
+### main
+echo
+msg
+gui/line
+
+sys_mac_db="$(ns/dir)/../sql/${sys_mac_db}"
+if ! test -z "${_f}" ; then
+  sys_mac_db="${_f}"
+fi
+sys/mac/mgr "${_m}"
