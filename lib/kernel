@@ -51,6 +51,10 @@ function ns/path() {
   echo $(cd $(dirname $1); pwd)/$(basename $1)
 }
 
+function ns/readlink() {
+  echo $(cd -P "${1}"; pwd)
+}
+
 function ns/isfunc() {
   local _f="${1:-${FUNCNAME}}"
   if test $(type -t "${_f}") = "function" ; then
