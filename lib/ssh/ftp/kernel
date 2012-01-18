@@ -6,7 +6,14 @@ function PUT() {
   local _s=${*}
   local i
   for i in ${_s} ; do
-    if test -r "${i}" ; then
+    if test -l "${i}" ; then
+      # resolv symlinks
+      import sys/dir
+      local _p=$(cd "${i}";pwd)
+      sys/dir/svwd "${_p}/.."
+      ssh/put "${_h}" "${i}" ${_t}
+      sys/dir/ldwd
+    elif test -r "${i}" ; then
       ssh/put "${_h}" "${i}" ${_t}
     fi
   done
@@ -46,4 +53,17 @@ function RGET() {
   for i in ${_s} ; do
     ssh/get "${_h}" "${i}" ${_t} true
   done
+}
+
+function MODE() {
+  local _m="${1:-3}"
+  _t=${_m}
+}
+
+function LS() {
+  import ssh
+  local _h=${1:-default}
+  shift
+  local _s="${*}"
+  ssh/cmd "${_h}" "ls -l ${_s}"
 }
