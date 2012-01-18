@@ -6,7 +6,7 @@ function PUT() {
   local _s=${*}
   local i
   for i in ${_s} ; do
-    if test -l "${i}" ; then
+    if test -L "${i}" ; then
       # resolv symlinks
       import sys/dir
       local _p=$(cd "${i}";pwd)
