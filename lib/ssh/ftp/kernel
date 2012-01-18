@@ -19,7 +19,8 @@ function RPUT() {
   local _s=${*}
   local i
   for i in ${_s} ; do
-    if test -r "${i}" ; then
+    local i=$(cd "${i}";pwd)
+    if test -d "${i}" ; then
       ssh/put "${_h}" "${i}" ${_t} true
     fi
   done

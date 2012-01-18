@@ -2,7 +2,7 @@
 function sys/py/ini() {
   local _h="${1:-${gbn}}"
   local _f="${2:-${gbn}.ini}"
-  
+
   if test -z "${_h}" || \
    ! test -r "${_f}" ; then
     return ${_false_}
@@ -59,3 +59,46 @@ function sys/py/ini() {
     exit 1;
   }'
 }
+
+# TODO operators rel dir
+# default lib / with version
+function sys/py/path() {
+  local _p="${1}"
+  if test -z "${_p}" ; then
+    return ${_false_}
+  fi
+
+  local _pv=$(ns/op/value "${_p}")
+  if $(ns/op "${_p}" "+") ; then
+    _p="${gdn}/${sys_py_pkgdir}/${_pv}/build"
+    if ! test -d "${_p}" ; then
+      msg "Build not found: ${_p}"
+      return ${_false_}
+    fi
+    # lib
+    local _l=$(ls -d ${_p}/lib*)
+    if ! test -d "${_l}" ; then
+      msg "Lbrary not found: ${_l}"
+      return ${_false_}
+    fi
+  else
+    local _l="${_pv}"
+  fi
+
+  if test -z "${PYTHONPATH}" ; then
+    export PYTHONPATH="${_l}"
+  else
+    PYTHONPATH="${_l}:${PYTHONPATH}"
+  fi
+}
+
+# function sys/py/pkg() {
+#   local _p="${1:-${gdn}/../pkg}"
+#   local i
+#   for i in ${_p}/* ; do
+#     if test -d "${i}" ; then
+#       i=$(basename "${i}")
+#       sys/py/path "+${i}"
+#     fi
+#   done
+# }
