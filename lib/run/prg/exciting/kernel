@@ -28,6 +28,8 @@ function run/prg/exciting/finish() {
 function run/prg/exciting/save() {
   import run/save
 
+  local _main=$(ns/op/value "${MAIN}")
+  PREFIX="${_main%%.*}"
   run/save
 }
 
@@ -48,6 +50,8 @@ function run/prg/exciting/init() {
   fi
 
   # init other
+  local _main=$(ns/op/value "${MAIN}")
+  PREFIX="${_main%%.*}"
   run/init/other
   if test $? -gt 0 ; then
     msg "run/init/other failed"
