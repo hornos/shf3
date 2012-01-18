@@ -1,5 +1,5 @@
 
-function run/prg/general/check() {
+function run/prg/exciting/check() {
   # main input check
   run/check/main
   if test $? -gt 0 ; then
@@ -20,18 +20,18 @@ function run/prg/general/check() {
   return ${_true_}
 }
 
-function run/prg/general/finish() {
+function run/prg/exciting/finish() {
   return ${_true_}
 }
 
 
-function run/prg/general/save() {
+function run/prg/exciting/save() {
   import run/save
 
   run/save
 }
 
-function run/prg/general/init() {
+function run/prg/exciting/init() {
   import run/init
 
   run/init/main
