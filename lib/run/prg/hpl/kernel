@@ -1,0 +1,44 @@
+
+function run/prg/hpl/check() {
+  # main input check
+  run/check/main
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  return ${_true_}
+}
+
+function run/prg/hpl/finish() {
+  return ${_true_}
+}
+
+function run/prg/hpl/save() {
+  import run/save
+
+  run/save
+}
+
+function run/prg/hpl/init() {
+  import run/init
+
+  # operator clean name
+  local _idir=$(ns/op/value "${INPUTDIR}")
+  local _inp=$(ns/op/value "${MAIN}")
+  _inp="${_idir}/${_inp}"
+
+  # HPL.dat
+  run/init/bcast "${_inp}" "HPL.dat"
+  if test $? -gt 0 ; then
+    msg "${FUNCNAME} HPL.dat failed"
+    return ${_false_}
+  fi
+
+#  run/init/main
+#  if test $? -gt 0 ; then
+#    msg "run/init/main failed"
+#    return ${_false_}
+#  fi
+
+  return ${_true_}
+}
