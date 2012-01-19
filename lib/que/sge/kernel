@@ -43,8 +43,15 @@ function que/sge() {
       _qlogin="${_qlogin} -q ${QQUEUE}"
     fi
 
+    # exclusive
     if test "${QEXCL}" = "yes" ; then
       _qlogin="${_qlogin} -l exclusive=true"
+    fi
+
+    # jsv
+    if ! test -z "${QJSV}" && \
+         test -r "${QJSV}" ; then
+      _qlogin="${_qlogin} -jsv ${QJSV}"
     fi
 
     echo "${_qlogin}" >> "${_bat}"
