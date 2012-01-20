@@ -1,2 +1,3 @@
 sys_py_python="python2.6"
 sys_py_pkgdir="../pkg"
+sys_py_libdir="../lib"

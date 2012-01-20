@@ -64,13 +64,14 @@ function sys/py/ini() {
 # default lib / with version
 function sys/py/path() {
   local _p="${1}"
+  local _l="${2:-${sys_py_pkgdir}}"
   if test -z "${_p}" ; then
     return ${_false_}
   fi
 
   local _pv=$(ns/op/value "${_p}")
   if $(ns/op "${_p}" "+") ; then
-    _p="${gdn}/${sys_py_pkgdir}/${_pv}/build"
+    _p="${gdn}/${_l}/${_pv}/build"
     if ! test -d "${_p}" ; then
       msg "Build not found: ${_p}"
       return ${_false_}
@@ -92,13 +93,8 @@ function sys/py/path() {
   fi
 }
 
-# function sys/py/pkg() {
-#   local _p="${1:-${gdn}/../pkg}"
-#   local i
-#   for i in ${_p}/* ; do
-#     if test -d "${i}" ; then
-#       i=$(basename "${i}")
-#       sys/py/path "+${i}"
-#     fi
-#   done
-# }
+function sys/py/pkg() {
+  local _p="${1}"
+  sys/py/path "${_p}" "${sys_py_pkgdir}"
+}
+
