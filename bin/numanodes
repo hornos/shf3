@@ -7,8 +7,19 @@ if ! test -z "${SGE_BINDING}" ; then
   _numalist=$(for i in ${SGE_BINDING} ; do echo $((i/${_m})); done | uniq)
 fi
 
+_numanodes=""
+export NUMA=""
 if ! test -z "${_numalist}" ; then
-  export NUMANODES="${_numalist}"
+  first=true
+  for numa in ${_numalist} ; do
+    if ! $first ; then
+      _numanodes="${_numanodes},$numa"
+    else
+      _numanodes=$numa
+      first=false
+    fi
+  done
+  export NUMANODES="${_numanodes}"
   export NUMA="numactl -m ${NUMANODES} -N ${NUMANODES}"
   echo "Numanodes : ${NUMANODES}"
 fi

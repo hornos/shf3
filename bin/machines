@@ -30,7 +30,7 @@ if ! test -z "${_nodelist}" ; then
       first=false
     fi
   done
-  MACHINES="${_machines}"
+  export MACHINES="${_machines}"
 fi
 if test -z "${MACHINES}" ; then
   echo "Machines : not set"
