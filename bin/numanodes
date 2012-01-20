@@ -9,5 +9,6 @@ fi
 
 if ! test -z "${_numalist}" ; then
   export NUMANODES="${_numalist}"
+  export NUMA="numactl -m ${NUMANODES} -N ${NUMANODES}"
   echo "Numanodes : ${NUMANODES}"
 fi

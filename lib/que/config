@@ -1,5 +1,4 @@
 que_dir="${grd}/mid/que"
 que_shell="/bin/bash"
 que_mpirun="mpirun"
-que_numactl="numactl"
 

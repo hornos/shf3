@@ -254,32 +254,26 @@ function que/sub() {
     ### MPI OMP
     # regular nodes
     local _machines=""
-
-    # numa nodes
-    local _numa=""
-    if ! test -z "${NUMANODES}"; then
-      _numa="${que_numactl} -m ${NUMANODES} -N ${NUMANODES} ${NUMA}"
-    fi
     case ${_mpi} in
       ompi)
         # Open MPI
         _machines="-np ${_np} -npernode ${_pn}"
         # machinefile support: SGE, PBS/Torque, SLURM, LoadLeveler
-        echo "export MPI_OPT=\"${_mpirun_opt} ${_machines} ${_numa} ${_bind} ${_prof}\""   >> "${_bat}"
+        echo "export MPI_OPT=\"${_mpirun_opt} ${_machines} \${NUMA} ${_bind} ${_prof}\""   >> "${_bat}"
         ;;
       impi)
         # Intel MPI
         _machines="-np ${_np} -perhost ${_pn}"
         # machinefile support: SGE, PBS/Torque, SLURM
-        echo "export MPI_OPT=\"${_mpirun_opt} ${_machines} ${_numa} ${_bind} ${_prof}\""    >> "${_bat}"
+        echo "export MPI_OPT=\"${_mpirun_opt} ${_machines} \${NUMA} ${_bind} ${_prof}\""    >> "${_bat}"
         ;;
       pmpi)
         # Platform MPI
-        echo "export MPI_OPT=\"${_mpirun_opt} -hostlist \${MACHINES} ${_pn} -np ${_np} ${_numa} ${_bind} ${_prof}\"" >> "${_bat}"
+        echo "export MPI_OPT=\"${_mpirun_opt} -hostlist \${MACHINES} ${_pn} -np ${_np} \${NUMA} ${_bind} ${_prof}\"" >> "${_bat}"
         ;;
       mpt)
         # SGI MPT
-        echo "export MPI_OPT=\"${_mpirun_opt} \${MACHINES} ${_pn} ${_numa} ${_bind} ${_boost} ${_prof}\"" >> "${_bat}"
+        echo "export MPI_OPT=\"${_mpirun_opt} \${MACHINES} ${_pn} \${NUMA} ${_bind} ${_boost} ${_prof}\"" >> "${_bat}"
         ;;
       self)
         local _mpi_opt=""
