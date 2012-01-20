@@ -21,5 +21,6 @@ if ! test -z "${_numalist}" ; then
   done
   export NUMANODES="${_numanodes}"
   export NUMA="numactl -m ${NUMANODES} -N ${NUMANODES}"
+  export MACHINES=""
   echo "Numanodes : ${NUMANODES}"
 fi
