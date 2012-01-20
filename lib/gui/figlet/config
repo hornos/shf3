@@ -1,0 +1,2 @@
+gui_figlet_dir=$(dirname "${BASH_SOURCE}")
+gui_figlet="figlet -k -d ${gui_figlet_dir} -C utf8 -p"

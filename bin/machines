@@ -12,10 +12,8 @@ if ! test -z "${PE_HOSTFILE}" && \
   _nodelist=$(cat "${PE_HOSTFILE}" | awk '{sub(/\..*/,"",$1); print $1;}')
   _numalist=""
   if ! test -z "${SGE_BINDING}" ; then
-    _m=${QCRSPS:-8}
-    _numalist=$(for i in ${SGE_BINDING} ; do
-                  echo $((i/${_m}))
-                done | uniq)
+    _m=${QCPUPN:-8}
+    _numalist=$(for i in ${SGE_BINDING} ; do echo $((i/${_m})); done | uniq)
   fi
 fi
 

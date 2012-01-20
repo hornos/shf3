@@ -1,0 +1,6 @@
+
+function gui/figlet() {
+  local _s="${1:-FiGLET}"
+  local _f="${2:-utf8-slant}"
+  ${gui_figlet} -f "${_f}" "${_s}"
+}
