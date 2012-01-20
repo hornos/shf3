@@ -1,0 +1,13 @@
+#!/bin/bash
+
+### SGE
+_numalist=""
+if ! test -z "${SGE_BINDING}" ; then
+  _m=${QCPUPN:-8}
+  _numalist=$(for i in ${SGE_BINDING} ; do echo $((i/${_m})); done | uniq)
+fi
+
+if ! test -z "${_numalist}" ; then
+  export NUMANODES="${_numalist}"
+  echo "Numanodes : ${NUMANODES}"
+fi

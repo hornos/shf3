@@ -10,11 +10,6 @@ fi
 if ! test -z "${PE_HOSTFILE}" && \
      test -r "${PE_HOSTFILE}" ; then
   _nodelist=$(cat "${PE_HOSTFILE}" | awk '{sub(/\..*/,"",$1); print $1;}')
-  _numalist=""
-  if ! test -z "${SGE_BINDING}" ; then
-    _m=${QCPUPN:-8}
-    _numalist=$(for i in ${SGE_BINDING} ; do echo $((i/${_m})); done | uniq)
-  fi
 fi
 
 ### Slurm
@@ -41,9 +36,4 @@ if test -z "${MACHINES}" ; then
   echo "Machines : not set"
 else
   echo "Machines : ${MACHINES}"
-fi
-
-if ! test -z "${_numalist}" ; then
-  export NUMANODES="${_numalist}"
-  echo "Numanodes : ${NUMANODES}"
 fi
