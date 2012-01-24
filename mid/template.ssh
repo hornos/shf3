@@ -43,3 +43,7 @@ mid_ssh_sshfs_dst="/home/${mid_ssh_user}"
 
 # SSHFS options
 mid_ssh_sshfs_opt="-C -o Port=${mid_ssh_port} -o rw -o follow_symlinks"
+
+# Backup
+mid_ssh_backup_dir="${HOME}/backup"
+mid_ssh_backup_src=""

@@ -67,3 +67,43 @@ function LS() {
   local _s="${*}"
   ssh/cmd "${_h}" "ls -l ${_s}"
 }
+
+function BACKUP() {
+  import ssh
+  import sys/dir
+
+  local _h=${1:-default}
+  shift
+
+  sys/mid "ssh/${_h}"
+  if test $? -gt 0 ; then
+    msg "MID not found: ${_h}"
+    return ${_false_}
+  fi
+
+  # sources
+  local _s="${ssh_backup_src}"
+  if test -z "${_s}" ; then
+    msg "No source to backup"
+    return ${_false_}
+  fi
+
+  # backup dir
+  local _d="${ssh_backup_dir}"
+  if ! test -d "${_d}" ; then
+    answer "Create backup dir: ${_d}?"
+    if test $? -gt 0 ; then
+      return ${_false_}
+    fi
+    sys/dir/mk "${_d}"
+    if test $? -gt 0 ; then
+      return ${_false_}
+    fi
+  fi
+  sys/dir/svwd "${_d}"
+
+  local i
+  for i in ${_s} ; do
+    ssh/get "${_h}" "${i}" ${_t}
+  done
+}
