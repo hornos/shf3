@@ -93,6 +93,7 @@ function LS() {
 }
 
 function BACKUP() {
+  import sys
   import ssh
   import sys/dir
 
