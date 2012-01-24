@@ -16,7 +16,7 @@ EOF
 }
 
 ### args
-if test $# -lt 3 ; then
+if test $# -lt 2 ; then
   help/sshtx
 fi
 _t=3

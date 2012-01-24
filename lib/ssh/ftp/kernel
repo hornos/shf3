@@ -3,7 +3,13 @@ function PUT() {
   import ssh
   local _h=${1:-default}
   shift
+
+  # sources
   local _s=${*}
+  if test -z "${_s}" ; then
+    return ${_false_}
+  fi
+
   local i
   for i in ${_s} ; do
     if test -L "${i}" ; then
@@ -23,7 +29,13 @@ function RPUT() {
   import ssh
   local _h=${1:-default}
   shift
+
+  # sources
   local _s=${*}
+  if test -z "${_s}" ; then
+    return ${_false_}
+  fi
+
   local i
   for i in ${_s} ; do
     local i=$(cd "${i}";pwd)
@@ -37,7 +49,13 @@ function GET() {
   import ssh
   local _h=${1:-default}
   shift
+
+  # sources
   local _s=${*}
+  if test -z "${_s}" ; then
+    return ${_false_}
+  fi
+
   local i
   for i in ${_s} ; do
     ssh/get "${_h}" "${i}" ${_t}
@@ -48,7 +66,13 @@ function RGET() {
   import ssh
   local _h=${1:-default}
   shift
+
+  # sources
   local _s=${*}
+  if test -z "${_s}" ; then
+    return ${_false_}
+  fi
+
   local i
   for i in ${_s} ; do
     ssh/get "${_h}" "${i}" ${_t} true
@@ -84,7 +108,6 @@ function BACKUP() {
   # sources
   local _s="${ssh_backup_src}"
   if test -z "${_s}" ; then
-    msg "No source to backup"
     return ${_false_}
   fi
 
