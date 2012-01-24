@@ -1,5 +1,6 @@
 #!/bin/bash
 source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
 import sys/dir
 
 function help/dirsync() {

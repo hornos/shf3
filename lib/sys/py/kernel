@@ -98,3 +98,8 @@ function sys/py/pkg() {
   sys/py/path "${_p}" "${sys_py_pkgdir}"
 }
 
+function sys/py/lib() {
+  local _p="${1:-${sys_py_libdir}}"
+  sys/py/path "${gdn}/${_p}"
+}
+
