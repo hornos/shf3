@@ -107,13 +107,13 @@ function BACKUP() {
   fi
 
   # sources
-  local _s="${ssh_backup_src}"
+  local _s="${mid_ssh_backup_src}"
   if test -z "${_s}" ; then
     return ${_false_}
   fi
 
   # backup dir
-  local _d="${ssh_backup_dir}"
+  local _d="${mid_ssh_backup_dir}"
   if ! test -d "${_d}" ; then
     answer "Create backup dir: ${_d}?"
     if test $? -gt 0 ; then
