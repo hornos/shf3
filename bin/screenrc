@@ -3,10 +3,10 @@
 # caption always "%3n %t%? @%u%?%? [%h]%?%=%c"
 # caption always "%?%F%{.R.}%?%3n %t%? [%h]%?"
 # caption always "%{= kc}%H (system load: %l)%-21=%{= .m}%D %d.%m.%Y %0c"
-
 caption always "%-Lw%{= BW}%50>%n%f* %t%{-}%+Lw%<"
+shell -bash
 defscrollback 1024
 startup_message off
 hardstatus on
-hardstatus alwayslastline
+#hardstatus alwayslastline
 bind ' ' windowlist -b
