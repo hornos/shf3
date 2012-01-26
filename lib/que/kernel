@@ -239,7 +239,7 @@ function que/sub() {
     fi
 
     # default for MPIOMP
-    local _np=${_socktes}
+    local _np=${_sockets}
     local _pn=${_sckts}
 
     ### begin MPI OMP hybrid
