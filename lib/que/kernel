@@ -264,8 +264,8 @@ function que/sub() {
       impi)
         # Intel MPI
         _machines="-np ${_np} -perhost ${_pn}"
-        # machinefile support: SGE, PBS/Torque, SLURM
-        echo "export MPI_OPT=\"${_mpirun_opt} ${_machines} \${NUMA} ${_bind} ${_prof}\""    >> "${_bat}"
+        # machinefile support: PBS/Torque, SLURM
+        echo "export MPI_OPT=\"${_mpirun_opt} -hosts \${MACHINES} ${_machines} \${NUMA} ${_bind} ${_prof}\""    >> "${_bat}"
         ;;
       pmpi)
         # Platform MPI

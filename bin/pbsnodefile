@@ -1,14 +1,10 @@
 #!/bin/bash
 
-echo ""
-echo "Warning: machinefile is obsolete use pbsnodefile"
-echo ""
-
-_machinefile="${PWD}/machinefile"
-if test -r "${_machinefile}" ; then
-  rm -f "${_machinefile}"
+_pbsnodefile="${PWD}/pbsnodefile"
+if test -r "${_pbsnodefile}" ; then
+  rm -f "${_pbsnodefile}"
   if test $? -gt 0 ; then
-    echo "Machine file failed"
+    echo "Cannot create: ${_pbsnodefile}"
     exit 1
   fi
 fi
@@ -25,8 +21,8 @@ if ! test -z "${PE_HOSTFILE}" && \
     for(c=0;c<$2;++c) {
       print $1;
     }
-  }' > "${_machinefile}"
-  export PBS_NODEFILE="${_machinefile}"
+  }' > "${_pbsnodefile}"
+  export PBS_NODEFILE="${_pbsnodefile}"
 fi
 
 ### Slurm
@@ -37,11 +33,11 @@ if ! test -z "${SLURM_JOB_NODELIST}" ; then
     _ntasks=${SLURM_NTASKS_PER_NODE}
   fi
 
-  echo -n > "${_machinefile}"
+  echo -n > "${_pbsnodefile}"
   for node in ${_nodelist} ; do
     for ((c=0; c<_ntasks; ++c)) ; do
-      echo "${node}" >> "${_machinefile}"
+      echo "${node}" >> "${_pbsnodefile}"
     done
   done
-  export PBS_NODEFILE="${_machinefile}"
+  export PBS_NODEFILE="${_pbsnodefile}"
 fi
