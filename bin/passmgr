@@ -11,6 +11,7 @@ Random password manager for the console
 Usage: ${gbn} options
               -l length
               -f database
+              -t table
               -u uid - retrieve
               -c uid - change
               -n uid - new
@@ -24,9 +25,11 @@ _l=21
 _u=""
 _m="LIST"
 _f=""
-while getopts hf:l:c:n:d:u:v o; do
+_t=""
+while getopts hf:t:l:c:n:d:u:v o; do
   case "$o" in
     f) _f=$OPTARG;;
+    t) _t=$OPTARG;;
     l) _l=$OPTARG;;
     u) _u=$OPTARG;;
     c) _m="CHANGE"; _u=$OPTARG;;
@@ -45,5 +48,8 @@ gui/line
 enc_pass_db="$(ns/dir)/../sql/${enc_pass_db}"
 if ! test -z "${_f}" ; then
   enc_pass_db="${_f}"
+fi
+if ! test -z "${_t}" ; then
+  enc_pass_tb="${_t}"
 fi
 enc/pass/mgr "${_m}" ${_l} "${_u}"
