@@ -435,8 +435,16 @@ function choose() {
   done
 }
 
+function is_int() {
+  return $(test "$@" -eq "$@" > /dev/null 2>&1);
+}
+
 function epoch() {
   local _d=${1:-0}
+  if ! $(is_int "${_d}") ; then
+    echo "${_d}"
+    return ${_true_}
+  fi
   if test ${_d} -eq 0 ; then
     date +%s
   else
