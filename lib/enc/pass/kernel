@@ -90,7 +90,7 @@ function enc/pass/mgr() {
       printf "${_frm1}" "uid" "created" "modified"
       gui/line
       local i
-      for i in $(sql/select "${enc_pass_db}" "${enc_pass_tb}" "uid,ctime,mtime") ; do
+      for i in $(sql/select "${enc_pass_db}" "${enc_pass_tb}" "${enc_pass_acc},ctime,mtime") ; do
         printf "${_frm1}" $(field "${i}") "$(epoch $(field "${i}" 2))" "$(epoch $(field "${i}" 3))"
       done
       ;;
@@ -113,7 +113,7 @@ function enc/pass/mgr() {
         return ${_false_}
       fi
       local _date=$(epoch)
-      local _f=("uid" "pass" "ctime" "mtime")
+      local _f=("${enc_pass_acc}" "pass" "ctime" "mtime")
       local _v=("${_u}" "${_p}" "${_date}" "${_date}")
       if ${gdbg} ; then
         sql/insert "${enc_pass_db}" "${enc_pass_tb}" "${_f[*]}" "${_v[*]}"
@@ -151,7 +151,7 @@ function enc/pass/mgr() {
       # TODO: serialize
       local _f=("pass" "mtime")
       local _v=("${_p}" "${_date}")
-      sql/update "${enc_pass_db}" "${enc_pass_tb}" "${_f[*]}" "${_v[*]}" "uid='${_u}'"
+      sql/update "${enc_pass_db}" "${enc_pass_tb}" "${_f[*]}" "${_v[*]}" "${enc_pass_acc}='${_u}'"
       if test $? -gt 0 ; then
         msg "Update failed"
         return ${_false_}
@@ -178,7 +178,7 @@ function enc/pass/mgr() {
       if test $? -gt 0 ; then
         return ${_false_}
       fi
-      sql/delete "${enc_pass_db}" "${enc_pass_tb}" "uid='${_u}'"
+      sql/delete "${enc_pass_db}" "${enc_pass_tb}" "${enc_pass_acc}='${_u}'"
       if test $? -gt 0 ; then
         msg "Delete failed"
         return ${_false_}
