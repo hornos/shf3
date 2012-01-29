@@ -26,10 +26,12 @@ _u=""
 _m="LIST"
 _f=""
 _t=""
-while getopts hf:t:l:c:n:d:u:v o; do
+_a=""
+while getopts hf:t:a:l:c:n:d:u:v o; do
   case "$o" in
     f) _f=$OPTARG;;
     t) _t=$OPTARG;;
+    a) _a=$OPTARG;;
     l) _l=$OPTARG;;
     u) _u=$OPTARG;;
     c) _m="CHANGE"; _u=$OPTARG;;
@@ -46,10 +48,16 @@ msg
 gui/line
 
 enc_pass_db="$(ns/dir)/../sql/${enc_pass_db}"
+
+# overrides
 if ! test -z "${_f}" ; then
   enc_pass_db="${_f}"
 fi
 if ! test -z "${_t}" ; then
   enc_pass_tb="${_t}"
 fi
+if ! test -z "${_a}" ; then
+  enc_pass_acc="${_a}"
+fi
+
 enc/pass/mgr "${_m}" ${_l} "${_u}"

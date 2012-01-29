@@ -37,7 +37,7 @@ function enc/pass/pass() {
   if test -z "${_u}" ; then
     return ${_false_}
   fi
-  local _p=$(sql/select "${enc_pass_db}" "${enc_pass_tb}" "pass" 0 1 "uid='${_u}'")
+  local _p=$(sql/select "${enc_pass_db}" "${enc_pass_tb}" "pass" 0 1 "${enc_pass_acc}='${_u}'")
   if test "${_p}" = "" ; then
     return ${_false_}
   fi

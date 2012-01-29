@@ -1,2 +1,3 @@
 enc_pass_db="enc_pass.sqlite"
 enc_pass_tb="enc_pass"
+enc_pass_acc="uid"
