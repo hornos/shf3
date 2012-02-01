@@ -164,7 +164,7 @@ function run/prg() {
   sys/dir/lsl . "Inputs in ${_wdir}"
 
   # MPI & options
-  local _out=${_prg}.output
+  local _out=${OUTPUT:-${_prg}.output}
   local _cmd="${PRGBIN}"
 
   if ! test -z "${PRERUN}" ; then
