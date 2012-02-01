@@ -8,6 +8,7 @@ function help/jobmon() {
 Usage: ${gbn} options
               -j jobid
               -n nodefile
+              -m pbs_nodefile
               -a - node average
               -t - total memory
               -h - help
@@ -32,12 +33,14 @@ _job=0
 _t=false
 _a=false
 _n=""
-while getopts htaj:n: o; do
+_m=""
+while getopts htaj:n:m: o; do
   case "$o" in
     j) _job=$OPTARG;;
     t) _t=true;;
     a) _a=true;;
     n) _n=$OPTARG;;
+    m) _m=$OPTARG;;
     v) gdbg=true;;
     h|*) help/jobmon;;
   esac
@@ -51,9 +54,18 @@ fi
 
 _stat=""
 
+# pbs nodefile
 if ! test -z "${_n}" && \
      test -r "${_n}" ; then
   _out="${_n}"
+
+# nodefile
+elif ! test -z "${_m}" && \
+     test -r "${_m}" ; then
+  _out="./.nodefile"
+  cat "${_m}" | uniq > "${_out}"
+
+# from job
 else
   _out="./.${_job}.nodes"
   for i in "qstat" "scontrol" ; do

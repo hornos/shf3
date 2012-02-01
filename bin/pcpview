@@ -1,0 +1,132 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import que
+import gui
+import sys/pcp
+
+function help/pcpview() {
+  cat << EOF
+Usage: ${gbn} options
+              -j jobid
+              -n nodefile
+              -m pbs_nodefile
+              -g - gui
+              -a - node average
+              -t - total memory
+              -h - help
+              -v - verbose
+EOF
+  exit 1
+}
+
+### trap
+function pcpview/exit() {
+  if test -z "${_n}" && \
+     test -r "${_f}"; then
+    rm -f "${_f}"
+  fi
+  exit $?
+}
+trap pcpview/exit INT TERM EXIT
+
+
+### args
+_job=0
+_t=false
+_a=false
+_c=""
+_n=""
+_m=""
+while getopts htaj:n:m:c: o; do
+  case "$o" in
+    j) _job=$OPTARG;;
+    t) _t=true;;
+    a) _a=true;;
+    c) _c=$OPTARG;;
+    n) _n=$OPTARG;;
+    m) _m=$OPTARG;;
+    v) gdbg=true;;
+    h|*) help/pcpview;;
+  esac
+done
+
+# TODO
+### main
+if ! $(installed pmstat) ; then
+  msg "Not found: pmstat"
+  exit ${_false_}
+fi
+
+if ${_g} ; then
+  if ! $(installed pmchart) ; then
+    msg "Not found: pmchart"
+    exit ${_false_}
+  fi
+fi
+
+_stat=""
+
+# pbs nodefile
+if ! test -z "${_n}" && \
+     test -r "${_n}" ; then
+  _f="${_n}"
+
+# nodefile
+elif ! test -z "${_m}" && \
+     test -r "${_m}" ; then
+  _f="./.nodefile"
+  cat "${_m}" | uniq > "${_f}"
+
+# from job
+else
+  _f="./.${_job}.nodes"
+  for i in "qstat" "scontrol" ; do
+    which "${i}" &> /dev/null
+    if test $? -eq 0 ; then
+      _stat="${i}"
+    fi
+  done
+  if test "${_stat}" = "" ; then
+    exit 1
+  fi
+
+  ### SGE
+  if test "${_stat}" = "qstat" ; then
+    _nodes=$(${_stat} -g t -r -u ${USER} | \
+           grep ${_job} | \
+           awk '{print $8}' | \
+           sed s/.*@// | \
+           sed s/\\..*//)
+
+    if test "${_nodes}" = "(null)" ; then
+      msg "Job not started"
+      exit 1
+    fi
+
+    for i in ${_nodes} ; do
+      echo ${i} >> ${_f}
+    done
+  fi
+
+  ### Slurm
+  if test "${_stat}" = "scontrol" ; then
+    ${_stat} show job ${_job}
+    if test $? -gt 0 ; then
+      exit 1
+    fi
+    _nodes=$(${_stat} show job ${_job} | egrep "^ *NodeList" | sed s/\ *NodeList=//)
+
+    if test "${_nodes}" = "(null)" ; then
+      msg "Job not started"
+      exit 1
+    fi
+
+    ${_stat} show hostnames ${_nodes} > ${_f}
+  fi
+fi
+
+if ! test -z "${_c}" ; then
+  sys/pcp/chart "${_f}" ${_c}
+else
+  sys/pcp/stat "${_f}" ${_a} ${_t}
+fi

@@ -1,0 +1,119 @@
+
+function sys/pcp/stat() {
+  local _f="${1}"
+  local _a=${2:-false}
+  local _t=${3:-false}
+
+  if ! test -r "${_f}" ; then
+    msg "Not found: ${_f}"
+    return ${_false_}
+  fi
+
+  if ! ${_a} ; then
+    ${sys_pcp_pmstat} -H "${_f}"
+    return $?
+  fi
+
+  # average
+  _n=$(cat "${_f}" | wc -l)
+  ${sys_pcp_pmstat} -H "${_f}" | \
+  awk -v t=${_t} -v n=${_n} 'BEGIN {
+    av[0]=0; # loadavg 1min
+    av[1]=0; # memory swpd
+    av[2]=0; # memory buff
+    av[3]=0; # memory cache
+    av[4]=0; # swap pi
+    av[5]=0; # swap po
+    av[6]=0; # io bi
+    av[7]=0; # io bo
+    av[8]=0; # system in
+    av[9]=0; # system cs
+    av[10]=0; # cpu us
+    av[11]=0; # cpu sy
+    av[12]=0; # cpu id
+    nc=1;
+    tc=0;
+  }
+  {
+    if( nc > n ) {
+      if( t == "true" ) {
+        av[1] = av[1]/1024.0;
+        av[2] = av[2]/1024.0;
+        av[3] = av[3]/1024.0;
+      }
+      for(i=0;i<13;i++) {
+        if( t == "true" ) {
+          if( i < 1 || i > 3 )
+            av[i] = av[i]/n;
+        }
+        else
+           av[i] = av[i]/n;
+      }
+      printf "Avg %3d%8.2f",n,av[0];
+      if( t == "true" )
+        printf "%6dg%6dg%6dg",av[1],av[2],av[3];
+      else
+        printf "%6dm%6dm%6dm",av[1],av[2],av[3];
+      printf "%5d%5d%5d%5d",av[4],av[5],av[6],av[7];
+      printf "%5d%5d%4d%4d%4d\n",av[8],av[9],av[10],av[11],av[12];
+  
+      for(i=0;i<13;i++)
+        av[i] = 0;
+      nc=1;
+      tc=tc+1;
+    }
+  
+    if(tc > 500 ) {
+      tc=0;
+    }
+  
+    if( ! tc % 10 ) {
+      if( match($0,"^node") )
+        print;
+      if( match($0,"^ +1 min") )
+        print;
+    }
+  
+    if( match($0,"^[a-z][0-9]+") ) {
+      for(i=2;i<14;i++) {
+        av[i-2] = av[i-2] + $i;
+      }
+      nc=nc+1;
+    }
+  }'
+  # end awk
+}
+
+function sys/pcp/chart() {
+  local _f="${1}"
+  local _c="${2:-NODEWIEV}"
+  local _n=""
+
+  local _c_red="#ff0000"
+  local _c_green="#00ff00"
+  local _c_blue="#0000ff"
+  local _c_yellow="#ffff00"
+
+  # node or smp cpu list
+  _n=$(cat "${_f}")
+
+  # TODO: node vs smp
+  case "${_c}" in
+    echo -e "#kmchart\nversion 1\n\n" >  "${_f}"
+    NODEWIEV)
+      echo "chart title \"CPU Utilization\" style plot antialiasing off" >> "${_f}"
+
+      local i
+      for i in ${_n} ; do
+        echo "plot color ${_c_red} host ${i} metric kernel.all.cpu.sys"     >> "${_f}"
+        echo "plot color ${_c_green} host ${i} metric kernel.all.cpu.user"  >> "${_f}"
+        echo "plot color ${_c_yellow} host ${i} metric kernel.all.cpu.idle" >> "${_f}"
+      done
+    ;;
+    SMPVIEW)
+      # TODO
+      echo "Not implemented"
+    ;;
+  esac
+  ${sys_pcp_pmchart} -c "${_f}"
+}

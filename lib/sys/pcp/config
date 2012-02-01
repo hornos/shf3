@@ -1,0 +1,2 @@
+sys_pcp_pmstat="pmstat"
+sys_pcp_pmchart="pmchart"

@@ -362,6 +362,7 @@ function que/sub() {
   fi
 
   ### OMP
+  # TODO OMP KMP MKL ACML?
   echo "### OMP Setup"                      >> "${_bat}"
   echo "export OMP_NUM_THREADS=${_threads}" >> "${_bat}"
   echo "export MKL_NUM_THREADS=${_threads}" >> "${_bat}"
@@ -370,6 +371,12 @@ function que/sub() {
     if ! test -z "${KMPAFF}" ; then
       echo "export KMP_AFFINITY=${KMPAFF}"  >> "${_bat}"
     fi
+
+    # OMP 3.0
+    echo "export OMP_PROC_BIND=TRUE"        >> "${_bat}"
+    echo "export OMP_NESTED=FALSE"          >> "${_bat}"
+    echo "export OMP_STACKSIZE=12M"         >> "${_bat}"
+    echo "export KMP_STACKSIZE=12000000"    >> "${_bat}"
   else
     echo "export KMP_LIBRARY=serial"        >> "${_bat}"
   fi
