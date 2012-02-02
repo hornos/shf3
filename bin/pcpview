@@ -95,7 +95,7 @@ else
 
   ### SGE
   if test "${_stat}" = "qstat" ; then
-    _nodes=$(${_stat} -g t -r -u ${USER} | \
+    _nodes=$(${_stat} -g t -r -u "*" | \
            grep ${_job} | \
            awk '{print $8}' | \
            sed s/.*@// | \
