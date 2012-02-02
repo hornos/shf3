@@ -299,12 +299,6 @@ function que/sub() {
   fi
   ### end MPIOMP
 
-  ### threads
-  # forced by THRDS
-  if test ${_thrds} -gt 0 ; then
-    _threads=${_thrds}
-  fi
-
   ### begin verbose
   if test ${_v} -gt 0 ; then
     case ${_mpi} in
@@ -365,6 +359,13 @@ function que/sub() {
   ### OMP
   if test "${_mode}" = "omp" ; then
     echo "export PRERUN=\"${_bind} ${_prof}\"" >> "${_bat}"
+    _threads=${_tasks}
+  fi
+
+  ### threads
+  # forced by THRDS
+  if test ${_thrds} -gt 0 ; then
+    _threads=${_thrds}
   fi
 
   # TODO OMP KMP MKL ACML?
