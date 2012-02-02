@@ -85,14 +85,13 @@ function sys/pcp/stat() {
 }
 
 function sys/pcp/chart() {
+  import gui/rgb
+
   local _f="${1}"
   local _c="${2:-NODEWIEV}"
+  local _h="${3:-localhost}"
   local _n=""
-
-  local _c_red="#ff0000"
-  local _c_green="#00ff00"
-  local _c_blue="#0000ff"
-  local _c_yellow="#ffff00"
+  local _m=""
 
   # node or smp cpu list
   _n=$(cat "${_f}")
@@ -100,19 +99,27 @@ function sys/pcp/chart() {
   # TODO: node vs smp
   case "${_c}" in
     echo -e "#kmchart\nversion 1\n\n" >  "${_f}"
+    echo "chart title \"CPU Utilization\" style plot antialiasing off" >> "${_f}"
     NODEWIEV)
-      echo "chart title \"CPU Utilization\" style plot antialiasing off" >> "${_f}"
-
       local i
+      _m="kernel.all"
       for i in ${_n} ; do
-        echo "plot color ${_c_red} host ${i} metric kernel.all.cpu.sys"     >> "${_f}"
-        echo "plot color ${_c_green} host ${i} metric kernel.all.cpu.user"  >> "${_f}"
-        echo "plot color ${_c_yellow} host ${i} metric kernel.all.cpu.idle" >> "${_f}"
+        echo "plot color ${gui_rgb_r} host ${i} metric ${_m}.cpu.sys"  >> "${_f}"
+        echo "plot color ${gui_rgb_g} host ${i} metric ${_m}.cpu.user" >> "${_f}"
+        echo "plot color ${gui_rgb_y} host ${i} metric ${_m}.cpu.idle" >> "${_f}"
       done
     ;;
-    SMPVIEW)
-      # TODO
-      echo "Not implemented"
+    HOSTVIEW)
+      echo "chart title \"CPU Utilization\" style plot antialiasing off" >> "${_f}"
+      local i
+      local _ni=""
+      _m="kernel.pernode"
+      for i in ${_n} ; do
+        _ni="node${_i}"
+        echo "plot color ${gui_rgb_r} host ${_h} metric ${_m}.cpu.sys  instance "${_ni}" >> "${_f}"
+        echo "plot color ${gui_rgb_g} host ${_h} metric ${_m}.cpu.user instance "${_ni}" >> "${_f}"
+        echo "plot color ${gui_rgb_y} host ${_h} metric ${_m}.cpu.idle instance "${_ni}" >> "${_f}"
+      done
     ;;
   esac
   ${sys_pcp_pmchart} -c "${_f}"

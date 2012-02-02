@@ -10,6 +10,7 @@ Usage: ${gbn} options
               -j jobid
               -n nodefile
               -m pbs_nodefile
+              -s scheduler
               -g - gui
               -a - node average
               -t - total memory
@@ -37,12 +38,14 @@ _a=false
 _c=""
 _n=""
 _m=""
-while getopts htaj:n:m:c: o; do
+_s=""
+while getopts htaj:n:m:c:s: o; do
   case "$o" in
     j) _job=$OPTARG;;
     t) _t=true;;
     a) _a=true;;
     c) _c=$OPTARG;;
+    s) _s=$OPTARG;;
     n) _n=$OPTARG;;
     m) _m=$OPTARG;;
     v) gdbg=true;;
@@ -66,12 +69,12 @@ fi
 
 _stat=""
 
-# pbs nodefile
+# nodefile
 if ! test -z "${_n}" && \
      test -r "${_n}" ; then
   _f="${_n}"
 
-# nodefile
+# pbs nodefile
 elif ! test -z "${_m}" && \
      test -r "${_m}" ; then
   _f="./.nodefile"

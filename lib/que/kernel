@@ -195,6 +195,21 @@ function que/sub() {
 
   local _v=${VERBOSE:-0}
 
+  ### common
+  # binding
+  local _bind=""
+  if ! test -z "${BIND}" ; then
+    _bind="${BIND}"
+    msg "Binding   : ${_bind}"
+  fi
+
+  # Profiler
+  local _prof=""
+  if ! test -z "${PROF}" ; then
+    _prof="${PROF}"
+    msg "Profiler  : ${_prof}"
+  fi
+
   ### begin MPIOMP
   if test "${_mode}" = "mpi" || \
      test "${_mode}" = "mpiomp" ; then
@@ -208,25 +223,11 @@ function que/sub() {
       return ${_false_}
     fi
 
-    # binding
-    local _bind=""
-    if ! test -z "${BIND}" ; then
-      _bind="${BIND}"
-      msg "Binding   : ${_bind}"
-    fi
-
     # SGI MPT Perfboost
     local _boost=""
     if ! test -z "${BOOST}" ; then
       _boost="${BOOST}"
       msg "Perfboost : ${_boost}"
-    fi
-
-    # Profiler
-    local _prof=""
-    if ! test -z "${PROF}" ; then
-      _prof="${PROF}"
-      msg "Profiler  : ${_prof}"
     fi
 
     # mpirun
@@ -362,6 +363,10 @@ function que/sub() {
   fi
 
   ### OMP
+  if test "${_mode}" = "omp" ; then
+    echo "export PRERUN=\"${_bind} ${_prof}\"" >> "${_bat}"
+  fi
+
   # TODO OMP KMP MKL ACML?
   echo "### OMP Setup"                      >> "${_bat}"
   echo "export OMP_NUM_THREADS=${_threads}" >> "${_bat}"
