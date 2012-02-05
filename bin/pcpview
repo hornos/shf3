@@ -9,9 +9,9 @@ function help/pcpview() {
 Usage: ${gbn} options
               -j jobid
               -n nodefile
-              -m pbs_nodefile
+              -m pbs nodefile
               -s scheduler
-              -g - gui
+              -c - chart
               -a - node average
               -t - total memory
               -h - help
@@ -35,16 +35,16 @@ trap pcpview/exit INT TERM EXIT
 _job=0
 _t=false
 _a=false
-_c=""
+_c=false
 _n=""
 _m=""
 _s=""
-while getopts htaj:n:m:c:s: o; do
+while getopts htacj:n:m:s: o; do
   case "$o" in
     j) _job=$OPTARG;;
     t) _t=true;;
     a) _a=true;;
-    c) _c=$OPTARG;;
+    c) _c=true;;
     s) _s=$OPTARG;;
     n) _n=$OPTARG;;
     m) _m=$OPTARG;;
@@ -60,76 +60,68 @@ if ! $(installed pmstat) ; then
   exit ${_false_}
 fi
 
-if ${_g} ; then
+if ${_c} ; then
   if ! $(installed pmchart) ; then
     msg "Not found: pmchart"
     exit ${_false_}
   fi
 fi
 
-_stat=""
 
 # nodefile
 if ! test -z "${_n}" && \
      test -r "${_n}" ; then
-  _f="${_n}"
+  _nf="${_n}"
 
 # pbs nodefile
 elif ! test -z "${_m}" && \
      test -r "${_m}" ; then
-  _f="./.nodefile"
-  cat "${_m}" | uniq > "${_f}"
+  _nf="./.nodefile"
+  cat "${_m}" | uniq > "${_nf}"
 
-# from job
+# begin job
 else
-  _f="./.${_job}.nodes"
-  for i in "qstat" "scontrol" ; do
-    which "${i}" &> /dev/null
-    if test $? -eq 0 ; then
-      _stat="${i}"
-    fi
-  done
-  if test "${_stat}" = "" ; then
+  _nf="./.nodefile.${_job}"
+
+  # scheduler
+  if ! test -z "${ESZR_SCHEDULER}" ; then
+    _sched="${ESZR_SCHEDULER}"
+  fi
+  if ! test -z "${_s}" ; then
+    _sched="${_s}"
+  fi
+  if test -z "${_sched}" ; then
+    msg "Scheduler not found"
     exit 1
   fi
 
-  ### SGE
-  if test "${_stat}" = "qstat" ; then
-    _nodes=$(${_stat} -g t -r -u "*" | \
-           grep ${_job} | \
-           awk '{print $8}' | \
-           sed s/.*@// | \
-           sed s/\\..*//)
-
-    if test "${_nodes}" = "(null)" ; then
-      msg "Job not started"
-      exit 1
-    fi
-
-    for i in ${_nodes} ; do
-      echo ${i} >> ${_f}
-    done
+  import que/${_sched}/job
+  if test $? -gt 0 ; then
+    msg "Module not found: que/${_sched}/job"
+    exit 1
   fi
 
-  ### Slurm
-  if test "${_stat}" = "scontrol" ; then
-    ${_stat} show job ${_job}
-    if test $? -gt 0 ; then
-      exit 1
-    fi
-    _nodes=$(${_stat} show job ${_job} | egrep "^ *NodeList" | sed s/\ *NodeList=//)
-
-    if test "${_nodes}" = "(null)" ; then
-      msg "Job not started"
-      exit 1
-    fi
-
-    ${_stat} show hostnames ${_nodes} > ${_f}
+  if test -r "${_nf}" ; then
+    rm -f "${_nf}"
   fi
+
+  # job nodes
+  _jn=$(que/${_sched}/job/nodes "${_job}")
+
+  if test -z "${_jn}" ; then
+    msg "Job not started"
+    exit 1
+  fi
+
+  for i in ${_jn} ; do
+    echo ${i} >> ${_nf}
+  done
 fi
+# end job
 
-if ! test -z "${_c}" ; then
-  sys/pcp/chart "${_f}" ${_c}
+### stat
+if ${_c} ; then
+  sys/pcp/chart "${_nf}" ${_h}
 else
-  sys/pcp/stat "${_f}" ${_a} ${_t}
+  sys/pcp/stat "${_nf}" ${_a} ${_t}
 fi

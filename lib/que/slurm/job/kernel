@@ -1,0 +1,18 @@
+
+function que/slurm/job/nodes() {
+  local _j="${1}"
+  local _n=""
+
+  if test -z "${_j}" ; then
+    echo ""
+    return
+  fi
+
+  _n=$(${que_slurm_job_qstat} show job ${_j} | egrep "^ *NodeList" | sed s/\ *NodeList=//)
+
+  if test "${_n}" = "(null)" ; then
+    echo ""
+  else
+    ${que_slurm_job_qstat} show hostnames ${_n}
+  fi
+}

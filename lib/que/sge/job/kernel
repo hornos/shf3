@@ -1,0 +1,22 @@
+
+function que/sge/job/nodes() {
+  local _j="${1}"
+  local _n=""
+
+  if test -z "${_j}" ; then
+    echo ""
+    return
+  fi
+
+  _n=$(${que_sge_job_qstat} -g t -r -u "*" | \
+       grep ${_j} | \
+       awk '{print $8}' | \
+       sed s/.*@// | \
+       sed s/\\..*//)
+
+  if test "${_n}" = "(null)" ; then
+    echo ""
+  else
+    echo "${_n}"
+  fi
+}
