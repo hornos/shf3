@@ -23,8 +23,9 @@ EOF
 ### trap
 function pcpview/exit() {
   if test -z "${_n}" && \
-     test -r "${_f}"; then
-    rm -f "${_f}"
+     test -z "${_m}" && \
+     test -r "${_nf}"; then
+    rm -f "${_nf}"
   fi
   exit $?
 }
