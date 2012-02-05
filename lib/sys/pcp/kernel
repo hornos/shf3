@@ -114,7 +114,7 @@ function sys/pcp/chart() {
       local _ni=""
       _m="kernel.pernode"
       for i in ${_n} ; do
-        _ni="node${_i}"
+        _ni="node${i}"
         echo "plot color ${gui_rgb_r} host ${_h} metric ${_m}.cpu.sys  instance \"${_ni}\"" >> "${_f}"
         echo "plot color ${gui_rgb_g} host ${_h} metric ${_m}.cpu.user instance \"${_ni}\"" >> "${_f}"
         echo "plot color ${gui_rgb_y} host ${_h} metric ${_m}.cpu.idle instance \"${_ni}\"" >> "${_f}"

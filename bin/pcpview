@@ -107,7 +107,11 @@ else
   fi
 
   # job nodes
-  _jn=$(que/${_sched}/job/nodes "${_job}")
+  if test -r "${_job}" ; then
+    _jn=$(cat "${_job}" | grep ^cpubind: | sed s/cpubind://)
+  else
+    _jn=$(que/${_sched}/job/nodes "${_job}")
+  fi
 
   if test -z "${_jn}" ; then
     msg "Job not started"
@@ -122,7 +126,11 @@ fi
 
 ### stat
 if ${_c} ; then
-  sys/pcp/chart "${_nf}" ${_h}
+  if ! test -z "${ESZR_SMPHOST}" ; then
+    sys/pcp/chart "${_nf}" HOSTVIEW ${ESZR_SMPHOST}
+  else
+    sys/pcp/chart "${_nf}" ${_h}
+  fi
 else
   sys/pcp/stat "${_nf}" ${_a} ${_t}
 fi
