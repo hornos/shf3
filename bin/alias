@@ -19,3 +19,4 @@ alias encfsumount="encfsmnt -u"
 alias book="bmkmgr -b"
 
 alias jobsub="jobmgr -s"
+alias jobmon="pcpview -t -a -j"
