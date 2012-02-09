@@ -1,6 +1,8 @@
 #!/bin/bash
 source $(dirname ${BASH_SOURCE})/../lib/header
 
+import gui
+
 function help/mailit() {
   cat << EOF
 Usage: ${gbn} options
