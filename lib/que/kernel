@@ -293,11 +293,11 @@ function que/sub() {
     esac
 
     # fmp
-    echo "export FMP_MPI_PERNODE=${_pn}"
+    echo "export FMP_MPI_PERNODE=${_pn}"                  >> "${_bat}"
 
     # prerun
     if test "${_mpi}" != "self" ; then
-      echo "export PRERUN=\"${MPIRUN} \${MPI_OPT}\"" >> "${_bat}"
+      echo "export PRERUN=\"${MPIRUN} \${MPI_OPT}\""      >> "${_bat}"
     fi
   fi
   ### end MPIOMP
