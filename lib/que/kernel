@@ -292,6 +292,9 @@ function que/sub() {
         ;;
     esac
 
+    # fmp
+    echo "export FMP_MPI_PERNODE=${_pn}"
+
     # prerun
     if test "${_mpi}" != "self" ; then
       echo "export PRERUN=\"${MPIRUN} \${MPI_OPT}\"" >> "${_bat}"
