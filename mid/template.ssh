@@ -24,7 +24,7 @@ mid_ssh_grid="prace"
 mid_ssh_opt="-o TCPKeepAlive=${ssh_TCPKeepAlive} -o ServerAliveInterval=${ssh_ServerAliveInterval}"
 
 # SSH options
-mid_ssh_ssh_opt="-XC ${mid_ssh_opt} -p ${mid_ssh_port} ${mid_ssh_opt}"
+mid_ssh_ssh_opt="-XC -p ${mid_ssh_port} ${mid_ssh_opt}"
 
 # SCP options
 mid_ssh_scp_opt="-C -P ${mid_ssh_port} ${mid_ssh_opt}"
