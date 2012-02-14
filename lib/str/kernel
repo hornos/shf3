@@ -11,6 +11,8 @@ function str/case() {
 function str/tolower() {
   str/case "${*}" true
 }
+
 function str/toupper() {
   str/case "${*}"
 }
+
