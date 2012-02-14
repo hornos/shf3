@@ -15,6 +15,17 @@ mode:
 EOF
 }
 
+function run/prg/step() {
+  # start program
+  if $(ns/op "${MAIN}" "<") ; then
+    ${_cmd} < "${_inp}" &> "${_out}"
+  elif $(ns/op "${MAIN}" "-") ; then
+    ${_cmd} &> "${_out}"
+  else
+    ${_cmd} "${_inp}" &> "${_out}"
+  fi
+}
+
 function run/prg() {
   import sys/dir
   import sys/lnk
@@ -219,14 +230,18 @@ function run/prg() {
 
   # start timer
   local _t0=$(epoch)
-  # start program
-  if $(ns/op "${MAIN}" "<") ; then
-    ${_cmd} < "${_inp}" &> "${_out}"
-  elif $(ns/op "${MAIN}" "-") ; then
-    ${_cmd} &> "${_out}"
+
+  local _kernel=${KERNEL:-${_prg}/kernel}
+  if ! $(ns/isfunc ${_kernel}) ; then
+    # single step
+    _kernel="run/prg/step"
   else
-    ${_cmd} "${_inp}" &> "${_out}"
+    msg "Kernel  : ${_kernel}"
   fi
+
+  # start kernel
+  ${_kernel}
+
   _exit=$?
   # stop timer
   local _t1=$(epoch)
