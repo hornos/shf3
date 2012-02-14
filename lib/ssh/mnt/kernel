@@ -8,7 +8,10 @@ function ssh/mnt/ls() {
           egrep -v 'encfs|fuse.encfs' | \
           egrep -v 'TrueCrypt' | \
           egrep ${USER} | \
-          awk '{printf "%-32s %s\n",$3,$1}'
+          awk -v h=${HOME} '{
+            sub(h,"$HOME",$3);
+            printf "%-32s %s\n",$3,$1
+          }'
   return ${_true_}
 }
 
