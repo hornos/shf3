@@ -22,11 +22,12 @@ EOF
 _m=""
 _f=false
 _c="LIST"
-while getopts hfvlm:u: o; do
+while getopts hfvlk:m:u: o; do
   case "$o" in
     m) _c="MOUNT"; _m=$OPTARG;;
     u) _c="UNMOUNT"; _m=$OPTARG;;
     l) _c="LIST";;
+    k) _c="KILL"; _m=$OPTARG;;
     f) _f=true;;
     v) gdbg=true;;
     h|*) help/sshmnt;;
@@ -51,5 +52,8 @@ case ${_c} in
     ;;
   UNMOUNT)
     ssh/mnt "${_m}" ${_f} true
+    ;;
+  KILL)
+    ssh/mnt/kill "${_m}"
     ;;
 esac

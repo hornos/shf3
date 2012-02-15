@@ -15,6 +15,37 @@ function ssh/mnt/ls() {
   return ${_true_}
 }
 
+function ssh/mnt/kill() {
+  import gui
+
+  local _h="${1}"
+  local _s=${2:-9}
+
+  if test -z "${_h}" ; then
+    return ${_false_}
+  fi
+
+  local _src="${ssh_mnt_dir}/${_h}"
+  local _pid=$(ps aux | \
+    grep $USER | \
+    grep sshfs | \
+    grep ${_src} | \
+    grep -v grep | \
+    awk '{print $2}')
+
+  if test -z "${_pid}" ; then
+    return ${_false_}
+  fi
+
+  msg
+  gui/line
+  ps ${_p}
+  answer "Kill process?"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  kill -${_s} ${_p}
+}
 
 function ssh/mnt() {
   import sys
