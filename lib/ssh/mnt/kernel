@@ -25,15 +25,15 @@ function ssh/mnt/kill() {
     return ${_false_}
   fi
 
-  local _src="${ssh_mnt_dir}/${_h}"
   local _pid=$(ps aux | \
     grep $USER | \
     grep sshfs | \
-    grep ${_src} | \
+    grep ${_h} | \
     grep -v grep | \
     awk '{print $2}')
 
   if test -z "${_pid}" ; then
+    msg "Process not found"
     return ${_false_}
   fi
 
