@@ -220,3 +220,10 @@ function run/prg/vasp/init() {
 
   return ${_true_}
 }
+
+function run/prg/vasp/valid() {
+  import run/valid
+  local _m="${1:-reached required accuracy}"
+
+  run/valid OUTCAR "${_m}"
+}

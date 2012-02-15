@@ -1,0 +1,16 @@
+function run/valid() {
+  local _o="${1}"
+  local _m="${2}"
+
+  if ! test -r "${_o}" || \
+       test -z "${_m}" ; then
+    return ${_false_}
+  fi
+
+  local _m=$(cat "${_o}" | \
+    grep "${_m}")
+  if test -z "${_m}" ; then
+    return ${_false_}
+  fi
+  return ${_true_}
+}
