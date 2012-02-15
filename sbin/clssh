@@ -1,0 +1,32 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+
+import gui
+
+### args
+_cmd="${1:-ls}"
+_nodes="${2:-nodes}"
+_opt="-i -v -p 1"
+
+_x="ls"
+_n="nodes"
+_opt="-i -v"
+_p=1
+while getopts hvx:n:p: o; do
+  case "$o" in
+    t) _x=$OPTARG;;
+    a) _n=$OPTARG;;
+    s) _p=$OPTARG;;
+    v) gdbg=true;;
+    h|*) help/clssh;;
+  esac
+done
+
+if ! test -r "${_n}" ; then
+  msg "Not found: ${_n}"
+  exit 1
+fi
+
+_opt="${_opt} -p ${_p}"
+
+pssh ${_opt} -h "${_n}" "${_x}"

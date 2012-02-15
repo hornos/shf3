@@ -1,37 +1,38 @@
 
 function str/f/set() {
-  local _f="${1}"
-  local _k=${2}
-  local _v=${3:-.TRUE.}
+  local _k=${1}
+  local _v=${2:-.TRUE.}
 
   if test -z "${_k}" ; then
     cat
     return ${_true_}
   fi
 
-  if test "${_f}" = "-" ; then
-    sed "s/^\ *${_k}.*/${_k}\ =\ ${_v}/"
-    return ${_true_}
-  fi
-
-  cat "${_f}" | \
-  sed "s/^\ *${_k}.*/${_k}\ =\ ${_v}/"
+  awk -v k=${_k} -v v=${_v} 'BEGIN{
+    found=0;
+  }
+  {
+    m=sprintf("^ *%s.*",k);
+    if(match($0,m)) {
+      found=1;
+      print k,"=",v
+    }
+    else
+      print;
+  }
+  END{
+    if(!found) {
+      print k,"=",v
+    }
+  }'
 }
 
 function str/f/unset() {
-  local _f="${1}"
-  local _k=${2}
+  local _k=${1}
 
   if test -z "${_k}" ; then
-    cat
     return ${_true_}
   fi
 
-  if test "${_f}" = "-" ; then
-    sed "s/^\ *${_k}.*/#\ &/"
-    return ${_true_}
-  fi
-
-  cat "${_f}" | \
   sed "s/^\ *${_k}.*/#\ &/"
 }

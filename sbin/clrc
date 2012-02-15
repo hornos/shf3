@@ -1,0 +1,13 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+
+import gui
+
+_p="${1}"
+_a="${2:-restart}"
+
+if test -z "${_p}" ; then
+  exit 1
+fi
+
+clssh -x "/etc/rc.d/${_p} ${_a}"

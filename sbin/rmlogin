@@ -1,0 +1,25 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+
+import gui
+
+msg "Kill old user logins"
+gui/line
+
+_old=$(who -u | grep old | awk '{print $1 ":" $6}' | sort)
+if test -z "${_old}" ; then
+  msg "Old logins not found"
+  exit 1
+fi
+
+for p in ${_old}; do
+  _pid=${p##*:}
+  _usr=${p%%:*}
+  echo ""
+  ps ${_pid}
+  answer "Kill process?"
+  if test $? -gt 0 ; then
+    continue
+  fi
+  kill -9 ${_pid}
+done

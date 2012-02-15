@@ -1,0 +1,12 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+
+import gui
+
+_p="${1}"
+if test -z "${_p}" ; then
+  exit 1
+fi
+
+clssh -x "ps aux | grep ${1} | grep -v grep"
+

@@ -1,0 +1,16 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+
+import gui
+
+_c="${1}"
+
+if test -z "${_c}" ; then
+  msg "Cluster not found"
+  exit 1
+fi
+
+msg "Cluster queue tree: ${_c}"
+gui/line
+
+sacctmgr list associations cluster=${_c} format=Account,Cluster,User,Fairshare tree withd
