@@ -120,7 +120,6 @@ function run/init/other() {
   local inp
   local _inp
   for inp in ${OTHER}; do
-    _dst=""
     _inp="${INPUTDIR}/${inp}"
     if ! test -r "${_inp}" ; then
       msg "Input not found: ${_inp}"
