@@ -231,13 +231,20 @@ function run/prg() {
   # start timer
   local _t0=$(epoch)
 
-  local _kernel=${KERNEL:-${_prg}/kernel}
-  if ! $(ns/isfunc ${_kernel}) ; then
-    # single step
-    _kernel="run/prg/step"
-  else
-    msg "Kernel  : ${_kernel}"
+  local _kernel="run/prg/step"
+  if ! test -z "${KERNEL}" ; then
+    if ! test -r "${KERNEL}" ; then
+      msg "Kernel not found: ${KERNEL}"
+      return ${_false_}
+    fi
+    _kernel="${KERNEL}"
+    source "${_kernel}"
+    if ! $(ns/isfunc ${_kernel}) ; then
+      msg "Kernel function not found: ${_kernel}"
+      return ${_false_}
+    fi
   fi
+  msg "Kernel  : ${_kernel}"
 
   # start kernel
   ${_kernel}

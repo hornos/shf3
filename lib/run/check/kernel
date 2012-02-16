@@ -37,6 +37,19 @@ function run/check() {
     return ${_false_}
   fi
 
+  # check kernel
+  if ! test -z "${KERNEL}" ; then
+    if ! test -r "${KERNEL}" ; then
+      msg "Kernel not found: ${KERNEL}"
+      return ${_false_}
+    fi
+    source "${KERNEL}"
+    if ! $(ns/isfunc ${KERNEL}) ; then
+      msg "Kernel function not found: ${KERNEL}"
+      return ${_false_}
+    fi
+  fi
+
   # basic dir checks
   if test ${_chk} -gt 0 ; then
     local dir

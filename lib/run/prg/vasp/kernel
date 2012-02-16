@@ -227,3 +227,17 @@ function run/prg/vasp/valid() {
 
   run/valid OUTCAR "${_m}"
 }
+
+function run/prg/vasp/patch() {
+  local _o="${1}"
+  local _p="${2}"
+  
+  local i
+  for i in "${_o}" "${_p}" ; do
+    if ! test -r "${_o}" ; then
+      msg "Not found: ${_o}"
+      return ${_false_}
+    fi
+  done
+
+}
