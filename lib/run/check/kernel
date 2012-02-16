@@ -44,11 +44,13 @@ function run/check() {
       return ${_false_}
     fi
     source "${KERNEL}"
-    if ! $(ns/isfunc ${KERNEL}) ; then
-      msg "Kernel function not found: ${KERNEL}"
+    local _kernel="${prg}/kernel"
+    if ! $(ns/isfunc ${_kernel}) ; then
+      msg "Kernel function not found: ${_kernel}"
       return ${_false_}
     fi
   fi
+  OTHER="${OTHER} ${KERNEL}"
 
   # basic dir checks
   if test ${_chk} -gt 0 ; then

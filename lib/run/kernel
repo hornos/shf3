@@ -237,8 +237,8 @@ function run/prg() {
       msg "Kernel not found: ${KERNEL}"
       return ${_false_}
     fi
-    _kernel="${KERNEL}"
-    source "${_kernel}"
+    source "${KERNEL}"
+    _kernel="${_prg}/kernel"
     if ! $(ns/isfunc ${_kernel}) ; then
       msg "Kernel function not found: ${_kernel}"
       return ${_false_}
