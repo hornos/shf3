@@ -1,4 +1,4 @@
-function run/valid() {
+function run/valid/check() {
   local _o="${1}"
   local _m="${2}"
 
@@ -13,4 +13,27 @@ function run/valid() {
     return ${_false_}
   fi
   return ${_true_}
+}
+
+function run/valid/show() {
+  local _o="${1}"
+  local _b="${2}"
+  local _e="${3}"
+
+  if ! test -r "${_o}" || \
+       test -z "${_m}" ; then
+    return ${_false_}
+  fi
+
+  cat "${_o}" | \
+  awk -v b="${_b}" -v e="${_e}" 'BEGIN{prn=0;}
+  {
+    if(match($0,b))
+      prn=1;
+    if(e!="")
+    if(match($0,e))
+      prn=0;
+    if(prn)
+      print;
+  }'
 }
