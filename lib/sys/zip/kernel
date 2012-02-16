@@ -68,12 +68,14 @@ function sys/zip/cpuzmv() {
     _dst=${_dst##${_pre}.}
   fi
 
-  if test "${_dst}" = "${_src}" ; then
-    return {_true_}
-  fi
 
   # 3. move (rename)
   if ! test -z "${_dst}" ; then
+    # leave
+    if test "${_dst}" = "${_src}" ; then
+      return ${_true_}
+    fi
+
     # directory
     if test -d "${_dir}/${_src}" ; then
       # remove destination
