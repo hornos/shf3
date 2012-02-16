@@ -44,7 +44,7 @@ function run/check() {
       return ${_false_}
     fi
     source "${KERNEL}"
-    local _kernel="${prg}/kernel"
+    local _kernel="${_prg}/kernel"
     if ! $(ns/isfunc ${_kernel}) ; then
       msg "Kernel function not found: ${_kernel}"
       return ${_false_}
