@@ -39,7 +39,9 @@ function sys/zip/cpuzmv() {
   fi
 
   # 2. decompress
-  _dst=$(basename "${_dst}")
+  if ! test -z "${_dst}" ; then
+    _dst=$(basename "${_dst}")
+  fi
   _src=$(basename "${_src}")
 
   if test -d "${_dir}/${_src}" ; then

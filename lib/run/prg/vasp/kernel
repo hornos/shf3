@@ -187,7 +187,7 @@ function run/prg/vasp/init() {
     # copy
     cp -f "${_dat}" "${_idir}/${_tmp}"
     if test $? -gt 0 ; then
-      msg "Copy failed: ${_dat}"
+      msg "Data copy failed: ${_dat}"
       return ${_false_}
     fi
 

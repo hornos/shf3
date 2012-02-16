@@ -20,7 +20,7 @@ function run/init/bcast() {
     # normal copy
     sys/zip/cpuzmv "${_src}" "${_wdir}" "${_dst}"
     if test $? -gt 0 ; then
-      msg "Copy failed: ${_src}"
+      msg "Broadcast copy failed: ${_src}"
       return ${_false_}
     fi
     return ${_true_}
@@ -119,7 +119,6 @@ function run/init/other() {
 
   local inp
   local _inp
-  local _dst
   for inp in ${OTHER}; do
     _dst=""
     _inp="${INPUTDIR}/${inp}"
@@ -128,7 +127,7 @@ function run/init/other() {
       return ${_false_}
     fi
 
-    run/init/bcast "${_inp}" "${_dst}"
+    run/init/bcast "${_inp}"
 
     if test $? -gt 0 ; then
       return ${_false_}
