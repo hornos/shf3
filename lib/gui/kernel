@@ -76,3 +76,9 @@ function gui/err() {
 function gui/wrn() {
   gui/txt "${*}" "yellow"
 }
+
+function gui/header() {
+  echo ""
+  msg $*
+  gui/line
+}

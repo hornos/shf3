@@ -103,3 +103,11 @@ function sys/py/lib() {
   sys/py/path "${gdn}/${_p}"
 }
 
+function sys/py/run() {
+  local _py="${gdn}/${gbn}.py"
+  if ! test -x ${_py} ; then
+    msg "Executable not found: ${_py}"
+    return ${_false_}
+  fi
+  ${_py} $*
+}
