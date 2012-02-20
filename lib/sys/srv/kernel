@@ -1,23 +1,42 @@
+function sys/srv/cntl() {
+  echo "${gbn}/${sys_srv_cntl}"
+}
 
-function sys/srv/stop() {
+function sys/srv/cmd() {
+  local _f=$(sys/srv/cntl)
+  if ! test -r "${_f}" ; then
+    msg "Not found: ${_f}"
+    return ${_false_}
+  fi
+  echo "$*" > "${_f}"
+}
+
+
+function sys/srv/trap() {
   import sys/dir
   import sys/fifo
-
-  local _f="${gbn}/${sys_srv_cntl}"
+  local _f=$(sys/srv/cntl)
 
   sys/fifo/rm "${_f}"
   sys/dir/rm "${gbn}"
 }
 
+function sys/srv/stop() {
+  local _q=${1:-false}
+  if ! ${_q} ; then
+    gui/header $(ns/func "${FUNCNAME}")
+  fi
+  local _f=$(sys/srv/cntl)
+  if test -r "${_f}" ; then
+    echo "exit" > "${_f}"
+  fi
+}
 
 function sys/srv/init() {
   import sys/dir
   import sys/fifo
 
-  # exit trap
-  trap sys/srv/stop INT TERM EXIT
-
-  local _f="${gbn}/${sys_srv_cntl}"
+  local _f=$(sys/srv/cntl)
 
   # check fifo
   if test -r "${_f}" ; then
@@ -39,13 +58,22 @@ function sys/srv/init() {
 }
 
 function sys/srv/start() {
+  import gui
   local _p="$*"
-  local _f="${gbn}/${sys_srv_cntl}"
+  local _f=$(sys/srv/cntl)
 
-  # check fifo
-  if ! test -r "${_f}" ; then
-    msg "Control not found: ${_f}"
+  sys/srv/init
+  if test $? -gt 0 ; then
     return ${_false_}
   fi
+
+  # exit trap
+  trap sys/srv/trap INT TERM EXIT
+
+  gui/header $(ns/func "${FUNCNAME}")
+  msg "Command : ${_p}"
+  msg "Control : ${_f}"
+  msg "Press Ctrl-C to exit"
+  echo ""
   ${sys_srv_xterm} ${sys_srv_xterm_opt} -title "${1}" -e "tail -f \"${_f}\" | ${_p}"
 }
