@@ -13,6 +13,7 @@ function sys/srv/cmd() {
     msg "Stdin not found: ${_in}"
     return ${_false_}
   fi
+  msg "Command: $*"
   echo "$*" > "${_in}"
 }
 
