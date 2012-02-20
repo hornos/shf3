@@ -99,11 +99,16 @@ function enc/encfs/mnt() {
     _opt="${_opt} -o nonempty"
   fi
 
-  ENCFS6_CONFIG="${_sec}" ${enc_encfs_mnt} ${_opt} "${_enc}" "${_dst}" ${_osx_opt} 2>/dev/null
+  export ENCFS6_CONFIG="${_sec}"
+  if ${gdbg} ; then
+    ${enc_encfs_mnt} ${_opt} "${_enc}" "${_dst}" ${_osx_opt} 2>/dev/null
+  else
+    ${enc_encfs_mnt} ${_opt} "${_enc}" "${_dst}" ${_osx_opt}
+  fi
   if test $? -gt 0 ; then
     sys/lck/rm "${_lck}"
     msg "Mount failed"
-    return {_false_}
+    return ${_false_}
   fi
 
   msg "Mount success"
