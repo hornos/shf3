@@ -1,23 +1,32 @@
-function sys/srv/cntl() {
-  echo "${gbn}/${sys_srv_cntl}"
+function sys/srv/stdin() {
+  echo "${gbn}/${sys_srv_stdin}"
 }
 
+function sys/srv/stdout() {
+  echo "${gbn}/${sys_srv_stdout}"
+}
+
+
 function sys/srv/cmd() {
-  local _f=$(sys/srv/cntl)
-  if ! test -r "${_f}" ; then
-    msg "Not found: ${_f}"
+  local _in=$(sys/srv/stdin)
+  if ! test -r "${_in}" ; then
+    msg "Stdin not found: ${_in}"
     return ${_false_}
   fi
-  echo "$*" > "${_f}"
+  echo "$*" > "${_in}"
 }
 
 
 function sys/srv/trap() {
   import sys/dir
   import sys/fifo
-  local _f=$(sys/srv/cntl)
+  local _in=$(sys/srv/stdin)
+  local _out=$(sys/srv/stdout)
 
-  sys/fifo/rm "${_f}"
+  sys/fifo/rm "${_in}"
+  if test -r "${_out}" ; then
+    rm -f "${_out}"
+  fi
   sys/dir/rm "${gbn}"
 }
 
@@ -26,9 +35,9 @@ function sys/srv/stop() {
   if ! ${_q} ; then
     gui/header $(ns/func "${FUNCNAME}")
   fi
-  local _f=$(sys/srv/cntl)
-  if test -r "${_f}" ; then
-    echo "exit" > "${_f}"
+  local _in=$(sys/srv/stdin)
+  if test -r "${_in}" ; then
+    echo "exit" > "${_in}"
   fi
 }
 
@@ -36,11 +45,17 @@ function sys/srv/init() {
   import sys/dir
   import sys/fifo
 
-  local _f=$(sys/srv/cntl)
+  local _in=$(sys/srv/stdin)
+  local _out=$(sys/srv/stdout)
 
   # check fifo
-  if test -r "${_f}" ; then
-    msg "Found control: ${_f}"
+  if test -r "${_in}" ; then
+    msg "Found stdin: ${_in}"
+    return ${_false_}
+  fi
+
+  if test -r "${_out}" ; then
+    msg "Found stdout: ${_out}"
     return ${_false_}
   fi
 
@@ -50,9 +65,15 @@ function sys/srv/init() {
     return ${_false_}
   fi
 
-  sys/fifo/mk "${_f}"
+  sys/fifo/mk "${_in}"
   if test $? -gt 0; then
-    msg "Init fifo failed: ${_f}"
+    msg "Stdin failed: ${_in}"
+    return ${_false_}
+  fi
+
+  touch "${_out}"
+  if test $? -gt 0; then
+    msg "Stdout failed: ${_out}"
     return ${_false_}
   fi
 }
@@ -60,7 +81,8 @@ function sys/srv/init() {
 function sys/srv/start() {
   import gui
   local _p="$*"
-  local _f=$(sys/srv/cntl)
+  local _in=$(sys/srv/stdin)
+  local _out=$(sys/srv/stdout)
 
   sys/srv/init
   if test $? -gt 0 ; then
@@ -72,8 +94,15 @@ function sys/srv/start() {
 
   gui/header $(ns/func "${FUNCNAME}")
   msg "Command : ${_p}"
-  msg "Control : ${_f}"
+  msg "Stdin   : ${_in}"
+  msg "Stdout  : ${_out}"
   msg "Press Ctrl-C to exit"
   echo ""
-  ${sys_srv_xterm} ${sys_srv_xterm_opt} -title "${1}" -e "tail -f \"${_f}\" | ${_p}"
+  ${sys_srv_xterm} ${sys_srv_xterm_opt} -title "${1}" -e "tail -f \"${_in}\" | ${_p} | tee ${_out}"
+}
+
+function sys/srv/restart() {
+  sys/srv/stop
+  sleep 2
+  sys/srv/start $*
 }

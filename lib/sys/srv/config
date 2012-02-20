@@ -1,3 +1,4 @@
-sys_srv_cntl="control"
+sys_srv_stdin="stdin"
+sys_srv_stdout="stdout"
 sys_srv_xterm="xterm"
-sys_srv_xterm_opt='-bg black -fg green -geometry +0+0'
+sys_srv_xterm_opt='-bg black -fg green -geometry 72x15+0+0'
