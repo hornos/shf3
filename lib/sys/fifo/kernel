@@ -1,0 +1,25 @@
+function sys/fifo/mk() {
+  local _f="${1}"
+
+  if test -z "${_f}" ; then
+    return ${_false_}
+  fi
+
+  if test -r "${_f}" ; then
+    return ${_true_}
+  fi
+  mkfifo "${_f}"
+}
+
+function sys/fifo/rm() {
+  local _f="${1}"
+
+  if test -z "${_f}" ; then
+    return ${_false_}
+  fi
+
+  if ! test -r "${_f}" ; then
+    return ${_true_}
+  fi
+  rm -f "${_f}"
+}

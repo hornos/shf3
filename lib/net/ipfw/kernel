@@ -1,0 +1,11 @@
+function net/ipfw/init() {
+  import sql
+  msg/debug "Database: ${net_ipfw_db}"
+  answer "Create database?"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  local _sql="$(ns/dir ${BASH_SOURCE})/net_ipfw.sql"
+  sql/init "${net_ipfw_db}" "${_sql}"
+}
+

@@ -1,0 +1,3 @@
+sys_srv_cntl="control"
+sys_srv_xterm="xterm"
+sys_srv_xterm_opt='-bg black -fg green -geometry +0+0'

@@ -1,0 +1,3 @@
+net_ipfw_db="net_ipfw.sqlite"
+net_ipfw_tag="ipfw_tag"
+net_ipfw_rule="ipfw_rule"

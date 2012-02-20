@@ -1,0 +1,97 @@
+#!/bin/bash
+
+source /etc/rc.common
+
+fw_ipfw="/sbin/ipfw -q"
+fw_sysctl="/usr/sbin/sysctl"
+fw_log="/var/log/kernel.log"
+
+### service interface
+function StartService() {
+  echo "Starting Firewall"
+
+  # ${fw_sysctl} -w net.inet.ip.fw.dyn_max=8192
+  # ${fw_sysctl} -w net.inet.ip.fw.dyn_buckets=512
+  # ${fw_sysctl} -w net.inet.ip.fw.dyn_ack_lifetime=300
+  # ${fw_sysctl} -w net.inet.ip.fw.dyn_syn_lifetime=20
+  # ${fw_sysctl} -w net.inet.ip.fw.dyn_fin_lifetime=5
+  # ${fw_sysctl} -w net.inet.ip.fw.dyn_rst_lifetime=5
+  # ${fw_sysctl} -w net.inet.ip.fw.dyn_short_lifetime=10
+  # ${fw_sysctl} -w net.inet.ip.fw.verbose_limit=100
+
+  ${fw_ipfw} flush
+  ${fw_ipfw} zero
+
+  # begin set 1: loopback
+  local _set=1
+  # spoofing
+  ${fw_ipfw} add deny log ip from any to any not verrevpath in
+  # localhost
+  ${fw_ipfw} add allow ip from me to me
+  # spoofing
+  ${fw_ipfw} add deny log ip from 127.0.0.0/8 to any in
+  ${fw_ipfw} add deny log ip from any to 127.0.0.0/8 in
+  ${fw_ipfw} add deny log ip from any to any ipoptions ssrr,lsrr in
+  ${fw_ipfw} add deny log tcp from any to any frag
+  ${fw_ipfw} add deny log tcp from any to 224.0.0.0/3 in
+  ${fw_ipfw} add deny tcp from any to any 0 in
+
+  # stateful
+  _set=2
+  ${fw_ipfw} add check-state
+  ${fw_ipfw} add allow tcp from me to any keep-state
+  ${fw_ipfw} add allow udp from me to any keep-state
+  # dhcp
+  ${fw_ipfw} add allow udp from any to any src-port 67 dst-port 68 in
+  # outbound icmp
+  ${fw_ipfw} add allow icmp from any to any out
+  ${fw_ipfw} add allow icmp from any to me icmptypes 0,3,11 in
+  # reject
+  _set=3
+  ${fw_ipfw} add 65000 deny log all from any to any in
+  # ${fw_ipfw} add deny log icmp from any to any in
+  # ${fw_ipfw} add deny log ip from any to any in
+}
+
+function StopService() {
+  ${fw_ipfw} flush
+  if test $? -gt 0 ; then
+    echo "There was a problem stopping the Firewall"
+    exit 1
+  fi
+  echo "Firewall has been stopped"
+}
+
+function RestartService() {
+  StopService
+  StartService
+}
+
+### extension
+function fwlog() {
+  ${fw_sysctl} -w net.inet.ip.fw.verbose=1 &> /dev/null
+  tail -f "${fw_log}" | \
+  awk '/ipfw/{
+    split($0,a);
+    date=sprintf("%s %s %s",a[1],a[2],a[3]);
+    user=sprintf("%8s",a[4]);
+    rule=sprintf("%6s",a[7]);
+    m=sprintf(".*%s",rule);
+    print date,user,rule;
+  }'
+}
+
+function fwstop() {
+  ${fw_sysctl} -w net.inet.ip.fw.verbose=0 &> /dev/null
+  exit 0
+}
+
+### main
+action="${1:-start}"
+case "${action}" in
+  start|stop|restart)
+    RunService "${action}";;
+  log)
+    trap fwstop INT TERM EXIT;
+    fwlog;;
+esac

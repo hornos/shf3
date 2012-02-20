@@ -1,0 +1,35 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../../lib/header
+import net/ipfw
+import sql
+
+function ipwall/usage() {
+  cat << EOF
+Usage: ${gbn} options
+              -f database
+EOF
+  exit ${_false_}
+}
+
+### args
+_f=""
+while getopts hvf: o; do
+  case "$o" in
+    f) _f=$OPTARG;;
+    v) gdbg=true;;
+    h) ipwall/usage;;
+  esac
+done
+
+### main
+net_ipfw_db="$(ns/dir)/../sql/${net_ipfw_db}"
+if ! test -z "${_f}" ; then
+  net_ipfw_db="${_f}"
+fi
+
+if ! test -r "${net_ipfw_db}" ; then
+  net/ipfw/init
+  if test $? -gt 0 ; then
+    exit ${_false_}
+  fi
+fi
