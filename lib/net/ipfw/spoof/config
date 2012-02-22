@@ -1,0 +1,4 @@
+net_ipfw_spoof_revpath=100
+net_ipfw_spoof_nmap=200
+net_ipfw_spoof_ip=300
+net_ipfw_spoof_tcp=400

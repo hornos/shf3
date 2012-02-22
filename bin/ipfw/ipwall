@@ -1,35 +1,122 @@
 #!/bin/bash
+
 source $(dirname ${BASH_SOURCE})/../../lib/header
 import net/ipfw
-import sql
+# import sql
 
-function ipwall/usage() {
-  cat << EOF
-Usage: ${gbn} options
-              -f database
-EOF
-  exit ${_false_}
+
+
+function ipwall/start() {
+  echo "Starting Firewall"
+
+  net/ipfw/reset
+
+  import net/ipfw/spoof
+
+  net/ipfw/spoof/revpath on in
+
+
+  net/ipfw/spoof/nmap on in
+
+  # begin set 1: loopback
+  # local _set=1
+  # local _no=100
+  #${fw_ipfw} set enable ${_set}
+  # spoofing
+  # ${fw_ipfw} add ${_no} set ${_set} deny log ip from any to any not verrevpath in
+  # localhost
+  ${fw_ipfw} add set ${_set} allow ip from me to me
+  # spoofing
+  ${fw_ipfw} add set ${_set} deny log ip from 127.0.0.0/8 to any in
+  ${fw_ipfw} add set ${_set} deny log ip from any to 127.0.0.0/8 in
+
+  # ${fw_ipfw} add set ${_set} deny log ip from any to any ipoptions rr,ts,ssrr,lsrr in
+
+  ${fw_ipfw} add set ${_set} deny log tcp from any to any frag
+  ${fw_ipfw} add set ${_set} deny log tcp from any to 224.0.0.0/3 in
+  ${fw_ipfw} add set ${_set} deny log tcp from any to any 0 in
+
+  # stateful
+#  _set=2
+#  _no=((_set*100))
+#  # ${fw_ipfw} set enable ${_set}
+#  # dhcp
+#  ${fw_ipfw} set ${_set} add allow udp from any to any src-port 67 dst-port 68 in
+
+  # allow icmp out
+  _set=19
+  _no=19000
+  ${fw_ipfw} add ${_no} set ${_set} allow icmp from any to any out
+  ${fw_ipfw} add set ${_set} allow icmp from any to me icmptypes 0,3,11 in
+
+  # allow tcp
+  _set=20
+  _no=20000
+  ${fw_ipfw} add ${_no} set ${_set} check-state
+  ${fw_ipfw} add set ${_set} allow tcp from me to any keep-state
+
+  # allow udp
+  _set=21
+  _no=21000
+  ${fw_ipfw} add ${_no} set ${_set} check-state
+  ${fw_ipfw} add set ${_set} allow udp from me to any keep-state
+
+  # allow ip
+  _set=22
+  _no=22000
+  ${fw_ipfw} add ${_no} set ${_set} check-state
+  ${fw_ipfw} add set ${_set} allow all from me to any keep-state
+
+  # reject
+  _set=23
+  # ${fw_ipfw} set enable ${_set}
+  # ${fw_ipfw} add deny log icmp from any to any in
+  # ${fw_ipfw} add deny log ip from any to any in
+  ${fw_ipfw} add 65000 set ${_set} deny log all from any to any in
+  ${fw_ipfw} add 65001 set ${_set} deny log all from any to any out
 }
 
-### args
-_f=""
-while getopts hvf: o; do
-  case "$o" in
-    f) _f=$OPTARG;;
-    v) gdbg=true;;
-    h) ipwall/usage;;
-  esac
-done
+function StopService() {
+  local i
+  for i in flush zero ; do
+    ${fw_ipfw} ${i}
+    if test $? -gt 0 ; then
+      echo "error: ${i}"
+      exit 1
+    fi
+  done
+}
+
+function RestartService() {
+  StopService
+  StartService
+}
+
+### extension
+function fwlog() {
+  ${fw_sysctl} -w net.inet.ip.fw.verbose=1 &> /dev/null
+  tail -f "${fw_log}" | \
+  awk '/ipfw/{
+    split($0,a);
+    date=sprintf("%s %s %s",a[1],a[2],a[3]);
+    user=sprintf("%8s",a[4]);
+    rule=sprintf("%6s",a[7]);
+    m=sprintf(".*%s",rule);
+    print date,user,rule;
+  }'
+}
+
+function fwstop() {
+  ${fw_sysctl} -w net.inet.ip.fw.verbose=0 &> /dev/null
+  exit 0
+}
 
 ### main
-net_ipfw_db="$(ns/dir)/../sql/${net_ipfw_db}"
-if ! test -z "${_f}" ; then
-  net_ipfw_db="${_f}"
-fi
-
-if ! test -r "${net_ipfw_db}" ; then
-  net/ipfw/init
-  if test $? -gt 0 ; then
-    exit ${_false_}
-  fi
-fi
+action="${1:-start}"
+case "${action}" in
+  start|stop|restart)
+    RunService "${action}";;
+  log)
+    trap fwstop INT TERM EXIT;
+    fwlog;;
+esac

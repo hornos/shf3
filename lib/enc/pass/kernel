@@ -84,6 +84,10 @@ function enc/pass/mgr() {
           return ${_false_}
         fi
         msg ">>$(gui/pass "${_p}")<<"
+        answer "Clear?"
+        if test $? -eq 0 ; then
+          clear
+        fi
         return ${_true_}
       fi
       local _frm1="%-40s%-22s%-22s\n"

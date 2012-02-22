@@ -9,3 +9,23 @@ function net/ipfw/init() {
   sql/init "${net_ipfw_db}" "${_sql}"
 }
 
+function net/ipfw/reset() {
+  msg "reset"
+  ${net_ipfw} flush
+  ${net_ipfw} zero
+}
+
+
+function net/ipfw/deny() {
+  local _no="${1}"
+  shift
+  local _rule="${*}"
+  ${net_ipfw} add ${_no} set ${net_ipfw_set} deny ${_rule}
+}
+
+function net/ipfw/allow() {
+  local _no="${1}"
+  shift
+  local _rule="${*}"
+  ${net_ipfw} add ${_no} set ${net_ipfw_set} allow ${_rule}
+}
