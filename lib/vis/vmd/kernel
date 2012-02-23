@@ -1,0 +1,50 @@
+
+function vis/vmd/stop() {
+  import sys/srv
+  gui/header "${FUNCNAME}"
+  sys/srv/run "exit"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  sleep ${sys_srv_timeout}
+  sys/srv/stop true
+}
+
+function vis/vmd/start() {
+  import sys/srv
+
+  local _p="${vis_vmd} -nt -pos ${vis_vmd_pos} -startup ${vis_vmd_rc}"
+  sys/srv/start "${_p}"
+}
+
+function vis/vmd/run() {
+  import sys/srv
+  sys/srv/run $*
+}
+
+function vis/vmd/load() {
+  local i
+  for i in $* ; do
+    _f="${i}"
+    if ! test -r "${_f}" ; then
+      msg "Not found: ${_f}"
+      continue
+    fi
+  done
+  local _t=$(vis/vmd/type "${_f}")
+  vis/vmd/run mol load "${_t}" "${_f}"
+}
+
+function vis/vmd/type() {
+  local _t=$(basename "${_f}")
+  _t="${_t##*.}"
+  case "${_t}" in
+    CONTCAR|geom)
+      _t="POSCAR";;
+  esac
+  echo "${_t}"
+}
+
+function vis/vmd/reset() {
+  sys/srv/run mol delete all
+}

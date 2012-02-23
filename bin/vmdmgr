@@ -1,0 +1,25 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+import vis/vmd
+
+function help/vmdmgr() {
+  cat << EOF
+
+VMD Manager
+
+Usage: ${gbn} commands args
+              start - start terminal
+              stop  - stop
+              run args
+              load geom
+EOF
+  exit ${_false_}
+}
+
+### args
+action="${1:-start}"
+shift
+
+### main
+vis/vmd/${action} $*

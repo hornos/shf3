@@ -1,13 +1,12 @@
 function sys/srv/stdin() {
-  echo "${gbn}/${sys_srv_stdin}"
+  echo "${sys_srv_dir}/${gbn}/${sys_srv_stdin}"
 }
 
 function sys/srv/stdout() {
-  echo "${gbn}/${sys_srv_stdout}"
+  echo "${sys_srv_dir}/${gbn}/${sys_srv_stdout}"
 }
 
-
-function sys/srv/cmd() {
+function sys/srv/run() {
   local _in=$(sys/srv/stdin)
   if ! test -r "${_in}" ; then
     msg "Stdin not found: ${_in}"
@@ -17,18 +16,18 @@ function sys/srv/cmd() {
   echo "$*" > "${_in}"
 }
 
-
 function sys/srv/trap() {
   import sys/dir
   import sys/fifo
   local _in=$(sys/srv/stdin)
   local _out=$(sys/srv/stdout)
+  local _dir="${sys_srv_dir}/${gbn}"
 
   sys/fifo/rm "${_in}"
   if test -r "${_out}" ; then
     rm -f "${_out}"
   fi
-  sys/dir/rm "${gbn}"
+  sys/dir/rm "${_dir}"
 }
 
 function sys/srv/stop() {
@@ -37,9 +36,11 @@ function sys/srv/stop() {
     gui/header $(ns/func "${FUNCNAME}")
   fi
   local _in=$(sys/srv/stdin)
-  if test -r "${_in}" ; then
-    echo "exit" > "${_in}"
+  if ! test -r "${_in}" ; then
+    msg "Not Found: ${_in}"
+    return ${_false_}
   fi
+  echo "exit" > "${_in}"
 }
 
 function sys/srv/init() {
@@ -48,6 +49,7 @@ function sys/srv/init() {
 
   local _in=$(sys/srv/stdin)
   local _out=$(sys/srv/stdout)
+  local _dir="${sys_srv_dir}/${gbn}"
 
   # check fifo
   if test -r "${_in}" ; then
@@ -60,9 +62,9 @@ function sys/srv/init() {
     return ${_false_}
   fi
 
-  sys/dir/mk "${gbn}"
+  sys/dir/mk "${_dir}"
   if test $? -gt 0; then
-    msg "Init failed: ${gbn}"
+    msg "Init failed: ${_dir}"
     return ${_false_}
   fi
 

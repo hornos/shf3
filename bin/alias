@@ -20,3 +20,6 @@ alias book="bmkmgr -b"
 
 alias jobsub="jobmgr -s"
 alias jobmon="pcpview -t -a -j"
+
+alias vmdrun="vmdmgr run"
+alias vmdload="vmdmgr load"

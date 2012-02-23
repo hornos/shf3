@@ -1,0 +1,18 @@
+### menu
+menu main move 0 300
+menu main on
+
+### display
+display shadows off
+display backgroundgradient on
+display projection orthographic
+
+### lights
+light 0 on
+light 1 on
+light 2 off
+light 3 off
+
+### stage
+axes location lowerleft
+stage location off

@@ -1,0 +1,3 @@
+vis_vmd="vmd"
+vis_vmd_pos="500 0"
+vis_vmd_rc="${grd}/lib/vis/vmd/srvrc"
