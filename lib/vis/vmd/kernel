@@ -1,7 +1,7 @@
 
 function vis/vmd/stop() {
   import sys/srv
-  gui/header "${FUNCNAME}"
+  gui/header $(ns/func "${FUNCNAME}")
   sys/srv/run "exit"
   if test $? -gt 0 ; then
     return ${_false_}
@@ -32,7 +32,8 @@ function vis/vmd/load() {
     fi
   done
   local _t=$(vis/vmd/type "${_f}")
-  vis/vmd/run mol load "${_t}" "${_f}"
+  local _p=$(ns/path "${_f}")
+  vis/vmd/run mol load "${_t}" "${_p}"
 }
 
 function vis/vmd/type() {
