@@ -47,5 +47,6 @@ function vis/vmd/type() {
 }
 
 function vis/vmd/reset() {
+  import sys/srv
   sys/srv/run mol delete all
 }
