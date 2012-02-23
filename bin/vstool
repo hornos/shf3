@@ -1,0 +1,93 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../../shf3/lib/header
+import gui
+
+vstool_vstrans="vstrans"
+vstool_vsposcar="vsposcar"
+vstool_vmdmgr="vmdmgr"
+
+function help/vstool() {
+  cat << EOF
+Usage: ${gbn} options
+              -i input
+              -t "trans1.tf trans2.tf ..."
+EOF
+exit 1
+}
+
+function vstool/trans() {
+  local _trs="${1}"
+  local _inp="${2}"
+  local _out="${3}"
+  # crop
+  ${vstool_vstrans} -i ${_inp} -o ${_out} -t ${_trs}
+  # xyz
+  ${vstool_vsposcar} -i ${_out} -o ${_out%%.POSCAR} -x
+}
+
+### args
+_i="POSCAR"
+_i="trans.tf"
+_r=false
+while getopts hvri:t: o; do
+  case "$o" in
+    i) _i=$OPTARG;;
+    t) _t="${OPTARG}";;
+    r) _r=true;;
+    v) gdbg=true;
+       vstool_vstrans="${vstool_vstrans} -w";
+       vstool_vsposcar="${vstool_vsposcar} -w";
+       ;;
+    h|*) help/vstool;;
+  esac
+done
+
+### main
+gui/header
+
+if ! test -r "${_i}" ; then
+  msg "Input not found: ${_i}"
+  exit 1
+fi
+
+if test -z "${_t}" ; then
+  help/vstool
+fi
+
+# reset
+if ${_r} ; then
+  ${vstool_vmdmgr} reset
+fi
+
+answer "Show input?"
+if test $? -eq 0 ; then
+  ${vstool_vmdmgr} load "${_i}"
+fi
+
+for i in ${_t} ; do
+  if ! test -r "${i}" ; then
+    msg "Not found: ${i}"
+    exit 1
+  fi
+  _pre="${gbn}.${i%%.*}"
+  _out="${_pre}.POSCAR"
+
+  answer "Execute: ${i}?"
+  if test $? -gt 0 ; then
+    exit 1
+  fi
+
+  vstool/trans "${i}" "${_i}" "${_out}"
+  if test $? -gt 0 ; then
+    exit 1
+  fi
+  answer "Display ${_out}?"
+  if test $? -eq 0 ; then
+    ${vstool_vmdmgr} load "${_out}"
+  fi
+  _i="${_out}"
+done
+
+_out="${gbn}.POSCAR"
+ln -f -s "${_i}" "${_out}"
+msg "Output: ${_out}"
