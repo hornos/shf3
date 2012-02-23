@@ -89,5 +89,5 @@ for i in ${_t} ; do
 done
 
 _out="${gbn}.POSCAR"
-ln -f -s "${_i}" "${_out}"
+cp -f "${_i}" "${_out}"
 msg "Output: ${_out}"
