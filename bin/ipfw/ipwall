@@ -9,14 +9,16 @@ import net/ipfw
 function ipwall/start() {
   echo "Starting Firewall"
 
-  net/ipfw/reset
-
+  import net/ipfw
   import net/ipfw/spoof
 
+  # flush
+  net/ipfw/reset
+
   net/ipfw/spoof/revpath on in
-
-
   net/ipfw/spoof/nmap on in
+
+
 
   # begin set 1: loopback
   # local _set=1
@@ -26,6 +28,7 @@ function ipwall/start() {
   # ${fw_ipfw} add ${_no} set ${_set} deny log ip from any to any not verrevpath in
   # localhost
   ${fw_ipfw} add set ${_set} allow ip from me to me
+
   # spoofing
   ${fw_ipfw} add set ${_set} deny log ip from 127.0.0.0/8 to any in
   ${fw_ipfw} add set ${_set} deny log ip from any to 127.0.0.0/8 in
