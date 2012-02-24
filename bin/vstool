@@ -69,7 +69,7 @@ for i in ${_t} ; do
     msg "Not found: ${i}"
     exit 1
   fi
-  local j=$(basename "${i}")
+  j=$(basename "${i}")
   _pre="${gbn}.${j%%.*}"
   _out="${_pre}.POSCAR"
 
