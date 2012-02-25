@@ -1,0 +1,5 @@
+enc_ca_dir="${grd}/ca"
+enc_ca_openssl="openssl"
+enc_ca_openssl_cnf="${enc_ca_dir}/openssl.cnf"
+enc_ca_days=3650
+enc_ca_ext="ve_ca"

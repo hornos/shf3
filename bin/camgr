@@ -1,0 +1,34 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+import enc/ca
+
+function help/camgr() {
+  cat << EOF
+
+Certificate Authority Manager
+
+Usage: ${gbn} options
+              -a authority - create or use the authority
+              -l - list
+EOF
+  exit ${_false_}
+}
+
+### args
+_a="${USER}"
+while getopts hva: o; do
+  case "$o" in
+    a) _a=$OPTARG;;
+    v) gdbg=true;;
+    h|*) help/camgr;;
+  esac
+done
+
+### main
+echo
+msg
+gui/line
+
+enc/ca/mgr "${_a}"
+

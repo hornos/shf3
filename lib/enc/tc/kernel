@@ -1,0 +1,114 @@
+function help/enc/tc() {
+  cat << EOF
+Ubuntu:
+sudo usermod -a -G disk $USER
+sudo visudo
+%admin ALL = (root) NOPASSWD:/usr/bin/truecrypt
+EOF
+}
+
+
+function enc/tc/init() {
+  import sys
+  import gui
+  import enc/tc/key
+  import enc/tc/mnt
+
+  local _m="${1}"
+  if test -z "${_m}" ; then
+    return ${_false_}
+  fi
+  sys/mid "tc/${_m}"
+
+  if ! test -r "${mid_tc_disk}" ; then
+    msg "Disk not found: ${mid_tc_disk}"
+    return ${_false_}
+  fi
+  local _opt="${enc_tc_opt}"
+  local _key=$(enc/tc/key "${_m}")
+  if test -r "${_key}" ; then
+    _opt="${_opt} -k ${_key}"
+    msg "Key  : ${_key}"
+  fi
+  # volume type
+  _opt="${_opt} --volume-type=${mid_tc_type:-${enc_tc_vol_type}}"
+  # volume encryption
+  _opt="${_opt} --encryption=${mid_tc_vol_enc:-${enc_tc_vol_enc}}"
+  # volume hash
+  _opt="${_opt} --hash=${mid_tc_vol_hash:-${enc_tc_vol_hash}}"
+  # volume fs
+  _opt="${_opt} --filesystem=${enc_tc_vol_fs}"
+  # rng source
+  _opt="${_opt} --random-source=${enc_tc_vol_rng}"
+
+  # init
+  msg "Enc. : ${enc_tc_vol_enc}"
+  msg "Hash : ${enc_tc_vol_hash}"
+  answer "Init drive: ${mid_tc_disk}?"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  answer "Are you sure?"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  ${enc_tc} ${_opt} -c ${mid_tc_disk}
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  # map
+  enc/tc/map "${_m}"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  # mkfs
+  local _mkfs="mkfs.${mid_tc_fs}"
+  local _map="${enc_tc_vol_map}${enc_tc_vol_slot}"
+  answer "Format dirve: ${_map}?"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  sudo ${_mkfs} ${mid_tc_fs_opt} "${_map}"
+
+  enc/tc/mnt "${_m}" true
+}
+
+
+function enc/tc/mgr() {
+  import gui
+  import sys
+  import sys/dir
+
+  local _c="${1:-LIST}"
+  local _h="${2:-default}"
+
+  case "${_c}" in
+    CREATE)
+      enc/tc/init "${_h}"
+    ;;
+    LIST)
+      ${enc_tc} -l
+      # format
+      local _frm1="%-26s%-42s\n"
+
+      # header
+      echo
+      printf "${_frm1}" "mid" "directory"
+      gui/line
+      local i
+      for i in ${sys_mid_dir}/tcfs/* ; do
+        if test -r "${i}" ; then
+          i=$(basename "${i}")
+          sys/mid "tcfs/${i}"
+          if ! test -z "${mid_encfs_enc}" ; then
+            printf "${_frm1}" "${i}" "${mid_encfs_enc}"
+          fi
+        fi
+      done
+      ;;
+  esac
+}

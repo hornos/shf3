@@ -1,0 +1,169 @@
+function enc/tc/mnt/ls() {
+  import enc/tc
+  ${enc_tc} -l
+}
+
+function enc/tc/umnt() {
+  local _h="${1:-default}"
+  local _f="${2:-false}"
+  enc/tc/mnt "${_h}" ${_f} true
+}
+
+function enc/tc/mnt() {
+  import sys
+  import gui
+  import sys/lck
+  import sys/dir
+  import enc/tc
+  import enc/tc/key
+
+  local _h="${1:-default}"
+  local _f="${2:-false}"
+  local _u="${3:-false}"
+  local _ret
+
+  sys/mid "tc/${_h}"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  if ! test -r "${mid_tc_disk}" ; then
+    msg "Disk not found: ${mid_tc_disk}"
+    return ${_false_}
+  fi
+
+  # lock
+  # clear lock
+  local _lck="${_h}.${gbn}"
+  if ${_f} ; then
+    sys/lck/rm "${_lck}"
+  fi
+
+  local _src="${enc_tc_mnt_dir}/${_h}"
+  local _opt="${enc_tc_opt}"
+
+  # unmount
+  if ${_u} ; then
+    if ! test -d "${_src}" ; then
+      return ${_false_}
+    fi
+    if ! $(sys/lck "${_lck}") && ! ${_f}; then
+      msg "Not mounted: ${_h}"
+      return ${_false_}
+    fi
+
+    msg "Mount directory : ${_src}"
+    answer "Unmount ${_h}?"
+    if test $? -gt 0 ; then
+      return ${_false_}
+    fi
+
+    ${enc_tc} ${_opt} -d "${_src}" 2>/dev/null
+    _ret=$?
+    if ! test ${_ret} -gt 0 ; then
+      sys/lck/rm "${_lck}"
+      msg "Unmount success"
+    fi
+    return ${_ret}
+  fi
+
+  # lock
+  if $(sys/lck "${_lck}") && ! ${_f} ; then
+    msg "Mounted: ${_h}"
+    return ${_false_}
+  fi
+
+  msg "Mount directory : ${_src}"
+  answer "Mount ${_h}?"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  sys/lck/mk "${_lck}"
+
+
+  # key
+  local _key=$(enc/tc/key "${_m}")
+  if test -r "${_key}" ; then
+    _opt="${_opt} -k ${_key}"
+  else
+    msg "Key not found: ${_key}"
+    return ${_false_}
+  fi
+
+  local _url="${mid_tc_disk}"
+  sys/dir/mk "${_src}"
+
+#  if test "$(sys/os)" = "osx" ; then
+#    local _vol="tcfs/${_h}:${_url}"
+#    _opt="${_opt} -o volname=${_vol}"
+#    local _ico="${sys_img_dir}/tcfs.icns"
+#    if test -r "${_ico}" ; then
+#      _opt="${_opt} -o modules=volicon -o volicon=${_ico}"
+#    fi
+#  fi
+
+  local _type="${mid_tc_type:-${enc_tc_vol_type}}"
+  if test "${_type}" = "Normal" ; then
+    _opt="${_opt} --protect-hidden=no"
+  fi
+
+  _opt="${_opt} --filesystem=${mid_tc_fs} --fs-options=${mid_tc_fs_opt}"
+
+  local _cmd="${enc_tc} ${_opt} --mount ${_url} \"${_src}\""
+  msg/debug "${_cmd}"
+
+  if ${gdbg} ; then
+    eval ${_cmd}
+  else
+    eval ${_cmd} 2>/dev/null
+  fi
+  _ret=$?
+  if test ${_ret} -gt 0 ; then
+    msg "Mount failed"
+    sys/lck/rm "${_lck}"
+  else
+    msg "Mount success"
+  fi
+  return ${_ret}
+}
+
+function enc/tc/map() {
+  import sys
+  import enc/tc
+  import enc/tc/key
+
+  local _m="${1}"
+  local _s="${2:-${enc_tc_vol_slot}}"
+
+  if test -z "${_m}" ; then
+    return ${_false_}
+  fi
+  sys/mid "tc/${_m}"
+
+  if ! test -r "${mid_tc_disk}" ; then
+    msg "Disk not found: ${mid_tc_disk}"
+    return ${_false_}
+  fi
+
+  local _opt="${enc_tc_opt}"
+  local _key=$(enc/tc/key "${_m}")
+  if test -r "${_key}" ; then
+    _opt="${_opt} -k ${_key}"
+    msg "Key  : ${_key}"
+  fi
+
+  # volume type
+  local _type="${mid_tc_type:-${enc_tc_vol_type}}"
+  _opt="${_opt} --volume-type=${_type}"
+  if test "${_type}" = "Normal" ; then
+    _opt="${_opt} --protect-hidden=no"
+  fi
+  _opt="${_opt} --filesystem=${enc_tc_vol_fs}"
+
+  msg "Slot : ${_s}"
+  answer "Map dirve: ${mid_tc_disk}?"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  ${enc_tc} ${_opt} --slot=${_s} "${mid_tc_disk}"
+}

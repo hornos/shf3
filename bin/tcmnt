@@ -1,0 +1,55 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+import enc/tc/mnt
+
+function help/tcmnt() {
+  cat << EOF
+
+TrueCrypt Mount
+
+Usage: ${gbn} options
+              -m MID - mount
+              -u MID - unmount
+              -l - list
+              -f - force
+              -v - verbose
+EOF
+  exit ${_false_}
+}
+
+### args
+_m=""
+_f=false
+_c="LIST"
+while getopts hfvlm:u: o; do
+  case "$o" in
+    m) _c="MOUNT"; _m=$OPTARG;;
+    u) _c="UNMOUNT"; _m=$OPTARG;;
+    l) _c="LIST";;
+    f) _f=true;;
+    v) gdbg=true;;
+    h|*) help/tcmnt;;
+  esac
+done
+
+### main
+echo
+msg
+gui/line
+
+if test "${_m}" = "" ; then
+  _c="LIST"
+fi
+
+case ${_c} in
+  LIST)
+    enc/tc/mnt/ls
+    ;;
+  MOUNT)
+    enc/tc/mnt "${_m}" ${_f} false
+    ;;
+  UNMOUNT)
+    enc/tc/umnt "${_m}" ${_f}
+    ;;
+esac

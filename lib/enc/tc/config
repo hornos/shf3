@@ -1,0 +1,30 @@
+enc_tc="truecrypt"
+enc_tc_opt="-t"
+
+# Volume type:
+# 1) Normal
+# 2) Hidden
+enc_tc_vol_type="Normal"
+
+# Encryption algorithm:
+# 1) AES
+# 2) Serpent
+# 3) Twofish
+# 4) AES-Twofish
+# 5) AES-Twofish-Serpent
+# 6) Serpent-AES
+# 7) Serpent-Twofish-AES
+# 8) Twofish-Serpent
+enc_tc_vol_enc="AES-Twofish-Serpent"
+
+# Hash algorithm:
+# 1) RIPEMD-160
+# 2) SHA-512
+# 3) Whirlpool
+enc_tc_vol_hash="Whirlpool"
+
+# FS
+enc_tc_vol_fs="None"
+
+# Random source
+enc_tc_vol_rng="/dev/urandom"

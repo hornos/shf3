@@ -1,0 +1,5 @@
+function enc/tc/key() {
+  local _h="${1:-default}"
+  local _s="${2:-${enc_tc_key_key}}"
+  echo "${enc_tc_key_dir}/${_h}.${_s}"
+}

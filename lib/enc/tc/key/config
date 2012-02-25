@@ -1,0 +1,2 @@
+enc_tc_key_key="key"
+enc_tc_key_dir="${grd}/key/tc"

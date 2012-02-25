@@ -1,0 +1,33 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+import enc/tc
+
+function help/tcmgr() {
+  cat << EOF
+
+TrueCrypt manager
+
+Usage: ${gbn} options
+              -n mid - new
+EOF
+  exit ${_false_}
+}
+
+### args
+_c="LIST"
+_m=""
+while getopts hvn: o; do
+  case "$o" in
+    n) _c="CREATE"; _m=$OPTARG;;
+    v) gdbg=true;;
+    h|*) help/tcmgr;;
+  esac
+done
+
+### main
+echo
+msg
+gui/line
+
+enc/tc/mgr "${_c}" "${_m}"

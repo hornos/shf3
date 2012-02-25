@@ -1,0 +1,5 @@
+mid_tc_type="Normal"
+mid_tc_disk="/dev/disk/by-id/"
+mid_tc_fs="xfs"
+mid_tc_fs_opt=""
+

@@ -1,0 +1,96 @@
+function help/enc/ca() {
+  cat << EOF
+http://www.privacywonk.net/2010/10/security-how-to-wpa2-enterprise-on-your-home-network.php
+EOF
+}
+
+function enc/ca/init() {
+  import sys/dir
+
+  local _a="${1}"
+  if test -z "${_a}" ; then
+    return ${_false_}
+  fi
+
+  enc_ca="${enc_ca_dir}/${_a}"
+  if test -d "${enc_ca}" ; then
+    return ${_true_}
+  fi
+
+  sys/dir/mk "${enc_ca}"
+  if test $? -gt 0 ; then
+    msg "Failed: ${enc_ca}"
+    return ${_false_}
+  fi
+
+  # create dirs
+  local i
+  for i in CA CA/private certs crl private newcerts export ; do
+    sys/dir/mk "${enc_ca}/${i}"
+    if test $? -gt 0 ; then
+      msg "Failed: ${enc_ca}/${i}"
+      return ${_false_}
+    fi
+  done
+
+  # serial & index
+  chmod -R 0700 "${enc_ca}"
+
+  echo "10001" > "${enc_ca}/serial"
+  chmod 600 "${enc_ca}/serial"
+
+  touch "${enc_ca}/certindex.txt"
+  chmod 600 "${enc_ca}/certindex.txt"
+
+  # openssl config
+  cp "${enc_ca_openssl_cnf}" "${enc_ca}/openssl.cnf"
+  answer "Edit OpenSSL configuration?"
+  if test $? -eq 0 ; then
+    mc -e "${enc_ca}/openssl.cnf"
+  fi
+  chmod 600 "${enc_ca}/openssl.cnf"
+
+  # begin ca dir
+  sys/dir/svwd "${enc_ca}"
+
+  local _key="CA/private/cakey.pem"
+  local _out="CA/private/cacert.pem"
+  local _cnf="./openssl.cnf"
+  local _exp="export/cacert.der"
+
+  answer "Generate CA key?"
+  ${enc_ca_openssl} req -new -x509 \
+    -days ${enc_ca_days} \
+    -extensions ${enc_ca_ext} \
+    -keyout "${_key}" \
+    -out "${_out}" \
+    -config "${_cnf}"
+  if test $? -gt 0 ; then
+    msg "CA Failed"
+    return ${_false_}
+  fi
+  chmod 0400 "${_key}"
+
+  ${enc_ca_openssl} x509 \
+    -in "${_out}" \
+    -outform DER \
+    -out "${_exp}"
+  # end ca dir
+}
+
+
+function enc/ca/mgr() {
+  local _a="${1}"
+  if test -z "${_a}" ; then
+    return ${_false_}
+  fi
+  
+  enc_ca="${enc_ca_dir}/${_a}"
+  if ! test -d "${enc_ca}" ; then
+    answer "Create new authority: ${_a}?"
+    if test $? -gt 0 ; then
+      return ${_false_}
+    fi
+    enc/ca/init "${_a}"
+  fi
+}

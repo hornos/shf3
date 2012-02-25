@@ -1,0 +1,4 @@
+# Mounts
+enc_tc_mnt_dir=${HOME}/tcfs
+enc_tc_vol_slot=64
+enc_tc_vol_map="/dev/mapper/truecrypt"
