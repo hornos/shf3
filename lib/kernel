@@ -21,48 +21,6 @@ _true_=0
 _false_=1
 _abort_=255
 
-# error handling
-failure="return ${_false_}"
-success="return ${_true_}"
-
-function failed() {
-  local _r=${1:-${_false_}}
-  if test ${_r} -gt 0 ; then
-    $success
-  fi
-  $failure
-}
-
-function succeed() {
-  local _r=${1:-${_false_}}
-  if test ${_r} -eq 0 ; then
-    $success
-  fi
-  $failure
-}
-
-function empty() {
-  local _s="${1}"
-  if test -z "${_s}" ; then
-    $success
-  fi
-  $failure
-}
-
-function readable() {
-  local _f="${1}"
-  if test -r "${_f}" ; then
-    $success
-  fi
-  $failure
-}
-
-# return false
-# if failed $?;then $failure;fi
-# return true
-# if succeed $?;then $success;fi
-
-
 ### messages
 function msg() {
   echo -e "[${gbn}] ${*}"
@@ -100,9 +58,9 @@ function ns/readlink() {
 function ns/isfunc() {
   local _f="${1:-${FUNCNAME}}"
   if test $(type -t "${_f}") = "function" ; then
-    $success
+    return ${_true_}
   fi
-  $failure
+  return ${_false_}
 }
 
 function ns/func() {
@@ -119,12 +77,13 @@ function ns/var/io() {
   local _c="${1}"
   local _i="${2}"
   local _o="${3}"
-  if empty "${_c}"; then $failure; fi
-
-  if ! empty "${_i}" ; then
+  if test -z "${_c}" ; then
+    return ${_false_}
+  fi
+  if ! test -z "${_i}" ; then
     _c=$(echo "${_c}" | sed s/\<INPUT\>/"${_i}"/)
   fi
-  if ! empty "${_o}" ; then
+  if ! test -z "${_o}" ; then
     _c=$(echo "${_c}" | sed s/\<OUTPUT\>/"${_o}"/)
   fi
   echo "${_c}"
@@ -134,14 +93,15 @@ function ns/var/cmd() {
   local _f="${1}"
   local _i="${2}"
   local _o="${3}"
-  if empty "${_f}"; then $failure; fi
-  
+  if test -z "${_f}" ; then
+    return ${_false_}
+  fi
   local _c=$(ns/var "${_f}")
   _c=${!_c}
   _c=$(ns/var/io "${_c}" "${_i}" "${_o}")
-
-  if empty "${_c}"; then $failure; fi
-
+  if test -z "${_c}" ; then
+    return ${_false_}
+  fi
   ${_c}
 }
 
@@ -164,23 +124,23 @@ function ns/func/dir() {
 function ns/op() {
   local _s="${1}"
   local _m="${2}"
-  if empty "${_m}" ; then
+  if test -z "${_m}" ; then
     _m="< + -"
   fi
 
   local o
   for o in ${_m} ; do
     if test "${_s:0:1}" = "${o}" ; then
-      $success
+      return ${_true_}
     fi
   done
-  $failure
+  return ${_false_}
 }
 
 function ns/op/value() {
   local _s="${1}"
   local _m="${2}"
-  if empty "${_m}" ; then
+  if test -z "${_m}" ; then
     _m="< + -"
   fi
 
@@ -188,29 +148,31 @@ function ns/op/value() {
   for o in ${_m} ; do
     if $(ns/op "${_s}" "${o}") ; then
       echo "${_s:1}"
+      return ${_true_}
     fi
   done
   echo "${_s}"
+  return ${_false_}
 }
 
 # path
 function ns/inpath() {
   local _m="${1}"
   local _p="${2:-${gip}}"
-  if empty "${_p}" || \
-     empty "${_m}" ; then
-    $failure
+  if test -z "${_p}" || test -z "${_m}" ; then
+    return ${_false_}
   fi
   if test "${_p}" = "${_p/:${_m}:/}" ; then
-    $failure
+    return ${_false_}
   fi
-  $success
+  return ${_true_}
 }
 
 function ns/lspath() {
   local _p="${1}"
-  if empty "${_p}"; then $failure; fi
-
+  if test -z "${_p}" ; then
+    return ${_false_}
+  fi
   echo "${_p}" | \
   awk '{split($0,a,":"); for(i in a) print a[i]}'
 }
@@ -250,8 +212,9 @@ function ns/aa() {
 
 function ns/ext() {
   local _n="${1}"
-  if empty "${_n}"; then $failure; fi
-
+  if test -z "${_n}" ; then
+    return ${_false_}
+  fi
   local _bn=${_n%.*}
   echo =${_n##${_bn}}
 }
@@ -259,18 +222,20 @@ function ns/ext() {
 ### include
 function include() {
   local _p="${1}"
-  if empty "${_p}" ; then $failure; fi
+  if test -z "${_p}" ; then
+    return ${_false_}
+  fi
 
   local __p=$(ns/op/value "${_p}" "+")
   msg/debug "${FUNCNAME} ${__p}"
 
   if ! test -d "${__p}" ; then
-    $failure
+    return ${_false_}
   fi
 
   if test -z "${gip}" ; then
     gip=":${__p}:"
-    $success
+    return ${_true_}
   fi
 
   if ! $(ns/inpath "${__p}" "${gip}") ; then
@@ -280,17 +245,19 @@ function include() {
       gip=":${gip}${__p}"
     fi
   fi
-  $success
+  return ${_true_}
 }
 
 ### import
 function import/path() {
   local _m="${1}"
-  if empty "${_m}" ; then
+  if test -z "${_m}" ; then
     echo ""
+    return ${_false_}
   fi
+
   local _kn="${_m}/${gkn}"
-  if ! empty "${gip}" ; then
+  if ! test -z "${gip}" ; then
     _IFS=${IFS}
     IFS=:
     local i
@@ -304,6 +271,8 @@ function import/path() {
       fi
     done
     IFS=${_IFS}
+  else
+    echo ""
   fi
 }
 
@@ -312,9 +281,8 @@ function import() {
   # not loaded
   local _nl=false
 
-  if empty "${gip}" || \
-     empty "${_m}" ; then
-    $failure
+  if test -z "${gip}" || test -z "${_m}" ; then
+    return ${_false_}
   fi
 
   msg/debug "${FUNCNAME} gim    : ${gim}"
@@ -324,7 +292,8 @@ function import() {
   local __m=$(ns/op/value "${_m}" "+")
   if $(ns/inpath "${__m}" "${gim}") ; then
     if ! $(ns/op "${_m}" "+") ; then
-      $success
+      # skipped
+      return ${_true_}
     fi
   else
     _nl=true
@@ -334,39 +303,39 @@ function import() {
 
   # search
   local __p=$(import/path "${__m}")
-  if empty "${__p}" ; then
-    $failure
+  if test -z "${__p}" ; then
+    return ${_false_}
   fi
 
   local _lib="${__p}/${gkn}"
   local _cfg="${__p}/${gcn}"
 
   # read config
-  if readable "${_cfg}" ; then
+  if test -r "${_cfg}" ; then
     source "${_cfg}"
   fi
 
   # load OS specific library config
   local __cfg="${_cfg}.${OSTYPE}"
-  if readable ${__cfg} ; then
+  if test -r ${__cfg} ; then
     source "${__cfg}"
   fi
 
   # user specific library config
   __cfg="${_cfg}.${USER}"
-  if readable ${__cfg} ; then
+  if test -r ${__cfg} ; then
     source "${__cfg}"
   fi
 
   # read lib
-  if ! readable "${_lib}" ; then
-    $failure
+  if test -r "${_lib}" ; then
+    msg/debug "${FUNCNAME} source : ${_lib}"
+    source "${_lib}"
+  else
+    return ${_false_}
   fi
-  msg/debug "${FUNCNAME} source : ${_lib}"
-  source "${_lib}"
-
   if ${_nl} ; then
-    if empty "${gim}" ; then
+    if test -z "${gim}" ; then
       gim=":${__m}:"
     else
       gim="${gim}${__m}:"
@@ -392,10 +361,14 @@ function field() {
 
 function installed() {
   local _b="${1}"
-  if empty "${_b}" ; then $failure; fi
-
+  if test -z "${_b}" ; then
+    return ${_false_}
+  fi
   which "${_b}" &> /dev/null
-  if succeed $?;then $success;fi
+  if test $? -eq 0; then
+    return ${_true_}
+  fi
+  return ${_false_}
 }
 
 function answer() {
@@ -470,7 +443,7 @@ function epoch() {
   local _d=${1:-0}
   if ! $(is_int "${_d}") ; then
     echo "${_d}"
-    $success
+    return ${_true_}
   fi
   if test ${_d} -eq 0 ; then
     date +%s
@@ -496,7 +469,6 @@ function check() {
 }
 
 
-# TODO column print
 ### help system
 function help/kernel() {
   local _l="${grd}/lib"
@@ -515,7 +487,7 @@ function help/modules() {
       echo "Available modules in ${_l}:"
       for i in $(sys/dir/rls "${_l}") ; do
         i=${i##${_l}}
-        if ! empty "${i}"; then
+        if ! test -z "${i}"; then
           echo "${i##/}"
         fi
       done
@@ -530,22 +502,29 @@ function help() {
   msg "Shell Framework Help System"
   gui/line
 
-  if ! empty "${_h}" ; then
+  if ! test -z "${_h}" ; then
     local _f="help/${_h}"
     if $(ns/isfunc "${_f}") ; then
       ${_f}
       return $?
     fi
     msg "Help not available for ${_h}"
-    $failure
+    return ${_false_}
   fi
 
   msg "Available help:"
   local i
   for i in $(set | grep "^help/*\ *\(\)" | awk '{print $1}') ; do
     i=${i##help}
-    if ! empty "${i}" ; then
+    if ! test -z "${i}" ; then
       echo "${i##/}"
     fi
   done
 }
+
+### binary check
+if $(installed pv) ; then
+  gpv=true
+else
+  gpv=false
+fi
