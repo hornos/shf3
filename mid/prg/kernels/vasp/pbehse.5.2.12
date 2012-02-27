@@ -1,0 +1,73 @@
+
+function vasp/kernel() {
+  # reserved global variables
+  # ${_inp} : input
+  # ${_out} : output
+  # ${_cmd} : command
+
+  # declare all variables as local
+
+  import gui
+  import str/f
+  import run/valid
+
+  ### begin pbe step
+  # step variable
+  local _step="pbe"
+  echo -e "\n1. PBE Relaxation"
+  gui/line
+
+  # run pbe step
+  run/prg/step
+  # check program error
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  # validate
+  # search OUTCAR for this line:
+  run/valid/check OUTCAR "reached required accuracy"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  # show timing
+  # search OUTCAR
+  run/valid/show OUTCAR "General timing"
+
+  # save old outputs
+  local i
+  for i in OUTCAR vasp.output ; do
+    cp ${i} ${i}.${_step}
+  done
+
+  # create new input
+  local _tmp=INCAR.${_step}
+  mv INCAR ${_tmp}
+
+  cat ${_tmp}            | \
+  str/f/set ISTART 1     | \
+  str/f/set NSW 0        | \
+  str/f/set LHFCALC      | \
+  str/f/set AEXX 0.25    | \
+  str/f/set AGGAX 0.25   | \
+  str/f/set AGGAC 1.00   | \
+  str/f/set HFSCREEN 0.2 | \
+  str/f/set PRECFOCK N   | \
+  str/f/set IALGO 53     | \
+  str/f/set TIME 0.4     > INCAR
+  ### end pbe step
+
+  ### begin hse step
+  _step="hse"
+  echo -e "\n2. HSE Relaxation"
+  gui/line
+
+  # run hse step
+  run/prg/step
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  # show timing
+  # search OUTCAR
+  run/valid/show OUTCAR "General timing"
+}

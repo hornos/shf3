@@ -46,6 +46,7 @@ function vasp/kernel() {
 
   cat ${_tmp}            | \
   str/f/set ISTART 1     | \
+  str/f/set NSW 0        | \
   str/f/set LHFCALC      | \
   str/f/set AEXX 0.25    | \
   str/f/set AGGAX 0.25   | \
@@ -63,4 +64,10 @@ function vasp/kernel() {
 
   # run hse step
   run/prg/step
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  # show timing
+  # search OUTCAR
+  run/valid/show OUTCAR "General timing"
 }

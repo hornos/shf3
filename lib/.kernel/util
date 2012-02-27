@@ -1,0 +1,131 @@
+function column() {
+  local _c=${1:-3}
+  awk -v c=3 'BEGIN{i=0;s="";}{
+    if(i==c) {
+      print s;
+      s="";
+      i=0
+    }
+    else {
+      s=sprintf("%s %-30s",s,$0);
+      ++i;
+    }
+  }
+  END{if(i>0) print s;}'
+}
+
+function installed() {
+  local _b="${1}"
+  if test -z "${_b}" ; then
+    return ${_false_}
+  fi
+  which "${_b}" &> /dev/null
+  if test $? -eq 0; then
+    return ${_true_}
+  fi
+  return ${_false_}
+}
+
+function answer() {
+  import str
+  local _m="${1:-Answer}"
+  local _t=${2:-3}
+  local _a
+
+  while true ; do
+    echo -en "[${gbn}] ${_m} (y/n/q) [${_t}]: "
+    read _a
+    _a=$(str/tolower ${_a})
+    case "${_a}" in
+      "y" | "case" | "yes" )
+        return ${_true_}
+      ;;
+      "n" | "no" | "q"  )
+        echo -e "[${gbn}] Abort\n"
+        return ${_false_}
+      ;;
+      *)
+        echo -e "[${gbn}] Invalid\n"
+        _t=$((_t-1))
+      ;;
+    esac
+    if test ${_t} -lt 1 ; then
+      return ${_false_}
+    fi
+  done
+}
+
+function choose() {
+  import str
+  local _m="${1:-Answer}"
+  local _n=${2:-3}
+  local _t=${2:-3}
+  local _a
+
+  while true ; do
+    echo -en "[${gbn}] ${_m} (1-${_n}/n/q) [${_t}]: "
+    read _a
+    _a=$(str/tolower ${_a})
+    case "${_a}" in
+      "y" | "case" | "yes" )
+        return ${_true_}
+      ;;
+      "n" | "no" | "q"  )
+        echo -e "[${gbn}] Abort\n"
+        return ${_abort_}
+      ;;
+      *)
+        if test ${_a} -le ${_n} && \
+           test ${_a} -gt 0 ; then
+          return ${_a}
+        else
+          echo -e "[${gbn}] Invalid\n"
+          _t=$((_t-1))
+        fi
+      ;;
+    esac
+    if test ${_t} -lt 1 ; then
+      return ${_abort_}
+    fi
+  done
+}
+
+function isint() {
+  return $(test "$@" -eq "$@" > /dev/null 2>&1);
+}
+
+function field() {
+  local _s="${1}"
+  local _f=${2:-1}
+  local _x="${3:-|}"
+  echo "${_s}" | cut  -d "${_x}" -f ${_f}
+}
+
+function epoch() {
+  local _d=${1:-0}
+  if ! $(isint "${_d}") ; then
+    echo "${_d}"
+    return ${_true_}
+  fi
+  if test ${_d} -eq 0 ; then
+    date +%s
+  else
+    date -r ${_d} +"%Y-%m-%d %H:%M:%S"
+  fi
+}
+
+function elapsed() {
+  local _t0=${1}
+  local _t1=${2}
+  local _dt=$((_t1-_t0))
+
+  h=$(( _dt / 3600 ))
+  m=$(( ( _dt / 60 ) % 60 ))
+  s=$(( _dt % 60 ))
+  printf "%02d:%02d:%02d" $h $m $s
+}
+
+function check() {
+  msg "import path    = ${gip}"
+  msg "loaded modules = ${gim}"
+}

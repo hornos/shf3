@@ -1,0 +1,52 @@
+
+### messages
+function msg() {
+  echo -e "[${gbn}] ${*}"
+}
+
+function msg/debug() {
+  if ${gdbg} ; then
+    msg "DEBUG: ${*}"
+  fi
+}
+
+function msg/error() {
+  msg "ERROR: ${*}"
+  exit ${2:-${_false_}}
+}
+
+function msg/warn() {
+  msg "WARN: ${*}"
+}
+
+function failed() {
+  local _r=${1:-${_false_}}
+  if test ${_r} -gt 0 ; then
+    $success
+  fi
+  $failure
+}
+
+function succeed() {
+  local _r=${1:-${_false_}}
+  if test ${_r} -eq 0 ; then
+    $success
+  fi
+  $failure
+}
+
+function empty() {
+  local _s="${1}"
+  if test -z "${_s}" ; then
+    $success
+  fi
+  $failure
+}
+
+function readable() {
+  local _f="${1}"
+  if test -r "${_f}" ; then
+    $success
+  fi
+  $failure
+}

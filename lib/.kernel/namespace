@@ -1,0 +1,176 @@
+
+ns_op="< + -"
+
+function ns/dir() {
+  echo "$(dirname ${1:-${BASH_SOURCE}})"
+}
+
+function ns/path() {
+  echo $(cd $(dirname $1); pwd)/$(basename $1)
+}
+
+function ns/readlink() {
+  echo $(cd -P "${1}"; pwd)
+}
+
+function ns/isfunc() {
+  local _f="${1:-${FUNCNAME}}"
+  local _t=$(type -t "${_f}")
+  if test "${_t}" = "function" ; then
+    $success
+  fi
+  $failure
+}
+
+function ns/func() {
+  local _f=${1:-${FUNCNAME}}
+  echo ${_f##*/}
+}
+
+function ns/var() {
+  local _f=${1:-${FUNCNAME}}
+  echo "${_f}" | sed s/\\//_/g
+}
+
+function ns/var/io() {
+  local _c="${1}"
+  local _i="${2}"
+  local _o="${3}"
+  if empty "${_c}" ; then $failure; fi
+
+  if ! empty "${_i}" ; then
+    _c=$(echo "${_c}" | sed s/\<INPUT\>/"${_i}"/)
+  fi
+  if ! empty "${_o}" ; then
+    _c=$(echo "${_c}" | sed s/\<OUTPUT\>/"${_o}"/)
+  fi
+  echo "${_c}"
+}
+
+function ns/var/cmd() {
+  local _f="${1}"
+  local _i="${2}"
+  local _o="${3}"
+  if empty "${_f}" ; then $failure; fi
+
+  local _c=$(ns/var "${_f}")
+  _c=${!_c}
+  _c=$(ns/var/io "${_c}" "${_i}" "${_o}")
+  if empty "${_c}" ; then $failure; fi
+
+  ${_c}
+}
+
+function ns/func/dir() {
+  local _f="${1:-${BASH_SOURCE}}"
+  local i
+  _IFS="${IFS}"
+  IFS=$'\n'
+  for i in $(cat "${_f}" | egrep "^function") ; do
+    i=$(field "${i}" 2 " ")
+    i=${i%%()}
+    if test "${i}" = "${i/help/}" ; then
+      echo "  ${i}"
+    fi
+  done
+  IFS="${_IFS}"
+}
+
+# operators
+function ns/op() {
+  local _s="${1}"
+  local _m="${2}"
+  if empty "${_m}" ; then
+    _m="${ns_op}"
+  fi
+
+  local o
+  for o in ${_m} ; do
+    if test "${_s:0:1}" = "${o}" ; then
+      $success
+    fi
+  done
+  $failure
+}
+
+function ns/op/value() {
+  local _s="${1}"
+  local _m="${2}"
+  if empty "${_m}" ; then
+    _m="${ns_op}"
+  fi
+
+  local o
+  for o in ${_m} ; do
+    if $(ns/op "${_s}" "${o}") ; then
+      echo "${_s:1}"
+      return
+    fi
+  done
+  echo "${_s}"
+}
+
+# TODO
+# path
+function ns/inpath() {
+  local _m="${1}"
+  local _p="${2:-${gip}}"
+  if test -z "${_p}" || test -z "${_m}" ; then
+    return ${_false_}
+  fi
+  if test "${_p}" = "${_p/:${_m}:/}" ; then
+    return ${_false_}
+  fi
+  return ${_true_}
+}
+
+function ns/lspath() {
+  local _p="${1}"
+  if test -z "${_p}" ; then
+    return ${_false_}
+  fi
+  echo "${_p}" | \
+  awk '{split($0,a,":"); for(i in a) print a[i]}'
+}
+
+# associative arrays
+function ns/aa() {
+  local _aa=${1:-'{one:1,two:2,three:3}'}
+  local _key=${2:-one}
+  local _oby=${3:-1}
+  local _ie=${4:-0}
+
+  echo ${_aa} | awk -v key=${_key} -v oby=${_oby} -v ie=${_ie} \
+  '{
+    sub(/^[[:space:]]*{[[:space:]]*/,"")
+    sub(/[[:space:]]*}[[:space:]]*/,"")
+    split($0,va,"[[:space:]]*,[[:space:]]*")
+    # print "->" $0 "<-"
+    for( k in va ) {
+      sub(/^[[:space:]]*/,"",va[v])
+      sub(/[[:space:]]*$/,"",va[v])
+      split(va[k],vva,"[[:space:]]*:[[:space:]]*")
+      sub(/^'\''/,"",vva[1])
+      sub(/'\''$/,"",vva[1])
+      if(oby==1)
+        aa[vva[1]]=vva[2]
+      else
+        aa[vva[2]]=vva[1]
+    }
+    # check key
+    if(aa[key]=="") {
+      print ie
+      exit 1
+    }
+    print aa[key]
+  }'
+}
+
+function ns/ext() {
+  local _n="${1}"
+  if test -z "${_n}" ; then
+    return ${_false_}
+  fi
+  local _bn=${_n%.*}
+  echo =${_n##${_bn}}
+}

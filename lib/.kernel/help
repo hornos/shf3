@@ -1,0 +1,52 @@
+
+function help() {
+  import sys/dir
+  local _h="${1:-}"
+  echo
+  msg "Shell Framework Help System"
+  gui/line
+
+  if ! test -z "${_h}" ; then
+    local _f="help/${_h}"
+    if $(ns/isfunc "${_f}") ; then
+      ${_f}
+      return $?
+    fi
+    msg "Help not available for ${_h}"
+    return ${_false_}
+  fi
+
+  msg "Available help:"
+  local i
+  for i in $(set | grep "^help/*\ *\(\)" | awk '{print $1}') ; do
+    i=${i##help}
+    if ! test -z "${i}" ; then
+      echo "${i##/}"
+    fi
+  done | column
+}
+
+function help/kernel() {
+  local _l="${grd}/lib"
+  msg "Kernel functions:"
+  ns/func/dir "${_l}/${gkn}"
+}
+
+function help/modules() {
+  import sys/dir
+  local _l=""
+  if ! test -z "${gip}" ; then
+    echo
+    local j
+    for j in $(ns/lspath ${gip}); do
+      _l="${j}"
+      echo "Available modules in ${_l}:"
+      for i in $(sys/dir/rls "${_l}") ; do
+        i=${i##${_l}}
+        if ! test -z "${i}"; then
+          echo "${i##/}"
+        fi
+      done | column
+    done
+  fi
+}

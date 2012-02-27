@@ -33,17 +33,19 @@ function enc/tc/init() {
   # volume type
   _opt="${_opt} --volume-type=${mid_tc_type:-${enc_tc_vol_type}}"
   # volume encryption
-  _opt="${_opt} --encryption=${mid_tc_vol_enc:-${enc_tc_vol_enc}}"
+  local _enc="${mid_tc_vol_enc:-${enc_tc_vol_enc}}"
+  _opt="${_opt} --encryption=${_enc}"
   # volume hash
-  _opt="${_opt} --hash=${mid_tc_vol_hash:-${enc_tc_vol_hash}}"
+  local _hash=${mid_tc_vol_hash:-${enc_tc_vol_hash}}
+  _opt="${_opt} --hash=${_hash}"
   # volume fs
   _opt="${_opt} --filesystem=${enc_tc_vol_fs}"
   # rng source
   _opt="${_opt} --random-source=${enc_tc_vol_rng}"
 
   # init
-  msg "Enc. : ${enc_tc_vol_enc}"
-  msg "Hash : ${enc_tc_vol_hash}"
+  msg "Enc. : ${_enc}"
+  msg "Hash : ${_hash}"
   answer "Init drive: ${mid_tc_disk}?"
   if test $? -gt 0 ; then
     return ${_false_}
