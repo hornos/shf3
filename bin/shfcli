@@ -33,7 +33,7 @@ done
 ### main
 cat << EOF > "${rc}"
 source $(dirname ${BASH_SOURCE})/../lib/header
-export PS1="SHF3(\$?)> "
+export PS1='SHF3(\$?)> '
 EOF
 if ${_v} ; then
   echo "gdbg=true" >> "${rc}"
