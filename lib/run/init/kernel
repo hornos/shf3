@@ -119,8 +119,14 @@ function run/init/other() {
 
   local inp
   local _inp
+  local _idn
   for inp in ${OTHER}; do
-    _inp="${INPUTDIR}/${inp}"
+    _idn=$(dirname "${inp}")
+    if test "${_idn}" = "." ; then
+      _inp="${INPUTDIR}/${inp}"
+    else
+      _inp="${inp}"
+    fi
     if ! test -r "${_inp}" ; then
       msg "Input not found: ${_inp}"
       return ${_false_}
@@ -132,5 +138,6 @@ function run/init/other() {
       return ${_false_}
     fi
   done
+
   return ${_true_}
 }
