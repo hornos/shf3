@@ -116,9 +116,15 @@ function run/check/other() {
   local inp
   local _inp
   for inp in ${!_input}; do
-    _inp="${_idir}/${inp}"
+    _idn=$(dirname "${inp}")
+    if test "${_idn}" = "." ; then
+      _inp="${_idir}/${inp}"
+    else
+      _inp="${inp}"
+    fi
+
     if ! test -r "${_inp}" ; then
-      msg "Input not found: ${_inp}"
+      msg "${FUNCNAME} Input not found: ${_inp}"
       return ${_false_}
     fi
   done
