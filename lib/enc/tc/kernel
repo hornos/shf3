@@ -2,7 +2,8 @@ function help/enc/tc() {
   cat << EOF
 Ubuntu:
 sudo usermod -a -G disk $USER
-sudo visudo
+
+/etc/sudoers.d/truecrypt
 %admin ALL = (root) NOPASSWD:/usr/bin/truecrypt
 EOF
 }
@@ -15,16 +16,23 @@ function enc/tc/init() {
   import enc/tc/mnt
 
   local _m="${1}"
-  if test -z "${_m}" ; then
-    return ${_false_}
-  fi
+  if empty "${_m}" ; then $failure; fi
+
+  # read mid
   sys/mid "tc/${_m}"
+
+  local _opt="${enc_tc_opt}"
 
   if ! test -r "${mid_tc_disk}" ; then
     msg "Disk not found: ${mid_tc_disk}"
-    return ${_false_}
+    answer "Create image?"
+    if failed $? ; then $failure; fi
+
+    # create disk image
+    # TODO: size opt
+    # key check
   fi
-  local _opt="${enc_tc_opt}"
+
   local _key=$(enc/tc/key "${_m}")
   if test -r "${_key}" ; then
     _opt="${_opt} -k ${_key}"
@@ -79,7 +87,6 @@ function enc/tc/init() {
   enc/tc/mnt "${_m}" true
 }
 
-
 function enc/tc/mgr() {
   import gui
   import sys
@@ -90,6 +97,27 @@ function enc/tc/mgr() {
 
   case "${_c}" in
     CREATE)
+      answer "Create new TrueCrypt MID ${_h}?"
+      if succeed $? ; then $failure; fi
+
+      # check mid
+      local _mid="${sys_mid_dir}/tc/${_h}"
+      if readable "${_mid}" ; then
+        msg "MID ${_h} exists, delete first"
+        $failure
+      fi
+      cp -f "${sys_mid_dir}/${enc_tc_template}" "${_mid}"
+
+      # edit mid
+      answer "Do you want to edit ${_h} now?"
+      if succeed $? ; then
+        sys/edit "${_mid}"
+        if failed $? ; then
+          msg "Editor failed"
+          $failure
+        fi
+      fi
+
       enc/tc/init "${_h}"
     ;;
     LIST)

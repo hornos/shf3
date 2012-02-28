@@ -2,48 +2,46 @@
 ### include
 function include() {
   local _p="${1}"
-  if test -z "${_p}" ; then
-    return ${_false_}
-  fi
+  if empty "${_p}" ; then $failure; fi
 
   local __p=$(ns/op/value "${_p}" "+")
   msg/debug "${FUNCNAME} ${__p}"
 
   if ! test -d "${__p}" ; then
-    return ${_false_}
+    $failure
   fi
 
   if test -z "${gip}" ; then
     gip=":${__p}:"
-    return ${_true_}
+    $success
   fi
 
-  if ! $(ns/inpath "${__p}" "${gip}") ; then
-    if $(ns/op "${_p}" "+") ; then
-      gip="${__p}${gip}:"
+  if ! ns/inpath "${__p}" "${gip}" ; then
+    if ns/op "${_p}" "+" ; then
+      gip=":${__p}${gip}"
     else
-      gip=":${gip}${__p}"
+      gip="${gip}${__p}:"
     fi
   fi
-  return ${_true_}
+  $success
 }
 
 ### import
 function import/path() {
   local _m="${1}"
-  if test -z "${_m}" ; then
+  if empty "${_m}" ; then
     echo ""
-    return ${_false_}
+    return
   fi
 
   local _kn="${_m}/${gkn}"
-  if ! test -z "${gip}" ; then
+  if ! empty "${gip}" ; then
     _IFS=${IFS}
     IFS=:
     local i
     for i in ${gip}; do
       local _p="${i}"
-      if test -z "${_p}" ; then
+      if empty "${_p}"; then
         continue
       fi
       if test -r "${_p}/${_kn}" ; then
@@ -61,8 +59,9 @@ function import() {
   # not loaded
   local _nl=false
 
-  if test -z "${gip}" || test -z "${_m}" ; then
-    return ${_false_}
+  if empty "${gip}" || \
+     empty "${_m}" ; then
+    $failure
   fi
 
   msg/debug "${FUNCNAME} gim    : ${gim}"
@@ -70,10 +69,10 @@ function import() {
 
   # force reloading
   local __m=$(ns/op/value "${_m}" "+")
-  if $(ns/inpath "${__m}" "${gim}") ; then
-    if ! $(ns/op "${_m}" "+") ; then
+  if ns/inpath "${__m}" "${gim}" ; then
+    if ! ns/op "${_m}" "+" ; then
       # skipped
-      return ${_true_}
+      $failure
     fi
   else
     _nl=true
@@ -83,43 +82,40 @@ function import() {
 
   # search
   local __p=$(import/path "${__m}")
-  if test -z "${__p}" ; then
-    return ${_false_}
-  fi
+  if empty "${__p}" ; then $failure; fi
 
   local _lib="${__p}/${gkn}"
   local _cfg="${__p}/${gcn}"
 
   # read config
-  if test -r "${_cfg}" ; then
+  if readable "${_cfg}" ; then
     source "${_cfg}"
   fi
 
   # load OS specific library config
   local __cfg="${_cfg}.${OSTYPE}"
-  if test -r ${__cfg} ; then
+  if readable ${__cfg} ; then
     source "${__cfg}"
   fi
 
   # user specific library config
   __cfg="${_cfg}.${USER}"
-  if test -r ${__cfg} ; then
+  if readable ${__cfg} ; then
     source "${__cfg}"
   fi
 
   # read lib
-  if test -r "${_lib}" ; then
+  if readable "${_lib}" ; then
     msg/debug "${FUNCNAME} source : ${_lib}"
     source "${_lib}"
   else
-    return ${_false_}
+    $failure
   fi
   if ${_nl} ; then
-    if test -z "${gim}" ; then
+    if empty "${gim}" ; then
       gim=":${__m}:"
     else
       gim="${gim}${__m}:"
     fi
   fi
 }
-

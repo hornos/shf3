@@ -54,7 +54,7 @@ function answer() {
     fi
   done
 }
-# TODO
+
 function choose() {
   import str
   local _m="${1:-Answer}"
@@ -68,11 +68,11 @@ function choose() {
     _a=$(str/tolower ${_a})
     case "${_a}" in
       "y" | "case" | "yes" )
-        return ${_true_}
+        $success
       ;;
       "n" | "no" | "q"  )
         echo -e "[${gbn}] Abort\n"
-        return ${_abort_}
+        $abort
       ;;
       *)
         if test ${_a} -le ${_n} && \
@@ -85,13 +85,9 @@ function choose() {
       ;;
     esac
     if test ${_t} -lt 1 ; then
-      return ${_abort_}
+      $abort
     fi
   done
-}
-
-function isint() {
-  return $(test "$@" -eq "$@" > /dev/null 2>&1);
 }
 
 function field() {
@@ -103,9 +99,9 @@ function field() {
 
 function epoch() {
   local _d=${1:-0}
-  if ! $(isint "${_d}") ; then
+  if ! ns/isint "${_d}" ; then
     echo "${_d}"
-    return ${_true_}
+    return
   fi
   if test ${_d} -eq 0 ; then
     date +%s

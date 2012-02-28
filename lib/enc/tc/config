@@ -1,5 +1,6 @@
 enc_tc="truecrypt"
 enc_tc_opt="-t"
+enc_tc_template="template.tc"
 
 # Volume type:
 # 1) Normal

@@ -1,6 +1,10 @@
 
 ns_op="< + -"
 
+function ns/isint() {
+  return $(test "$@" -eq "$@" > /dev/null 2>&1);
+}
+
 function ns/dir() {
   echo "$(dirname ${1:-${BASH_SOURCE}})"
 }

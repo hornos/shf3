@@ -6,36 +6,43 @@ function help() {
   msg "Shell Framework Help System"
   gui/line
 
-  if ! test -z "${_h}" ; then
+  if ! empty "${_h}" ; then
     local _f="help/${_h}"
     if $(ns/isfunc "${_f}") ; then
       ${_f}
       return $?
     fi
     msg "Help not available for ${_h}"
-    return ${_false_}
+    $failure
   fi
 
   msg "Available help:"
   local i
   for i in $(set | grep "^help/*\ *\(\)" | awk '{print $1}') ; do
     i=${i##help}
-    if ! test -z "${i}" ; then
+    if ! empty "${i}" ; then
       echo "${i##/}"
     fi
   done | column
 }
 
 function help/kernel() {
+  import gui
   local _l="${grd}/lib"
-  msg "Kernel functions:"
-  ns/func/dir "${_l}/${gkn}"
+  msg "Kernel functions"
+  gui/line
+  local i
+  for i in error help import namespace util; do
+    echo "kernel/${i} functions:"
+    ns/func/dir "${_l}/.kernel/${i}" | column
+    echo ""
+  done
 }
 
 function help/modules() {
   import sys/dir
   local _l=""
-  if ! test -z "${gip}" ; then
+  if ! empty "${gip}" ; then
     echo
     local j
     for j in $(ns/lspath ${gip}); do
@@ -43,7 +50,7 @@ function help/modules() {
       echo "Available modules in ${_l}:"
       for i in $(sys/dir/rls "${_l}") ; do
         i=${i##${_l}}
-        if ! test -z "${i}"; then
+        if ! empty "${i}"; then
           echo "${i##/}"
         fi
       done | column

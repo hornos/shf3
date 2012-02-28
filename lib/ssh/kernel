@@ -67,7 +67,7 @@ function ssh/mgr() {
       ssh/info "${_h}"
       ;;
     CREATE)
-      answer "Create new MID ${_h}?"
+      answer "Create new SSH MID ${_h}?"
       if test $? -gt 0 ; then
         return ${_false_}
       fi

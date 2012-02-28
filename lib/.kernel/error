@@ -22,31 +22,31 @@ function msg/warn() {
 function failed() {
   local _r=${1:-${_false_}}
   if test ${_r} -gt 0 ; then
-    $success
+    return ${_true_}
   fi
-  $failure
+  return ${_false_}
 }
 
 function succeed() {
   local _r=${1:-${_false_}}
   if test ${_r} -eq 0 ; then
-    $success
+    return ${_true_}
   fi
-  $failure
+  return ${_false_}
 }
 
 function empty() {
   local _s="${1}"
-  if test -z "${_s}" ; then
-    $success
+  if test -z "${_s}"; then
+    return ${_true_}
   fi
-  $failure
+  return ${_false_}
 }
 
 function readable() {
   local _f="${1}"
   if test -r "${_f}" ; then
-    $success
+    return ${_true_}
   fi
-  $failure
+  return ${_false_}
 }
