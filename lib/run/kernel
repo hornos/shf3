@@ -243,8 +243,8 @@ function run/prg() {
       msg "Kernel function not found: ${_kernel}"
       return ${_false_}
     fi
+    msg "Kernel  : ${KERNEL}"
   fi
-  msg "Kernel  : ${_kernel}"
 
   # start kernel
   ${_kernel}
