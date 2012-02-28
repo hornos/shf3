@@ -47,7 +47,7 @@ echo
 msg
 gui/line
 
-enc_pass_db="$(ns/dir)/../sql/${enc_pass_db}"
+enc_pass_db="${grd}/sql/${enc_pass_db}"
 
 # overrides
 if ! test -z "${_f}" ; then

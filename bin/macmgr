@@ -34,7 +34,7 @@ echo
 msg
 gui/line
 
-sys_mac_db="$(ns/dir)/../sql/${sys_mac_db}"
+sys_mac_db="${grd}/sql/${sys_mac_db}"
 if ! test -z "${_f}" ; then
   sys_mac_db="${_f}"
 fi
