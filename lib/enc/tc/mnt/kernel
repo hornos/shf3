@@ -87,7 +87,6 @@ function enc/tc/mnt() {
     _opt="${_opt} -k ${_key}"
   else
     msg "Key not found: ${_key}"
-    return ${_false_}
   fi
 
   local _url="${mid_tc_disk}"
@@ -127,6 +126,13 @@ function enc/tc/mnt() {
   return ${_ret}
 }
 
+function enc/tc/umap() {
+  local _m="${1}"
+  local _s="${2:-${enc_tc_vol_slot}}"
+  local _u=${3:-false}
+  enc/tc/map "${1}" "${2}" true
+}
+
 function enc/tc/map() {
   import sys
   import enc/tc
@@ -134,6 +140,7 @@ function enc/tc/map() {
 
   local _m="${1}"
   local _s="${2:-${enc_tc_vol_slot}}"
+  local _u=${3:-false}
 
   if test -z "${_m}" ; then
     return ${_false_}
@@ -142,6 +149,15 @@ function enc/tc/map() {
 
   if ! test -r "${mid_tc_disk}" ; then
     msg "Disk not found: ${mid_tc_disk}"
+    return ${_false_}
+  fi
+
+  if ${_u} ; then
+    answer "Unmap drive?"
+    if test $? -eq 0 ; then
+      ${enc_tc} -d "${mid_tc_disk}"
+      return $?
+    fi
     return ${_false_}
   fi
 
@@ -161,7 +177,7 @@ function enc/tc/map() {
   _opt="${_opt} --filesystem=${enc_tc_vol_fs}"
 
   msg "Slot : ${_s}"
-  answer "Map dirve: ${mid_tc_disk}?"
+  answer "Map dirve?"
   if test $? -gt 0 ; then
     return ${_false_}
   fi

@@ -52,9 +52,10 @@ function enc/tc/init() {
   _opt="${_opt} --random-source=${enc_tc_vol_rng}"
 
   # init
-  msg "Enc. : ${_enc}"
-  msg "Hash : ${_hash}"
-  answer "Init drive: ${mid_tc_disk}?"
+  msg "Disk       : ${mid_tc_disk}"
+  msg "Encryption : ${_enc}"
+  msg "Hash       : ${_hash}"
+  answer "Init drive?"
   if test $? -gt 0 ; then
     return ${_false_}
   fi
@@ -84,7 +85,7 @@ function enc/tc/init() {
   fi
   sudo ${_mkfs} ${mid_tc_fs_opt} "${_map}"
 
-  enc/tc/mnt "${_m}" true
+  enc/tc/umap "${_m}"
 }
 
 function enc/tc/mgr() {
@@ -98,7 +99,7 @@ function enc/tc/mgr() {
   case "${_c}" in
     CREATE)
       answer "Create new TrueCrypt MID ${_h}?"
-      if succeed $? ; then $failure; fi
+      if failed $? ; then $failure; fi
 
       # check mid
       local _mid="${sys_mid_dir}/tc/${_h}"
