@@ -115,22 +115,23 @@ function ns/op/value() {
 function ns/inpath() {
   local _m="${1}"
   local _p="${2:-${gip}}"
-  if test -z "${_p}" || test -z "${_m}" ; then
-    return ${_false_}
+  if empty "${_p}" || \
+     empty "${_m}" ; then
+    $failure
   fi
   if test "${_p}" = "${_p/:${_m}:/}" ; then
-    return ${_false_}
+    $failure
   fi
-  return ${_true_}
+  $success
 }
 
 function ns/lspath() {
   local _p="${1}"
-  if test -z "${_p}" ; then
-    return ${_false_}
+  if empty "${_p}" ; then
+    $failure
   fi
   echo "${_p}" | \
-  awk '{split($0,a,":"); for(i in a) print a[i]}'
+  awk '{split($0,a,":"); for(i in a) if(a[i]!="") print a[i];}'
 }
 
 # associative arrays
@@ -164,13 +165,4 @@ function ns/aa() {
     }
     print aa[key]
   }'
-}
-
-function ns/ext() {
-  local _n="${1}"
-  if test -z "${_n}" ; then
-    return ${_false_}
-  fi
-  local _bn=${_n%.*}
-  echo =${_n##${_bn}}
 }

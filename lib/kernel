@@ -17,6 +17,7 @@ _abort_=255
 
 failure="return ${_false_}"
 success="return ${_true_}"
+abort="return ${_abort_}"
 
 # bootstrap
 for i in util help error namespace import; do

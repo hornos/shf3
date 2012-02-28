@@ -1,4 +1,7 @@
 
+vasp_kernel_save="CHGCAR DOSCAR LOCPOT OUTCAR CHG EIGENVAL OSZICAR UEIG CONTCAR OUTCAR UPOT XDATCAR"
+vasp_kernel_save="${vasp_kernel_save} vasprun.xml vasp.output"
+
 function vasp/kernel() {
   # reserved global variables
   # ${_inp} : input
@@ -36,17 +39,20 @@ function vasp/kernel() {
 
   # save old outputs
   local i
-  for i in OUTCAR vasp.output ; do
+  for i in ${vasp_kernel_save} ; do
     cp ${i} ${i}.${_step}
   done
+
+  # continue geom
+  mv CONTCAR POSCAR
 
   # create new input
   local _tmp=INCAR.${_step}
   mv INCAR ${_tmp}
 
   cat ${_tmp}            | \
-  str/f/set ISTART 1     | \
   str/f/set NSW 0        | \
+  str/f/set ISTART 1     | \
   str/f/set LHFCALC      | \
   str/f/set AEXX 0.25    | \
   str/f/set AGGAX 0.25   | \

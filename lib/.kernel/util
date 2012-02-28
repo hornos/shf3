@@ -16,14 +16,14 @@ function column() {
 
 function installed() {
   local _b="${1}"
-  if test -z "${_b}" ; then
-    return ${_false_}
+  if empty "${_b}" ; then
+    $failure
   fi
   which "${_b}" &> /dev/null
-  if test $? -eq 0; then
-    return ${_true_}
+  if succeed $?; then
+    $success
   fi
-  return ${_false_}
+  $failure
 }
 
 function answer() {
@@ -38,11 +38,11 @@ function answer() {
     _a=$(str/tolower ${_a})
     case "${_a}" in
       "y" | "case" | "yes" )
-        return ${_true_}
+        $success
       ;;
       "n" | "no" | "q"  )
         echo -e "[${gbn}] Abort\n"
-        return ${_false_}
+        $failure
       ;;
       *)
         echo -e "[${gbn}] Invalid\n"
@@ -50,11 +50,11 @@ function answer() {
       ;;
     esac
     if test ${_t} -lt 1 ; then
-      return ${_false_}
+      $failure
     fi
   done
 }
-
+# TODO
 function choose() {
   import str
   local _m="${1:-Answer}"
