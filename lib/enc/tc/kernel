@@ -40,7 +40,7 @@ function enc/tc/init() {
     _opt="${_opt} -k ${_key}"
     msg "Key      : ${_key}"
   else
-    _opt="${_opt} -k \"\""
+    # _opt="${_opt} -k \"\""
     msg "Empty key"
   fi
   # volume type
