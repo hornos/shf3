@@ -72,7 +72,7 @@ function import() {
   if ns/inpath "${__m}" "${gim}" ; then
     if ! ns/op "${_m}" "+" ; then
       # skipped
-      $failure
+      $success
     fi
   else
     _nl=true
@@ -118,4 +118,5 @@ function import() {
       gim="${gim}${__m}:"
     fi
   fi
+  $success
 }
