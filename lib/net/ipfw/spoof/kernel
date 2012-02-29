@@ -1,22 +1,43 @@
 
 function net/ipfw/spoof/revpath() {
   import net/ipfw
-  local _v=${1:-0}
-  local _if="${1:-in}"
+  local _no=${1:-$(ns/var "${FUNCNAME}")}
+  local _v=${2:-0}
+  local _if="${3:-in}"
 
   case "${_v}" in
     1|on|yes)
-      net/ipfw/deny ${net_ipfw_spoof} log ip from any to any not verrevpath ${_if};;
+      net/ipfw/deny ${!_no} log ip from any to any not verrevpath ${_if}
+    ;;
   esac
 }
 
 function net/ipfw/spoof/nmap() {
   import net/ipfw
+  local _no=${1:-$(ns/var "${FUNCNAME}")}
+  local _v=${2:-0}
+  local _if="${3:-in}"
+
+  case "${_v}" in
+    1|on|yes)
+      net/ipfw/deny ${!_no} log ip from any to any ipoptions rr,ts,ssrr,lsrr ${_if}
+    ;;
+  esac
+}
+
+function net/ipfw/spoof/ip() {
+  import net/ipfw
+  local _no=${1:-$(ns/var "${FUNCNAME}")}
   local _v=${1:-0}
   local _if="${1:-in}"
 
   case "${_v}" in
     1|on|yes)
-      net/ipfw/deny ${net_ipfw_nmap} log ip from any to any ipoptions rr,ts,ssrr,lsrr ${_if};;
+      net/ipfw/deny ${!_no} log ip from 127.0.0.0/8 to any ${_if}
+      net/ipfw/deny ${!_no} log ip from any to 127.0.0.0/8 ${_if}
+    ;;
+    0|off|no)
   esac
+  # register
 }
+

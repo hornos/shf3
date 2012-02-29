@@ -86,7 +86,8 @@ function enc/tc/mnt() {
   if test -r "${_key}" ; then
     _opt="${_opt} -k ${_key}"
   else
-    msg "Key not found: ${_key}"
+    _opt="${_opt} -k \"\""
+    msg "Empty key"
   fi
 
   local _url="${mid_tc_disk}"

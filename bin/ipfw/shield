@@ -5,8 +5,7 @@ import net/ipfw
 # import sql
 
 
-
-function ipwall/start() {
+function shield/start() {
   echo "Starting Firewall"
 
   import net/ipfw
@@ -18,16 +17,28 @@ function ipwall/start() {
   net/ipfw/spoof/revpath on in
   net/ipfw/spoof/nmap on in
 
+  # spoofing
+  ${fw_ipfw} add set ${_set} deny log ip from 127.0.0.0/8 to any in
+  ${fw_ipfw} add set ${_set} deny log ip from any to 127.0.0.0/8 in
 
+  # ${fw_ipfw} add set ${_set} deny log ip from any to any ipoptions rr,ts,ssrr,lsrr in
+
+  ${fw_ipfw} add set ${_set} deny log tcp from any to any frag
+  ${fw_ipfw} add set ${_set} deny log tcp from any to 224.0.0.0/3 in
+  ${fw_ipfw} add set ${_set} deny log tcp from any to any 0 in
+
+
+  net/ipfw/allow/meme on
 
   # begin set 1: loopback
   # local _set=1
   # local _no=100
   #${fw_ipfw} set enable ${_set}
+
   # spoofing
   # ${fw_ipfw} add ${_no} set ${_set} deny log ip from any to any not verrevpath in
   # localhost
-  ${fw_ipfw} add set ${_set} allow ip from me to me
+  # ${fw_ipfw} add set ${_set} allow ip from me to me
 
   # spoofing
   ${fw_ipfw} add set ${_set} deny log ip from 127.0.0.0/8 to any in
@@ -79,7 +90,7 @@ function ipwall/start() {
   ${fw_ipfw} add 65001 set ${_set} deny log all from any to any out
 }
 
-function StopService() {
+function shield/stop() {
   local i
   for i in flush zero ; do
     ${fw_ipfw} ${i}
@@ -90,9 +101,10 @@ function StopService() {
   done
 }
 
-function RestartService() {
-  StopService
-  StartService
+function shield/restart() {
+  shield/stop
+  sleep 1
+  shiled/start
 }
 
 ### extension
@@ -118,7 +130,7 @@ function fwstop() {
 action="${1:-start}"
 case "${action}" in
   start|stop|restart)
-    RunService "${action}";;
+    shiled/${action}";;
   log)
     trap fwstop INT TERM EXIT;
     fwlog;;

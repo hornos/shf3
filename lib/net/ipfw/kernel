@@ -9,6 +9,34 @@ function net/ipfw/init() {
   sql/init "${net_ipfw_db}" "${_sql}"
 }
 
+function net/ipfw/rule() {
+  if args $# 3 ; then $failure; fi
+
+  local _no="${1}"
+  shift
+  local _s=${1}
+  shift
+  local _rule="${*}"
+  ${net_ipfw} add ${_no} set ${net_ipfw_set} ${_rule}
+}
+
+# delete
+
+function net/ipfw/allow() {
+  local _no="${1}"
+  shift
+  local _rule="${*}"
+  net/ipfw/rule ${_no} true allow ${_rule}
+}
+
+function net/ipfw/deny() {
+  local _no="${1}"
+  shift
+  local _rule="${*}"
+  net/ipfw/rule ${_no} true deny ${_rule}
+}
+
+
 function net/ipfw/reset() {
   msg "reset"
   ${net_ipfw} flush
@@ -16,16 +44,3 @@ function net/ipfw/reset() {
 }
 
 
-function net/ipfw/deny() {
-  local _no="${1}"
-  shift
-  local _rule="${*}"
-  ${net_ipfw} add ${_no} set ${net_ipfw_set} deny ${_rule}
-}
-
-function net/ipfw/allow() {
-  local _no="${1}"
-  shift
-  local _rule="${*}"
-  ${net_ipfw} add ${_no} set ${net_ipfw_set} allow ${_rule}
-}

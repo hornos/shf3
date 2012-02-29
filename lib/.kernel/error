@@ -50,3 +50,12 @@ function readable() {
   fi
   return ${_false_}
 }
+
+function args() {
+  local _a=${1}
+  local _l=${2:-3}
+  if test ${_a} -lt ${_l} ; then
+    return ${_false_}
+  fi
+  return ${_true_}
+}
