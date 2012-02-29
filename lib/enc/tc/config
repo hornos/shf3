@@ -29,3 +29,6 @@ enc_tc_vol_fs="None"
 
 # Random source
 enc_tc_vol_rng="/dev/urandom"
+
+# 128 MB  134217728
+enc_tc_vol_size=134217728

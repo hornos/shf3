@@ -8,12 +8,14 @@ sudo usermod -a -G disk $USER
 EOF
 }
 
-
 function enc/tc/init() {
   import sys
   import gui
   import enc/tc/key
   import enc/tc/mnt
+
+  # disk type
+  local _d=true
 
   local _m="${1}"
   if empty "${_m}" ; then $failure; fi
@@ -29,14 +31,16 @@ function enc/tc/init() {
     if failed $? ; then $failure; fi
 
     # create disk image
-    # TODO: size opt
-    # key check
+    _opt="${_opt} --size=${mid_tc_vol_size:-${enc_tc_vol_size}}"
+    _d=false
   fi
 
   local _key=$(enc/tc/key "${_m}")
   if test -r "${_key}" ; then
     _opt="${_opt} -k ${_key}"
-    msg "Key  : ${_key}"
+    msg "Key      : ${_key}"
+  else
+    msg "Key not found"
   fi
   # volume type
   _opt="${_opt} --volume-type=${mid_tc_type:-${enc_tc_vol_type}}"
@@ -52,10 +56,14 @@ function enc/tc/init() {
   _opt="${_opt} --random-source=${enc_tc_vol_rng}"
 
   # init
-  msg "Disk       : ${mid_tc_disk}"
+  if ${_d} ; then
+    msg "Disk       : ${mid_tc_disk}"
+  else
+    msg "Image      : ${mid_tc_disk}"
+  fi
   msg "Encryption : ${_enc}"
   msg "Hash       : ${_hash}"
-  answer "Init drive?"
+  answer "Initialize (erase all data)?"
   if test $? -gt 0 ; then
     return ${_false_}
   fi
@@ -70,13 +78,14 @@ function enc/tc/init() {
     return ${_false_}
   fi
 
-  # map
+  # map drive
   enc/tc/map "${_m}"
   if test $? -gt 0 ; then
     return ${_false_}
   fi
 
   # mkfs
+  # TODO: osx vs linux
   local _mkfs="mkfs.${mid_tc_fs}"
   local _map="${enc_tc_vol_map}${enc_tc_vol_slot}"
   answer "Format dirve: ${_map}?"

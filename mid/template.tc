@@ -1,5 +1,7 @@
 mid_tc_type="Normal"
 mid_tc_disk="/dev/disk/by-id/"
+# images
+# mid_tc_disk="${HOME}/shf3/enc/"
 mid_tc_fs="xfs"
 mid_tc_fs_opt=""
 
