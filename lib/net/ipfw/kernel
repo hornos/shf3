@@ -9,6 +9,16 @@ function net/ipfw/init() {
   sql/init "${net_ipfw_db}" "${_sql}"
 }
 
+function net/ipfw/reset() {
+  import sql
+  msg "reset"
+  ${net_ipfw} flush
+  ${net_ipfw} zero
+  # reset db
+  sql/vacuum "${net_ipfw_db}"
+}
+
+
 function net/ipfw/rule() {
   if args $# 3 ; then $failure; fi
 
@@ -37,10 +47,5 @@ function net/ipfw/deny() {
 }
 
 
-function net/ipfw/reset() {
-  msg "reset"
-  ${net_ipfw} flush
-  ${net_ipfw} zero
-}
 
 

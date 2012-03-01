@@ -2,7 +2,7 @@ net_ipfw_db="net_ipfw.sqlite"
 net_ipfw_tag="ipfw_tag"
 net_ipfw_rule="ipfw_rule"
 
-net_ipfw="/sbin/ipfw -q"
+net_ipfw="sudo /sbin/ipfw -q"
 net_ipfw_log="/var/log/kernel.log"
 
 net_ipfw_set=1

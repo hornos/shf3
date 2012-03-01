@@ -142,3 +142,18 @@ function sql/delete() {
   _q="${_q} WHERE ${_w}"
   ${sql_sqlite} "${_db}" "${_q}"
 }
+
+function sql/vacuum() {
+  local _db="${1}"
+  if empty "${_db}" ; then
+    $failure
+  fi
+
+  if ! readable "${_db}" ; then
+    msg "Database not found: ${_db}"
+    $failure
+  fi
+
+  _q="VACUUM"
+  ${sql_sqlite} "${_db}" "${_q}"
+}
