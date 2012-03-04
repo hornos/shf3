@@ -93,7 +93,7 @@ function enc/tc/init() {
   if test $? -gt 0 ; then
     return ${_false_}
   fi
-  sudo ${_mkfs} ${mid_tc_fs_opt} "${_map}"
+  sudo ${_mkfs} ${mid_tc_mkfs_opt} "${_map}"
 
   enc/tc/umap "${_m}"
 }

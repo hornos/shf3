@@ -1,3 +1,9 @@
+function help/net/ipfw() {
+  cat <<EOF
+%admin ALL = (root) NOPASSWD:/sbin/ipfw
+EOF
+}
+
 function net/ipfw/init() {
   import sql
   msg/debug "Database: ${net_ipfw_db}"
@@ -9,13 +15,38 @@ function net/ipfw/init() {
   sql/init "${net_ipfw_db}" "${_sql}"
 }
 
-function net/ipfw/reset() {
-  import sql
-  msg "reset"
+function net/ipfw/zero() {
   ${net_ipfw} flush
   ${net_ipfw} zero
-  # reset db
+  msg "Firewall flushed"
+}
+
+function net/ipfw/vacuum() {
+  import sql
   sql/vacuum "${net_ipfw_db}"
+  msg "Firewall vacuumed"
+}
+
+function net/ipfw/default() {
+  local _d=${net_ipfw_default:-0}
+  ${net_ipfw} set enable ${_d}
+  local lo=127.0.0.0/8
+
+#                 no      set   act   log prot src      dst    opt                       if
+#------------------------------------------------------------------------------------------
+  # revpath
+  ${net_ipfw} add 100 set ${_d} deny  log ip   from any to any not verrevpath            in
+  # localhost
+  ${net_ipfw} add     set ${_d} allow     ip   from me  to me
+  # spoof
+  ${net_ipfw} add     set ${_d} deny  log ip   from $lo to any                           in
+  ${net_ipfw} add     set ${_d} deny  log ip   from any to $lo                           in
+  # nmap
+  ${net_ipfw} add     set ${_d} deny  log ip   from any to any ipoptions rr,ts,ssrr,lsrr in
+  ${net_ipfw} add     set ${_d} deny  log tcp  from any to any frag
+  ${net_ipfw} add     set ${_d} deny  log tcp  from any to $lo                           in
+  ${net_ipfw} add     set ${_d} deny  log tcp  from any to any 0                         in
+  ${net_ipfw} add     set ${_d} deny  log any  from any to any
 }
 
 
@@ -45,7 +76,3 @@ function net/ipfw/deny() {
   local _rule="${*}"
   net/ipfw/rule ${_no} true deny ${_rule}
 }
-
-
-
-

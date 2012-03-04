@@ -1,28 +1,56 @@
+function help/net/ipfw/spoof/revpath() {
+#---------------------------------------------------------------------72
+  cat <<EOF
+This rule drops all incoming packets that appear to be coming to the 
+sytem on the wrong interface. For example, a packet with a source 
+address belonging to a host on a protected internal network would be 
+dropped if it tried to enter the system from an external interface.
+EOF
+}
 
 function net/ipfw/spoof/revpath() {
   import net/ipfw
-  local _no=${1:-$(ns/var "${FUNCNAME}")}
-  local _v=${2:-0}
-  local _if="${3:-in}"
+  local _no=$(ns/var "${FUNCNAME}")
+  local _if="${2:-in}"
+  local _s=${2:-false}
 
-  case "${_v}" in
-    1|on|yes)
-      net/ipfw/deny ${!_no} log ip from any to any not verrevpath ${_if}
-    ;;
-  esac
+  #            log  proto  from      to      options         interface
+  local _rule="log  ip     from any  to any  not verrevpath  ${_if}"
+
+  if ${_s} ; then
+    net/ipfw/deny ${!_no} ${_rule}
+    return $?
+  fi
+  net/ipfw/rm ${!_no}
+}
+
+
+# TODO
+function help/net/ipfw/spoof/nmap() {
+#---------------------------------------------------------------------72
+  cat <<EOF
+This rule drops all incoming packets whose IP header contains the 
+following IP options:
+  rr (record packet route) and ts
+  ssrr (strict source route)
+  lsrr (loose source route)
+EOF
 }
 
 function net/ipfw/spoof/nmap() {
   import net/ipfw
-  local _no=${1:-$(ns/var "${FUNCNAME}")}
-  local _v=${2:-0}
-  local _if="${3:-in}"
+  local _no=$(ns/var "${FUNCNAME}")
+  local _if="${2:-in}"
+  local _s=${2:-false}
 
-  case "${_v}" in
-    1|on|yes)
-      net/ipfw/deny ${!_no} log ip from any to any ipoptions rr,ts,ssrr,lsrr ${_if}
-    ;;
-  esac
+  #            log  proto  from      to      options                    interface
+  local _rule="log  ip     from any  to any  ipoptions rr,ts,ssrr,lsrr  ${_if}"
+
+  if ${_s} ; then
+    net/ipfw/deny ${!_no} ${_rule}
+    return $?
+  fi
+  net/ipfw/rm ${!_no}
 }
 
 function net/ipfw/spoof/ip() {

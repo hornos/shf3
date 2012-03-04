@@ -1,6 +1,7 @@
 #!/bin/bash
 source $(dirname ${BASH_SOURCE})/../../lib/header
 import net/ipfw
+import gui
 
 function shield/start() {
   echo "Starting Firewall"
@@ -8,19 +9,29 @@ function shield/start() {
   import net/ipfw
   import net/ipfw/spoof
 
-  # flush
-  net/ipfw/reset
-
+  net/ipfw/zero
+  net/ipfw/default
 }
 
 function shield/stop() {
-  net/ipfw/reset
+  net/ipfw/zero
 }
 
 function shield/restart() {
   shield/stop
   sleep 1
   shiled/start
+}
+
+function shield/list() {
+  local _t="${1}"
+  if test "${_t}" = "db" ; then
+    net/ipfw/list
+  else
+    msg "IPFW Rules"
+    gui/line
+    ${net_ipfw} list
+  fi
 }
 
 net_ipfw_db="${grd}/sql/${net_ipfw_db}"
@@ -33,6 +44,10 @@ fi
 action="${1:-start}"
 case "${action}" in
   start|stop|restart)
+    shield/${action}
+  ;;
+  list)
+    shift
     shield/${action}
   ;;
 esac
