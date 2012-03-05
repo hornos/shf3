@@ -22,6 +22,9 @@ function run/check() {
   local _prg="${2}"
   local _guide="${3}"
 
+  # flag for custom guide
+  local _run_check=true
+
   # check guide
   if test -z "${_guide}" || ! test -r "${_guide}" ; then
     msg "Guide not found: ${guide}"
