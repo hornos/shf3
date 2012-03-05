@@ -46,6 +46,9 @@ function run/prg() {
     return ${_false_}
   fi
 
+  # flag for custom guide
+  local _run_prg=true
+
   # read guide
   source "${_guide}"
 
