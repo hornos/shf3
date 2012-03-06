@@ -67,14 +67,14 @@ if ${_p} ; then
   if ${_r} ; then
     opts="--rebase"
   fi
-  answer "Pull from gtihub?"
-  if test $? -gt 0 ; then
-    exit ${_false_}
-  fi
   answer "Show updates?"
   if test $? -eq 0 ; then
     ${vcs_git_hub_git} fetch
     ${vcs_git_hub_git} log --pretty=oneline --abbrev-commit --decorate HEAD..origin
+  fi
+  answer "Pull from gtihub?"
+  if test $? -gt 0 ; then
+    exit ${_false_}
   fi
   ${vcs_git_hub_git} pull ${opts} origin master
   exit $?
