@@ -60,17 +60,34 @@ function que/sub() {
     fi
   done
 
-  # mode
+  ### mode
+  # autodetect from ESZR
+  if test "${MODE}" = "eszr" ; then
+    if test -z "${ESZR_MODE}" ; then
+      msg "ESZR_MODE not found"
+      return ${_false_}
+    fi
+    MODE="${ESZR_MODE}"
+  fi
   local _mode=$(field "${MODE}" 1 /)
   local _mpi=$(field "${MODE}" 2 /)
   if test "${_mode}" = "${_mpi}" ; then
     _mpi=""
   fi
+  # override MPI
   if ! test -z "${MPI}" ; then
     _mpi="${MPI}"
   fi
 
   ### import scheduler
+  # autodetect from ESZR
+  if test "${QSCHED}" = "eszr" ; then
+    if test -z "${ESZR_SCHEDULER}" ; then
+      msg "ESZR_SCHEDULER not found"
+      return ${_false_}
+    fi
+    QSCHED="${ESZR_SCHEDULER}"
+  fi
   local _sch=${QSCHED}
   import que/${_sch}
   msg/debug "Scheduler ${_sch} imported"
@@ -92,15 +109,44 @@ function que/sub() {
       return ${_false_}
     fi
   fi
-  # nodes
+
+  ### nodes
   local _nodes=${NODES:-1}
-  # sockets per node
+
+  ### sockets per node
+  # autodetect form ESZR
+  if test "${SCKTS}" = "eszr" ; then
+    if test -z "${ESZR_SCKTS}" ; then
+      msg "ESZR_SCKTS not found"
+      return ${_false_}
+    fi
+    SCKTS=${ESZR_SCKTS}
+  fi
   local _sckts=${SCKTS:-1}
-  # cores per sockets
+
+  ### cores per sockets
+  # autodetect form ESZR
+  if test "${CORES}" = "eszr" ; then
+    if test -z "${ESZR_CORES}" ; then
+      msg "ESZR_CORES not found"
+      return ${_false_}
+    fi
+    CORES=${ESZR_CORES}
+  fi
   local _cores=${CORES:-2}
-  # slots per node (forced)
+
+  ### slots per node (forced)
+  # autodetect form ESZR
+  if test "${SLTPN}" = "eszr" ; then
+    if test -z "${ESZR_SLTPN}" ; then
+      msg "ESZR_SLTPN not found"
+      return ${_false_}
+    fi
+    SLTPN=${ESZR_SLTPN}
+  fi
   local _sltpn=${SLTPN:-0}
-  # threads per core (forced)
+
+  ### threads per core (forced)
   local _thrds=${THRDS:-0}
 
   ### compound resource parameters
