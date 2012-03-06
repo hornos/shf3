@@ -14,8 +14,9 @@ function net/ipfw/spoof/revpath() {
   local _if="${2:-in}"
   local _s=${2:-false}
 
-  #            log  proto  from      to      options         interface
+  # rule       log  proto  from      to      options         interface
   local _rule="log  ip     from any  to any  not verrevpath  ${_if}"
+
 
   if ${_s} ; then
     net/ipfw/deny ${!_no} ${_rule}

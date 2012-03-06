@@ -36,16 +36,20 @@ function net/ipfw/default() {
 #------------------------------------------------------------------------------------------
   # revpath
   ${net_ipfw} add 100 set ${_d} deny  log ip   from any to any not verrevpath            in
+
   # localhost
   ${net_ipfw} add     set ${_d} allow     ip   from me  to me
+
   # spoof
   ${net_ipfw} add     set ${_d} deny  log ip   from $lo to any                           in
   ${net_ipfw} add     set ${_d} deny  log ip   from any to $lo                           in
+
   # nmap
   ${net_ipfw} add     set ${_d} deny  log ip   from any to any ipoptions rr,ts,ssrr,lsrr in
-  ${net_ipfw} add     set ${_d} deny  log tcp  from any to any frag
-  ${net_ipfw} add     set ${_d} deny  log tcp  from any to $lo                           in
-  ${net_ipfw} add     set ${_d} deny  log tcp  from any to any 0                         in
+
+#  ${net_ipfw} add     set ${_d} deny  log tcp  from any to any frag
+#  ${net_ipfw} add     set ${_d} deny  log tcp  from any to $lo                           in
+#  ${net_ipfw} add     set ${_d} deny  log tcp  from any to any 0                         in
   ${net_ipfw} add     set ${_d} deny  log any  from any to any
 }
 
