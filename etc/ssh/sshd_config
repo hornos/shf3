@@ -1,0 +1,10 @@
+Port 12345
+Protocol 2
+LoginGraceTime 15s
+PermitRootLogin no
+StrictModes yes
+MaxAuthTries 1
+PubkeyAuthentication yes
+PasswordAuthentication no
+PermitEmptyPasswords no
+ChallengeResponseAuthentication no
