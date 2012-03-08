@@ -70,7 +70,7 @@ if ${_p} ; then
   answer "Show updates?"
   if test $? -eq 0 ; then
     ${vcs_git_hub_git} fetch
-    ${vcs_git_hub_git} log --pretty=oneline --abbrev-commit --decorate HEAD..origin
+    ${vcs_git_hub_git} --no-pager log --pretty=oneline --abbrev-commit --decorate HEAD..origin
   fi
   answer "Pull from gtihub?"
   if test $? -gt 0 ; then
