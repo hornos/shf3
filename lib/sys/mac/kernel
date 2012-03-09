@@ -1,0 +1,34 @@
+
+function sys/mac/init() {
+  import sql
+
+  msg/debug "Database: ${sys_mac_db}"
+  answer "Create database?"
+  if failed $? ; then $failure; fi
+
+  local _in="$(ns/dir ${BASH_SOURCE})/sys_mac.sql"
+  sql/init "${sys_mac_db}" "${_in}"
+}
+
+function sys/mac/mgr() {
+  import sql
+  import gui
+
+  local _m="${1:-LIST}"
+  local _f="${2}"
+  local _q=""
+
+  if ! readable "${sys_mac_db}" ; then
+    sys/mac/init
+    if failed $? ; then $failure; fi
+
+    $success
+  fi
+  # TODO: toupper
+  case "${_m}" in
+    INSERT)
+    ;;
+    LIST)
+    ;;
+  esac
+}

@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS sys_mac;
+
+CREATE TABLE sys_mac (
+  id   VARCHAR(128) NOT NULL,
+  info TEXT,
+  mac  TEXT PRIMARY KEY NOT NULL
+);

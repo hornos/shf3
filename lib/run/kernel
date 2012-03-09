@@ -26,6 +26,23 @@ function run/prg/step() {
   fi
 }
 
+function run/prg/save() {
+  local _s=${1}
+  shift
+  local _o=$*
+
+  if empty "${_s}" ; then $failure; fi
+
+  local i
+  for i in ${_o} ; do
+    if test -r "${i}" ; then
+      cp -fv ${i} ${i}.${_step}
+    else
+      msg "Not found: ${i}"
+    fi
+  done
+}
+
 function run/prg() {
   import sys/dir
   import sys/lnk

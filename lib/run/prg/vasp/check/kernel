@@ -1,0 +1,16 @@
+
+function run/prg/vasp/check/accuracy() {
+  import run/valid/check
+  run/valid/check OUTCAR "reached required accuracy"
+}
+
+function run/prg/vasp/check/wavecar() {
+  import run/valid/check
+  run/valid/check OUTCAR "writing wavefunctions"
+}
+
+function run/prg/vasp/check/timing() {
+  import run/valid/show
+  run/valid/show OUTCAR "General timing"
+}
+
