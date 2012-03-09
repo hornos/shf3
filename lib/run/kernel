@@ -31,8 +31,16 @@ function run/prg/save() {
   shift
   local _o=$*
 
-  if empty "${_s}" ; then $failure; fi
-
+  if empty "${_s}" ; then 
+    msg "Step not found"
+    $failure
+  fi
+ 
+  if empty "${_o}" ; then 
+    msg "Output not found"
+    $failure
+  fi
+ 
   local i
   for i in ${_o} ; do
     if test -r "${i}" ; then
