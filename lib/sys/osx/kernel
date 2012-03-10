@@ -1,0 +1,44 @@
+function sys/osx/location() {
+  local _l="${1}"
+  local _loc=$(${sys_osx_networksetup} -getcurrentlocation)
+
+  if ! empty "${_l}" ; then
+    if test "${_l}" = "${_loc}" ; then
+      msg "On location: ${_l}"
+      $success
+    fi
+    ${sys_osx_networksetup} -switchtolocation "${_l}" &>/dev/null
+    if failed $? ; then
+      msg "Not found: ${_l}"
+      $failure
+    fi
+    msg "New location: ${_l}"
+    $success
+  fi
+
+  ${sys_osx_networksetup} -listlocations | \
+  awk -v l="${_loc}" '{
+    if($0==l)
+      print " *",$0;
+    else
+      print "  ",$0;
+  }'
+}
+
+function sys/osx/airport() {
+  import sys/mac
+
+  local _s=${1:-off}
+  local _d=${2:-en1}
+
+  if test "${_s}" = "z" ; then
+    ${sys_osx_airport} -z
+    return $?
+  fi
+
+  ${sys_osx_networksetup} -setairportpower ${_d} ${_s}
+}
+
+function sys/osx/scan() {
+  ${sys_osx_airport} -s
+}

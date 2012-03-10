@@ -9,33 +9,37 @@ function help/macmgr() {
 MAC Manager
 
 Usage: ${gbn} options
-              -f database
-              -i database - init
-              -s - select
+              -g - generate
+              -n - new
 EOF
   exit ${_false_}
 }
 
 ### args
-_m="SELECT"
-_f=""
-while getopts hvgf:i: o; do
+_m="GEN"
+_q=false
+while getopts hvgqn o; do
   case "$o" in
-    f) _f=$OPTARG;;
-    i) _m="INIT"; _f=$OPTARG;;
-    s) _m="SELECT";;
+    g) _m="GEN";;
+    q) _q=true;;
+    n) _m="NEW";;
     v) gdbg=true;;
     h|*) help/macmgr;;
   esac
 done
 
 ### main
-echo
-msg
-gui/line
-
-sys_mac_db="${grd}/sql/${sys_mac_db}"
-if ! test -z "${_f}" ; then
-  sys_mac_db="${_f}"
+if ! ${_q} ; then
+  echo
+  msg
+  gui/line
 fi
-sys/mac/mgr "${_m}"
+
+case "${_m}" in
+  GEN)
+    sys/mac/gen
+  ;;
+  NEW)
+    sys/mac/new
+  ;;
+esac

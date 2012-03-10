@@ -1,2 +1,2 @@
-sys_mac_db="sys_mac.sqlite"
-sys_mac_tb="sys_mac"
+sys_mac_airport="sudo airport"
+sys_mac_ifconfig="sudo ifconfig"

@@ -1,0 +1,2 @@
+sys_osx_networksetup="networksetup"
+sys_osx_airport="sudo /sbin/airport"

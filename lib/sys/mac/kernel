@@ -1,34 +1,21 @@
-
-function sys/mac/init() {
-  import sql
-
-  msg/debug "Database: ${sys_mac_db}"
-  answer "Create database?"
-  if failed $? ; then $failure; fi
-
-  local _in="$(ns/dir ${BASH_SOURCE})/sys_mac.sql"
-  sql/init "${sys_mac_db}" "${_in}"
+function sys/mac/gen() {
+  openssl rand -hex 6 | sed 's/\(..\)/\1:/g; s/.$//'
 }
 
-function sys/mac/mgr() {
-  import sql
-  import gui
+function sys/mac/new() {
+  import sys
+  local _dev=""
 
-  local _m="${1:-LIST}"
-  local _f="${2}"
-  local _q=""
-
-  if ! readable "${sys_mac_db}" ; then
-    sys/mac/init
-    if failed $? ; then $failure; fi
-
-    $success
+  local _mac=$(sys/mac/gen)
+  local _os=$(sys/os)
+  if test "${_os}" = "osx" ; then
+    _dev="${1:-en1}"
+    ${sys_mac_airport} -z
+    sleep 4
+    ${sys_mac_ifconfig} ${_dev} ether ${_mac}
+    sleep 2
+    echo "New mac : ${_mac}"
+    local _chk=$(${sys_mac_ifconfig} ${_dev} ether | awk '/ether/{print $2}')
+    echo "Check   : ${_chk}"
   fi
-  # TODO: toupper
-  case "${_m}" in
-    INSERT)
-    ;;
-    LIST)
-    ;;
-  esac
 }
