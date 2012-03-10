@@ -1,2 +1,15 @@
 sys_osx_networksetup="networksetup"
 sys_osx_airport="sudo /sbin/airport"
+sys_osx_ifconfig="sudo /sbin/ifconfig"
+
+# echo "                            SSID BSSID             RSSI CHANNEL HT CC SECURITY"
+# printf "${sys_osx_airport_frm}\n" "ssid" "bssid" "rssi" "chan" "ht" "cc" "sec"
+
+
+sys_osx_airport_hdr="                            SSID BSSID             RSSI CHANNEL HT CC SECURITY"
+sys_osx_airport_frm="%+32s %-17s %-4s %-7s %2s %2s %s"
+
+sys_osx_network_hdr="                            NAME ETHER             DEV  IP              MASK            GW"
+sys_osx_network_frm="%+32s %-17s %-4s %-15s %-15s %-15s"
+
+sys_osx_airport_service="AirPort"

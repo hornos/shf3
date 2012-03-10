@@ -1,21 +1,3 @@
 function sys/mac/gen() {
   openssl rand -hex 6 | sed 's/\(..\)/\1:/g; s/.$//'
 }
-
-function sys/mac/new() {
-  import sys
-  local _dev=""
-
-  local _mac=$(sys/mac/gen)
-  local _os=$(sys/os)
-  if test "${_os}" = "osx" ; then
-    _dev="${1:-en1}"
-    ${sys_mac_airport} -z
-    sleep 4
-    ${sys_mac_ifconfig} ${_dev} ether ${_mac}
-    sleep 2
-    echo "New mac : ${_mac}"
-    local _chk=$(${sys_mac_ifconfig} ${_dev} ether | awk '/ether/{print $2}')
-    echo "Check   : ${_chk}"
-  fi
-}

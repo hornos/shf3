@@ -1,0 +1,114 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+import sys
+
+function help/sysmgr() {
+  cat << EOF
+
+System Manager
+
+Usage: ${gbn} command  options  description
+              wifi
+                       off      disjoin from a network
+                       down     power down
+                       up       power up
+                       scan     scan for networks
+                       con      connect
+
+              loc               list locations
+                       [loc]    switch to [loc]
+
+              info
+
+Setup: /etc/sudoers
+ %admin ALL = (root) NOPASSWD:/sbin/ipfw
+ %admin ALL = (root) NOPASSWD:/sbin/airport
+ %admin ALL = (root) NOPASSWD:/sbin/ifconfig
+
+http://osxdaily.com/2007/01/18/airport-the-little-known-command-line-wireless-utility/
+sudo ln -s /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport /sbin/airport
+
+
+EOF
+  exit ${_false_}
+}
+
+### os
+_os=$(sys/os)
+case "${_os}" in
+  osx)
+    import sys/osx
+  ;;
+  linux)
+    import sys/linux
+  ;;
+esac
+
+### args
+_cmd="${1:-loc}"
+shift
+_opt=${1}
+shift
+_arg=$*
+
+### main
+case "${_cmd}" in
+  help)
+    echo
+    msg "Help"
+    gui/line
+    help/sysmgr
+  ;;
+  loc)
+    echo
+    msg "Locations"
+    gui/line
+    sys/${_os}/${_cmd} ${_opt} ${_arg}
+  ;;
+  wifi)
+    case "${_opt}" in
+      off|down|up)
+        echo
+        msg "Wireless: ${_opt}"
+        gui/line
+        sys/${_os}/${_cmd} ${_opt} ${_arg}
+      ;;
+      scan)
+        echo
+        msg "Broadcasted Wireless Networks"
+        gui/line
+        sys/${_os}/${_cmd}/${_opt} ${_arg}
+      ;;
+      info)
+        echo
+        msg "Wireless Network Interface"
+        gui/line
+        _dev=$(sys/${_os}/${_cmd}/dev)
+        _eth=$(sys/${_os}/${_cmd}/ether)
+        _eif=$(sys/${_os}/${_cmd}/ether if)
+        _nam=$(sys/${_os}/${_cmd}/name)
+        _ip4=$(sys/${_os}/${_cmd}/ip)
+        _ms4=$(sys/${_os}/${_cmd}/ip ms)
+        _gw4=$(sys/${_os}/${_cmd}/ip gw)
+        echo "${sys_osx_network_hdr}"
+        if ! test "${_eth}" = "${_eif}" ; then
+          printf "${sys_osx_network_frm}\n" "${_nam}" ${_eif} ${_dev} ${_ip4} ${_ms4} ${_gw4}
+          printf "${sys_osx_network_frm}\n" "HW" ${_eth} " " " " " " " "
+        else
+          printf "${sys_osx_network_frm}\n" "${_nam}" ${_eth} ${_dev} ${_ip4} ${_ms4} ${_gw4}
+        fi
+        gui/line
+        echo "${sys_osx_airport_hdr}"
+        sys/${_os}/${_cmd}/info
+        gui/line
+        _dns=$(sys/${_os}/${_cmd}/dns)
+        echo "                             DNS"
+        printf "%32s\n" "${_dns}"
+      ;;
+      *)
+        sys/${_os}/${_cmd}/${_opt} ${_arg}
+      ;;
+    esac
+  ;;
+esac
