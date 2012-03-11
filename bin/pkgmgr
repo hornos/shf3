@@ -15,6 +15,10 @@ Usage: ${gbn} command  options  description
 OSX: /etc/sudoers
  %admin ALL = (root) NOPASSWD:/opt/local/bin/port
 
+Ubuntu: /etc/sudoers
+ %admin ALL = (root) NOPASSWD:/usr/bin/apt-get
+ %admin ALL = (root) NOPASSWD:/usr/bin/apt-cache
+
 EOF
   exit ${_false_}
 }
