@@ -106,16 +106,48 @@ function sys/osx/wifi/ether() {
 }
 
 function sys/osx/wifi/ip4() {
-  local _d="${1}"
-  if empty "${_d}" ; then
-    _d=$(sys/osx/wifi/dev)
-  fi
+  local _d=$(sys/osx/wifi/dev)
   ${sys_osx_ifconfig} "${_d}" inet | \
   awk '/inet/{print $2}'
 }
 
 function sys/osx/wifi/ip() {
   local _m=${1:-ip}
+  local _d=$(sys/osx/wifi/dev)
+
+  # from sipcalc
+  case "${_m}" in
+    dns)
+      sys/osx/wifi/dns
+      return
+    ;;
+    net|bcast|range)
+      ${sys_osx_sipcalc} "${_d}" | \
+      awk -v m="${_m}" '{
+        split($0,a,"-");
+        sub(/ /,"",a[2]);
+        if(m=="net")
+          m="Network address";
+        if(m=="bcast")
+          m="Broadcast address";
+        if(m=="range")
+          m="Usable range";
+        if(match($0,m)) {
+          if(m=="Usable range") {
+            gsub(/ /,"",a[2]);
+            gsub(/ /,"",a[3]);
+            print a[2] "-" a[3];
+          }
+          else {
+            print a[2];
+          }
+        }
+      }'
+      return
+    ;;
+  esac
+
+  # from networksetup
   ${sys_osx_networksetup} -getinfo "${sys_osx_airport_service}" | \
   awk -v m="${_m}" '{
     split($0,a,":");
@@ -126,9 +158,8 @@ function sys/osx/wifi/ip() {
       m="Subnet mask";
     if(m=="gw")
       m="Router";
-    if(match($0,m)) {
+    if(match($0,m))
       print a[2];
-    }
   }'
 }
 

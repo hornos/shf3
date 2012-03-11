@@ -1,0 +1,14 @@
+
+function sys/linux/pkg/search() {
+  import sys/linux
+  local _lx=$(sys/linux)
+  import sys/linux/${_lx}/pkg
+  sys/linux/${_lx}/pkg/search $*
+}
+
+function sys/linux/pkg/install() {
+  import sys/linux
+  local _lx=$(sys/linux)
+  import sys/linux/${_lx}/pkg
+  sys/linux/${_lx}/pkg/install $*
+}

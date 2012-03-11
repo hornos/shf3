@@ -1,0 +1,13 @@
+
+function sys/osx/pkg/search() {
+  if empty "$*" ; then $failure; fi
+
+  ${sys_osx_pkg} search $*
+}
+
+function sys/osx/pkg/install() {
+  if empty "$*" ; then $failure; fi
+
+  ${sys_osx_pkg} install $*
+}
+

@@ -1,0 +1,13 @@
+
+function sys/linux/ubuntu/pkg/search() {
+   if empty "$*" ; then $failure; fi
+
+  ${sys_linux_ubuntu_pkg}-cache search $*
+}
+
+function sys/linux/ubuntu/pkg/install() {
+   if empty "$*" ; then $failure; fi
+
+  ${sys_linux_ubuntu_pkg}-get install $*
+}
+

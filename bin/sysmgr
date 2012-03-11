@@ -21,7 +21,7 @@ Usage: ${gbn} command  options  description
 
               info
 
-Setup: /etc/sudoers
+OSX: /etc/sudoers
  %admin ALL = (root) NOPASSWD:/sbin/ipfw
  %admin ALL = (root) NOPASSWD:/sbin/airport
  %admin ALL = (root) NOPASSWD:/sbin/ifconfig
@@ -29,6 +29,7 @@ Setup: /etc/sudoers
 http://osxdaily.com/2007/01/18/airport-the-little-known-command-line-wireless-utility/
 sudo ln -s /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport /sbin/airport
 
+Linux:
 
 EOF
   exit ${_false_}
@@ -89,22 +90,25 @@ case "${_cmd}" in
         _eif=$(sys/${_os}/${_cmd}/ether if)
         _nam=$(sys/${_os}/${_cmd}/name)
         _ip4=$(sys/${_os}/${_cmd}/ip)
-        _ms4=$(sys/${_os}/${_cmd}/ip ms)
+        _ms4=$(sys/${_os}/${_cmd}/ip mask)
         _gw4=$(sys/${_os}/${_cmd}/ip gw)
-        echo "${sys_osx_network_hdr}"
+        echo "${sys_osx_host_hdr}"
         if ! test "${_eth}" = "${_eif}" ; then
-          printf "${sys_osx_network_frm}\n" "${_nam}" ${_eif} ${_dev} ${_ip4} ${_ms4} ${_gw4}
-          printf "${sys_osx_network_frm}\n" "HW" ${_eth} " " " " " " " "
+          printf "${sys_osx_host_frm}\n" "${_nam}" ${_eif} ${_dev} ${_ip4} ${_ms4} ${_gw4}
+          printf "${sys_osx_host_frm}\n" "HW" ${_eth} " " " " " " " "
         else
-          printf "${sys_osx_network_frm}\n" "${_nam}" ${_eth} ${_dev} ${_ip4} ${_ms4} ${_gw4}
+          printf "${sys_osx_host_frm}\n" "${_nam}" ${_eth} ${_dev} ${_ip4} ${_ms4} ${_gw4}
         fi
         gui/line
         echo "${sys_osx_airport_hdr}"
         sys/${_os}/${_cmd}/info
         gui/line
-        _dns=$(sys/${_os}/${_cmd}/dns)
-        echo "                             DNS"
-        printf "%32s\n" "${_dns}"
+        _dns=$(sys/${_os}/${_cmd}/ip dns)
+        _net=$(sys/${_os}/${_cmd}/ip net)
+        _bca=$(sys/${_os}/${_cmd}/ip bcast)
+        _rng=$(sys/${_os}/${_cmd}/ip range)
+        echo "${sys_osx_network_hdr}"
+        printf "${sys_osx_network_frm}\n" "${_dns}" "${_net}" "${_bca}" "${_rng}"
       ;;
       *)
         sys/${_os}/${_cmd}/${_opt} ${_arg}
