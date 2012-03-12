@@ -79,7 +79,7 @@ function ssh/gsi/destroy() {
   msg "Grid Proxy destroyed"
 }
 
-fucntion ssh/gsi/pkcs12() {
+function ssh/gsi/pkcs12() {
   import sys
   local _h="${1:-default}"
 
