@@ -17,8 +17,8 @@ function ssh/key/crt() {
   ssh/key "${1:-default}" "${ssh_key_crt}"
 }
 
-function ssh/key/pfx() {
-  ssh/key "${1:-default}" "${ssh_key_pfx}"
+function ssh/key/p12() {
+  ssh/key "${1:-default}" "${ssh_key_p12}"
 }
 
 function ssh/key/gen() {
