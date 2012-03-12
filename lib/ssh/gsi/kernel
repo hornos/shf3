@@ -78,3 +78,40 @@ function ssh/gsi/destroy() {
   unset X509_CERT_DIR
   msg "Grid Proxy destroyed"
 }
+
+fucntion ssh/gsi/pkcs12() {
+  import sys
+  local _h="${1:-default}"
+
+  sys/mid "ssh/${_h}"
+  if failed $? ; then
+    msg "MID not found: ${_h}"
+    $failure
+  fi
+
+  local _sec="$(ssh/key/sec ${_h})"
+  local _crt="$(ssh/key/crt ${_h})"
+  local _pfx="$(ssh/key/pfx ${_h})"
+  _sec=$(basename "${_sec}")
+  _crt=$(basename "${_crt}")
+  _pfx=$(basename "${_pfx}")
+
+  # in ${ssh_key_dir}
+  sys/dir/svwd "${ssh_key_dir}"
+
+  # check
+  if ! readable "${_sec}" ; then
+    msg "Key not found"
+    $failure
+  fi
+  if ! readable "${_crt}" ; then
+    msg "Certificate not found"
+    $failure
+  fi
+  if readable "${_pfx}" ; then
+    msg "Found PKCS12 key"
+    $failure
+  fi
+
+  ${ssh_gsi_openssl} pkcs12 -export -in "${_crt}" -inkey "${_sec}" -out ${_pfx}
+}

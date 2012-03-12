@@ -1,3 +1,5 @@
+# TODO: refac
+
 function sys/osx/loc() {
   local _l="${1}"
   local _loc=$(${sys_osx_networksetup} -getcurrentlocation)
@@ -230,4 +232,9 @@ function sys/osx/wifi/con() {
     $failure
   fi
   $success
+}
+
+function sys/osx/wifi/stat() {
+  local _d=$(sys/osx/wifi/dev)
+  ${sys_osx_slurm} -s -i "${_d}"
 }

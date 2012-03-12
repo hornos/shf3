@@ -17,6 +17,10 @@ function ssh/key/crt() {
   ssh/key "${1:-default}" "${ssh_key_crt}"
 }
 
+function ssh/key/pfx() {
+  ssh/key "${1:-default}" "${ssh_key_pfx}"
+}
+
 function ssh/key/gen() {
   import sys
   import sys/dir

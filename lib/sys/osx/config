@@ -4,6 +4,8 @@ sys_osx_ifconfig="sudo /sbin/ifconfig"
 sys_osx_airport_service="AirPort"
 sys_osx_sipcalc="sipcalc"
 
+sys_osx_slurm="slurm"
+
 # echo "                            SSID BSSID             RSSI CHANNEL HT CC SECURITY"
 # printf "${sys_osx_airport_frm}\n" "ssid" "bssid" "rssi" "chan" "ht" "cc" "sec"
 

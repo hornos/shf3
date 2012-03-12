@@ -11,7 +11,11 @@ SSH key generator
 Usage: ${gbn} options
               -n MID - new
               -c MID - change
+              -e MID - export to pkcs12
               -v - verbose
+
+PKCS2:
+https://www.tampabaycomputing.com/blog/creating-pkcs12-pfx-from-a-private-key-and-certificate-file-openssl
 EOF
   exit ${_false_}
 }
@@ -19,10 +23,11 @@ EOF
 ### args
 _m=""
 _c="NEW"
-while getopts hvc:n: o; do
+while getopts hvc:n:e: o; do
   case "$o" in
     n) _n="NEW"; _m=$OPTARG;;
     c) _c="CHANGE"; _m=$OPTARG;;
+    e) _c="PKCS12"; _m=$OPTARG;;
     v) gdbg=true;;
     h|*) help/sshkey;;
   esac
@@ -41,16 +46,21 @@ fi
 case ${_c} in
   CHANGE)
     answer "Change key for ${_m}?"
-    if test $? -gt 0 ; then
-      exit ${_false_}
-    fi
+    if failed $? ; then exit ${_false_}; fi
+
     ssh/key/chg "${_m}"
-    ;;
+  ;;
   NEW)
     answer "Generate key for ${_m}?"
-    if test $? -gt 0 ; then
-      exit ${_false_}
-    fi
+    if failed $? ; then exit ${_false_}; fi
+
     ssh/key/gen "${_m}"
-    ;;
+  ;;
+  PKCS12)
+    answer "Export pkcs12 key for ${_m}?"
+    if failed $? ; then  exit ${_false_}; fi
+
+    import ssh/gsi
+    ssh/gsi/pkcs12 "${_m}"
+  ;;
 esac

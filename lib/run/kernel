@@ -44,7 +44,7 @@ function run/prg/save() {
   local i
   for i in ${_o} ; do
     if test -r "${i}" ; then
-      cp -fv ${i} ${i}.${_step}
+      cp -fv ${i} ${_s}.${i}
     else
       msg "Not found: ${i}"
     fi
