@@ -115,4 +115,7 @@ function ssh/gsi/pkcs12() {
   fi
 
   ${ssh_gsi_openssl} pkcs12 -export -in "${_crt}" -inkey "${_sec}" -out "${_p12}"
+  if readable "${_p12}" ; then
+    chmod 600 "${_p12}"
+  fi
 }
