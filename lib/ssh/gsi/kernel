@@ -81,6 +81,7 @@ function ssh/gsi/destroy() {
 
 function ssh/gsi/pkcs12() {
   import sys
+  import sys/dir
   local _h="${1:-default}"
 
   sys/mid "ssh/${_h}"
