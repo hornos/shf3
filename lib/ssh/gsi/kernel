@@ -92,10 +92,10 @@ function ssh/gsi/pkcs12() {
 
   local _sec="$(ssh/key/sec ${_h})"
   local _crt="$(ssh/key/crt ${_h})"
-  local _pfx="$(ssh/key/pfx ${_h})"
+  local _pfx="$(ssh/key/p12 ${_h})"
   _sec=$(basename "${_sec}")
   _crt=$(basename "${_crt}")
-  _pfx=$(basename "${_pfx}")
+  _p12=$(basename "${_p12}")
 
   # in ${ssh_key_dir}
   sys/dir/svwd "${ssh_key_dir}"
@@ -109,10 +109,10 @@ function ssh/gsi/pkcs12() {
     msg "Certificate not found"
     $failure
   fi
-  if readable "${_pfx}" ; then
+  if readable "${_p12}" ; then
     msg "Found PKCS12 key"
     $failure
   fi
 
-  ${ssh_gsi_openssl} pkcs12 -export -in "${_crt}" -inkey "${_sec}" -out ${_pfx}
+  ${ssh_gsi_openssl} pkcs12 -export -in "${_crt}" -inkey "${_sec}" -out ${_p12}
 }
