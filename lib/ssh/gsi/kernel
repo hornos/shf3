@@ -92,7 +92,7 @@ function ssh/gsi/pkcs12() {
 
   local _sec="$(ssh/key/sec ${_h})"
   local _crt="$(ssh/key/crt ${_h})"
-  local _pfx="$(ssh/key/p12 ${_h})"
+  local _p12="$(ssh/key/p12 ${_h})"
   _sec=$(basename "${_sec}")
   _crt=$(basename "${_crt}")
   _p12=$(basename "${_p12}")
@@ -114,5 +114,5 @@ function ssh/gsi/pkcs12() {
     $failure
   fi
 
-  ${ssh_gsi_openssl} pkcs12 -export -in "${_crt}" -inkey "${_sec}" -out ${_p12}
+  ${ssh_gsi_openssl} pkcs12 -export -in "${_crt}" -inkey "${_sec}" -out "${_p12}"
 }
