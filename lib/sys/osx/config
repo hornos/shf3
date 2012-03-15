@@ -1,4 +1,6 @@
 sys_osx_networksetup="networksetup"
+sys_osx_kextstat="kextstat"
+
 sys_osx_airport="sudo /sbin/airport"
 sys_osx_ifconfig="sudo /sbin/ifconfig"
 sys_osx_airport_service="AirPort"
@@ -17,5 +19,3 @@ sys_osx_host_frm="%+32s %-17s %-4s %-15s %-15s %-15s"
 
 sys_osx_network_hdr="                             DNS NETWORK         BROADCAST       RANGE"
 sys_osx_network_frm="%+32s %-15s %-15s %-15s"
-
-sys_osx_kextstat="kextstat"

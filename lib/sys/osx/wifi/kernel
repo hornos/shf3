@@ -1,0 +1,241 @@
+
+function sys/osx/wifi() {
+  import sys/mac
+  import sys/osx
+
+  local _o=${1:-info}
+  local _d=${2}
+
+  if empty "${_d}" ; then
+    # autodetect
+    _d=$(sys/osx/wifi/dev)
+    if empty "${_d}" ; then
+      echo ""
+      $failure
+    fi
+  fi
+
+  case "${_o}" in
+    off)
+      ${sys_osx_airport} -z
+    ;;
+    down)
+      ${sys_osx_networksetup} -setairportpower ${_d} off
+    ;;
+    up)
+      ${sys_osx_networksetup} -setairportpower ${_d} on
+    ;;
+  esac
+}
+
+function sys/osx/wifi/restart() {
+  sys/osx/wifi down
+  sleep 1
+  sys/osx/wifi up
+}
+
+function sys/osx/wifi/spoof() {
+  import sys/mac
+  local _d=$(sys/osx/wifi/dev)
+  local _m=$(sys/mac/gen)
+
+  sys/osx/wifi off
+  sleep 2
+  ${sys_osx_ifconfig} ${_d} ether ${_m}
+  # sleep 2
+  # local _e=$(sys/osx/wifi/ether)
+  # if ! test "${_m}" = "${_e}" ; then
+  #  msg "Spoof failed"
+  # fi
+  msg "${_m}"
+}
+
+function sys/osx/wifi/scan() {
+  ${sys_osx_airport} -s
+}
+
+function sys/osx/wifi/dev() {
+  ${sys_osx_networksetup} -listallhardwareports | \
+  awk 'BEGIN{ap=0;}{
+    if(match($0,"AirPort"))
+      ap=1
+    if(ap) {
+      if(match($0,"Device")) {
+        print $2;
+      }
+    }
+  }'
+}
+
+function sys/osx/wifi/ether() {
+  local _t="${1}"
+  local _d=$(sys/osx/wifi/dev)
+  if test "${_t}" = "if" ; then
+    ${sys_osx_ifconfig} "${_d}" ether | \
+    awk '/ether/{print $2}'
+  else
+    ${sys_osx_networksetup} -getmacaddress "${_d}" | \
+    awk '{print $3}'
+  fi
+}
+
+function sys/osx/wifi/ip4() {
+  local _d=$(sys/osx/wifi/dev)
+  ${sys_osx_ifconfig} "${_d}" inet | \
+  awk '/inet/{print $2}'
+}
+
+function sys/osx/wifi/ip() {
+  local _m=${1:-ip}
+  local _d=$(sys/osx/wifi/dev)
+
+  # from sipcalc
+  case "${_m}" in
+    dns)
+      sys/osx/wifi/dns
+      return
+    ;;
+    net|bcast|range)
+      ${sys_osx_sipcalc} "${_d}" | \
+      awk -v m="${_m}" '{
+        split($0,a,"-");
+        sub(/ /,"",a[2]);
+        if(m=="net")
+          m="Network address";
+        if(m=="bcast")
+          m="Broadcast address";
+        if(m=="range")
+          m="Usable range";
+        if(match($0,m)) {
+          if(m=="Usable range") {
+            gsub(/ /,"",a[2]);
+            gsub(/ /,"",a[3]);
+            print a[2] "-" a[3];
+          }
+          else {
+            print a[2];
+          }
+        }
+      }'
+      return
+    ;;
+  esac
+
+  # from networksetup
+  ${sys_osx_networksetup} -getinfo "${sys_osx_airport_service}" | \
+  awk -v m="${_m}" '{
+    split($0,a,":");
+    sub(/ /,"",a[2]);
+    if(m=="ip")
+      m="IP address";
+    if(m=="ms")
+      m="Subnet mask";
+    if(m=="gw")
+      m="Router";
+    if(match($0,m))
+      print a[2];
+  }'
+}
+
+function sys/osx/wifi/dns() {
+  # 10.6
+  local _dns=$(${sys_osx_networksetup} -getdnsservers "${sys_osx_airport_service}")
+  if test "${_dns}" = "There aren't any DNS Servers set on AirPort." ; then
+    _dns=""
+  fi
+  # default
+  
+  if empty "${_dns}" && readable "/etc/resolv.conf" ; then
+    _dns=$(cat /etc/resolv.conf | awk '/^nameserver/{print $2}')
+  fi
+  echo "${_dns}"
+}
+
+function sys/osx/wifi/resolv() {
+  local _h=${1:-www.google.com}
+  local _d=$(sys/osx/wifi/dns)
+  host -a "${_h}" ${_d}
+}
+
+function sys/osx/wifi/ap() {
+  ${sys_osx_airport} -I | \
+  awk '{
+    split($0,a,":");
+    sub(/ /,"",a[2]);
+    if(match($0,"agrCtlRSSI"))
+      rssi=a[2]
+    if(match($0,"SSID"))
+      ssid=a[2]
+    if(match($0,"BSSID"))
+      bssi=a[2]
+    if(match($0,"link auth"))
+      auth=a[2]
+    if(match($0,"channel"))
+      chan=a[2]
+  }
+  END{
+    printf "%+32s %-17s %-4s %-7s %2s %2s %s\n",ssid,bssi,rssi,chan,"--","--",auth
+  }'
+}
+
+function sys/osx/wifi/name() {
+  ${sys_osx_networksetup} -getcomputername
+}
+
+function sys/osx/wifi/con() {
+  import gui
+  local _ssid=""
+  local _pass=""
+  answer "Scan networks?"
+  if succeed $? ; then
+    gui/line
+    sys/osx/wifi/scan
+    gui/line
+  fi
+  read -p  "Network  : " _ssid
+  read -sp "Password : " _pass
+  echo
+  answer "Join ${_ssid}?"
+  if failed $? ; then $failure; fi
+
+  ${sys_osx_networksetup} -setairportnetwork "${sys_osx_airport_service}" "${_ssid}" "${_pass}"
+  if failed $? ; then
+    msg "Network not found"
+    $failure
+  fi
+  $success
+}
+
+function sys/osx/wifi/stat() {
+  local _d=$(sys/osx/wifi/dev)
+  ${sys_osx_slurm} -s -i "${_d}"
+}
+
+function sys/osx/wifi/info() {
+  import sys/osx
+
+  _dev=$(sys/osx/wifi/dev)
+  _eth=$(sys/osx/wifi/ether)
+  _eif=$(sys/osx/wifi/ether if)
+  _nam=$(sys/osx/wifi/name)
+  _ip4=$(sys/osx/wifi/ip)
+  _ms4=$(sys/osx/wifi/ip mask)
+  _gw4=$(sys/osx/wifi/ip gw)
+  echo "${sys_osx_host_hdr}"
+  if ! test "${_eth}" = "${_eif}" ; then
+    printf "${sys_osx_host_frm}\n" "${_nam}" ${_eif} ${_dev} ${_ip4} ${_ms4} ${_gw4}
+    printf "${sys_osx_host_frm}\n" "HW" ${_eth} " " " " " " " "
+  else
+    printf "${sys_osx_host_frm}\n" "${_nam}" ${_eth} ${_dev} ${_ip4} ${_ms4} ${_gw4}
+  fi
+  gui/line
+  echo "${sys_osx_airport_hdr}"
+  sys/${_os}/${_cmd}/ap
+  gui/line
+  _dns=$(sys/osx/wifi/ip dns)
+  _net=$(sys/osx/wifi/ip net)
+  _bca=$(sys/osx/wifi/ip bcast)
+  _rng=$(sys/osx/wifi/ip range)
+  echo "${sys_osx_network_hdr}"
+  printf "${sys_osx_network_frm}\n" "${_dns}" "${_net}" "${_bca}" "${_rng}"
+}

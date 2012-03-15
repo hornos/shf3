@@ -1,0 +1,118 @@
+
+function help/sys/mgr() {
+  cat << EOF
+
+System Manager
+
+Usage: ${gbn} commands
+
+              in <pkg> - install package
+              se <pkg> - search package
+
+              wifi
+                       off      - disjoin
+                       down     - power down
+                       up       - power up
+                       scan     - scan
+                       con      - connect
+
+              loc               - list locations
+                       <loc>    - switch to location
+              kernel
+                       lsmod    - list modules
+
+OSX: /etc/sudoers
+ %admin ALL = (root) NOPASSWD:/sbin/ipfw
+ %admin ALL = (root) NOPASSWD:/sbin/airport
+ %admin ALL = (root) NOPASSWD:/sbin/ifconfig
+ %admin ALL = (root) NOPASSWD:/opt/local/bin/port
+
+http://osxdaily.com/2007/01/18/airport-the-little-known-command-line-wireless-utility/
+sudo ln -s /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport /sbin/airport
+
+Ubuntu: /etc/sudoers
+ %admin ALL = (root) NOPASSWD:/usr/bin/apt-get
+ %admin ALL = (root) NOPASSWD:/usr/bin/apt-cache
+
+EOF
+  exit ${_false_}
+}
+
+
+function sys/mgr() {
+  local _cmd="${1:-help}"
+  shift
+
+  import sys
+  local _os=$(sys/os)
+  import sys/${_os}
+  if failed $? ; then $failure ; fi
+
+  case "${_cmd}" in
+    help)
+      help/sys/mgr
+    ;;
+
+    in|install)
+      echo
+      msg "Install package"
+      gui/line
+      import sys/${_os}/pkg
+      sys/${_os}/pkg/install $*
+    ;;
+
+    se|search)
+      echo
+      msg "Search packages"
+      gui/line
+      import sys/${_os}/pkg
+      sys/${_os}/pkg/search $*
+    ;;
+
+    loc)
+      echo
+      msg "Location"
+      gui/line
+      sys/${_os}/${_cmd} $*
+    ;;
+
+    lsmod)
+      echo
+      msg "Kernel modules"
+      gui/line
+      sys/${_os}/${_cmd} $*
+    ;;
+
+    wifi)
+      import sys/${_os}/wifi
+      local _opt="${1:-info}"
+      shift
+      case "${_opt}" in
+        off|down|up)
+          echo
+          msg "Wireless: ${_opt}"
+          gui/line
+          sys/${_os}/${_cmd} $*
+        ;;
+
+        scan)
+          echo
+          msg "Broadcasted Wireless Networks"
+          gui/line
+          sys/${_os}/${_cmd}/${_opt} $*
+        ;;
+
+        info)
+          echo
+          msg "Wireless Network Interface"
+          gui/line
+          sys/${_os}/${_cmd}/${_opt} $*
+        ;;
+
+        *)
+          sys/${_os}/${_cmd}/${_opt} $*
+        ;;
+      esac
+    ;;
+  esac
+}
