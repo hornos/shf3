@@ -17,3 +17,5 @@ sys_osx_host_frm="%+32s %-17s %-4s %-15s %-15s %-15s"
 
 sys_osx_network_hdr="                             DNS NETWORK         BROADCAST       RANGE"
 sys_osx_network_frm="%+32s %-15s %-15s %-15s"
+
+sys_osx_kextstat="kextstat"

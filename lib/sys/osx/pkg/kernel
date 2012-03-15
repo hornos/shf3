@@ -2,7 +2,19 @@
 function sys/osx/pkg/search() {
   if empty "$*" ; then $failure; fi
 
-  ${sys_osx_pkg} search $*
+  local _m="${1}"
+  shift
+  case "${_m}" in
+    installed|uninstalled|active|inactive)
+      ${sys_osx_pkg} "${_m}" | grep ${1}
+    ;;
+    all)
+      ${sys_osx_pkg} search "${1}"
+    ;;
+    *)
+      ${sys_osx_pkg} search "${_m}"
+    ;;
+  esac
 }
 
 function sys/osx/pkg/install() {

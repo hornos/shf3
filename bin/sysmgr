@@ -18,6 +18,8 @@ Usage: ${gbn} command  options  description
 
               loc               list locations
                        [loc]    switch to [loc]
+              kernel
+                       lsmod
 
               info
 
@@ -37,14 +39,11 @@ EOF
 
 ### os
 _os=$(sys/os)
-case "${_os}" in
-  osx)
-    import sys/osx
-  ;;
-  linux)
-    import sys/linux
-  ;;
-esac
+import sys/${_os}
+if failed $? ; then
+  msg "OS not found: ${_os}"
+  exit 1
+fi
 
 ### args
 _cmd="${1:-loc}"
@@ -64,6 +63,12 @@ case "${_cmd}" in
   loc)
     echo
     msg "Locations"
+    gui/line
+    sys/${_os}/${_cmd} ${_opt} ${_arg}
+  ;;
+  lsmod)
+    echo
+    msg "Kernel modules"
     gui/line
     sys/${_os}/${_cmd} ${_opt} ${_arg}
   ;;

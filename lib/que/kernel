@@ -17,19 +17,19 @@ function que/sub() {
 
   msg "Job file  : ${_job}"
   ### job file
-  if ! test -r "${_job}" ; then
-    msg "Job file not found"
-    return ${_false_}
+  if ! readable "${_job}" ; then
+    msg "${FUNCNAME}: job file not found ${_job}"
+    $failure
   fi
   source ${_job}
-  msg/debug "Job file imported"
+  # msg/debug "Job file imported"
 
   # basic checks
   local i
   for i in NAME MODE QUEUE RUN ; do
-    if test -z "${!i}" ; then
-      msg "${i} not set"
-      return ${_false_}
+    if empty "${!i}" ; then
+      msg "${FUNCNAME} not set ${i}"
+      $failure
     fi
   done
 
@@ -41,12 +41,12 @@ function que/sub() {
 
   ### queue file
   local _que="${que_dir}/${QUEUE:-default}"
-  if ! test -r "${_que}" ; then
-    msg "Queue file not found"
-    return ${_false_}
+  if ! readable "${_que}" ; then
+    msg "${FUNCNAME}: queue file not found ${_que}"
+    $failure
   fi
   source "${_que}"
-  msg/debug "Queue file imported"
+  # msg/debug "Queue file imported"
 
   # defaults
   QIN=${QIN:-/dev/null}
@@ -54,18 +54,18 @@ function que/sub() {
   QOUT=${QOUT:-StdOut}
 
   for i in QSCHED ; do
-    if test -z "${!i}" ; then
-      msg "${i} not set"
-      return ${_false_}
+    if empty "${!i}" ; then
+      msg "${FUNCNAME}: not set ${i}"
+      $failure
     fi
   done
 
   ### mode
   # autodetect from ESZR
   if test "${MODE}" = "eszr" ; then
-    if test -z "${ESZR_MODE}" ; then
-      msg "ESZR_MODE not found"
-      return ${_false_}
+    if empty "${ESZR_MODE}" ; then
+      msg "${FUNCNAME}: not set ESZR_MODE"
+      $failure
     fi
     MODE="${ESZR_MODE}"
   fi
@@ -74,23 +74,19 @@ function que/sub() {
   if test "${_mode}" = "${_mpi}" ; then
     _mpi=""
   fi
-  # override MPI
-  if ! test -z "${MPI}" ; then
-    _mpi="${MPI}"
-  fi
 
   ### import scheduler
   # autodetect from ESZR
   if test "${QSCHED}" = "eszr" ; then
-    if test -z "${ESZR_SCHEDULER}" ; then
-      msg "ESZR_SCHEDULER not found"
-      return ${_false_}
+    if empty "${ESZR_SCHEDULER}" ; then
+      msg "${FUNCNAME}: not set ESZR_SCHEDULER"
+      $failure
     fi
     QSCHED="${ESZR_SCHEDULER}"
   fi
   local _sch=${QSCHED}
   import que/${_sch}
-  msg/debug "Scheduler ${_sch} imported"
+  # msg/debug "Scheduler ${_sch} imported"
 
   # scheduler batch file
   local _bat="./${_sch}.batch.sh"
@@ -105,8 +101,8 @@ function que/sub() {
   ### resource parameters
   if test "${_mode}" = "omp" ; then
     if test ${NODES} -gt 1 ; then
-      msg "For OMP mode set NODES=1"
-      return ${_false_}
+      msg "${FUNCNAME}: for OMP set NODES=1"
+      $failure
     fi
   fi
 
@@ -116,9 +112,9 @@ function que/sub() {
   ### sockets per node
   # autodetect form ESZR
   if test "${SCKTS}" = "eszr" ; then
-    if test -z "${ESZR_SCKTS}" ; then
-      msg "ESZR_SCKTS not found"
-      return ${_false_}
+    if empty "${ESZR_SCKTS}" ; then
+      msg "${FUNCNAME}: not set ESZR_SCKTS"
+      $failure
     fi
     SCKTS=${ESZR_SCKTS}
   fi
@@ -127,9 +123,9 @@ function que/sub() {
   ### cores per sockets
   # autodetect form ESZR
   if test "${CORES}" = "eszr" ; then
-    if test -z "${ESZR_CORES}" ; then
-      msg "ESZR_CORES not found"
-      return ${_false_}
+    if empty "${ESZR_CORES}" ; then
+      msg "${FUNCNAME}: not set ESZR_CORES"
+      $failure
     fi
     CORES=${ESZR_CORES}
   fi
@@ -138,9 +134,9 @@ function que/sub() {
   ### slots per node (forced)
   # autodetect form ESZR
   if test "${SLTPN}" = "eszr" ; then
-    if test -z "${ESZR_SLTPN}" ; then
-      msg "ESZR_SLTPN not found"
-      return ${_false_}
+    if empty "${ESZR_SLTPN}" ; then
+      msg "${FUNCNAME}: not set ESZR_SLTPN"
+      $failure
     fi
     SLTPN=${ESZR_SLTPN}
   fi
@@ -172,16 +168,15 @@ function que/sub() {
   ### scheduler setup
   echo "### Scheduler: ${_sch}" >> "${_bat}"
   que/${_sch} "${_sub}" "${_bat}"
-  if test $? -gt 0 ; then
-    return ${_false_}
-  fi
+  if failed $? ; then $failure; fi
+
   msg "Scheduler : ${_sch}"
 
   ### login
   if test "${_sub}" = "L" ; then
     echo ""
     answer "Show batch file?"
-    if test $? -eq 0 ; then
+    if success $? ; then
       gui/line
       cat "${_bat}"
       gui/line
@@ -190,26 +185,25 @@ function que/sub() {
     # login
     echo ""
     answer "Queue login?"
-    if test $? -gt 0 ; then
-      return ${_false_}
-    fi
+    if failed $? ; then $failure; fi
+
     sh "${_bat}"
     return $?
   fi
 
   ### batch
   # queue setup
-  if ! test -z "${QSETUP}" ; then
-    echo "### Queue Setup"     >> "${_bat}"
+  if ! empty "${QSETUP}" ; then
+    echo "### Queue Setup"           >> "${_bat}"
     local _s
     for _s in ${QSETUP} ; do
-      echo "source ${_s}"      >> "${_bat}"
+      echo "source ${_s}"            >> "${_bat}"
     done
   fi
 
   # ulimit
-  if ! test -z "${QULIMIT}" ; then
-    echo "${QULIMIT}"          >> "${_bat}"
+  if ! empty "${QULIMIT}" ; then
+    echo "${QULIMIT}"                >> "${_bat}"
   fi
 
   # mail
@@ -219,39 +213,39 @@ function que/sub() {
     echo "Internal mail notifications"
   fi
 
-  # job setup
-  if ! test -z "${SETUP}" ; then
-    echo "### Job Setup"       >> "${_bat}"
+  ### job setup by source
+  if ! empty "${SETUP}" ; then
+    echo "### Job Setup"             >> "${_bat}"
     local _s
     for _s in ${SETUP} ; do
-      echo "source ${_s}"      >> "${_bat}"
+      echo "source ${_s}"            >> "${_bat}"
     done
   fi
 
-  # modules
-  if ! test -z "${MODULE}" ; then
-    echo "### Modules"         >> "${_bat}"
+  ### load environment modules
+  if ! empty "${MODULE}" ; then
+    echo "### Modules"               >> "${_bat}"
     local _m
     for _m in ${MODULE} ; do
-      echo "module load ${_m}" >> "${_bat}"
+      echo "module load ${_m}"       >> "${_bat}"
     done
   fi
 
-  msg "Parallel  : ${MODE}"
+  ### PARALLEL ###
 
+  msg "Parallel  : ${MODE}"
   local _v=${VERBOSE:-0}
 
-  ### common
-  # binding
+  ### cpu binding
   local _bind=""
-  if ! test -z "${BIND}" ; then
+  if ! empty "${BIND}" ; then
     _bind="${BIND}"
     msg "Binding   : ${_bind}"
   fi
 
-  # Profiler
+  ### profiler
   local _prof=""
-  if ! test -z "${PROF}" ; then
+  if ! empty "${PROF}" ; then
     _prof="${PROF}"
     msg "Profiler  : ${_prof}"
   fi
@@ -263,30 +257,31 @@ function que/sub() {
     echo "### MPI Setup" >> "${_bat}"
 
     ### basic checks
-    # SGI MPT Machines
-    if test -z "${_mpi}" ; then
-      msg "Set MPI type"
-      return ${_false_}
+    if empty "${_mpi}" ; then
+      msg "${FUNCNAME}: set MPI type"
+      $failure
     fi
 
     # SGI MPT Perfboost
     local _boost=""
-    if ! test -z "${BOOST}" ; then
+    if ! empty "${BOOST}" ; then
       _boost="${BOOST}"
       msg "Perfboost : ${_boost}"
     fi
 
     # mpirun
-    if test -z "${MPIRUN}" ; then
+    if empty "${MPIRUN}" ; then
       MPIRUN="${que_mpirun}"
     fi
     local _mpirun_opt=""
-    if ! test -z "${MPIRUN_OPT}" ; then
+    if ! empty "${MPIRUN_OPT}" ; then
       _mpirun_opt="${MPIRUN_OPT}"
     fi
 
     # default for MPIOMP
+    # no of mpi processes
     local _np=${_sockets}
+    # mpi process per node
     local _pn=${_sckts}
 
     ### begin MPI OMP hybrid
@@ -301,48 +296,96 @@ function que/sub() {
     ### MPI OMP
     # regular nodes
     local _machines=""
+    local _machinefile=""
+    local _nppn=""
+    local _mpi_opt=""
+
+    # begin mpirun
+    _mpi_opt="export MPI_OPT=\""
+    _mpi_opt="${_mpi_opt} ${_mpirun_opt}"
+
     case ${_mpi} in
       ompi)
-        # Open MPI
-        _machines="-np ${_np} -npernode ${_pn}"
-        # machinefile support: SGE, PBS/Torque, SLURM, LoadLeveler
-        echo "export MPI_OPT=\"${_mpirun_opt} ${_machines} \${NUMA} ${_bind} ${_prof}\""   >> "${_bat}"
-        ;;
+        ### Open MPI
+        # echo "export MPI_OPT=\"${_mpirun_opt} ${_machines} \${NUMA} ${_bind} ${_prof}\""   >> "${_bat}"
+
+        # machinefile: SGE, PBS/Torque, SLURM, LoadLeveler
+        _machinefile=""
+        _machines=""
+
+        # distribution
+        _nppn="-np ${_np} -npernode ${_pn}"
+      ;;
+
       impi)
-        # Intel MPI
-        _machines="-np ${_np} -perhost ${_pn}"
-        # machinefile support: PBS/Torque, SLURM
-        echo "export MPI_OPT=\"${_mpirun_opt} -hosts \${MACHINES} ${_machines} \${NUMA} ${_bind} ${_prof}\""    >> "${_bat}"
-        ;;
+        ### Intel MPI
+        # echo "export MPI_OPT=\"${_mpirun_opt} -hosts \${MACHINES} ${_machines} \${NUMA} ${_bind} ${_prof}\""    >> "${_bat}"
+
+        # machinefile: PBS/Torque, SLURM
+        # set environment by machines
+        _machinefile=""
+        _machines="-hosts \${MACHINES}"
+
+        # distribution
+        _nppn="-np ${_np} -perhost ${_pn}"
+      ;;
+
       pmpi)
-        # Platform MPI
-        echo "export MPI_OPT=\"${_mpirun_opt} -hostlist \${MACHINES} ${_pn} -np ${_np} \${NUMA} ${_bind} ${_prof}\"" >> "${_bat}"
-        ;;
+        ### Platform MPI
+        # echo "export MPI_OPT=\"${_mpirun_opt} -hostlist \${MACHINES} ${_pn} -np ${_np} \${NUMA} ${_bind} ${_prof}\"" >> "${_bat}"
+        # machinefile: PBS?
+        _machinefile=""
+        _machines="-hostlist \${MACHINES}"
+
+        # distribution
+        _nppn="${_pn} -np ${_np}"
+      ;;
+
       mpt)
-        # SGI MPT
-        echo "export MPI_OPT=\"${_mpirun_opt} \${MACHINES} ${_pn} \${NUMA} ${_bind} ${_boost} ${_prof}\"" >> "${_bat}"
-        ;;
+        ### SGI MPT
+        # echo "export MPI_OPT=\"${_mpirun_opt} \${MACHINES} ${_pn} \${NUMA} ${_bind} ${_boost} ${_prof}\"" >> "${_bat}"
+        _machinefile=""
+        _machines="\${MACHINES}"
+
+        # distribution
+        _nppn="${_pn}"
+      ;;
+
       self)
-        local _mpi_opt=""
+        ### Internal
         echo "# Internal MPI used"                        >> "${_bat}"
         echo "export MPI_NUM_SLOTS=${_np}"                >> "${_bat}"
         echo "export MPI_NUM_TASKS=${_pn}"                >> "${_bat}"
 
-        if ! test -z "${_mpirun_opt}" ; then
+        if ! empty "${_mpirun_opt}" ; then
           echo "export MPIRUN_OPTIONS=\"${_mpirun_opt}\"" >> "${_bat}"
         fi
-        ;;
+      ;;
+
       *)
         msg "MPI: ${_mpi} not implemented"
-        return ${_false_}
-        ;;
+        $failure
+      ;;
     esac
+    # end mpirun
 
-    # fmp
+    ### fmp
+    # http://github.com/hornos/fmp
+    echo "export FMP_MPI_NODES=${_np}"                    >> "${_bat}"
     echo "export FMP_MPI_PERNODE=${_pn}"                  >> "${_bat}"
 
-    # prerun
+    ### prerun
+    # TODO: omp mpi merge
     if test "${_mpi}" != "self" ; then
+      if ! readable "${_machinefile}" ; then
+        msg "Machinefile not found: ${_machinefile}"
+        $failure
+      fi
+      local __machines="${_machinefile} ${_machines}"
+      #                     MACHINES      NPPN     NUMA     BINDING  BOOST     PROFILER
+      _mpi_opt="${_mpi_opt} ${__machines} ${_nppn} \${NUMA} ${_bind} ${_boost} ${_prof}"
+
+      echo "${_mpi_opt}\""                                >> "${_bat}"
       echo "export PRERUN=\"${MPIRUN} \${MPI_OPT}\""      >> "${_bat}"
     fi
   fi
@@ -360,15 +403,18 @@ function que/sub() {
         if test ${_v} -gt 2 ; then
           MPI_OPT="-d ${_v} ${MPI_OPT}"         >> "${_bat}"
         fi
-        ;;
+      ;;
+
       impi)
         # Intel MPI
         echo "export I_MPI_DEBUG=${_v}"         >> "${_bat}"
-        ;;
+      ;;
+
       pmpi)
         # Platform MPI
         echo "export MPI_ERROR_LEVEL=${_v}"     >> "${_bat}"
-        ;;
+      ;;
+
       mpt)
         echo "export MPI_VERBOSE=1"             >> "${_bat}"
         echo "export MPI_DSM_VERBOSE=1"         >> "${_bat}"
@@ -384,30 +430,31 @@ function que/sub() {
           echo "export MPI_COLL_OPT_VERBOSE=1"  >> "${_bat}"
           echo "export MPI_STATS=1"             >> "${_bat}"
         fi
-        ;;
+      ;;
+
       self)
         echo "# Internal MPI used"              >> "${_bat}"
-        ;;
+      ;;
+
       *)
-        msg "MPI: ${_mpi} not implemented"
-        return ${_false_}
-        ;;
+        msg "${FUNCNAME}: not implemented ${_mpi}"
+        $failure
+      ;;
     esac
   fi
-
   ### end verbose
 
   ### Toggle Options
-  if ! test -z "${TOGGLE}" ; then
-    echo "### Options"                      >> "${_bat}"
+  if ! empty "${TOGGLE}" ; then
+    echo "### Options"                          >> "${_bat}"
     for i in ${TOGGLE} ; do
-      echo "export ${i}=1"                  >> "${_bat}"
+      echo "export ${i}=1"                      >> "${_bat}"
     done
   fi
 
   ### OMP
   if test "${_mode}" = "omp" ; then
-    echo "export PRERUN=\"${_bind} ${_prof}\"" >> "${_bat}"
+    echo "export PRERUN=\"${_bind} ${_prof}\""  >> "${_bat}"
     _threads=${_tasks}
   fi
 
@@ -427,9 +474,11 @@ function que/sub() {
       echo "export KMP_AFFINITY=${KMPAFF}"  >> "${_bat}"
     fi
 
+    # TODO OMP 2.0
     # OMP 3.0
     echo "export OMP_PROC_BIND=TRUE"        >> "${_bat}"
     echo "export OMP_NESTED=FALSE"          >> "${_bat}"
+    # TODO stacksize
     echo "export OMP_STACKSIZE=12M"         >> "${_bat}"
     echo "export KMP_STACKSIZE=12000000"    >> "${_bat}"
   else
@@ -446,9 +495,9 @@ function que/sub() {
     # check
     if ${_chk} ; then
       que/check "${RUN}"
-      if test $? -gt 0 ; then
-        msg "Job check failed"
-        return ${_false_}
+      if failed $? ; then
+        msg "${FUNCNAME}: job check failed"
+        $failure
       fi
     fi
   fi
@@ -457,7 +506,7 @@ function que/sub() {
   ### submit
   echo ""
   answer "Show batch file?"
-  if test $? -eq 0 ; then
+  if success $? ; then
     gui/line
     cat "${_bat}"
     gui/line
@@ -466,15 +515,13 @@ function que/sub() {
   local _sub="que_${_sch}_qsub"
   _sub=${!_sub}
   if ! $(installed "${_sub}") ; then
-    msg "${_sub} not found"
-    return ${_false_}
+    msg "${FUNCNAME}: not found ${_sub}"
+    $failure
   fi
 
   # submit
   answer "Submit job?"
-  if test $? -gt 0 ; then
-    return ${_false_}
-  fi
+  if failed $? ; then $failure; fi
 
   # clean stderr/out
   local i
@@ -484,12 +531,12 @@ function que/sub() {
     fi
   done
   ${_sub} "${_bat}"
-  if test $? -gt 0 ; then
-    msg "Submit failed"
-    return ${_false_}
+  if failed $? ; then
+    msg "${FUNCNAME}: submit failed"
+    $failure
   fi
   msg "Submit success"
-  return ${_true_}
+  $success
 }
 
 
@@ -517,15 +564,15 @@ function que/check() {
     esac
   done
 
-  if test -z "${_prg}" ; then
-    msg "Program module not set"
-    return ${_false_}
+  if empty "${_prg}" ; then
+    msg "${FUNCNAME}: program module not set"
+    $failed
   fi
 
-  if test -z "${_guide}" || \
-   ! test -r "${_guide}" ; then
-    msg "Guide not found: ${_guide}"
-    return ${_false_}
+  if empty "${_guide}" || \
+   ! readable "${_guide}" ; then
+    msg "${FUNCNAME}: guide not found ${_guide}"
+    $failure
   fi
 
   import run

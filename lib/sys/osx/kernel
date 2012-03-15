@@ -238,3 +238,21 @@ function sys/osx/wifi/stat() {
   local _d=$(sys/osx/wifi/dev)
   ${sys_osx_slurm} -s -i "${_d}"
 }
+
+function sys/osx/lsmod() {
+  if test "${1}" = "kext" ; then
+    ${sys_osx_kextstat}
+    return $?
+  fi
+  printf "%4s %58s %8s %s\n" "No" "Module" "Size" "Used by"
+  ${sys_osx_kextstat} -l -k | \
+  awk '{
+    no=$1;
+    mod=$6;
+    size=$4;
+    split($0,a,"<");
+    sub(">","",a[2]);
+    used=a[2];
+    printf("%4d %58s %8d %s\n",no,mod,size,used);
+  }'
+}
