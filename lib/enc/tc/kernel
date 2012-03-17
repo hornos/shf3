@@ -132,7 +132,7 @@ function enc/tc/mgr() {
       enc/tc/init "${_h}"
     ;;
     LIST)
-      ${enc_tc} -l
+      ${enc_tc} ${enc_tc_opt} -l
       # format
       local _frm1="%-26s%-42s\n"
 
