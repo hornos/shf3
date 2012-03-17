@@ -107,7 +107,12 @@ function enc/tc/mnt() {
     _opt="${_opt} --protect-hidden=no"
   fi
 
-  _opt="${_opt} --filesystem=${mid_tc_fs} --fs-options=${mid_tc_fs_opt}"
+  if ! empty "${mid_tc_fs}" ; then
+    _opt="${_opt} --filesystem=${mid_tc_fs}"
+    if ! empty "${mid_tc_fs_opt}" ; then
+      _opt="${_opt} --fs-options=${mid_tc_fs_opt}"
+    fi
+  fi
 
   local _cmd="${enc_tc} ${_opt} --mount ${_url} \"${_src}\""
   msg/debug "${_cmd}"
