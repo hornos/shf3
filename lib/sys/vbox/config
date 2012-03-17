@@ -1,0 +1,4 @@
+sys_linux_vbox_if="/etc/network/interfaces"
+sys_linux_vbox_mc="sudo macchanger"
+sys_linux_vbox_ifcfg="sudo ifconfig"
+

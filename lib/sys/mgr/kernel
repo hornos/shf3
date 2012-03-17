@@ -1,4 +1,27 @@
 
+function help/sys/mgr/vbox() {
+  cat << EOF
+vbox commands:
+  host
+  elan
+  wlan
+EOF
+  exit ${_false_}
+}
+
+function help/sys/mgr/wifi() {
+  cat << EOF
+wifi commands:
+  off      - disjoin
+  down     - power down
+  up       - power up
+  scan     - scan
+  con      - connect
+EOF
+  exit ${_false_}
+}
+
+
 function help/sys/mgr() {
   cat << EOF
 
@@ -6,20 +29,15 @@ System Manager
 
 Usage: ${gbn} commands
 
-              in <pkg> - install package
-              se <pkg> - search package
+Commands:
+  in <pkg>  - install package
+  se <pkg>  - search package
 
-              wifi
-                       off      - disjoin
-                       down     - power down
-                       up       - power up
-                       scan     - scan
-                       con      - connect
+  wifi      - wifi
 
-              loc               - list locations
-                       <loc>    - switch to location
-              kernel
-                       lsmod    - list modules
+  loc <loc> - list/switch locations
+
+  kernel    - kernel
 
 OSX: /etc/sudoers
  %admin ALL = (root) NOPASSWD:/sbin/ipfw
@@ -83,11 +101,29 @@ function sys/mgr() {
       sys/${_os}/${_cmd} $*
     ;;
 
-    wifi)
-      import sys/${_os}/wifi
+    # vbox linux guest
+    vbox)
+      import sys/${_os}/vbox
       local _opt="${1:-info}"
       shift
       case "${_opt}" in
+        host|elan|wlan|info)
+          sys/${_os}/vbox/lan ${_opt} $*
+        ;;
+      esac
+    ;;
+
+    wifi)
+      import sys/${_os}/wifi
+      local _opt="${1:-help}"
+      shift
+      case "${_opt}" in
+        help)
+          echo
+          msg "Wireless Help"
+          gui/line
+          help/sys/mgr/wifi
+        ;;
         off|down|up)
           echo
           msg "Wireless: ${_opt}"

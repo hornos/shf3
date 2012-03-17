@@ -1,1 +1,2 @@
 enc_tc="/Applications/TrueCrypt.app/Contents/MacOS/TrueCrypt"
+enc_opt="--text"
