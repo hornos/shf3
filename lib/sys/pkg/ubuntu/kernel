@@ -1,0 +1,22 @@
+function help/sys/pkg/ubuntu() {
+  cat << EOF
+Package manager for Ubuntu is based on apt.
+
+/etc/sudoers
+ %admin ALL = (root) NOPASSWD:/usr/bin/apt-get
+ %admin ALL = (root) NOPASSWD:/usr/bin/apt-cache
+
+EOF
+}
+
+function sys/pkg/ubuntu/search() {
+   if empty "$*" ; then $failure; fi
+
+  ${sys_pkg_ubuntu}cache search $*
+}
+
+function sys/pkg/ubuntu/install() {
+   if empty "$*" ; then $failure; fi
+
+  ${sys_pkg_ubuntu}get install $*
+}

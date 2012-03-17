@@ -1,0 +1,38 @@
+function help/sys/pkg/osx() {
+  cat << EOF
+Package manager for OS X is based on Mac Ports: http://www.macports.org/
+
+/etc/sudoers
+ %admin ALL = (root) NOPASSWD:/opt/local/bin/port
+EOF
+}
+
+function sys/pkg/osx/search() {
+  if empty "$*" ; then $failure; fi
+
+  local _m="${1}"
+  shift
+  case "${_m}" in
+    installed|uninstalled|active|inactive)
+      ${sys_pkg_osx} "${_m}" | grep ${1}
+    ;;
+    all)
+      ${sys_pkg_osx} search "${1}"
+    ;;
+    *)
+      ${sys_pkg_osx} search "${_m}"
+    ;;
+  esac
+}
+
+function sys/pkg/osx/install() {
+  if empty "$*" ; then $failure; fi
+
+  ${sys_pkg_osx} install $*
+}
+
+function sys/pkg/osx/info() {
+  if empty "$*" ; then $failure; fi
+
+  ${sys_pkg_osx} info $*
+}

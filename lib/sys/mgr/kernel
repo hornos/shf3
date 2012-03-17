@@ -1,27 +1,4 @@
 
-function help/sys/mgr/vbox() {
-  cat << EOF
-vbox commands:
-  host
-  elan
-  wlan
-EOF
-  exit ${_false_}
-}
-
-function help/sys/mgr/wifi() {
-  cat << EOF
-wifi commands:
-  off      - disjoin
-  down     - power down
-  up       - power up
-  scan     - scan
-  con      - connect
-EOF
-  exit ${_false_}
-}
-
-
 function help/sys/mgr() {
   cat << EOF
 
@@ -30,125 +7,63 @@ System Manager
 Usage: ${gbn} commands
 
 Commands:
-  in <pkg>  - install package
-  se <pkg>  - search package
+  os        - OS
 
-  wifi      - wifi
+  pkg       - packages
 
   loc <loc> - list/switch locations
 
-  kernel    - kernel
+  net       - network
 
 OSX: /etc/sudoers
  %admin ALL = (root) NOPASSWD:/sbin/ipfw
  %admin ALL = (root) NOPASSWD:/sbin/airport
  %admin ALL = (root) NOPASSWD:/sbin/ifconfig
- %admin ALL = (root) NOPASSWD:/opt/local/bin/port
 
 http://osxdaily.com/2007/01/18/airport-the-little-known-command-line-wireless-utility/
 sudo ln -s /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport /sbin/airport
 
-Ubuntu: /etc/sudoers
- %admin ALL = (root) NOPASSWD:/usr/bin/apt-get
- %admin ALL = (root) NOPASSWD:/usr/bin/apt-cache
-
 EOF
-  exit ${_false_}
+  $failure
 }
 
-
 function sys/mgr() {
+  import sys
+
   local _cmd="${1:-help}"
   shift
-
-  import sys
-  local _os=$(sys/os)
-  import sys/${_os}
-  if failed $? ; then $failure ; fi
 
   case "${_cmd}" in
     help)
       help/sys/mgr
     ;;
 
-    in|install)
+    loc|location)
       echo
-      msg "Install package"
+      msg "Network Location"
       gui/line
-      import sys/${_os}/pkg
-      sys/${_os}/pkg/install $*
+      import sys/net
+      sys/net/loc $*
     ;;
 
-    se|search)
-      echo
-      msg "Search packages"
-      gui/line
-      import sys/${_os}/pkg
-      sys/${_os}/pkg/search $*
+    # submenus
+    os)
+      import sys/os
+      sys/os $*
     ;;
 
-    loc)
-      echo
-      msg "Location"
-      gui/line
-      sys/${_os}/${_cmd} $*
+    pkg|package)
+      import sys/pkg
+      sys/pkg $*
     ;;
 
-    lsmod)
-      echo
-      msg "Kernel modules"
-      gui/line
-      sys/${_os}/${_cmd} $*
+    net|network)
+      import sys/net
+      sys/net $*
     ;;
 
-    # vbox linux guest
-    vbox)
-      import sys/${_os}/vbox
-      local _opt="${1:-info}"
-      shift
-      case "${_opt}" in
-        host|elan|wlan|info)
-          sys/${_os}/vbox/lan ${_opt} $*
-        ;;
-      esac
-    ;;
-
-    wifi)
-      import sys/${_os}/wifi
-      local _opt="${1:-help}"
-      shift
-      case "${_opt}" in
-        help)
-          echo
-          msg "Wireless Help"
-          gui/line
-          help/sys/mgr/wifi
-        ;;
-        off|down|up)
-          echo
-          msg "Wireless: ${_opt}"
-          gui/line
-          sys/${_os}/${_cmd} $*
-        ;;
-
-        scan)
-          echo
-          msg "Broadcasted Wireless Networks"
-          gui/line
-          sys/${_os}/${_cmd}/${_opt} $*
-        ;;
-
-        info)
-          echo
-          msg "Wireless Network Interface"
-          gui/line
-          sys/${_os}/${_cmd}/${_opt} $*
-        ;;
-
-        *)
-          sys/${_os}/${_cmd}/${_opt} $*
-        ;;
-      esac
+    *|help)
+      help/sys/mgr
     ;;
   esac
 }
