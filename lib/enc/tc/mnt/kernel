@@ -1,6 +1,6 @@
 function enc/tc/mnt/ls() {
   import enc/tc
-  ${enc_tc} -l
+  ${enc_tc} ${enc_tc_opt} -l
 }
 
 function enc/tc/umnt() {
