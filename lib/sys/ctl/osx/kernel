@@ -1,0 +1,37 @@
+function help/sys/ctl/osx() {
+  cat << EOF
+
+On Os X query the kernel state by sysctl.
+
+EOF
+}
+
+function sys/ctl/osx/get() {
+  local _mib=$(ns/mib "${1}")
+  if empty "${_mib}" ; then $failure; fi
+
+  ${sys_ctl_osx} "${_mib}"
+}
+
+function sys/ctl/osx/set() {
+  local _mib=$(ns/mib "${1}")
+  shift
+  local _val="${1}"
+
+  if empty "${_mib}" ; then $failure; fi
+
+  if empty "${_val}" ; then $failure; fi
+
+  ${sys_ctl_osx} -w "${_mib}=${_val}"
+}
+
+function sys/ctl/osx/all() {
+  ${sys_ctl_osx} -a
+}
+
+function sys/ctl/osx/search() {
+  local _s="${1}"
+  if empty "${_s}" ; then $failure; fi
+
+  sys/ctl/osx/all | grep "${_s}"
+}

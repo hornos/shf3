@@ -7,13 +7,14 @@ System Manager
 Usage: ${gbn} commands
 
 Commands:
-  os        - OS
+  ctl       - OS
 
   pkg       - packages
 
+  net       - network
+
   loc <loc> - list/switch locations
 
-  net       - network
 
 OSX: /etc/sudoers
  %admin ALL = (root) NOPASSWD:/sbin/ipfw
@@ -34,22 +35,10 @@ function sys/mgr() {
   shift
 
   case "${_cmd}" in
-    help)
-      help/sys/mgr
-    ;;
-
-    loc|location)
-      echo
-      msg "Network Location"
-      gui/line
-      import sys/net
-      sys/net/loc $*
-    ;;
-
     # submenus
-    os)
-      import sys/os
-      sys/os $*
+    ctl|control|kernel)
+      import sys/ctl
+      sys/ctl $*
     ;;
 
     pkg|package)
@@ -60,6 +49,15 @@ function sys/mgr() {
     net|network)
       import sys/net
       sys/net $*
+    ;;
+
+    # shortcuts
+    loc|location)
+      echo
+      msg "Network Location"
+      gui/line
+      import sys/net
+      sys/net/loc $*
     ;;
 
     *|help)

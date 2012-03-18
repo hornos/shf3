@@ -1,0 +1,40 @@
+# lsmod rmmod modprobe
+
+# set / get sysctl vs /proc apple notation . <-> /proc/
+
+function help/sys/ctl() {
+  import sys
+  sys/help ${FUNCNAME} $*
+}
+
+function sys/ctl() {
+  import sys
+  local _cmd=${1:-help}
+  shift
+
+  echo
+  msg "Kernel manager"
+  gui/line
+
+  case "${_cmd}" in
+    get)
+      sys/call sys/ctl get $*
+    ;;
+
+    set)
+      sys/call sys/ctl set $*
+    ;;
+
+    all)
+      sys/call sys/ctl all $*
+    ;;
+
+    se|search)
+      sys/call sys/ctl search $*
+    ;;
+
+    *|help)
+      help/sys/ctl $*
+    ;;
+  esac
+}

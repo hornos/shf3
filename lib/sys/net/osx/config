@@ -1,5 +1,4 @@
 sys_osx_networksetup="networksetup"
-sys_osx_kextstat="kextstat"
 
 sys_osx_airport="sudo /sbin/airport"
 sys_osx_ifconfig="sudo /sbin/ifconfig"

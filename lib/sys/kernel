@@ -81,3 +81,69 @@ function sys/cksum() {
   fi
   field "$(${sys_cksum} ${_f})" 4 " "
 }
+
+function sys/call() {
+  import sys
+
+  local _mod="${1}"
+  shift
+  local _func="${1}"
+  shift
+
+  if empty "${_mod}" ; then $failure; fi
+
+  if ! empty "${_func}" ; then
+    _func="/${_func}"
+  fi
+  local _mod=${_mod##help/}
+  local _os=$(sys/os)
+  _mod="${_mod}/${_os}"
+  case "${_os}" in
+    osx)
+      import ${_mod}
+      if failed $? ; then $failure; fi
+
+      ${_mod}${_func} $*
+    ;;
+
+    linux)
+      local _lnx=$(sys/linux)
+      _mod="${_mod}/${_lnx}"
+      import ${_mod}
+      if failed $? ; then $failure; fi
+
+      ${_mod}${_func} $*
+    ;;
+  esac
+}
+
+function sys/help() {
+  import sys
+
+  local _mod="${1}"
+  shift
+
+  if empty "${_mod}" ; then $failure; fi
+
+  local _mod=${_mod##help/}
+  local _os=$(sys/os)
+  _mod="${_mod}/${_os}"
+  case "${_os}" in
+    osx)
+      import ${_mod}
+      if failed $? ; then $failure; fi
+
+      help/${_mod} $*
+    ;;
+
+    linux)
+      local _lnx=$(sys/linux)
+      _mod="${_mod}/${_lnx}"
+      import ${_mod}
+      if failed $? ; then $failure; fi
+
+      help/${_mod} $*
+    ;;
+  esac
+  $failure
+}

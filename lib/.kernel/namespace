@@ -36,6 +36,16 @@ function ns/var() {
   echo "${_f}" | sed s/\\//_/g
 }
 
+function ns/mib() {
+  local _f=${1:-${FUNCNAME}}
+  echo "${_f}" | sed s/[/]/\./g
+}
+
+function ns/bim() {
+  local _f=${1:-${FUNCNAME}}
+  echo "${_f}" | sed s/[.]/\\//g
+}
+
 function ns/var/io() {
   local _c="${1}"
   local _i="${2}"

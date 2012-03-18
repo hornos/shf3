@@ -1,19 +1,7 @@
 function help/sys/pkg() {
   import sys
-  local _os=$(sys/os)
-
-  case "${_os}" in
-    osx)
-      import sys/pkg/osx
-      help/sys/pkg/osx
-    ;;
-    linux)
-      local _lnx=$(sys/linux)
-      import sys/pkg/${_lnx}
-      help/sys/pkg/${_lnx}
-    ;;
-  esac
-  exit ${_false_}
+  sys/help ${FUNCNAME} $*
+  $failure
 }
 
 function sys/pkg() {
@@ -26,74 +14,19 @@ function sys/pkg() {
 
   case "${_cmd}" in
     info)
-      sys/pkg/info $*
+      sys/call sys/pkg info $*
     ;;
 
     in|install)
-      sys/pkg/install $*
+      sys/call sys/pkg install $*
     ;;
 
     se|search)
-      sys/pkg/search $*
+      sys/call sys/pkg search $*
     ;;
 
     *|help)
       help/sys/pkg
-    ;;
-  esac
-}
-
-function sys/pkg/search() {
-  import sys
-  local _os=$(sys/os)
-
-  case "${_os}" in
-    osx)
-      import sys/pkg/osx
-      sys/pkg/osx/search $*
-    ;;
-    linux)
-      local _lnx=$(sys/linux)
-      import sys/pkg/${_lnx}
-      sys/pkg/${_lnx}/search $*
-    ;;
-  esac
-}
-
-function sys/pkg/install() {
-  import sys
-  local _os=$(sys/os)
-
-  answer "Do you want to install $*?"
-  if failed $?; then $failure; fi
-
-  case "${_os}" in
-    osx)
-      import sys/pkg/osx
-      sys/pkg/osx/install $*
-    ;;
-    linux)
-      local _lnx=$(sys/linux)
-      import sys/pkg/${_lnx}
-      sys/pkg/${_lnx}/install $*
-    ;;
-  esac
-}
-
-function sys/pkg/info() {
-  import sys
-  local _os=$(sys/os)
-
-  case "${_os}" in
-    osx)
-      import sys/pkg/osx
-      sys/pkg/osx/info $*
-    ;;
-
-    linux)
-      local _lnx=$(sys/linux)
-      import sys/pkg/${_lnx}
-      sys/pkg/${_lnx}/info $*
     ;;
   esac
 }
