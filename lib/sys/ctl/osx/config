@@ -1,1 +1,2 @@
 sys_ctl_osx="sysctl"
+sys_ctl_osx_kextstat="kextstat"

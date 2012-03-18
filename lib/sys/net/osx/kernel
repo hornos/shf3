@@ -1,5 +1,17 @@
 # TODO: refac
 
+function help/sys/net/osx() {
+  cat << EOF
+OSX: /etc/sudoers
+ %admin ALL = (root) NOPASSWD:/sbin/ipfw
+ %admin ALL = (root) NOPASSWD:/sbin/airport
+ %admin ALL = (root) NOPASSWD:/sbin/ifconfig
+
+http://osxdaily.com/2007/01/18/airport-the-little-known-command-line-wireless-utility/
+sudo ln -s /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport /sbin/airport
+EOF
+}
+
 function sys/net/osx/loc() {
   local _l="${1}"
   local _loc=$(${sys_osx_networksetup} -getcurrentlocation)

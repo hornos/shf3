@@ -1,0 +1,2 @@
+sys_ctl_ubuntu_proc="/proc"
+sys_ctl_ubuntu_lsmod="lsmod"
