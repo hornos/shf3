@@ -20,3 +20,11 @@ function sys/pkg/ubuntu/install() {
 
   ${sys_pkg_ubuntu}get install $*
 }
+
+function sys/pkg/ubuntu/refresh() {
+  ${sys_pkg_ubuntu}get update $*
+}
+
+function sys/pkg/ubuntu/update() {
+  ${sys_pkg_ubuntu}get upgrade $*
+}

@@ -4,16 +4,28 @@ function help/sys/pkg() {
   $failure
 }
 
+### zypper interface
+# repos|lr      - repo list
+# refresh|ref   - refresh repos (update,selfupdate)
+# addrepo|ar    - add repo
+# removerepo|rr - remove repo
+# install|in
+# remove|rm
+# list-updates|lu
+# update|up     - update(upgrade)
+# search|se
+# info|if
+
 function sys/pkg() {
   local _cmd=${1:-help}
   shift
 
   echo
-  msg "Package manager"
+  msg "Package Manager"
   gui/line
 
   case "${_cmd}" in
-    info)
+    if|info)
       sys/call sys/pkg info $*
     ;;
 
