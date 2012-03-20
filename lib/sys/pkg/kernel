@@ -5,16 +5,7 @@ function help/sys/pkg() {
 }
 
 ### zypper interface
-# repos|lr      - repo list
-# refresh|ref   - refresh repos (update,selfupdate)
-# addrepo|ar    - add repo
-# removerepo|rr - remove repo
-# install|in
-# remove|rm
-# list-updates|lu
-# update|up     - update(upgrade)
-# search|se
-# info|if
+# TODO: patch
 
 function sys/pkg() {
   local _cmd=${1:-help}
@@ -25,16 +16,51 @@ function sys/pkg() {
   gui/line
 
   case "${_cmd}" in
-    if|info)
-      sys/call sys/pkg info $*
+
+    # Repo list
+    lr|repos)
+      sys/call sys/pkg repos $*
+    ;;
+
+    # Refresh repos
+    ref|refresh)
+      sys/call sys/pkg refresh $*
+    ;;
+
+    # Add repo
+    ar|addrepo)
+      sys/call sys/pkg addrepo $*
+    ;;
+
+    # Remove repo
+    rr|removerepo
+      sys/call sys/pkg removerepo $*
     ;;
 
     in|install)
       sys/call sys/pkg install $*
     ;;
 
+    rm|remove)
+      sys/call sys/pkg remove $*
+    ;;
+
+    # List updates
+    lu|list-updates)
+      sys/call sys/pkg listupdates $*
+    ;;
+
+    # Update
+    up|update)
+      sys/call sys/pkg update $*
+    ;;
+
     se|search)
       sys/call sys/pkg search $*
+    ;;
+
+    if|info)
+      sys/call sys/pkg info $*
     ;;
 
     *|help)

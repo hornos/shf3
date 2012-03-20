@@ -14,23 +14,24 @@ EOF
 
 function sys/net/osx/loc() {
   local _l="${1}"
-  local _loc=$(${sys_osx_networksetup} -getcurrentlocation)
+  local _loc=$(${sys_net_osx_networksetup} -getcurrentlocation)
 
   if ! empty "${_l}" ; then
     if test "${_l}" = "${_loc}" ; then
       msg "On location: ${_l}"
       $success
     fi
-    ${sys_osx_networksetup} -switchtolocation "${_l}" &>/dev/null
+    ${sys_net_osx_networksetup} -switchtolocation "${_l}" &>/dev/null
     if failed $? ; then
-      msg "Not found: ${_l}"
+      msg "Location failed: ${_l}"
       $failure
     fi
     msg "New location: ${_l}"
     $success
   fi
 
-  ${sys_osx_networksetup} -listlocations | \
+  # list locations
+  ${sys_net_osx_networksetup} -listlocations | \
   awk -v l="${_loc}" '{
     if($0==l)
       print " *",$0;
@@ -39,16 +40,38 @@ function sys/net/osx/loc() {
   }'
 }
 
-function sys/osx/wifi() {
-  import sys/mac
-  import sys/osx
+function sys/net/osx/dev() {
+  local _d="${1:-wifi}"
+  local _dev=""
+  case "${_d}" in
+    wifi)
+      # TODO test Lion
+      _dev="AirPort"
+    ;;
+    lan)
+      _dev="Ethernet"
+    ;;
+  esac
 
+  ${sys_net_osx_networksetup} -listallhardwareports | \
+  awk -v dev="${_dev}" 'BEGIN{ap=0;}{
+    if(match($0,dev))
+      ap=1
+    if(ap) {
+      if(match($0,"Device")) {
+        print $2;
+      }
+    }
+  }'
+}
+
+function sys/net/osx/wifi() {
   local _o=${1:-info}
   local _d=${2}
 
   if empty "${_d}" ; then
     # autodetect
-    _d=$(sys/osx/wifi/dev)
+    _d=$(sys/net/osx/dev wifi)
     if empty "${_d}" ; then
       echo ""
       $failure
@@ -57,22 +80,29 @@ function sys/osx/wifi() {
 
   case "${_o}" in
     off)
-      ${sys_osx_airport} -z
+      ${sys_net_osx_airport} -z
     ;;
     down)
-      ${sys_osx_networksetup} -setairportpower ${_d} off
+      ${sys_net_osx_networksetup} -setairportpower ${_d} off
     ;;
     up)
-      ${sys_osx_networksetup} -setairportpower ${_d} on
+      ${sys_net_osx_networksetup} -setairportpower ${_d} on
+    ;;
+    scan)
     ;;
   esac
 }
 
-function sys/osx/wifi/restart() {
-  sys/osx/wifi down
+function sys/net/osx/wifi/restart() {
+  sys/net/osx/wifi down
   sleep 1
-  sys/osx/wifi up
+  sys/net/osx/wifi up
 }
+
+function sys/net/osx/wifi/scan() {
+  ${sys_net_osx_airport} -s
+}
+
 
 function sys/osx/wifi/spoof() {
   import sys/mac
@@ -90,22 +120,7 @@ function sys/osx/wifi/spoof() {
   msg "${_m}"
 }
 
-function sys/osx/wifi/scan() {
-  ${sys_osx_airport} -s
-}
 
-function sys/osx/wifi/dev() {
-  ${sys_osx_networksetup} -listallhardwareports | \
-  awk 'BEGIN{ap=0;}{
-    if(match($0,"AirPort"))
-      ap=1
-    if(ap) {
-      if(match($0,"Device")) {
-        print $2;
-      }
-    }
-  }'
-}
 
 function sys/osx/wifi/ether() {
   local _t="${1}"

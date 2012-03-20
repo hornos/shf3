@@ -125,3 +125,7 @@ function check() {
   msg "import path    = ${gip}"
   msg "loaded modules = ${gim}"
 }
+
+function timestamp() {
+  date +%Y-%m-%d-%H-%M-%S
+}

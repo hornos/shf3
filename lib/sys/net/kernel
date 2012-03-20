@@ -1,0 +1,31 @@
+
+function help/sys/net() {
+  import sys
+  sys/help ${FUNCNAME} $*
+}
+
+function sys/net() {
+  import sys
+  local _cmd=${1:-help}
+  shift
+
+  case "${_cmd}" in
+    # set location
+    loc)
+      sys/call sys/net loc $*
+    ;;
+
+    wifi)
+      sys/call sys/net wifi $*
+    ;;
+
+    # virtualbox guest
+    elan|wlan|send|recv)
+      sys/call sys/net "${_cmd}" $*
+    ;;
+
+    *|help)
+      help/sys/net $*
+    ;;
+  esac
+}

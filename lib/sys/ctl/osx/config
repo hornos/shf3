@@ -1,2 +1,5 @@
 sys_ctl_osx="sysctl"
 sys_ctl_osx_kextstat="kextstat"
+sys_ctl_osx_kextunload="kextunload"
+sys_ctl_osx_kextutil="kextutil"
+

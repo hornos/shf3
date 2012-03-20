@@ -7,6 +7,80 @@ Package manager for OS X is based on Mac Ports: http://www.macports.org/
 EOF
 }
 
+function sys/pkg/osx/repos() {
+  if ! readable "${sys_pkg_osx_repos}" ; then
+    msg "Repos not found: ${sys_pkg_osx_repos}"
+    $failure
+  fi
+  cat "${sys_pkg_osx_repos}" | \
+  awk '/^[a-z]+:/{print}'
+}
+
+function sys/pkg/osx/refresh() {
+  answer "Refresh repos?"
+  if failed $?; $failure; fi
+
+  ${sys_pkg_osx} selfupdate
+}
+
+function sys/pkg/osx/addrepo() {
+  local _r="${*}"
+  if ! readable "${sys_pkg_osx_repos}" ; then
+    msg "Repos not found: ${sys_pkg_osx_repos}"
+    $failure
+  fi
+  msg "New repo: ${_r}"
+  answer "Add new repo?"
+  if failed $? ; then $failure; fi
+
+  # save
+  local _ts=$(timestamp)
+  local _sav="${sys_pkg_osx_repos}.${_ts}"
+  cp -fv "${sys_pkg_osx_repos}" "${_sav}"
+  sudo echo "${_r}" >> "${sys_pkg_osx_repos}"
+  sys/pkg/osx/refresh
+}
+
+function sys/pkg/osx/removerepo() {
+  answer "Edit ${sys_pkg_osx_repos}?"
+  if failed $?; $failure; fi
+
+  sudo mc -e "${sys_pkg_osx_repos}"
+  sys/pkg/osx/refresh
+}
+
+function sys/pkg/osx/install() {
+  if empty "$*" ; then $failure; fi
+
+  ${sys_pkg_osx} install $*
+}
+
+function sys/pkg/osx/remove() {
+  if empty "$*" ; then $failure; fi
+
+  ${sys_pkg_osx} uninstall $*
+}
+
+function sys/pkg/osx/listupdate() {
+  ${sys_pkg_osx} list $*
+}
+
+function sys/pkg/osx/update() {
+  ${sys_pkg_osx} upgrade $*
+}
+
+function sys/pkg/osx/info() {
+  if empty "$*" ; then $failure; fi
+
+  ${sys_pkg_osx} info $*
+}
+
+# function sys/pkg/osx/search() {
+#   if empty "$*" ; then $failure; fi
+#
+#   ${sys_pkg_osx} search $*
+# }
+
 function sys/pkg/osx/search() {
   if empty "$*" ; then $failure; fi
 
@@ -23,16 +97,4 @@ function sys/pkg/osx/search() {
       ${sys_pkg_osx} search "${_m}"
     ;;
   esac
-}
-
-function sys/pkg/osx/install() {
-  if empty "$*" ; then $failure; fi
-
-  ${sys_pkg_osx} install $*
-}
-
-function sys/pkg/osx/info() {
-  if empty "$*" ; then $failure; fi
-
-  ${sys_pkg_osx} info $*
 }

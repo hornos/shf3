@@ -9,10 +9,46 @@ Package manager for Ubuntu is based on apt.
 EOF
 }
 
-function sys/pkg/ubuntu/search() {
-   if empty "$*" ; then $failure; fi
+function sys/pkg/ubuntu/repos() {
+  if ! readable "${sys_pkg_ubuntu_repos}" ; then
+    msg "Repos not found: ${sys_pkg_ubuntu_repos}"
+    $failure
+  fi
+  cat "${sys_pkg_ubuntu_repos}" | \
+  awk '/^[a-z]+/{print}'
+}
 
-  ${sys_pkg_ubuntu}cache search $*
+function sys/pkg/ubuntu/refresh() {
+  answer "Refresh repos?"
+  if failed $?; $failure; fi
+
+  ${sys_pkg_ubuntu}get update $*
+}
+
+function sys/pkg/ubuntu/addrepo() {
+  local _r="${*}"
+  if ! readable "${sys_pkg_ubuntu_repos}" ; then
+    msg "Repos not found: ${sys_pkg_ubuntu_repos}"
+    $failure
+  fi
+  msg "New repo: ${_r}"
+  answer "Add new repo?"
+  if failed $? ; then $failure; fi
+
+  # save
+  local _ts=$(timestamp)
+  local _sav="${sys_pkg_ubuntu_repos}.${_ts}"
+  cp -fv "${sys_pkg_ubuntu_repos}" "${_sav}"
+  sudo echo "${_r}" >> "${sys_pkg_ubuntu_repos}"
+  sys/pkg/ubuntu/refresh
+}
+
+function sys/pkg/ubuntu/removerepo() {
+  answer "Edit ${sys_pkg_ubuntu_repos}?"
+  if failed $?; $failure; fi
+
+  sudo mc -e "${sys_pkg_ubuntu_repos}"
+  sys/pkg/ubuntu/refresh
 }
 
 function sys/pkg/ubuntu/install() {
@@ -21,10 +57,28 @@ function sys/pkg/ubuntu/install() {
   ${sys_pkg_ubuntu}get install $*
 }
 
-function sys/pkg/ubuntu/refresh() {
-  ${sys_pkg_ubuntu}get update $*
+function sys/pkg/ubuntu/remove() {
+   if empty "$*" ; then $failure; fi
+
+  ${sys_pkg_ubuntu}get remove $*
+}
+
+function sys/pkg/ubuntu/listupdates() {
+  ${sys_pkg_ubuntu}get --show-upgraded $*
 }
 
 function sys/pkg/ubuntu/update() {
   ${sys_pkg_ubuntu}get upgrade $*
+}
+
+function sys/pkg/ubuntu/search() {
+   if empty "$*" ; then $failure; fi
+
+  ${sys_pkg_ubuntu}cache search $*
+}
+
+function sys/pkg/ubuntu/info() {
+   if empty "$*" ; then $failure; fi
+
+  ${sys_pkg_ubuntu}cache showpkg $*
 }

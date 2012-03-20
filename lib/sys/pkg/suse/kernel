@@ -1,0 +1,41 @@
+function help/sys/pkg/suse() {
+  cat << EOF
+Package manager for SuSE is based on zypper.
+
+/etc/sudoers
+ %admin ALL = (root) NOPASSWD:/usr/bin/apt-get
+
+EOF
+}
+
+function sys/pkg/suse/repos() {
+}
+
+function sys/pkg/suse/refresh() {
+}
+
+function sys/pkg/suse/addrepo() {
+}
+
+function sys/pkg/suse/removerepo() {
+}
+
+function sys/pkg/suse/install() {
+   if empty "$*" ; then $failure; fi
+}
+
+function sys/pkg/suse/remove() {
+}
+
+function sys/pkg/suse/listupdates() {
+}
+
+function sys/pkg/suse/update() {
+}
+
+function sys/pkg/suse/search() {
+   if empty "$*" ; then $failure; fi
+}
+
+function sys/pkg/suse/info() {
+}

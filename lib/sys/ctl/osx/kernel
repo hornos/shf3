@@ -45,7 +45,7 @@ function sys/ctl/osx/lsmod() {
     ${sys_ctl_osx_kextstat}
     return $?
   fi
-  printf "%4s %58s %8s %s\n" "No" "Module" "Size" "Used by"
+  printf "%4s %-56s %8s %s\n" "No" "Module" "Size" "Used by"
   ${sys_ctl_osx_kextstat} -l | \
   awk '{
     no=$1;
@@ -54,6 +54,26 @@ function sys/ctl/osx/lsmod() {
     split($0,a,"<");
     sub(">","",a[2]);
     used=a[2];
-    printf("%4d %58s %8d %s\n",no,mod,size,used);
+    printf("%4d %-56s %8d %s\n",no,mod,size,used);
   }'
+}
+
+function sys/ctl/osx/rmmod() {
+  local _mib=$(ns/mib "${1}")
+  if empty "${_mib}" ; then $failure; fi
+
+  answer "Unload module ${_mib}?"
+  if failed $? ; then $failure; fi
+
+  ${sys_ctl_osx_kextunload} -b "${_mib}"
+}
+
+function sys/ctl/osx/modprobe() {
+  local _mib=$(ns/mib "${1}")
+  if empty "${_mib}" ; then $failure; fi
+
+  answer "Load module ${_mib}?"
+  if failed $? ; then $failure; fi
+
+  ${sys_ctl_osx_kextutil} -b "${_mib}"
 }
