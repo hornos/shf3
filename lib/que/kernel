@@ -176,7 +176,7 @@ function que/sub() {
   if test "${_sub}" = "L" ; then
     echo ""
     answer "Show batch file?"
-    if success $? ; then
+    if succeed $? ; then
       gui/line
       cat "${_bat}"
       gui/line
@@ -507,7 +507,7 @@ function que/sub() {
   ### submit
   echo ""
   answer "Show batch file?"
-  if success $? ; then
+  if succeed $? ; then
     gui/line
     cat "${_bat}"
     gui/line
