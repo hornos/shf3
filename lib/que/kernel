@@ -376,11 +376,12 @@ function que/sub() {
 
     ### prerun
     # TODO: omp mpi merge
+    # TODO: machinefile
     if test "${_mpi}" != "self" ; then
-      if ! readable "${_machinefile}" ; then
-        msg "Machinefile not found: ${_machinefile}"
-        $failure
-      fi
+      # if ! readable "${_machinefile}" ; then
+      #  msg "Machinefile not found: ${_machinefile}"
+      #  $failure
+      # fi
       local __machines="${_machinefile} ${_machines}"
       #                     MACHINES      NPPN     NUMA     BINDING  BOOST     PROFILER
       _mpi_opt="${_mpi_opt} ${__machines} ${_nppn} \${NUMA} ${_bind} ${_boost} ${_prof}"
