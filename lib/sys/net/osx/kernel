@@ -65,34 +65,6 @@ function sys/net/osx/dev() {
   }'
 }
 
-function sys/net/osx/wifi() {
-  local _o=${1:-info}
-  local _d=${2}
-
-  if empty "${_d}" ; then
-    # autodetect
-    _d=$(sys/net/osx/dev wifi)
-    if empty "${_d}" ; then
-      echo ""
-      $failure
-    fi
-  fi
-
-  case "${_o}" in
-    off)
-      ${sys_net_osx_airport} -z
-    ;;
-    down)
-      ${sys_net_osx_networksetup} -setairportpower ${_d} off
-    ;;
-    up)
-      ${sys_net_osx_networksetup} -setairportpower ${_d} on
-    ;;
-    scan)
-    ;;
-  esac
-}
-
 function sys/net/osx/wifi/restart() {
   sys/net/osx/wifi down
   sleep 1
@@ -103,55 +75,78 @@ function sys/net/osx/wifi/scan() {
   ${sys_net_osx_airport} -s
 }
 
-
-function sys/osx/wifi/spoof() {
+function sys/osx/wifi/macchanger() {
   import sys/mac
-  local _d=$(sys/osx/wifi/dev)
-  local _m=$(sys/mac/gen)
+  local _dev=$(sys/osx/wifi/dev)
+  local _mac=$(sys/mac/gen)
 
   sys/osx/wifi off
   sleep 2
-  ${sys_osx_ifconfig} ${_d} ether ${_m}
-  # sleep 2
-  # local _e=$(sys/osx/wifi/ether)
-  # if ! test "${_m}" = "${_e}" ; then
-  #  msg "Spoof failed"
-  # fi
+  ${sys_osx_ifconfig} ${_dev} ether ${_mac}
   msg "${_m}"
 }
 
+function sys/net/osx/wifi() {
+  local _cmd=${1:-info}
+  local _dev=${2}
 
+  if empty "${_dev}" ; then
+    # autodetect
+    _dev=$(sys/net/osx/dev wifi)
+    if empty "${_dev}" ; then
+      echo ""
+      $failure
+    fi
+  fi
 
-function sys/osx/wifi/ether() {
+  case "${_cmd}" in
+    off)
+      ${sys_net_osx_airport} -z
+    ;;
+    down)
+      ${sys_net_osx_networksetup} -setairportpower ${_dev} off
+    ;;
+    up)
+      ${sys_net_osx_networksetup} -setairportpower ${_dev} on
+    ;;
+    connect)
+      shift
+      sys/net/osx/wifi/con $*
+    ;;
+    *)
+      shift
+      sys/net/osx/wifi/${_cmd} $*
+    ;;
+  esac
+}
+
+function sys/net/osx/wifi/ether() {
   local _t="${1}"
-  local _d=$(sys/osx/wifi/dev)
+  local _d=$(sys/net/osx/dev wifi)
   if test "${_t}" = "if" ; then
-    ${sys_osx_ifconfig} "${_d}" ether | \
+    ${sys_net_osx_ifconfig} "${_d}" ether | \
     awk '/ether/{print $2}'
   else
-    ${sys_osx_networksetup} -getmacaddress "${_d}" | \
+    ${sys_net_osx_networksetup} -getmacaddress "${_d}" | \
     awk '{print $3}'
   fi
 }
 
-function sys/osx/wifi/ip4() {
-  local _d=$(sys/osx/wifi/dev)
-  ${sys_osx_ifconfig} "${_d}" inet | \
-  awk '/inet/{print $2}'
-}
-
-function sys/osx/wifi/ip() {
+function sys/net/osx/wifi/ip() {
   local _m=${1:-ip}
-  local _d=$(sys/osx/wifi/dev)
+  local _d=$(sys/net/osx/dev wifi)
 
-  # from sipcalc
   case "${_m}" in
+    ip4)
+      ${sys_net_osx_ifconfig} "${_d}" inet | \
+      awk '/inet/{print $2}'
+    ;;
     dns)
-      sys/osx/wifi/dns
+      sys/net/osx/wifi/dns
       return
     ;;
     net|bcast|range)
-      ${sys_osx_sipcalc} "${_d}" | \
+      ${sys_net_osx_sipcalc} "${_d}" | \
       awk -v m="${_m}" '{
         split($0,a,"-");
         sub(/ /,"",a[2]);
@@ -177,7 +172,7 @@ function sys/osx/wifi/ip() {
   esac
 
   # from networksetup
-  ${sys_osx_networksetup} -getinfo "${sys_osx_airport_service}" | \
+  ${sys_net_osx_networksetup} -getinfo "${sys_net_osx_wifi}" | \
   awk -v m="${_m}" '{
     split($0,a,":");
     sub(/ /,"",a[2]);
@@ -192,9 +187,9 @@ function sys/osx/wifi/ip() {
   }'
 }
 
-function sys/osx/wifi/dns() {
-  # 10.6
-  local _dns=$(${sys_osx_networksetup} -getdnsservers "${sys_osx_airport_service}")
+function sys/net/osx/wifi/dns() {
+  # TODO Lion
+  local _dns=$(${sys_net_osx_networksetup} -getdnsservers "${sys_net_osx_wifi}")
   if test "${_dns}" = "There aren't any DNS Servers set on AirPort." ; then
     _dns=""
   fi
@@ -206,14 +201,14 @@ function sys/osx/wifi/dns() {
   echo "${_dns}"
 }
 
-function sys/osx/wifi/resolv() {
+function sys/net/osx/wifi/resolv() {
   local _h=${1:-www.google.com}
-  local _d=$(sys/osx/wifi/dns)
+  local _d=$(sys/net/osx/wifi/dns)
   host -a "${_h}" ${_d}
 }
 
-function sys/osx/wifi/ap() {
-  ${sys_osx_airport} -I | \
+function sys/net/osx/wifi/ap() {
+  ${sys_net_osx_airport} -I | \
   awk '{
     split($0,a,":");
     sub(/ /,"",a[2]);
@@ -233,18 +228,18 @@ function sys/osx/wifi/ap() {
   }'
 }
 
-function sys/osx/wifi/name() {
-  ${sys_osx_networksetup} -getcomputername
+function sys/net/osx/wifi/name() {
+  ${sys_net_osx_networksetup} -getcomputername
 }
 
-function sys/osx/wifi/con() {
+function sys/net/osx/wifi/con() {
   import gui
   local _ssid=""
   local _pass=""
   answer "Scan networks?"
   if succeed $? ; then
     gui/line
-    sys/osx/wifi/scan
+    sys/net/osx/wifi/scan
     gui/line
   fi
   read -p  "Network  : " _ssid
@@ -253,7 +248,7 @@ function sys/osx/wifi/con() {
   answer "Join ${_ssid}?"
   if failed $? ; then $failure; fi
 
-  ${sys_osx_networksetup} -setairportnetwork "${sys_osx_airport_service}" "${_ssid}" "${_pass}"
+  ${sys_net_osx_networksetup} -setairportnetwork "${sys_net_osx_wifi}" "${_ssid}" "${_pass}"
   if failed $? ; then
     msg "Network not found"
     $failure
@@ -261,36 +256,38 @@ function sys/osx/wifi/con() {
   $success
 }
 
-function sys/osx/wifi/stat() {
-  local _d=$(sys/osx/wifi/dev)
-  ${sys_osx_slurm} -s -i "${_d}"
+function sys/net/osx/wifi/stat() {
+  local _d=$(sys/net/osx/wifi/dev)
+  ${sys_net_osx_slurm} -s -i "${_d}"
 }
 
-function sys/osx/wifi/info() {
-  import sys/osx
+# TODO
+function sys/net/osx/wifi/info() {
+  _dev=$(sys/net/osx/dev wifi)
+  _eth=$(sys/net/osx/wifi/ether)
+  _eif=$(sys/net/osx/wifi/ether if)
+  _nam=$(sys/net/osx/wifi/name)
+  _ip4=$(sys/net/osx/wifi/ip ip4)
+  _ms4=$(sys/net/osx/wifi/ip mask)
+  _gw4=$(sys/net/osx/wifi/ip gw)
 
-  _dev=$(sys/osx/wifi/dev)
-  _eth=$(sys/osx/wifi/ether)
-  _eif=$(sys/osx/wifi/ether if)
-  _nam=$(sys/osx/wifi/name)
-  _ip4=$(sys/osx/wifi/ip)
-  _ms4=$(sys/osx/wifi/ip mask)
-  _gw4=$(sys/osx/wifi/ip gw)
-  echo "${sys_osx_host_hdr}"
+  printf "${sys_net_osx_wifi_host}" "NAME" "ETHER" "DEV" "IP" "MASK" "GW"
   if ! test "${_eth}" = "${_eif}" ; then
-    printf "${sys_osx_host_frm}\n" "${_nam}" ${_eif} ${_dev} ${_ip4} ${_ms4} ${_gw4}
-    printf "${sys_osx_host_frm}\n" "HW" ${_eth} " " " " " " " "
+    printf "${sys_net_osx_wifi_host}" "${_nam}" ${_eif} ${_dev} ${_ip4} ${_ms4} ${_gw4}
+    printf "${sys_net_osx_wifi_host}" "HW" ${_eth} " " " " " " " "
   else
-    printf "${sys_osx_host_frm}\n" "${_nam}" ${_eth} ${_dev} ${_ip4} ${_ms4} ${_gw4}
+    printf "${sys_net_osx_wifi_host}" "${_nam}" ${_eth} ${_dev} ${_ip4} ${_ms4} ${_gw4}
   fi
   gui/line
-  echo "${sys_osx_airport_hdr}"
-  sys/${_os}/${_cmd}/ap
+
+  printf "${sys_net_osx_wifi_ap}" "SSID" "BSSID" "RSSI" "CHANNEL" "HT" "CC" "SECURITY"
+  sys/net/osx/wifi/ap
   gui/line
-  _dns=$(sys/osx/wifi/ip dns)
-  _net=$(sys/osx/wifi/ip net)
-  _bca=$(sys/osx/wifi/ip bcast)
-  _rng=$(sys/osx/wifi/ip range)
-  echo "${sys_osx_network_hdr}"
-  printf "${sys_osx_network_frm}\n" "${_dns}" "${_net}" "${_bca}" "${_rng}"
+
+  _dns=$(sys/net/osx/wifi/ip dns)
+  _net=$(sys/net/osx/wifi/ip net)
+  _bca=$(sys/net/osx/wifi/ip bcast)
+  _rng=$(sys/net/osx/wifi/ip range)
+  printf "${sys_net_osx_net}" "DNS" "NETWORK" "BROADCAST" "RANGE"
+  printf "${sys_net_osx_net}" "${_dns}" "${_net}" "${_bca}" "${_rng}"
 }
