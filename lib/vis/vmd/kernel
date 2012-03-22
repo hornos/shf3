@@ -40,7 +40,7 @@ function vis/vmd/type() {
   local _t=$(basename "${_f}")
   _t="${_t##*.}"
   case "${_t}" in
-    CONTCAR|geom)
+    CONTCAR|geom|CONTCAR.pbe)
       _t="POSCAR";;
   esac
   echo "${_t}"
