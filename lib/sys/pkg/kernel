@@ -33,7 +33,7 @@ function sys/pkg() {
     ;;
 
     # Remove repo
-    rr|removerepo
+    rr|removerepo)
       sys/call sys/pkg removerepo $*
     ;;
 

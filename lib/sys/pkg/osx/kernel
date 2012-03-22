@@ -18,7 +18,7 @@ function sys/pkg/osx/repos() {
 
 function sys/pkg/osx/refresh() {
   answer "Refresh repos?"
-  if failed $?; $failure; fi
+  if failed $?; then $failure; fi
 
   ${sys_pkg_osx} selfupdate
 }
@@ -43,7 +43,7 @@ function sys/pkg/osx/addrepo() {
 
 function sys/pkg/osx/removerepo() {
   answer "Edit ${sys_pkg_osx_repos}?"
-  if failed $?; $failure; fi
+  if failed $?; then $failure; fi
 
   sudo mc -e "${sys_pkg_osx_repos}"
   sys/pkg/osx/refresh
