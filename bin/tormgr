@@ -1,0 +1,34 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+import net/tor
+
+function help/tormgr() {
+  cat << EOF
+
+TOR manager
+
+Usage: ${gbn} options
+              -n - new connection
+              -i - change identity
+EOF
+  exit ${_false_}
+}
+
+### args
+_c="NEW"
+while getopts hv:ni o; do
+  case "$o" in
+    v) gdbg=true;;
+    n) _c="NEW";;
+    i) _c="IDENTITY";;
+    h|*) help/tormgr;;
+  esac
+done
+
+### main
+echo
+msg
+gui/line
+
+net/tor/mgr "${_c}"

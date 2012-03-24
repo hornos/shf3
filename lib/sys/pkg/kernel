@@ -1,5 +1,8 @@
 function help/sys/pkg() {
   import sys
+  import gui
+  msg "Package Manager Help"
+  gui/line
   sys/help ${FUNCNAME} $*
   $failure
 }

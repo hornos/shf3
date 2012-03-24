@@ -1,6 +1,9 @@
 
 function help/sys/net() {
   import sys
+  import gui
+  msg "Network Manager Help"
+  gui/line
   sys/help ${FUNCNAME} $*
 }
 
@@ -21,6 +24,10 @@ function sys/net() {
 
     # virtualbox guest
     elan|wlan|send|recv)
+      sys/call sys/net "${_cmd}" $*
+    ;;
+
+    ifconfig)
       sys/call sys/net "${_cmd}" $*
     ;;
 

@@ -1,123 +1,76 @@
+# TODO: hash password
 
 function net/tor/exit() {
-  import sql
-  msg/debug "Database: ${tor_exit_db}"
-  answer "Create database?"
-  if test $? -gt 0 ; then
-    return ${_false_}
+  local _d="${net_tor_data}.$$"
+  if ! empty "${_d}" && \
+     readable "${_d}" ; then
+    rm -Rf "${_d}"
   fi
-  local _in="$(ns/dir ${BASH_SOURCE})/tor_exit.sql"
-  sql/init "${tor_exit_db}" "${_in}"
+  return $?
 }
 
-
-function net/tor/tor.noreply.org() {
-  import net
-  local _site=$(ns/func ${FUNCNAME})
-  local _f=${1}
-  local _o="./.${_site}"
-  local _url="http://${_site}/tor/status/all"
-
-  if test "${_f}" = LOAD ; then
-    net/get "${_url}" > "${_o}"
-    return $?
-  fi
-  if test "${_f}" = "DEL" ; then
-    if test -r "${_o}" ; then
-      rm -f "${_o}"
-    fi
-    return $?
-  fi
-
-  if ! test -r "${_o}" ; then
-    return ${_false_}
-  fi
-
-  cat "${_o}" | \
-  awk '{
-    if(match($0, "^r .*")) {
-      r=$0;
-    }
-    if(match($0, "^s .*")) {
-      if( match($0, "Valid") )
-      if( match($0, "Stable") )
-      if( match($0, "Running") )
-      if( match($0, "Fast") )
-      if( match($0, "Guard") )
-      if( match($0, "Exit") ) {
-        s=$0;
-        sub(/s /,"",s);
-        split(r,a," ");
-        printf "NM=\"%s\" IP=\"%s\" OP=\"%s\" DP=\"%s\"",a[2],a[7],a[8],a[9];
-        printf " DT=\"%s\" TM=\"%s\"",a[5],a[6];
-        printf " FP1=\"%s\" FP2=\"%s\" ST=\"%s\"\n",a[3],a[4],s;
-      }
-    }
-  }'
-}
-
-function net/tor/kill() {
-  import sys
+function net/tor/mgr() {
+  import sys/dir
+  import sys/net
   import gui
 
-  local _no=${1:-0}
-  local _os=$(sys/os)
+  local _cmd="${1:-NEW}"
+  local _dev="${2:-None}"
+  local _socks=${2:-None}
+  local _lport=${3:-8051}
+  local _cport=${4:-8052}
+  local _dport=${5:-8053}
 
-  _IFS=${IFS}
-  IFS=$'\n'
-  local k
-  local i
-  for k in "${tor_texit}.${_no}" "${tor_tproxy}.${_os}.${_no}" ; do
-    for i in $(ps ax | grep ${k} | grep -v grep) ; do
-      j=$(echo "${i}" | awk '{print $1}')
-      echo -n " ${_no} [${gbn}] Stopping ${k} (${j})..."
-      kill ${j}
-      if test $? -eq 0 ; then
-        echo $(gui/txt " done" "green")
+  case "${_cmd}" in
+    NEW)
+      local _data="${net_tor_data}.$$"
+      local _cfg="${_data}/config"
+      local _rc="${_data}/torrc"
+      sys/dir/mk "${_data}"
+      if failed $?; then
+        msg "Data directory failed: ${_data}"
+        $failure
       fi
-      sleep 1
-    done
-  done
-  IFS=${_IFS}
-}
+      # trap
+      trap net/tor/exit INT TERM EXIT
 
-function net/tor/insert() {
-  import sql
-  local _i="$*"
-  local _q="INSERT OR REPLACE INTO ${tor_exit_tb}"
-  _q="${_q} (nm,ip,op,dp,dt,tm,fp1,fp2,st)"
-  _q="${_q} VALUES("
-  eval $i
-  _q=${_q}"'"${NM}"','"${IP}"','"${OP}"','"${DP}"'"
-  _q=${_q}",'"${DT}"','"${TM}"'"
-  _q=${_q}",'"${FP1}"','"${FP2}"','"${ST}"'"
-  _q="${_q});"
-  ${sql_sqlite} "${tor_exit_db}" "${_q}""
-}
+      # TODO: proxychains strict 1 hoop
+      msg "TOR Connection"
+      gui/line
+      echo "Listen Port  : ${_lport}"
+      echo "Control Port : ${_cport}"
+      echo "DNS Port     : ${_dport}"
+      answer "Connect to TOR?"
+      if failed $?; then 
+        net/tor/exit
+        $failure
+      fi
 
-function net/tor/select() {
-  import sql
-  import rnd
-  _c=$(sql/count "${tor_exit_db}" "${tor_exit_tb}")
-  _o=$(rnd ${_c})
-  _s=$(sql/select ${_sql_db} ${_sql_tbl} ${_o} '*' 'er="0"')
-  _ip=$(echo ${_s} | awk '{split($0,a,"|"); print a[2]}')
-  _nam=$(echo ${_s} | awk '{split($0,a,"|"); print a[1]}')
-#  msg "${_no} Random ${_ip} ($_nam) -> localhost:${_port}"
-}
+      echo "TOR_LPORT=${_lport}"        > "${_cfg}"
+      echo "TOR_CPORT=${_cport}"       >> "${_cfg}"
+      echo "TOR_DPORT=${_dport}"       >> "${_cfg}"
 
-function net/tor/test() {
-  local _pchains="${1}"
-  local _cfg="${2}"
-  if ! test -r "${tor_exit_test}" ; then
-    return 1
-  fi
-  source "${tor_exit_test}"
-  local _ip=$(field "${EXIT_TEST}" 1 ":")
-  local _po=$(field "${EXIT_TEST}" 2 ":")
-  local _o=$(${_pchains} -f ${_cfg} ${tor_exit_nmap} -p ${_po} ${_ip} | grep open)
-  if test -z "${_o}" ; then
-    return 1
-  fi
-  return 0
+      echo "DataDirectory \"${_data}\"" > "${_rc}"
+      echo "SocksPort ${_sport}"       >> "${_rc}"
+      echo "ControlPort ${_cport}"     >> "${_rc}"
+      echo "DNSPort ${_dport}"         >> "${_rc}"
+      echo "CookieAuthentication 1"    >> "${_rc}"
+      # echo "DisableAllSwap 1"          >> "${_rc}"
+      # echo "ClientOnly 1"              >> "${_rc}"
+      echo "UseEntryGuards 1"          >> "${_rc}"
+      # echo "FascistFirewall 1"       >> "${_rc}"
+      # socks
+      if test "${_socks}" != "None" ; then
+        _socks="Socks5Proxy ${_socks}" >> "${_rc}"
+      fi
+
+      # outbound dev
+      if test "${_dev}" != "None" ; then
+        _dev=$(/sys/net/ifconfig ip4 "${_dev}")
+        _dev="OutboundBindAddres ${_dev}" >> "${_rc}"
+      fi
+
+      ${net_tor} -f "${_rc}"
+    ;;
+  esac
 }

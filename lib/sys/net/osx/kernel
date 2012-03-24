@@ -291,3 +291,18 @@ function sys/net/osx/wifi/info() {
   printf "${sys_net_osx_net}" "DNS" "NETWORK" "BROADCAST" "RANGE"
   printf "${sys_net_osx_net}" "${_dns}" "${_net}" "${_bca}" "${_rng}"
 }
+
+function sys/net/osx/ifconfig() {
+  local _cmd="${1}"
+  shift
+  case "${_cmd}" in
+    ether)
+      ${sys_net_osx_ifconfig} $* ether | \
+      awk '/ether/{print $2}'
+    ;;
+    ip4)
+      ${sys_net_osx_ifconfig} $* inet | \
+      awk '/inet/{print $2}'
+    ;;
+  esac
+}

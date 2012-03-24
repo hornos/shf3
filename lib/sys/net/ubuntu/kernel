@@ -1,0 +1,15 @@
+function sys/net/ubuntu/ifconfig() {
+  local _cmd="${1}"
+  shift
+  case "${_cmd}" in
+    ether)
+      ${sys_net_osx_ifconfig} $* | \
+      awk '/HWaddr/{print $5}'
+    ;;
+    ip4)
+      ${sys_net_osx_ifconfig} $* | \
+      awk '/inet addr/{print $2}' | \
+      sed s/addr://
+    ;;
+  esac
+}

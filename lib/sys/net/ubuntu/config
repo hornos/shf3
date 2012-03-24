@@ -1,0 +1,1 @@
+sys_net_ubuntu_ifconfig="sudo /sbin/ifconfig"
