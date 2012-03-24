@@ -35,8 +35,6 @@ function net/tor/mgr() {
       trap net/tor/exit INT TERM EXIT
 
       # TODO: proxychains strict 1 hoop
-      msg "TOR Connection"
-      gui/line
       echo "Listen  : ${_lport}"
       echo "Control : ${_cport}"
       echo "DNS     : ${_dport}"
@@ -76,7 +74,11 @@ function net/tor/mgr() {
       fi
 
       chmod -R go-rwx "${_data}"
-      ${net_tor} -f "${_rc}"
+      local _log="${_data}/${gbn}.log"
+      msg "Press Ctrl+C to terminate"
+      ${net_tor} -f "${_rc}" | \
+      tee "${_log}" | \
+      awk '/Done/{print}'
     ;;
   esac
 }
