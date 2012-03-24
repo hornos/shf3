@@ -37,28 +37,33 @@ function net/tor/mgr() {
       # TODO: proxychains strict 1 hoop
       msg "TOR Connection"
       gui/line
-      echo "Listen Port  : ${_lport}"
-      echo "Control Port : ${_cport}"
-      echo "DNS Port     : ${_dport}"
+      echo "Listen  : ${_lport}"
+      echo "Control : ${_cport}"
+      echo "DNS     : ${_dport}"
       answer "Connect to TOR?"
       if failed $?; then 
         net/tor/exit
         $failure
       fi
 
+      local _pass=""
+      read -s -p "Control Password: " _pass
+      _pass=$(${net_tor} --quiet --hash-password "${_pass}")
+
       echo "TOR_LPORT=${_lport}"        > "${_cfg}"
       echo "TOR_CPORT=${_cport}"       >> "${_cfg}"
       echo "TOR_DPORT=${_dport}"       >> "${_cfg}"
 
-      echo "DataDirectory \"${_data}\"" > "${_rc}"
-      echo "SocksPort ${_sport}"       >> "${_rc}"
-      echo "ControlPort ${_cport}"     >> "${_rc}"
-      echo "DNSPort ${_dport}"         >> "${_rc}"
-      echo "CookieAuthentication 1"    >> "${_rc}"
-      # echo "DisableAllSwap 1"          >> "${_rc}"
-      # echo "ClientOnly 1"              >> "${_rc}"
-      echo "UseEntryGuards 1"          >> "${_rc}"
-      # echo "FascistFirewall 1"       >> "${_rc}"
+      echo "DataDirectory \"${_data}\""          > "${_rc}"
+      echo "SocksPort ${_sport}"                >> "${_rc}"
+      echo "ControlPort ${_cport}"              >> "${_rc}"
+      echo "DNSPort ${_dport}"                  >> "${_rc}"
+      echo "CookieAuthentication 1"             >> "${_rc}"
+      # echo "DisableAllSwap 1"                   >> "${_rc}"
+      # echo "ClientOnly 1"                       >> "${_rc}"
+      echo "UseEntryGuards 1"                   >> "${_rc}"
+      echo "FascistFirewall 1"                  >> "${_rc}"
+      echo "HashedControlPassword \"${_pass}\"" >> "${_rc}"
       # socks
       if test "${_socks}" != "None" ; then
         _socks="Socks5Proxy ${_socks}" >> "${_rc}"
@@ -70,6 +75,7 @@ function net/tor/mgr() {
         _dev="OutboundBindAddres ${_dev}" >> "${_rc}"
       fi
 
+      chmod -R go-rwx "${_data}"
       ${net_tor} -f "${_rc}"
     ;;
   esac

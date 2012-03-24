@@ -31,4 +31,5 @@ echo
 msg
 gui/line
 
+net_tor_data="${grd}/tor/${gbn}"
 net/tor/mgr "${_c}"
