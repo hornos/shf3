@@ -53,7 +53,7 @@ function net/tor/mgr() {
       echo "TOR_DPORT=${_dport}"       >> "${_cfg}"
 
       echo "DataDirectory \"${_data}\""          > "${_rc}"
-      echo "SocksPort ${_sport}"                >> "${_rc}"
+      echo "SocksPort ${_lport}"                >> "${_rc}"
       echo "ControlPort ${_cport}"              >> "${_rc}"
       echo "DNSPort ${_dport}"                  >> "${_rc}"
       echo "CookieAuthentication 1"             >> "${_rc}"
@@ -75,7 +75,9 @@ function net/tor/mgr() {
 
       chmod -R go-rwx "${_data}"
       local _log="${_data}/${gbn}.log"
+      echo ""
       msg "Press Ctrl+C to terminate"
+      # TODO: better filtering
       ${net_tor} -f "${_rc}" | \
       tee "${_log}" | \
       awk '/Done/{print}'
