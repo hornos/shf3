@@ -1,0 +1,24 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import net/ifconfig
+
+function help/ifconfig.me() {
+  cat << EOF
+
+ifconfig.me
+
+Usage: ${gbn} <command>
+              ip
+              host
+              ua
+              port
+              lang
+              via
+              forwarded
+              all
+              all.json
+EOF
+  exit ${_false_}
+}
+
+net/ifconfig $*

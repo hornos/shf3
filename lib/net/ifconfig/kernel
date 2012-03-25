@@ -1,0 +1,4 @@
+
+function net/ifconfig() {
+  ${net_ifconfig} "${net_ifconfig_url}/$*"
+}

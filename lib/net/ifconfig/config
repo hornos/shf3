@@ -1,0 +1,2 @@
+net_ifconfig="curl"
+net_ifconfig_url="http://ifconfig.me"
