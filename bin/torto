@@ -1,0 +1,50 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+import net/tor
+
+function help/torto() {
+  cat << EOF
+
+TOR login
+
+Usage: ${gbn} options
+              -m MID
+              -f - force
+              -v - verbose
+              -r - rapid
+EOF
+  exit ${_false_}
+}
+
+### args
+_m=""
+_f=false
+_v=false
+_r=false
+while getopts hfrvm: o; do
+  case "$o" in
+    m) _m=$OPTARG;;
+    f) _f=true;;
+    v) gdbg=true;;
+    r) _r=true;;
+    h|*) help/torto;;
+  esac
+done
+
+### main
+echo
+# msg
+# gui/line
+
+if ${_r} ; then
+  net/tor/rapid
+  exit $?
+fi
+
+if empty "${_m}" = "" ; then
+  echo -n "[${gbn}] Enter MID: "
+  read _m
+fi
+
+net/tor/login "${_m}" ${_f}

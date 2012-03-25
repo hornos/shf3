@@ -15,8 +15,9 @@ function ssh/mgr() {
   local _h="${2}"
   case "${_m}" in
     LIST)
+      import ssh/key
       # format
-      local _frm1="%-26s%-6s%-42s\n"
+      local _frm1="%-21s%-6s%-42s\n"
 
       # header
       echo

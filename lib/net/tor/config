@@ -1,3 +1,3 @@
 net_tor="tor"
-net_tor_data="./.tor"
+net_tor_dir="${gdr}/tor"
 

@@ -1,86 +1,103 @@
-# TODO: hash password
+function net/tor/mgr() {
+  import sys
+  import gui
+  local _m="${1:-LIST}"
+  local _h="${2}"
 
-function net/tor/exit() {
-  local _d="${net_tor_data}.$$"
-  if ! empty "${_d}" && \
-     readable "${_d}" ; then
-    rm -Rf "${_d}"
-  fi
-  return $?
+  case "${_m}" in
+    LIST)
+      # format
+      local _frm1="%-21s%-8s%-8s%-8s\n"
+
+      # header
+      echo
+      printf "${_frm1}" "mid" "listen" "control" "dns"
+      gui/line
+      local i
+      for i in ${sys_mid_dir}/tor/* ; do
+        if readable "${i}" ; then
+          i=$(basename "${i}")
+          # sys/mid "tor/${i}"
+          printf "${_frm1}" "${i}" "${mid_tor_listen}" "${mid_tor_control}" "${mid_tor_dns}"
+        fi
+      done
+    ;;
+    EDIT)
+      echo ""
+    ;;
+    CREATE)
+      echo ""
+    ;;
+  esac
 }
 
-function net/tor/mgr() {
+# legacy rapid tor connection
+function net/tor/rapid() {
   import sys/dir
   import sys/net
   import gui
 
-  local _cmd="${1:-NEW}"
-  local _dev="${2:-None}"
+  local _dev="${1:-None}"
   local _socks=${2:-None}
-  local _lport=${3:-8051}
-  local _cport=${4:-8052}
-  local _dport=${5:-8053}
+  local _listen=${3:-8051}
+  local _control=${4:-8052}
+  local _dns=${5:-8053}
 
-  case "${_cmd}" in
-    NEW)
-      local _data="${net_tor_data}.$$"
-      local _cfg="${_data}/config"
-      local _rc="${_data}/torrc"
-      sys/dir/mk "${_data}"
-      if failed $?; then
-        msg "Data directory failed: ${_data}"
-        $failure
-      fi
-      # trap
-      trap net/tor/exit INT TERM EXIT
+  local _data="${net_tor_dir}/rapid"
+  local _cfg="${_data}/config"
+  local _rc="${_data}/torrc"
+  sys/dir/mk "${_data}"
+  if failed $?; then
+    msg "Data directory failed: ${_data}"
+    sys/dir/rm "${_data}"
+    $failure
+  fi
 
-      # TODO: proxychains strict 1 hoop
-      echo "Listen  : ${_lport}"
-      echo "Control : ${_cport}"
-      echo "DNS     : ${_dport}"
-      answer "Connect to TOR?"
-      if failed $?; then 
-        net/tor/exit
-        $failure
-      fi
+  local _frm1="%-21s%-8s%-8s%-8s\n"
+  echo
+  printf "${_frm1}" "mid" "listen" "control" "dns"
+  gui/line
+  printf "${_frm1}" "${_listen}" "${_control}" "${_dns}"
+  answer "Connect to TOR?"
+  if failed $?; then 
+    sys/dir/rm "${_data}"
+    $failure
+  fi
 
-      local _pass=""
-      read -s -p "Control Password: " _pass
-      _pass=$(${net_tor} --quiet --hash-password "${_pass}")
+  local _pass=""
+  read -s -p "Control Password: " _pass
+  _pass=$(${net_tor} --quiet --hash-password "${_pass}")
 
-      echo "TOR_LPORT=${_lport}"        > "${_cfg}"
-      echo "TOR_CPORT=${_cport}"       >> "${_cfg}"
-      echo "TOR_DPORT=${_dport}"       >> "${_cfg}"
+  echo "mid_tor_listen=${_listen}"           > "${_cfg}"
+  echo "mid_tor_control=${_control}"        >> "${_cfg}"
+  echo "mid_tor_dns=${_dns}"                >> "${_cfg}"
 
-      echo "DataDirectory \"${_data}\""          > "${_rc}"
-      echo "SocksPort ${_lport}"                >> "${_rc}"
-      echo "ControlPort ${_cport}"              >> "${_rc}"
-      echo "DNSPort ${_dport}"                  >> "${_rc}"
-      echo "CookieAuthentication 1"             >> "${_rc}"
-      # echo "DisableAllSwap 1"                   >> "${_rc}"
-      # echo "ClientOnly 1"                       >> "${_rc}"
-      echo "UseEntryGuards 1"                   >> "${_rc}"
-      echo "FascistFirewall 1"                  >> "${_rc}"
-      echo "HashedControlPassword \"${_pass}\"" >> "${_rc}"
-      # socks
-      if test "${_socks}" != "None" ; then
-        _socks="Socks5Proxy ${_socks}" >> "${_rc}"
-      fi
+  echo "DataDirectory \"${_data}\""          > "${_rc}"
+  echo "SocksPort ${_lport}"                >> "${_rc}"
+  echo "ControlPort ${_cport}"              >> "${_rc}"
+  echo "DNSPort ${_dport}"                  >> "${_rc}"
+  echo "CookieAuthentication 1"             >> "${_rc}"
+  echo "UseEntryGuards 1"                   >> "${_rc}"
+  echo "ReachableDirAddresses *:80"         >> "${_rc}"
+  echo "ReachableORAddresses *:443"         >> "${_rc}"
+  echo "FascistFirewall 1"                  >> "${_rc}"
+  echo "HashedControlPassword \"${_pass}\"" >> "${_rc}"
+  # socks
+  if test "${_socks}" != "None" ; then
+    _socks="Socks5Proxy ${_socks}"          >> "${_rc}"
+  fi
 
-      # outbound dev
-      if test "${_dev}" != "None" ; then
-        _dev=$(/sys/net/ifconfig ip4 "${_dev}")
-        _dev="OutboundBindAddres ${_dev}" >> "${_rc}"
-      fi
+  # outbound dev
+  if test "${_dev}" != "None" ; then
+    _dev=$(/sys/net/ifconfig ip4 "${_dev}")
+    _dev="OutboundBindAddres ${_dev}"       >> "${_rc}"
+  fi
 
-      chmod -R go-rwx "${_data}"
-      local _log="${_data}/${gbn}.log"
-      echo ""
-      msg "Press Ctrl+C to terminate"
-      # TODO: better filtering
-      ${net_tor} -f "${_rc}" | \
-      tee "${_log}" | \
-      awk '/Done/{print}'
-    ;;
-  esac
+  chmod -R go-rwx "${_data}"
+  local _log="${_data}/${gbn}.log"
+  echo ""
+  msg "Press Ctrl+C to terminate"
+  ${net_tor} -f "${_rc}" | \
+  tee "${_log}" | \
+  awk '/Done/{print}'
 }

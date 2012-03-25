@@ -9,18 +9,30 @@ function help/tormgr() {
 TOR manager
 
 Usage: ${gbn} options
-              -n - new connection
+              -c - connect
               -i - change identity
+
+Firefox tuning [about:config]
+  network.http.keep-alive.timeout:600
+  network.http.max-persistent-connections-per-proxy:16
+  network.http.pipelining:true
+  network.http.pipelining.maxrequests:8
+  network.http.proxy.keep-alive:true
+  network.http.proxy.pipelining:true
 EOF
   exit ${_false_}
 }
 
+# TODO: mids, services, polipo, privoxy, tunnels
+
 ### args
-_c="NEW"
-while getopts hv:ni o; do
+_c="CONNECT"
+_m=""
+while getopts hv:cni o; do
   case "$o" in
     v) gdbg=true;;
-    n) _c="NEW";;
+    c) _c="CONNECT";;
+    n) _c="NEW"; _m="${OPTARG}";;
     i) _c="IDENTITY";;
     h|*) help/tormgr;;
   esac
@@ -32,4 +44,4 @@ msg
 gui/line
 
 net_tor_data="${grd}/tor/${gbn}"
-net/tor/mgr "${_c}"
+net/tor/mgr "${_c}" "${_m}"
