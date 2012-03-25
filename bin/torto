@@ -38,7 +38,7 @@ echo
 # gui/line
 
 if ${_r} ; then
-  net/tor/rapid
+  net/tor/rapid ${_f}
   exit $?
 fi
 

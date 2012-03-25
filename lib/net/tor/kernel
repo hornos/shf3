@@ -1,3 +1,10 @@
+function net/tor/clean() {
+  import sys/dir
+  if empty "${net_tor_data}" ; then $failure; fi
+
+  sys/dir/rm "${net_tor_data}"
+}
+
 function net/tor/mgr() {
   import sys
   import gui
@@ -33,6 +40,8 @@ function net/tor/mgr() {
 
 # legacy rapid tor connection
 function net/tor/rapid() {
+  local _force=${1:-false}
+
   import sys/dir
   import sys/net
   import gui
@@ -43,26 +52,31 @@ function net/tor/rapid() {
   local _control=${4:-8052}
   local _dns=${5:-8053}
 
-  local _data="${net_tor_dir}/rapid"
-  local _cfg="${_data}/config"
-  local _rc="${_data}/torrc"
-  sys/dir/mk "${_data}"
+  net_tor_data="${net_tor_dir}/rapid"
+  local _cfg="${net_tor_data}/config"
+  local _rc="${net_tor_data}/torrc"
+
+  if test -d "${net_tor_data}" ; then
+    if ${_force} ; then
+      sys/dir/rm "${net_tor_data}"
+    fi
+  fi
+
+  sys/dir/mk "${net_tor_data}"
   if failed $?; then
-    msg "Data directory failed: ${_data}"
-    sys/dir/rm "${_data}"
+    msg "Data directory failed: ${net_tor_data}"
     $failure
   fi
+  # trap
+  trap /net/tor/clean INT TERM EXIT
 
   local _frm1="%-21s%-8s%-8s%-8s\n"
   echo
   printf "${_frm1}" "mid" "listen" "control" "dns"
   gui/line
-  printf "${_frm1}" "${_listen}" "${_control}" "${_dns}"
+  printf "${_frm1}" "rapid" "${_listen}" "${_control}" "${_dns}"
   answer "Connect to TOR?"
-  if failed $?; then 
-    sys/dir/rm "${_data}"
-    $failure
-  fi
+  if failed $?; then $failure; fi
 
   local _pass=""
   read -s -p "Control Password: " _pass
@@ -72,7 +86,7 @@ function net/tor/rapid() {
   echo "mid_tor_control=${_control}"        >> "${_cfg}"
   echo "mid_tor_dns=${_dns}"                >> "${_cfg}"
 
-  echo "DataDirectory \"${_data}\""          > "${_rc}"
+  echo "DataDirectory \"${net_tor_data}\""   > "${_rc}"
   echo "SocksPort ${_lport}"                >> "${_rc}"
   echo "ControlPort ${_cport}"              >> "${_rc}"
   echo "DNSPort ${_dport}"                  >> "${_rc}"
@@ -93,8 +107,8 @@ function net/tor/rapid() {
     _dev="OutboundBindAddres ${_dev}"       >> "${_rc}"
   fi
 
-  chmod -R go-rwx "${_data}"
-  local _log="${_data}/${gbn}.log"
+  chmod -R go-rwx "${net_tor_data}"
+  local _log="${net_tor_data}/${gbn}.log"
   echo ""
   msg "Press Ctrl+C to terminate"
   ${net_tor} -f "${_rc}" | \

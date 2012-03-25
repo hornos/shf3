@@ -1,3 +1,5 @@
 net_tor="tor"
 net_tor_dir="${grd}/tor"
+# for clean
+net_tor_data=""
 
