@@ -24,4 +24,5 @@ alias jobmon="pcpview -t -a -j"
 alias vmdrun="vmdmgr run"
 alias vmdload="vmdmgr load"
 
-alias torr="torto -r"
+alias rapid="torto -r"
+alias rapidify="torto -x"

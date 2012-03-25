@@ -13,11 +13,22 @@ Usage: ${gbn} options
               -f - force
               -v - verbose
               -r - rapid
+              -x CMD - torify on rapid
+
+Install:
+  https://code.google.com/p/torsocks/
 EOF
   exit ${_false_}
 }
 
 ### args
+
+if test "${1}" = "-x" ; then
+  shift
+  net/tor/rapidify $*
+  exit $?
+fi
+
 _m=""
 _f=false
 _v=false
