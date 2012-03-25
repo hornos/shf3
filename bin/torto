@@ -33,11 +33,11 @@ while getopts hfrvm: o; do
 done
 
 ### main
-echo
-# msg
-# gui/line
 
 if ${_r} ; then
+  echo
+  msg
+  gui/line
   net/tor/rapid ${_f}
   exit $?
 fi

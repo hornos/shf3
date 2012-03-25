@@ -46,11 +46,11 @@ function net/tor/rapid() {
   import sys/net
   import gui
 
-  local _dev="${1:-None}"
-  local _socks=${2:-None}
-  local _listen=${3:-8051}
-  local _control=${4:-8052}
-  local _dns=${5:-8053}
+  local _dev="${2:-None}"
+  local _socks=${3:-None}
+  local _listen=${4:-8051}
+  local _control=${5:-8052}
+  local _dns=${6:-8053}
 
   net_tor_data="${net_tor_dir}/rapid"
   local _cfg="${net_tor_data}/config"
@@ -103,7 +103,7 @@ function net/tor/rapid() {
 
   # outbound dev
   if test "${_dev}" != "None" ; then
-    _dev=$(sys/net/ifconfig ip4 "${_dev}")
+    _dev=$(sys/net ifconfig ip4 "${_dev}")
     _dev="OutboundBindAddres ${_dev}"       >> "${_rc}"
   fi
 
