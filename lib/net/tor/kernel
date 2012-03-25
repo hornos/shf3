@@ -87,10 +87,9 @@ function net/tor/rapid() {
   echo "mid_tor_dns=${_dns}"                >> "${_cfg}"
 
   echo "DataDirectory \"${net_tor_data}\""   > "${_rc}"
-  echo "SocksPort ${_lport}"                >> "${_rc}"
-  echo "ControlPort ${_cport}"              >> "${_rc}"
-  echo "DNSPort ${_dport}"                  >> "${_rc}"
-  echo "CookieAuthentication 1"             >> "${_rc}"
+  echo "SocksPort ${_listen}"               >> "${_rc}"
+  echo "ControlPort ${_control}"            >> "${_rc}"
+  echo "DNSPort ${_dns}"                    >> "${_rc}"
   echo "UseEntryGuards 1"                   >> "${_rc}"
   echo "ReachableDirAddresses *:80"         >> "${_rc}"
   echo "ReachableORAddresses *:443"         >> "${_rc}"
