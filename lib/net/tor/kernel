@@ -68,7 +68,7 @@ function net/tor/rapid() {
     $failure
   fi
   # trap
-  trap /net/tor/clean INT TERM EXIT
+  trap net/tor/clean INT TERM EXIT
 
   local _frm1="%-21s%-8s%-8s%-8s\n"
   echo
@@ -103,7 +103,7 @@ function net/tor/rapid() {
 
   # outbound dev
   if test "${_dev}" != "None" ; then
-    _dev=$(/sys/net/ifconfig ip4 "${_dev}")
+    _dev=$(sys/net/ifconfig ip4 "${_dev}")
     _dev="OutboundBindAddres ${_dev}"       >> "${_rc}"
   fi
 
