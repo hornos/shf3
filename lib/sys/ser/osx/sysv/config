@@ -1,0 +1,2 @@
+sys_ser_osx_sysv_lddir="/System/Library/LaunchDaemons"
+sys_ser_osx_sysv_ladir="/System/Library/LaunchAgents"

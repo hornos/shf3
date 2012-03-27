@@ -30,6 +30,11 @@ function sys/mgr() {
       sys/ctl $*
     ;;
 
+    ser|service)
+      import sys/ser
+      sys/ser $*
+    ;;
+
     pkg|package)
       import sys/pkg
       sys/pkg $*

@@ -89,7 +89,10 @@ function ssh/mnt() {
       return ${_false_}
     fi
 
-    ${ssh_mnt_umnt} ${_src} 2>/dev/null
+    if ${_f} ; then
+      local _opt="-f"
+    fi
+    ${ssh_mnt_umnt} ${_opt} ${_src} 2>/dev/null
     _ret=$?
     if ! test ${_ret} -gt 0 ; then
       sys/lck/rm "${_lck}"

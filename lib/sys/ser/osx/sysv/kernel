@@ -1,0 +1,103 @@
+# https://gist.github.com/1330318
+# https://gist.github.com/1330308
+# mac os x 10.6 hardening tips
+
+# TODO: status
+function sys/ser/osx/sysv() {
+  import sys/ser/osx
+  local _s="${1:-unload}"
+  shift
+  local _m="$*"
+  local _p=""
+
+  local i
+  for i in ${_m} ; do
+    _p="${sys_ser_osx_sysv_lddir}/${i}.plist"
+    if readable "${_p}" ; then
+      msg "Daemon ${_s} ${i}"
+      sys/ser/osx/${_s} "${_p}"
+    fi
+    _p="${sys_ser_osx_sysv_ladir}/${i}.plist"
+    if readable "${_p}" ; then
+      msg "Agent ${_s} ${i}"
+      sys/ser/osx/${_s} "${_p}"
+    fi
+  done
+
+}
+
+function sys/ser/osx/sysv/blued() {
+  sys/ser/osx/sysv ${1} "com.apple.blued"
+  sys/ser/osx/sysv ${1} "com.apple.bluetoothUIServer"
+}
+
+function sys/ser/osx/sysv/cupsd() {
+  sys/ser/osx/sysv ${1} "org.cups.cupsd"
+}
+
+function sys/ser/osx/sysv/ard() {
+  sys/ser/osx/sysv ${1} "com.apple.RemoteDesktop.PrivilegeProxy com.apple.rcd com.apple.RFBEventHelper com.apple.RemoteDesktop"
+}
+
+function sys/ser/osx/sysv/isync() {
+  sys/ser/osx/sysv ${1} "com.apple.FileSyncAgent.iDisk com.apple.iCalPush"
+}
+
+function sys/ser/osx/sysv/screenshare() {
+  sys/ser/osx/sysv ${1} "com.apple.screensharing.agent"
+}
+
+function sys/ser/osx/sysv/remote() {
+  sys/ser/osx/sysv ${1} "com.apple.RemoteUI"
+}
+
+function sys/ser/osx/sysv/smbd() {
+  sys/ser/osx/sysv ${1} "com.apple.netbiosd com.apple.smbfs_load_kext com.apple.smb.preferences"
+}
+
+function sys/ser/osx/sysv/appleshare() {
+  sys/ser/osx/sysv ${1} "com.apple.afpfs_checkafp com.apple.afpfs_afpLoad"
+}
+
+function sys/ser/osx/sysv/webdav() {
+  sys/ser/osx/sysv ${1} "com.apple.webdavfs_load_kext"
+}
+
+function sys/ser/osx/sysv/mdm() {
+  sys/ser/osx/sysv ${1} "com.apple.mdmclient.daemon com.apple.mdmclient.agent"
+}
+
+function sys/ser/osx/sysv/mtmd() {
+  if test "${1}" = "unload" ; then
+    if installed tmutil ; then
+      sudo tmutil disable
+      sudo tmutil disablelocal
+    fi
+  fi
+  sys/ser/osx/sysv ${1} "com.apple.mtmd com.apple.mtmfs"
+}
+
+function sys/ser/osx/sysv/isight() {
+  sys/ser/osx/sysv ${1} "com.apple.IIDCAssistant"
+}
+
+function sys/ser/osx/sysv/nis() {
+  sys/ser/osx/sysv ${1} "com.apple.nis.ypbind"
+}
+
+function sys/ser/osx/sysv/vpn() {
+  sys/ser/osx/sysv ${1} "com.apple.racoon"
+}
+
+function sys/ser/osx/sysv/userd() {
+  sys/ser/osx/sysv ${1} "com.apple.UserNotificationCenter"
+}
+
+function sys/ser/osx/sysv/maild() {
+  sys/ser/osx/sysv ${1} "org.postfix.master"
+}
+
+function sys/ser/osx/sysv/bonjour() {
+# TODO
+sudo defaults write /System/Library/LaunchDaemons/com.apple.mDNSResponder ProgramArguments -array-add "-NoMulticastAdvertisements"
+}

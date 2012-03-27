@@ -1,0 +1,26 @@
+
+function help/sys/ser() {
+  import sys
+  sys/help ${FUNCNAME} $*
+}
+
+function sys/ser() {
+  import sys
+  local _cmd=${1:-help}
+  shift
+
+  case "${_cmd}" in
+    load|unload|list)
+      sys/call sys/ser "${_cmd}" $*
+    ;;
+
+    # System-V like
+    start|stop|restart|status)
+      sys/call sys/ser "sysv" "${_cmd}" $*
+    ;;
+
+    *|help)
+      help/sys/ser $*
+    ;;
+  esac
+}

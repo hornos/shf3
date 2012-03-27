@@ -234,6 +234,7 @@ function que/sub() {
   ### PARALLEL ###
 
   msg "Parallel  : ${MODE}"
+  msg "Resources : N ${_nodes}  S ${_sckts}  C ${_cores}"
   local _v=${VERBOSE:-0}
 
   ### cpu binding

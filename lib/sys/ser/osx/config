@@ -1,0 +1,2 @@
+sys_ser_osx="sudo /bin/launchctl"
+sys_ser_osx_opt="-w"
