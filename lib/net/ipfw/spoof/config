@@ -1,7 +1,0 @@
-# rule numbers
-net_ipfw_spoof=1000
-net_ipfw_spoof_revpath=$((net_ipfw_spoof+100))
-net_ipfw_spoof_nmap=$((net_ipfw_spoof+200))
-net_ipfw_spoof_ip=$((net_ipfw_spoof+300))
-net_ipfw_spoof_tcp=$((net_ipfw_spoof+400))
-net_ipfw_spoof_udp$=$((net_ipfw_spoof+500))

@@ -10,7 +10,8 @@ function help/sshtx() {
 SSH Transfer
 
 Usage: ${gbn} CMD MID files
-
+              PUT
+              GET
 EOF
   exit 1
 }

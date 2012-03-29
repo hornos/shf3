@@ -135,9 +135,11 @@ function run/check/other() {
 function run/check/data() {
   # continue
   if test -z "${DATADIR}" ; then
+    msg "${FUNCNAME} Not found: DATADIR"
     return ${_true_}
   fi
   if test -z "${DATA}" ; then
+    msg "${FUNCNAME} Not found: DATA"
     return ${_true_}
   fi
 
@@ -148,7 +150,7 @@ function run/check/data() {
   for _dat in ${DATA}; do
     _dat="${_ddir}/${_dat}"
     if ! test -r "${_dat}" ; then
-      msg "Data not found: ${_dat}"
+      msg "${FUNCNAME} Data not found: ${_dat}"
       return ${_false_}
     fi
   done

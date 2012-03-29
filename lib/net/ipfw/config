@@ -1,7 +1,0 @@
-net_ipfw_db="net_ipfw.sqlite"
-net_ipfw_tb="ipfw_rule"
-
-net_ipfw_default=0
-net_ipfw="sudo /sbin/ipfw -q"
-net_ipfw_log="/var/log/kernel.log"
-

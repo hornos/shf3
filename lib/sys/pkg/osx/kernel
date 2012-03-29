@@ -52,6 +52,12 @@ function sys/pkg/osx/removerepo() {
 function sys/pkg/osx/install() {
   if empty "$*" ; then $failure; fi
 
+  ${sys_pkg_osx} info $*
+  if failed $? ; then $failure; fi
+
+  answer "Do you want to install?"
+  if failed $? ; then $failure; fi
+
   ${sys_pkg_osx} install $*
 }
 

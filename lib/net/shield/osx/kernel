@@ -1,0 +1,102 @@
+
+net_shield_osx_me=10000
+function net/shield/osx/me() {
+  local _s=${1:-load}
+  local _r=$(ns/var "${FUNCNAME}")
+  _r=${!_r}
+  if empty "${_r}" ; then
+    msg "${FUNCNAME} Rule no set"
+    $failure
+  fi
+
+  case "${_s}" in
+    load)
+      net/ipfw/rule ${_r} allow ip from me to me
+    ;;
+    unload)
+      net/ipfw/unload ${_r}
+    ;;
+    status)
+      echo ""
+    ;;
+  esac
+}
+
+net_shield_osx_denyall=65000
+function net/shield/osx/denyall() {
+  local _s=${1:-load}
+  local _r=$(ns/var "${FUNCNAME}")
+  _r=${!_r}
+  if empty "${_r}" ; then
+    msg "${FUNCNAME} Rule no set"
+    $failure
+  fi
+
+  case "${_s}" in
+    load)
+      net/ipfw/rule ${_r} deny log ip from any to any
+    ;;
+    unload)
+      net/ipfw/unload ${_r}
+    ;;
+    status)
+      echo ""
+    ;;
+  esac
+}
+
+net_shield_osx_dns=10053
+function net/shield/osx/dns() {
+  local _s=${1:-load}
+  shift
+  local _ip=${1:-any}
+
+  local _r=$(ns/var "${FUNCNAME}")
+  _r=${!_r}
+  if empty "${_r}" ; then
+    msg "${FUNCNAME} Rule no set"
+    $failure
+  fi
+
+  case "${_s}" in
+    load)
+      net/ipfw/state ${_r} allow udp from me to ${_ip} dst-port 53
+      net/ipfw/state ${_r} allow udp from me to ${_ip} dst-port 110
+    ;;
+    unload)
+      net/ipfw/unload ${_r}
+    ;;
+    status)
+      echo ""
+    ;;
+  esac
+}
+
+net_shield_osx_http=10080
+function net/shield/osx/http() {
+  local _s=${1:-load}
+  shift
+  local _ip=${1:-any}
+
+  local _r=$(ns/var "${FUNCNAME}")
+  _r=${!_r}
+  if empty "${_r}" ; then
+    msg "${FUNCNAME} Rule no set"
+    $failure
+  fi
+
+  case "${_s}" in
+    load)
+      net/ipfw/state ${_r} allow tcp from me to ${_ip} dst-port 80
+      net/ipfw/state ${_r} allow tcp from me to ${_ip} dst-port 443
+      net/ipfw/state ${_r} allow tcp from me to ${_ip} dst-port 8080
+    ;;
+    unload)
+      net/ipfw/unload ${_r}
+    ;;
+    status)
+      echo ""
+    ;;
+  esac
+}
+

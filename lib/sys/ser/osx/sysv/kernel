@@ -98,6 +98,6 @@ function sys/ser/osx/sysv/maild() {
 }
 
 function sys/ser/osx/sysv/bonjour() {
-# TODO
-sudo defaults write /System/Library/LaunchDaemons/com.apple.mDNSResponder ProgramArguments -array-add "-NoMulticastAdvertisements"
+# TODO: stop bonjour
+# sudo defaults write /System/Library/LaunchDaemons/com.apple.mDNSResponder ProgramArguments -array-add "-NoMulticastAdvertisements"
 }
