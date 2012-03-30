@@ -3,7 +3,7 @@ source $(dirname ${BASH_SOURCE})/../lib/header
 import que
 
 cd
-shfupd
+shfmgr -u
 
 pyf3="${HOME}/pyf3"
 eszr="${HOME}/site/eszr"
