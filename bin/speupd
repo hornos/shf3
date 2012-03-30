@@ -1,0 +1,21 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import que
+
+cd
+shfupd
+
+pyf3="${HOME}/pyf3"
+eszr="${HOME}/site/eszr"
+
+for i in "${pyf3}" "${eszr}" ; do
+  if test -d "${i}" ; then
+    cd "${i}"
+    gitmgr -p
+    cd
+  fi
+done
+
+
+
+

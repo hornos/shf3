@@ -1,0 +1,15 @@
+sys_xml_xpath="xpath"
+
+sys/xml/xpath() {
+  local _f="${1}"
+  shift
+  if ! readable "${_f}" ; then $failure; fi
+
+  ${sys_xml_xpath} "${_f}" $* 2>/dev/null
+}
+
+sys/xml/node() {
+  sys/xml/xpath $* | \
+  sed s/\<[a-z]*\>// | \
+  sed s/\<\\/[a-z]*\>//
+}
