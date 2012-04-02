@@ -64,8 +64,10 @@ function shf3/chkscr() {
   local _m="${1:-/etc/profile.d/modules.sh}"
   if test "${TERM}" = "screen" ; then
     if test -r "${_m}" ; then
-      return true
+      # true
+      return 0
     fi
   fi
-  return false
+  # false
+  return 1
 }
