@@ -245,6 +245,13 @@ function ssh/info() {
     return $?
   fi
   ### ssh
+  echo "Host Key:"
+  gui/line
+  ${ssh_key_gen} -lv -F ${mid_ssh_fqdn}
+
+  echo ""
+  echo "Public Key:"
+  gui/line
   local _pub="$(ssh/key/pub ${_h})"
   if ! test -r "${_pub}" ; then
     msg/warn "Key not found ${_pub}"
