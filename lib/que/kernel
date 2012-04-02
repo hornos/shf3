@@ -482,7 +482,7 @@ function que/sub() {
     echo "export OMP_NESTED=FALSE"          >> "${_bat}"
     # TODO stacksize
     echo "export OMP_STACKSIZE=12M"         >> "${_bat}"
-    echo "export KMP_STACKSIZE=12000000"    >> "${_bat}"
+    # echo "export KMP_STACKSIZE=12000000"    >> "${_bat}"
   else
     echo "export KMP_LIBRARY=serial"        >> "${_bat}"
   fi
