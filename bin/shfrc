@@ -68,11 +68,11 @@ function shf3/complete() {
   for i in ${_d}/*.cmp ; do
     if test -r "${i}" ; then
       source "${i}"
-      if test "${_f}" = "yes" ; then
-        comp/
-      else
-
-      fi
+#      if test "${_f}" = "yes" ; then
+#        comp/
+#      else
+#
+#      fi
     fi
   done
 }
