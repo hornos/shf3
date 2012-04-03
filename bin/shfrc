@@ -60,6 +60,23 @@ function shf3/alias() {
   fi
 }
 
+# TODO
+function shf3/complete() {
+  local _f="${1:-yes}"
+  local _d="${shf3_root}/bin"
+  local i
+  for i in ${_d}/*.cmp ; do
+    if test -r "${i}" ; then
+      source "${i}"
+      if test "${_f}" = "yes" ; then
+        comp/
+      else
+
+      fi
+    fi
+  done
+}
+
 function shf3/chkscr() {
   local _m="${1:-/etc/profile.d/modules.sh}"
   if test "${TERM}" = "screen" ; then

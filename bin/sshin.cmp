@@ -1,0 +1,27 @@
+function comp/sshin() {
+  source ${shf3_root}/lib/header
+  import sys
+
+  local _cur
+  local _prev
+  local _opts
+  local _base
+  COMPREPLY=()
+  _cur="${COMP_WORDS[COMP_CWORD]}"
+  _prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+  # options
+  opts=$(ls $sys_mid_dir/ssh | \
+         awk '{if(!match($0,"README")) print}')
+
+  COMPREPLY=($(compgen -W "${opts}" -- ${cur}))  
+   return 0
+}
+
+function comp/sshin/load() {
+  complete -F comp/sshin sshin
+}
+
+function comp/sshin/unload() {
+  uncomplete -F comp/sshin sshin
+}
