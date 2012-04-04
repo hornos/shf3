@@ -1,6 +1,6 @@
 # Tab complete
 for i in sshin sshtx ; do
-  if test -r "${shf3_root}/bin/${i}.cmp"
+  if test -r "${shf3_root}/bin/${i}.cmp" ; then
     source "${shf3_root}/bin/${i}.cmp"
     complete -F cmp/${i} ${i}
   fi
