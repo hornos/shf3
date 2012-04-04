@@ -1,0 +1,26 @@
+function cmp/sshtx() {
+  local _cur
+  local _prev
+  local _opts
+  local _base
+  COMPREPLY=()
+  _cur="${COMP_WORDS[COMP_CWORD]}"
+  _prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+  case "${prev}" in
+    PUT|GET|BACKUP)
+      local _mid=$(ls ${shf3_root}/mid/ssh | \
+                   awk '{if(!match($0,"README")) print}')
+      COMPREPLY=( $(compgen -W "${_mid}" -- ${_cur}) )
+      return 0
+    ;;
+      *)
+    ;;
+  esac
+
+  # options
+  opts="PUT GET BACKUP"
+
+  COMPREPLY=($(compgen -W "${_opts}" -- ${_cur}))
+  return 0
+}

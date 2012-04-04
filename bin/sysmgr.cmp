@@ -1,0 +1,44 @@
+function cmp/sysmgr() {
+  local _cur
+  local _prev
+  local _opts
+  local _base
+  COMPREPLY=()
+  _cur="${COMP_WORDS[COMP_CWORD]}"
+  _prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+  case "${prev}" in
+    ctl|control)
+      local _sub="get set all se search lsmod rmmod modprobe cpuinfo"
+      COMPREPLY=( $(compgen -W "${_sub}" -- ${_cur}) )
+      return 0
+    ;;
+
+    ser|service)
+      local _sub="load unload list start stop restart status"
+      COMPREPLY=( $(compgen -W "${_sub}" -- ${_cur}) )
+      return 0
+    ;;
+
+    pkg|package)
+      local _sub="lr repos ref refresh add addrepo rr removerepo in install rm remove lu list-updates up update se search if info"
+      COMPREPLY=( $(compgen -W "${_sub}" -- ${_cur}) )
+      return 0
+    ;;
+
+    net|network)
+      local _sub="lock wifi elan wlan send recv ifconfig"
+      COMPREPLY=( $(compgen -W "${_sub}" -- ${_cur}) )
+      return 0
+    ;;
+
+      *)
+    ;;
+  esac
+
+  # options
+  opts="ctl control ser service pkg package net network"
+
+  COMPREPLY=($(compgen -W "${_opts}" -- ${_cur}))
+  return 0
+}

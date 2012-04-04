@@ -1,4 +1,4 @@
-function cmp/sshin() {
+function cmp/tcmount() {
   local _cur
   local _prev
   local _opts
@@ -8,8 +8,7 @@ function cmp/sshin() {
   _prev="${COMP_WORDS[COMP_CWORD-1]}"
 
   # options
-  _opts=$(ls ${shf3_root}/mid/ssh | \
-         awk '{if(!match($0,"README")) print}')
+  _opts="start stop run load"
 
   COMPREPLY=($(compgen -W "${_opts}" -- ${_cur}))
   return 0

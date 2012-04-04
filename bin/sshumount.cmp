@@ -1,4 +1,4 @@
-function cmp/sshin() {
+function cmp/sshumount() {
   local _cur
   local _prev
   local _opts

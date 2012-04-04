@@ -1,0 +1,7 @@
+# Tab complete
+for i in sshin sshtx ; do
+  if test -r "${shf3_root}/bin/${i}.cmp"
+    source "${shf3_root}/bin/${i}.cmp"
+    complete -F cmp/${i} ${i}
+  fi
+done

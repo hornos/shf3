@@ -25,7 +25,7 @@ function sys/mgr() {
 
   case "${_cmd}" in
     # submenus
-    ctl|control|kernel)
+    ctl|control)
       import sys/ctl
       sys/ctl $*
     ;;

@@ -2,7 +2,7 @@
 source $(dirname ${BASH_SOURCE})/../lib/header
 import net/ifconfig
 
-function help/ifconfig.me() {
+function help/ifconfme() {
   cat << EOF
 
 ifconfig.me

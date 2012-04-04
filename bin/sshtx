@@ -12,6 +12,7 @@ SSH Transfer
 Usage: ${gbn} CMD MID files
               PUT
               GET
+              BACKUP
 EOF
   exit 1
 }

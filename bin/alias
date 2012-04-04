@@ -16,6 +16,9 @@ alias sshumount="sshmnt -u"
 alias encfsmount="encfsmnt -m"
 alias encfsumount="encfsmnt -u"
 
+alias tcmount="tcmnt -m"
+alias tcumount="tcmnt -u"
+
 alias book="bmkmgr -b"
 
 alias jobsub="jobmgr -s"
