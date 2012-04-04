@@ -60,7 +60,7 @@ function shf3/alias() {
   fi
 }
 
-function shf3/chkscr() {
+function shf3/is/screen() {
   local _m="${1:-/etc/profile.d/modules.sh}"
   if test "${TERM}" = "screen" ; then
     if test -r "${_m}" ; then
