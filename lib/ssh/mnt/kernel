@@ -64,6 +64,12 @@ function ssh/mnt() {
     return ${_false_}
   fi
 
+  # connection check
+  if ! ${_u} ; then
+    ssh/check
+    if failed $? ; then $failure; fi
+  fi
+
   # lock
   # clear lock
   local _lck="${_h}.${gbn}"

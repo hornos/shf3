@@ -6,3 +6,8 @@ ssh_template="template.ssh"
 # defaults
 ssh_TCPKeepAlive="no"
 ssh_ServerAliveInterval=30
+# check
+ssh_ping="ping -c 3 -t 10"
+ssh_nmap="nmap -sT --max-retries 3 --host-timeout 10"
+
+

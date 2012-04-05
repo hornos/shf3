@@ -142,7 +142,16 @@ function que/sub() {
   fi
   local _sltpn=${SLTPN:-0}
 
+  ### mpi procs per node (forced)
+  # in MPI-only mode you can force the 
+  # number of MPI procs by this
+  local _mpipn=${MPIPN:-0}
+  local _mpinp=$((_nodes*_mpipn))
+
   ### threads per core (forced)
+  # in MPI-OMP mode you can force the 
+  # number of threads by this
+  # effect can be the same as MPIPN
   local _thrds=${THRDS:-0}
 
   ### compound resource parameters
@@ -292,6 +301,12 @@ function que/sub() {
       _threads=1
     else
       _threads=${_cores}
+    fi
+
+    ### override by MPIPN for over/undersubscribe
+    if test ${_mpipn} -gt 0 ; then
+      _np=${_mpinp}
+      _pn=${_mpipn}
     fi
 
     ### MPI OMP

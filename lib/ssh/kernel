@@ -293,6 +293,10 @@ function ssh/login() {
     return ${_false_}
   fi
 
+  # connection check
+  ssh/check
+  if failed $? ; then $failure; fi
+
   local _lck="${_h}.${gbn}"
   # force
   if ${_f} ; then
@@ -613,4 +617,26 @@ function ssh/cmd() {
     ssh/gsi/destroy
   fi
   return ${_ret}
+}
+
+function ssh/check() {
+  if empty "${mid_ssh_port_check}" ; then
+    $success
+  fi
+  local i
+  case i in ${mid_ssh_port_check}
+    ping)
+      ${ssh_ping} ${mid_ssh_fqdn} &> /dev/null
+      if failed $? ; then $failure ; fi
+    ;;
+    nmap)
+      ${ssh_nmap} -p ${mid_ssh_port} ${mid_ssh_fqdn} 2>/dev/null | grep open' &>/dev/null
+      if failed $? ; then $failure ; fi
+    ;;
+    *)
+      msg "${FUNCNAME}: Check failed: ${i}"
+      $failure
+    ;;
+  esac
+  $success
 }

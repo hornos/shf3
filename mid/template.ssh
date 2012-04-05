@@ -13,6 +13,7 @@ mid_ssh_user="${USER}"
 # SSH port
 # gsi: 2222
 mid_ssh_port=22
+mid_ssh_port_check="ping nmap"
 
 # Valid proxy timeout for gsissh
 mid_ssh_valid="12:00"
