@@ -631,7 +631,7 @@ function ssh/check() {
       if failed $? ; then $failure ; fi
     fi
     if test "${i}" = "nmap" ; then
-      ${ssh_nmap} -p ${mid_ssh_port} ${mid_ssh_fqdn} 2>/dev/null | grep open' &>/dev/null
+      ${ssh_nmap} -p ${mid_ssh_port} ${mid_ssh_fqdn} 2>/dev/null | grep open &>/dev/null
       if failed $? ; then $failure ; fi
     fi
   do
