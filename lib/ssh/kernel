@@ -628,12 +628,18 @@ function ssh/check() {
   for i in ${mid_ssh_port_check}; do
     if test "${i}" = "ping" ; then
       ${ssh_ping} ${mid_ssh_fqdn} &> /dev/null
-      if failed $? ; then $failure ; fi
+      if failed $? ; then
+        msg "Connection failed"
+        $failure
+      fi
     fi
     if test "${i}" = "nmap" ; then
       ${ssh_nmap} -p ${mid_ssh_port} ${mid_ssh_fqdn} 2>/dev/null | grep open &>/dev/null
-      if failed $? ; then $failure ; fi
+      if failed $? ; then
+        msg "Connection failed"
+        $failure
+      fi
     fi
-  do
+  done
   $success
 }
