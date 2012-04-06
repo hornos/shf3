@@ -1,0 +1,16 @@
+
+function hpc/mpi/pmpi/machinefile() {
+  local _m="${1}"
+  echo ""
+}
+
+function hpc/mpi/pmpi/machines() {
+  local _m="${1}"
+  echo "-hostlist \${_m}"
+}
+
+function hpc/mpi/pmpi/nppn() {
+  local _np=${1}
+  local _pn=${2}
+  echo "${_pn} -np ${_np}"
+}

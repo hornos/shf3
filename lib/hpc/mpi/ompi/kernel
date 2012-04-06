@@ -1,0 +1,16 @@
+
+function hpc/mpi/ompi/machinefile() {
+  local _m="${1}"
+  echo ""
+}
+
+function hpc/mpi/ompi/machines() {
+  local _m="${1}"
+  echo ""
+}
+
+function hpc/mpi/ompi/nppn() {
+  local _np=${1}
+  local _pn=${2}
+  echo "-np ${_np} -npernode ${_pn}"
+}

@@ -1,0 +1,16 @@
+
+function hpc/mpi/mpt/machinefile() {
+  local _m="${1}"
+  echo ""
+}
+
+function hpc/mpi/mpt/machines() {
+  local _m="${1}"
+  echo "\${_m}"
+}
+
+function hpc/mpi/mpt/nppn() {
+  local _np=${1}
+  local _pn=${2}
+  echo "${_pn}"
+}

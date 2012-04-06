@@ -41,9 +41,4 @@ echo
 msg "${_msg}"
 gui/line
 
-if ! test -r "${_j}" ; then
-  msg "Job file not found"
-  exit ${_false_}
-fi
-
 que/sub "${_c}" "${_j}" ${_n}
