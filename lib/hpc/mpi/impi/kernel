@@ -14,3 +14,12 @@ function hpc/mpi/impi/nppn() {
   local _pn=${2}
   echo "-np ${_np} -perhost ${_pn}"
 }
+
+function hpc/mpi/impi/verbose() {
+  local _v=${1:-0}
+  local _b="${2}"
+  if ! readable "${_b}" ; then
+    echo ""
+  fi
+  echo "export I_MPI_DEBUG=${_v}" >> "${_b}"
+}

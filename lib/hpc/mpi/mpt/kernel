@@ -14,3 +14,30 @@ function hpc/mpi/mpt/nppn() {
   local _pn=${2}
   echo "${_pn}"
 }
+
+function hpc/mpi/ompi/verbose() {
+  local _v=${1:-0}
+  local _b="${2}"
+  local _verbose=""
+
+  if ! readable "${_b}" ; then
+    echo ""
+  fi
+
+  if test ${_v} -gt 0 ; then
+    echo "export MPI_VERBOSE=1"             >> "${_bat}"
+    echo "export MPI_DSM_VERBOSE=1"         >> "${_bat}"
+    echo "export MPI_DISPLAY_SETTINGS=1"    >> "${_bat}"
+  fi
+  if test ${_v} -gt 1 ; then
+    echo "export MPI_VERBOSE2=1"          >> "${_bat}"
+    echo "export MPI_IB_VERBOSE=1"        >> "${_bat}"
+    echo "export MPI_SHARED_VERBOSE=1"    >> "${_bat}"
+    echo "export MPI_XPMEM_VERBOSE=1"     >> "${_bat}"
+  fi
+  if test ${_v} -gt 2 ; then
+    echo "export MPI_IB_VERBOSE3=1"       >> "${_bat}"
+    echo "export MPI_COLL_OPT_VERBOSE=1"  >> "${_bat}"
+    echo "export MPI_STATS=1"             >> "${_bat}"
+  fi
+}

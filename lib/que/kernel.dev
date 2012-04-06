@@ -46,6 +46,46 @@ function que/autoenv() {
   echo ${!_v}
 }
 
+function que/check() {
+  local _cmd="${1##runprg}"
+  local _sub="${2:-B}"
+  local _prg=""
+  local _guide=""
+  local _sch=""
+
+  # reprocess args
+  OPTIND=1
+  local _o
+  while getopts p:g:s: _opt ${_cmd[@]}; do
+    case ${_opt} in
+      p) _prg=${OPTARG};;
+      g) _guide=${OPTARG};;
+      s) _sch=${OPTARG};;
+    esac
+  done
+
+  if empty "${_prg}" ; then
+    msg "${FUNCNAME}: program module not set"
+    $failed
+  fi
+
+  if empty "${_guide}" || \
+   ! readable "${_guide}" ; then
+    msg "${FUNCNAME}: guide not found ${_guide}"
+    $failure
+  fi
+
+  import run
+  # summary
+  if test "${_sub}" = "S" ; then
+    import run
+    run/sum "${_prg}" "${_guide}"
+    return $?
+  fi
+  # check
+  import run/check
+  run/check 2 "${_prg}" "${_guide}"
+}
 
 function que/sub() {
   import gui
@@ -65,6 +105,12 @@ function que/sub() {
   source ${_job}
   que/jobchk
   if failed $? ; then $failure; fi
+
+  ### summary
+  if test "${_sub}" = "C" ; then
+    que/check "${RUN}" "${_sub}"
+    return $?
+  fi
 
   msg "Job file    : ${_job}"
 
@@ -311,9 +357,12 @@ function que/sub() {
       # machines
       local __machines="${_machinefile} ${_machines}"
 
+      # verbose
+      local _verbose=$(hpc/mpi/${_mpi}/verbose ${_v} "${_bat}")
+
       # final mpirun command
-      # prerun              MACHINES      NPPN     NUMA     BINDING  BOOST     PROFILER
-      _mpi_opt="${_mpi_opt} ${__machines} ${_nppn} \${NUMA} ${_bind} ${_boost} ${_prof}"
+      # prerun  VERBOSE     OPTIONS     MACHINES      NPPN     NUMA     BINDING  BOOST     PROFILER
+      _mpi_opt="${_verbose} ${_mpi_opt} ${__machines} ${_nppn} \${NUMA} ${_bind} ${_boost} ${_prof}"
       echo "export MPI_OPT=\"${_mpi_opt}\""             >> "${_bat}"
       echo "export PRERUN=\"${_mpirun} \${MPI_OPT}\""   >> "${_bat}"
     fi
@@ -323,64 +372,12 @@ function que/sub() {
     echo "export FMP_MPI_PERNODE=${_pn}"                >> "${_bat}"
   fi
 
-  ### begin verbose
-  if test ${_v} -gt 0 ; then
-    case ${_mpi} in
-      ompi)
-        # Open MPI
-        MPI_OPT="-v ${MPI_OPT}"
-        if test ${_v} -gt 1 ; then
-          MPI_OPT="-report-bindings ${MPI_OPT}" >> "${_bat}"
-        fi
-        if test ${_v} -gt 2 ; then
-          MPI_OPT="-d ${_v} ${MPI_OPT}"         >> "${_bat}"
-        fi
-      ;;
-
-      impi)
-        # Intel MPI
-        echo "export I_MPI_DEBUG=${_v}"         >> "${_bat}"
-      ;;
-
-      pmpi)
-        # Platform MPI
-        echo "export MPI_ERROR_LEVEL=${_v}"     >> "${_bat}"
-      ;;
-
-      mpt)
-        echo "export MPI_VERBOSE=1"             >> "${_bat}"
-        echo "export MPI_DSM_VERBOSE=1"         >> "${_bat}"
-        echo "export MPI_DISPLAY_SETTINGS=1"    >> "${_bat}"
-        if test ${_v} -gt 1 ; then
-          echo "export MPI_VERBOSE2=1"          >> "${_bat}"
-          echo "export MPI_IB_VERBOSE=1"        >> "${_bat}"
-          echo "export MPI_SHARED_VERBOSE=1"    >> "${_bat}"
-          echo "export MPI_XPMEM_VERBOSE=1"     >> "${_bat}"
-        fi
-        if test ${_v} -gt 2 ; then
-          echo "export MPI_IB_VERBOSE3=1"       >> "${_bat}"
-          echo "export MPI_COLL_OPT_VERBOSE=1"  >> "${_bat}"
-          echo "export MPI_STATS=1"             >> "${_bat}"
-        fi
-      ;;
-
-      self)
-        echo "# Internal MPI used"              >> "${_bat}"
-      ;;
-
-      *)
-        msg "${FUNCNAME}: not implemented ${_mpi}"
-        $failure
-      ;;
-    esac
-  fi
-  ### end verbose
-
   ### Toggle Options
   if ! empty "${TOGGLE}" ; then
     echo "### Options"                          >> "${_bat}"
-    for i in ${TOGGLE} ; do
-      echo "export ${i}=1"                      >> "${_bat}"
+    local t
+    for t in ${TOGGLE} ; do
+      echo "export ${t}=1"                      >> "${_bat}"
     done
   fi
 
@@ -417,6 +414,7 @@ function que/sub() {
     echo "export KMP_LIBRARY=serial"        >> "${_bat}"
   fi
   # echo "export MKL_DYNAMIC=FALSE"         >> "${_bat}"
+
 
   ### setup mail
   echo "### Command" >> "${_bat}"
@@ -469,52 +467,4 @@ function que/sub() {
   fi
   msg "Submit success"
   $success
-}
-
-
-function help/que/check() {
-  cat << EOF
-\$1 string - command
-\$2 string - mode
-EOF
-}
-function que/check() {
-  local _cmd="${1##runprg}"
-  local _sub="${2:-B}"
-  local _prg=""
-  local _guide=""
-  local _sch=""
-
-  # reprocess args
-  OPTIND=1
-  local _o
-  while getopts p:g:s: _opt ${_cmd[@]}; do
-    case ${_opt} in
-      p) _prg=${OPTARG};;
-      g) _guide=${OPTARG};;
-      s) _sch=${OPTARG};;
-    esac
-  done
-
-  if empty "${_prg}" ; then
-    msg "${FUNCNAME}: program module not set"
-    $failed
-  fi
-
-  if empty "${_guide}" || \
-   ! readable "${_guide}" ; then
-    msg "${FUNCNAME}: guide not found ${_guide}"
-    $failure
-  fi
-
-  import run
-  # summary
-  if test "${_sub}" = "S" ; then
-    import run
-    run/sum "${_prg}" "${_guide}"
-    return $?
-  fi
-  # check
-  import run/check
-  run/check 2 "${_prg}" "${_guide}"
 }

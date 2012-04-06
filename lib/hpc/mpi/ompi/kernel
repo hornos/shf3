@@ -14,3 +14,20 @@ function hpc/mpi/ompi/nppn() {
   local _pn=${2}
   echo "-np ${_np} -npernode ${_pn}"
 }
+
+function hpc/mpi/ompi/verbose() {
+  local _v=${1:-0}
+  local _b="${2}"
+  local _verbose=""
+
+  if test ${_v} -gt 0 ; then
+    _verbose="-v"
+  fi
+  if test ${_v} -gt 1 ; then
+    _verbose="${_verbose} -report-bindings"
+  fi
+  if test ${_v} -gt 2 ; then
+    _verbose="${_verbose} -d ${_v}"
+  fi
+  echo "${_verbose}"
+}

@@ -14,3 +14,12 @@ function hpc/mpi/pmpi/nppn() {
   local _pn=${2}
   echo "${_pn} -np ${_np}"
 }
+
+function hpc/mpi/pmpi/verbose() {
+  local _v=${1:-0}
+  local _b="${2}"
+  if ! readable "${_b}" ; then
+    echo ""
+  fi
+  echo "export MPI_ERROR_LEVEL=${_v}" >> "${_b}"
+}
