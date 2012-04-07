@@ -206,6 +206,11 @@ function que/sub() {
   if failed $? ; then $failure; fi
   msg "Scheduler  : ${_sch}"
 
+  ### requested resources
+  gui/line
+  printf "%8s %8s %8s %8s %8s\n" "NODES" "SOCKETS" "CORES" "SLOTS" "TASKS"
+  printf "%8s %8s %8s %8s %8s\n" ${_nodes} ${_sckts} ${cores} ${SLOTS} ${TASKS}
+
   ### queue login
   if test "${_sub}" = "L" ; then
     echo ""
@@ -260,6 +265,15 @@ function que/sub() {
     local _m
     for _m in ${MODULE} ; do
       echo "module load ${_m}"       >> "${_bat}"
+    done
+  fi
+
+  ### Toggle Options
+  if ! empty "${TOGGLE}" ; then
+    echo "### Options"               >> "${_bat}"
+    local t
+    for t in ${TOGGLE} ; do
+      echo "export ${t}=1"           >> "${_bat}"
     done
   fi
 
@@ -360,69 +374,54 @@ function que/sub() {
       # verbose
       local _verbose=$(hpc/mpi/${_mpi}/verbose ${_v} "${_bat}")
 
-      # final mpirun command
-      # prerun  VERBOSE     OPTIONS     MACHINES      NPPN     NUMA     BINDING  BOOST     PROFILER
+      # predefined bindings
+      case "${_bind}" in
+        core|socket|cache)
+          _bind=$(hpc/mpi/${_mpi}/binding ${_bind})
+        ;;
+      esac
+
+      # PRERUN  VERBOSE     OPTIONS     MACHINES      NPPN     NUMA     BINDING  BOOST     PROFILER
       _mpi_opt="${_verbose} ${_mpi_opt} ${__machines} ${_nppn} \${NUMA} ${_bind} ${_boost} ${_prof}"
       echo "export MPI_OPT=\"${_mpi_opt}\""             >> "${_bat}"
       echo "export PRERUN=\"${_mpirun} \${MPI_OPT}\""   >> "${_bat}"
     fi
 
     # http://github.com/hornos/fmp
+    echo "### Fortran Mulit-processing"                 >> "${_bat}"
     echo "export FMP_MPI_NODES=${_np}"                  >> "${_bat}"
     echo "export FMP_MPI_PERNODE=${_pn}"                >> "${_bat}"
   fi
 
-  ### Toggle Options
-  if ! empty "${TOGGLE}" ; then
-    echo "### Options"                          >> "${_bat}"
-    local t
-    for t in ${TOGGLE} ; do
-      echo "export ${t}=1"                      >> "${_bat}"
-    done
-  fi
-
   ### OMP
+  echo "### OMP Setup"                         >> "${_bat}"
   if test "${_mode}" = "omp" ; then
-    echo "export PRERUN=\"${_bind} ${_prof}\""  >> "${_bat}"
+    echo "export PRERUN=\"${_bind} ${_prof}\"" >> "${_bat}"
     _threads=${_tasks}
   fi
-
-  ### threads
-  # forced by THRDS
+  # forced threads by THRDS
   if test ${_thrds} -gt 0 ; then
     _threads=${_thrds}
   fi
-
-  # TODO OMP KMP MKL ACML?
-  echo "### OMP Setup"                      >> "${_bat}"
-  echo "export OMP_NUM_THREADS=${_threads}" >> "${_bat}"
-  echo "export MKL_NUM_THREADS=${_threads}" >> "${_bat}"
-  if test ${_threads} -gt 1 ; then
-    echo "export KMP_LIBRARY=turnaround"    >> "${_bat}"
-    if ! test -z "${KMPAFF}" ; then
-      echo "export KMP_AFFINITY=${KMPAFF}"  >> "${_bat}"
-    fi
-
-    # TODO OMP 2.0
-    # OMP 3.0
-    echo "export OMP_PROC_BIND=TRUE"        >> "${_bat}"
-    echo "export OMP_NESTED=FALSE"          >> "${_bat}"
-    # TODO stacksize
-    echo "export OMP_STACKSIZE=12M"         >> "${_bat}"
-    # echo "export KMP_STACKSIZE=12000000"    >> "${_bat}"
+  # threads
+  echo "export OMP_NUM_THREADS=${_threads}"    >> "${_bat}"
+  echo "export MKL_NUM_THREADS=${_threads}"    >> "${_bat}"
+  if test ${_threads} -gt 1; then
+    echo "export KMP_LIBRARY=throughput"       >> "${_bat}"
+    echo "export OMP_PROC_BIND=TRUE"           >> "${_bat}"
+    echo "export OMP_NESTED=FALSE"             >> "${_bat}"
+    echo "export OMP_STACKSIZE=12M"            >> "${_bat}"
   else
-    echo "export KMP_LIBRARY=serial"        >> "${_bat}"
+    echo "export KMP_LIBRARY=serial"           >> "${_bat}"
   fi
-  # echo "export MKL_DYNAMIC=FALSE"         >> "${_bat}"
 
+  ### requested MPIOMP resources
 
-  ### setup mail
+  ### command
   echo "### Command" >> "${_bat}"
   if test "${RUN/*runprg*/runprg}" = "runprg" ; then
     # set scheduler
-    RUN="${RUN} -s ${QSCHED}"
-
-    # check
+    RUN="${RUN} -s ${_sch}"
     if ${_chk} ; then
       que/check "${RUN}"
       if failed $? ; then

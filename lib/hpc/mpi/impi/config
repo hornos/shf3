@@ -1,1 +1,2 @@
 hpc_mpi_impi_mpirun="mpirun"
+hpc_mpi_impi_manual="http://software.intel.com/sites/products/documentation/hpc/mpi/linux/reference_manual.pdf"

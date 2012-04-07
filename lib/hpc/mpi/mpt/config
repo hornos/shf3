@@ -1,1 +1,2 @@
 hpc_mpi_mpt_mpirun="mpirun"
+hpc_mpi_mpt_manual="http://techpubs.sgi.com/library/tpl/cgi-bin/browse.cgi?cmd=toc&coll=linux&db=bks&pth=/SGI_Developer/MPT_UG"

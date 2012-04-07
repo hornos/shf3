@@ -15,7 +15,7 @@ function hpc/mpi/mpt/nppn() {
   echo "${_pn}"
 }
 
-function hpc/mpi/ompi/verbose() {
+function hpc/mpi/mpt/verbose() {
   local _v=${1:-0}
   local _b="${2}"
   local _verbose=""
@@ -40,4 +40,18 @@ function hpc/mpi/ompi/verbose() {
     echo "export MPI_COLL_OPT_VERBOSE=1"  >> "${_bat}"
     echo "export MPI_STATS=1"             >> "${_bat}"
   fi
+}
+
+function hpc/mpi/mpt/binding() {
+  local _m=${1:-core}
+  local _b="dplace"
+  case "${_m}" in
+    core)
+      _b="${_b} -s 1 -c SC"
+    ;;
+    socket)
+      _b="${_b} -s 1 -c BS"
+    ;;
+  esac
+  echo "${_b}"
 }

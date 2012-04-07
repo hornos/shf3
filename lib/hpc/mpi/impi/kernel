@@ -1,4 +1,8 @@
 
+# host list support:
+# Torque, PBS Pro, OpenPBS, LSF, Parallelnavi NQS, 
+# SLURM, Sun Grid Engine, LoadLeveler
+
 function hpc/mpi/impi/machinefile() {
   local _m="${1}"
   echo ""
@@ -22,4 +26,22 @@ function hpc/mpi/impi/verbose() {
     echo ""
   fi
   echo "export I_MPI_DEBUG=${_v}" >> "${_b}"
+}
+
+# TODO: MPI OMP
+function hpc/mpi/impi/binding() {
+  local _m=${1:-core}
+  local _b="pin=yes"
+  case "${_m}" in
+    core)
+      _b="${_b};domain=core"
+    ;;
+    socket)
+      _b="${_b};domain=socket"
+    ;;
+    cache)
+      _b="${_b};domain=cache"
+    ;;
+  esac
+  echo "-binding \"${_b}\""
 }

@@ -1,1 +1,2 @@
 hpc_mpi_ompi_mpirun="mpirun"
+hpc_mpi_ompi_manual="http://www.open-mpi.org/doc/"

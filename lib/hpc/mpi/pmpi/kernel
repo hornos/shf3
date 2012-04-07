@@ -23,3 +23,18 @@ function hpc/mpi/pmpi/verbose() {
   fi
   echo "export MPI_ERROR_LEVEL=${_v}" >> "${_b}"
 }
+
+# TODO
+function hpc/mpi/pmpi/binding() {
+  local _m=${1:-core}
+  local _b=""
+  case "${_m}" in
+    core)
+      _b="-cpu_bind"
+    ;;
+    socket)
+      _b="-cpu_bind"
+    ;;
+  esac
+  echo "${_b}"
+}

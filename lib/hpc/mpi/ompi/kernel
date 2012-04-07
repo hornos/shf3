@@ -31,3 +31,17 @@ function hpc/mpi/ompi/verbose() {
   fi
   echo "${_verbose}"
 }
+
+function hpc/mpi/impi/binding() {
+  local _m=${1:-core}
+  local _b=""
+  case "${_m}" in
+    core)
+      _b="--bind-to-core --bycore"
+    ;;
+    socket)
+      _b="--bind-to-socket --bysocket"
+    ;;
+  esac
+  echo "${_b}"
+}
