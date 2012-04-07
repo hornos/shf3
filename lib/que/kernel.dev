@@ -186,13 +186,14 @@ function que/sub() {
   # threads
   local _threads=${_tasks}
 
-  ### global resources for SGE
+  ### global compound resources
   SLOTS=${_slots}
-  # over subscribe for SGE
+  TASKS=${_tasks}
+  # override tasks per node
   if test ${__slots} -gt 0 ; then
     SLOTS=${__slots}
+    TASKS=${_sltpn}
   fi
-  TASKS=${_tasks}
 
   ### write batch file
   local _bat="./${_sch}.batch.sh"
@@ -207,9 +208,15 @@ function que/sub() {
   msg "Scheduler  : ${_sch}"
 
   ### requested resources
+  msg "Requested scheduler resources"
   gui/line
-  printf "%8s %8s %8s %8s %8s\n" "NODES" "SOCKETS" "CORES" "SLOTS" "TASKS"
-  printf "%8s %8s %8s %8s %8s\n" ${_nodes} ${_sckts} ${cores} ${SLOTS} ${TASKS}
+  #     123456789 12345 12345 12345 1234567 1234567
+  echo           "per node/socket   compounds"
+  printf "%9s %5s %5s %5s %7s %7s %7s\n" "SCHEDULER" "NODES" "SCKTS" "CORES" "SLOTS" "TASKS" "SOCKETS"
+  printf "%9s %5d %5d %5d %7d %7d %7d\n" ${_sch} ${_nodes} ${_sckts} ${_cores} ${SLOTS} ${TASKS} ${_sockets}
+  if test ${__slots} -gt 0 ; then
+    msg "SLOTS and TASKS override"
+  fi
 
   ### queue login
   if test "${_sub}" = "L" ; then
@@ -399,7 +406,7 @@ function que/sub() {
     echo "export PRERUN=\"${_bind} ${_prof}\"" >> "${_bat}"
     _threads=${_tasks}
   fi
-  # forced threads by THRDS
+  # override threads by THRDS
   if test ${_thrds} -gt 0 ; then
     _threads=${_thrds}
   fi
@@ -415,7 +422,21 @@ function que/sub() {
     echo "export KMP_LIBRARY=serial"           >> "${_bat}"
   fi
 
-  ### requested MPIOMP resources
+  ### requested MPI OMP resources
+  msg "Requested MPI and OMP resources"
+  gui/line
+  printf "%9s %5s %5s %7s" "MODE" "MPINP" "MPIPN" "THREADS"
+  if test "${_mode}" = "omp" ; then
+    printf "%9s %5s %5s %7d" ${_mode}  "-" "-" ${_threads}
+  else
+    printf "%9s %5d %5d %7d" ${_mode}  ${_np} ${_pn} ${_threads}
+  fi
+  if test ${_mpipn} -gt 0 ; then
+    msg "MPI pn override"
+  fi
+  if test ${_thrds} -gt 0 ; then
+    msg "OMP threads override"
+  fi
 
   ### command
   echo "### Command" >> "${_bat}"
