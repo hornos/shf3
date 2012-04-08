@@ -46,19 +46,12 @@ function que/loadl() {
     echo "#${que_loadl_qsub} node = ${NODES}"                  >> "${_bat}"
   fi
 
-  if test "${MPIOMP}" = "yes" ; then
-    if ! test -z "${SCKTS}" ; then
-      echo "#${que_loadl_qsub} tasks_per_node = ${SCKTS}"      >> "${_bat}"
-    fi
-    if ! test -z "${CORES}" ; then
-      echo "#${que_loadl_qsub} parallel_threads = ${CORES}"    >> "${_bat}"
-      echo "#${que_loadl_qsub} task_affinity = core(${CORES})" >> "${_bat}"
-    fi
-  else
-    if ! test -z "${TASKS}" ; then
-      echo "#${que_loadl_qsub} tasks_per_node = ${TASKS}"      >> "${_bat}"
-    fi
+  if ! test -z "${TASKS}" ; then
+    echo "#${que_loadl_qsub} tasks_per_node = ${TASKS}"        >> "${_bat}"
   fi
+
+  # echo "#${que_loadl_qsub} parallel_threads = ${CORES}"    >> "${_bat}"
+  # echo "#${que_loadl_qsub} task_affinity = core(${CORES})" >> "${_bat}"
 
   # other constraints
   if ! test -z "${QCONST}" ; then

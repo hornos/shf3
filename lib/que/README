@@ -1,0 +1,9 @@
+=== Scheduler Matrix ===
+
+Scheduler  TIME                   MEMORY                NODES          TASKS                    SLOTS
+------------------------------------------------------------------------------------------------------------
+SGE        -l h_cpu=TIME          -l h_vmem=MEMORY                                              -pe PE SLOTS
+Slurm      --time=TIME            --mem-pre-cpu=MEMORY  --nodes=NODES  --ntasks-per-node=TASKS
+PBS        -lwalltime=TIME        -lpmem=MEMORY         -lnodes=NODES:ppn=TASKS
+TODO:
+Loadlev.   wall_clock_limit=TIME  Memory>MEMORY         node=NODES     tasks_per_node=TASKS

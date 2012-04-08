@@ -52,6 +52,7 @@ function ssh/mnt() {
   import gui
   import sys/lck
   import sys/dir
+  import ssh
   import ssh/key
 
   local _h="${1:-default}"
