@@ -6,7 +6,7 @@ function hpc/mpi/mpt/machinefile() {
 
 function hpc/mpi/mpt/machines() {
   local _m="${1}"
-  echo "\${_m}"
+  echo "\${${_m}}"
 }
 
 function hpc/mpi/mpt/nppn() {

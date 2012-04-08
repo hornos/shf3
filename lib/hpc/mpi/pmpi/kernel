@@ -6,7 +6,7 @@ function hpc/mpi/pmpi/machinefile() {
 
 function hpc/mpi/pmpi/machines() {
   local _m="${1}"
-  echo "-hostlist \${_m}"
+  echo "-hostlist \${${_m}}"
 }
 
 function hpc/mpi/pmpi/nppn() {

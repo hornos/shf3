@@ -10,7 +10,7 @@ function hpc/mpi/impi/machinefile() {
 
 function hpc/mpi/impi/machines() {
   local _m="${1}"
-  echo "-hosts \${_m}"
+  echo "-hosts \${${_m}}"
 }
 
 function hpc/mpi/impi/nppn() {
