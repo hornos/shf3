@@ -209,14 +209,14 @@ function que/sub() {
   ### requested resources
   local _over=""
   if test ${__slots} -gt 0 ; then
-    _over="override"
+    _over="SLOTS TASKS"
   fi
   gui/line
   #     123456789012 12345 12345 12345 1234567 1234567
-  printf "%12s %5s %5s %7s %s\n" "QSCHED" "NODES" "SCKTS" "CORES" " "
-  printf "%12s %5d %5d %7d\n" ${_sch} ${_nodes} ${_sckts} ${_cores}
-  printf "%12s %5s %5s %7s %s\n" " " "SLOTS" "TASKS" "sockets" " "
-  printf "%12s %5d %5d %7d\n" "${_over}" ${SLOTS} ${TASKS} ${_sockets}
+  printf "%12s %5s %5s %7s %s\n" "QSCHED" "NODES"   "SCKTS"   "CORES"     "override"
+  printf "%12s %5d %5d %7d %s\n" ${_sch}  ${_nodes} ${_sckts} ${_cores}   " "
+  printf "%12s %5s %5s %7s %s\n" " "      "SLOTS"   "TASKS"   "sockets"   "${_over}"
+  printf "%12s %5d %5d %7d %s\n" " "      ${SLOTS}  ${TASKS}  ${_sockets} " "
 
   ### queue login
   if test "${_sub}" = "L" ; then
@@ -420,17 +420,22 @@ function que/sub() {
   fi
 
   ### requested MPI OMP resources
-  printf "%12s %5s %5s %7s\n" "MODE" "np" "pn" "threads"
-  if test "${_mode}" = "omp" ; then
-    printf "%12s %5s %5s %7d\n" ${MODE}  "-" "-" ${_threads}
-  else
-    printf "%12s %5d %5d %7d\n" ${MODE}  ${_np} ${_pn} ${_threads}
-  fi
+  _over=""
   if test ${_mpipn} -gt 0 ; then
-    msg "MPI pn override"
+    _over="pn"
   fi
   if test ${_thrds} -gt 0 ; then
-    msg "OMP threads override"
+    if empty "${_over}" ; then
+      _over="threads"
+    else
+      _over="${_over} threads"
+    fi
+  fi
+  printf "%12s %5s %5s %7s\n" "MODE" "np" "pn" "threads"
+  if test "${_mode}" = "omp" ; then
+    printf "%12s %5s %5s %7d %s\n" ${MODE}  "-"    "-"    ${_threads} "${_over}"
+  else
+    printf "%12s %5d %5d %7d %s\n" ${MODE}  ${_np} ${_pn} ${_threads} "${_over}"
   fi
   gui/line
 
