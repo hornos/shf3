@@ -212,11 +212,11 @@ function que/sub() {
     _over="override"
   fi
   gui/line
-  #     123456789 12345 12345 12345 1234567 1234567
-  printf "%9s %5s %5s %7s %s\n" "QSCHED" "NODES" "SCKTS" "CORES" " "
-  printf "%9s %5d %5d %7d\n" ${_sch} ${_nodes} ${_sckts} ${_cores}
-  printf "%9s %5s %5s %7s %s\n" " " "SLOTS" "TASKS" "sockets" " "
-  printf "%9s %5d %5d %7d\n" "${_over}" ${SLOTS} ${TASKS} ${_sockets}
+  #     123456789012 12345 12345 12345 1234567 1234567
+  printf "%12s %5s %5s %7s %s\n" "QSCHED" "NODES" "SCKTS" "CORES" " "
+  printf "%12s %5d %5d %7d\n" ${_sch} ${_nodes} ${_sckts} ${_cores}
+  printf "%12s %5s %5s %7s %s\n" " " "SLOTS" "TASKS" "sockets" " "
+  printf "%12s %5d %5d %7d\n" "${_over}" ${SLOTS} ${TASKS} ${_sockets}
 
   ### queue login
   if test "${_sub}" = "L" ; then
@@ -420,11 +420,11 @@ function que/sub() {
   fi
 
   ### requested MPI OMP resources
-  printf "%9s %5s %5s %7s\n" "MODE" "np" "pn" "threads"
+  printf "%12s %5s %5s %7s\n" "MODE" "np" "pn" "threads"
   if test "${_mode}" = "omp" ; then
-    printf "%9s %5s %5s %7d\n" ${MODE}  "-" "-" ${_threads}
+    printf "%12s %5s %5s %7d\n" ${MODE}  "-" "-" ${_threads}
   else
-    printf "%9s %5d %5d %7d\n" ${MODE}  ${_np} ${_pn} ${_threads}
+    printf "%12s %5d %5d %7d\n" ${MODE}  ${_np} ${_pn} ${_threads}
   fi
   if test ${_mpipn} -gt 0 ; then
     msg "MPI pn override"
