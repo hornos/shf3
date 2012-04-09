@@ -414,7 +414,7 @@ function que/sub() {
     echo "export KMP_LIBRARY=throughput"       >> "${_bat}"
     echo "export OMP_PROC_BIND=TRUE"           >> "${_bat}"
     echo "export OMP_NESTED=FALSE"             >> "${_bat}"
-    echo "export OMP_STACKSIZE=12M"            >> "${_bat}"
+    echo "export OMP_STACKSIZE=16M"            >> "${_bat}"
   else
     echo "export KMP_LIBRARY=serial"           >> "${_bat}"
   fi
