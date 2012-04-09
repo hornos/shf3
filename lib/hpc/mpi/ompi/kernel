@@ -32,7 +32,7 @@ function hpc/mpi/ompi/verbose() {
   echo "${_verbose}"
 }
 
-function hpc/mpi/impi/binding() {
+function hpc/mpi/ompi/binding() {
   local _m=${1:-core}
   local _b=""
   case "${_m}" in
