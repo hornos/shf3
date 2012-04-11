@@ -1,5 +1,5 @@
 
-function enc/pass() {
+function enc/pass/db() {
   import sql
 
   msg/debug "Database: ${enc_pass_db}"
@@ -60,7 +60,7 @@ function enc/pass/mgr() {
   local _q=""
 
   if ! test -r "${enc_pass_db}" ; then
-    enc/pass
+    enc/pass/db
     if test $? -gt 0 ; then
       return ${_false_}
     fi

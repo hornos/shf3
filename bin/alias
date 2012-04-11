@@ -21,7 +21,7 @@ alias tcumount="tcmnt -u"
 
 alias book="bmkmgr -b"
 
-alias jobsub="jobmgr -s"
+alias jobsub="jobmgr -b"
 alias jobmon="pcpview -t -a -j"
 
 alias vmdrun="vmdmgr run"

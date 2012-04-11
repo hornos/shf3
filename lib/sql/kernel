@@ -28,6 +28,9 @@ function sql/init() {
 function sql/count() {
   local _db="${1}"
   local _tb="${2}"
+  if ! readable "${_db}" ; then
+    $failure
+  fi
   ${sql_sqlite} "${_db}" "SELECT COUNT(*) FROM ${_tb}"
 }
 

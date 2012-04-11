@@ -48,7 +48,7 @@ function que/autoenv() {
 
 function que/check() {
   local _cmd="${1##runprg}"
-  local _sub="${2:-B}"
+  local _sub="${2:-BATCH}"
   local _prg=""
   local _guide=""
   local _sch=""
@@ -77,7 +77,7 @@ function que/check() {
 
   import run
   # summary
-  if test "${_sub}" = "S" ; then
+  if test "${_sub}" = "SUMMARY" ; then
     import run
     run/sum "${_prg}" "${_guide}"
     return $?
@@ -90,12 +90,18 @@ function que/check() {
 function que/sub() {
   import gui
   import que
+  import que/track
 
-  # B - batch  L - login
-  local _sub=${1:-B}
+  local _sub=${1:-BATCH}
   local _job=${2:-${gbn}.job}
   # check level
   local _chk=${3:-false}
+
+  ### track database
+  if test "${_sub}" = "LIST" ; then
+    que/track/list
+    return $?
+  fi
 
   ### read job file
   if ! readable "${_job}" ; then
@@ -107,7 +113,7 @@ function que/sub() {
   if failed $? ; then $failure; fi
 
   ### summary
-  if test "${_sub}" = "C" ; then
+  if test "${_sub}" = "CHECK" ; then
     que/check "${RUN}" "${_sub}"
     return $?
   fi
@@ -197,7 +203,7 @@ function que/sub() {
 
   ### write batch file
   local _bat="./${_sch}.batch.sh"
-  if test "${_sub}" = "L" ; then
+  if test "${_sub}" = "LOGIN" ; then
     _bat="./${_sch}.login.sh"
   fi
   echo "#!${que_shell}"               > "${_bat}"
@@ -219,7 +225,7 @@ function que/sub() {
   printf "%12s %5d %5d %7d %s\n" " "      ${SLOTS}  ${TASKS}  ${_sockets} " "
 
   ### queue login
-  if test "${_sub}" = "L" ; then
+  if test "${_sub}" = "LOGIN" ; then
     echo ""
     answer "Show batch file?"
     if succeed $? ; then
@@ -476,10 +482,10 @@ function que/sub() {
     gui/line
   fi
 
-  local _sub="que_${_sch}_qsub"
-  _sub=${!_sub}
-  if ! $(installed "${_sub}") ; then
-    msg "${FUNCNAME}: not found ${_sub}"
+  local _qsub="que_${_sch}_qsub"
+  _qsub=${!_qsub}
+  if ! $(installed "${_qsub}") ; then
+    msg "${FUNCNAME}: not found ${_qsub}"
     $failure
   fi
 
@@ -494,7 +500,7 @@ function que/sub() {
       rm -f "${i}"
     fi
   done
-  ${_sub} "${_bat}"
+  ${_qsub} "${_bat}"
   if failed $? ; then
     msg "${FUNCNAME}: submit failed"
     $failure

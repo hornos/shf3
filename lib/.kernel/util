@@ -140,3 +140,11 @@ function match() {
   fi
   $failure
 }
+
+function calc() {
+  local _exp="${*}"
+  if empty "${_exp}" ; then
+    $failure
+  fi
+  echo "${_exp}" | bc
+}

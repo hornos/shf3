@@ -1,9 +1,9 @@
 
 function que/slurm() {
-  local _sub="${1:-S}"
+  local _sub="${1:-BATCH}"
   local _bat="${2:-slurm.batch.sh}"
 
-  if test "${_sub}" = "L" ; then
+  if test "${_sub}" = "LOGIN" ; then
     _bat="${2:-slurm.login.sh}"
   fi
   if ! test -r "${_bat}" ; then
@@ -12,7 +12,7 @@ function que/slurm() {
   fi
 
   ### begin login
-  if test "${_sub}" = "L" ; then
+  if test "${_sub}" = "LOGIN" ; then
     local _qlogin="${que_slurm_qlogin}"
     if ! $(installed "${_qlogin}") ; then
        msg "${_qlogin} not found"

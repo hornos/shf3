@@ -6,11 +6,12 @@ import gui
 function help/jobmgr() {
   cat << EOF
 
-Queue Job Submitter
+Job Submitter
 
 Usage: ${gbn} options
-              -s jobfile - submitt
-              -l jobfile - login
+              -b jobfile  - submitt
+              -l jobfile  - login
+              -f database - job track
               -n - no check
               -v - verbose
 EOF
@@ -19,13 +20,15 @@ EOF
 
 ### args
 _j="batch.job"
-_c="S"
+_c="LIST"
+_f=""
 _n=true
 _v=false
-while getopts hvns:l: o; do
+while getopts hvns:l:f: o; do
   case "$o" in
-    s) _c="S"; _j=$OPTARG;;
-    l) _c="L"; _j=$OPTARG;;
+    s) _c="BATCH"; _j=$OPTARG;;
+    l) _c="LOGIN"; _j=$OPTARG;;
+    f) _f=$OPTARG;;
     n) _n=false;;
     v) gdbg=true;;
     h|*) help/jobmgr;;
@@ -33,12 +36,26 @@ while getopts hvns:l: o; do
 done
 
 ### main
-_msg="Submit"
-if test "${_c}" = "L" ; then
-  _msg="Login"
-fi
+case "${_c}" in
+  BATCH)
+    _msg="Batch";;
+  LOGIN)
+    _msg="Login";;
+  LIST)
+    _msg="Job Track";;
+esac
+
 echo
 msg "${_msg}"
 gui/line
+
+# track database
+import que/track
+que_track_db="${grd}/sql/${que_track_db}"
+
+# overrides
+if ! test -z "${_f}" ; then
+  que_track_db="${_f}"
+fi
 
 que/sub "${_c}" "${_j}" ${_n}

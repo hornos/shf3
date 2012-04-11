@@ -1,9 +1,9 @@
 
 function que/pbs() {
-  local _sub="${1:-S}"
+  local _sub="${1:-BATCH}"
   local _bat="${2:-pbs.batch.sh}"
 
-  if test "${_sub}" = "L" ; then
+  if test "${_sub}" = "LOGIN" ; then
     _bat="${2:-pbs.login.sh}"
   fi
   if ! test -r "${_bat}" ; then
@@ -12,7 +12,7 @@ function que/pbs() {
   fi
 
   ### begin login
-  if test "${_sub}" = "L" ; then
+  if test "${_sub}" = "LOGIN" ; then
     local _qlogin="${que_pbs_qlogin}"
 
     # name

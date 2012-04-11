@@ -1,0 +1,45 @@
+
+function que/track/db() {
+  import sql
+
+  msg/debug "Database: ${que_track_db}"
+  answer "Create database?"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  local _in="$(ns/dir ${BASH_SOURCE})/que_track.sql"
+  sql/init "${que_track_db}" "${_in}"
+}
+
+function que/track/list() {
+  import sql
+
+  if ! readable "${que_track_db}" ; then
+    que/track/db
+    if failed $? ; then $failure; fi
+  fi
+  local _c=$(sql/count "${que_track_db}" "${que_track_tb}")
+  if test ${_c} -lt 0 ; then
+    return ${_false_}
+  fi
+  local _frm="%8s %12s %8s %8s %10s %s\n"
+  echo ""
+  printf "${_frm}" "job" "host" "queue" "user" "start" "elapsed"
+  gui/line
+  local i
+  #                      1   2    3   4   5     6
+  for i in $(sql/select "${que_track_db}" "${que_track_tb}" \
+                        "job,host,que,uid,stime,etime") ; do
+    local _stime=$(field "${i}" 5)
+    local _etime=$(field "${i}" 6)
+    local _elap=$(elapsed ${_stime} ${_etime})
+    printf "${_frm}" $(field "${i}" 1) \
+                     $(field "${i}" 2) \
+                     $(field "${i}" 3) \
+                     $(field "${i}" 4) \
+                     ${_stime} \
+                     ${_elap}
+
+#                     "$(epoch $(field "${i}" 2))" "$(epoch $(field "${i}" 3))"
+  done
+}
