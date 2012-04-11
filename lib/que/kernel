@@ -397,9 +397,9 @@ function que/sub() {
     echo "export FMP_MPI_PERNODE=${_pn}"                >> "${_bat}"
   fi
 
-  ### OMP
+  ### OMP and Intel MKL
   import hpc/omp
-  import hpc/kmp
+  import hpc/mkl
   echo "### OMP Setup"                         >> "${_bat}"
   if test "${_mode}" = "omp" ; then
     echo "export PRERUN=\"${_bind} ${_prof}\"" >> "${_bat}"
