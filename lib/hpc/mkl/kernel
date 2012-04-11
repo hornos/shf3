@@ -1,0 +1,15 @@
+function hpc/mkl/binding() {
+  local _thr=${1:-1}
+  local _bat=${2}
+  if empty "${_bat}" || \
+   ! readable "${_bat}" ; then
+    $failure
+  fi
+
+  echo "export MKL_NUM_THREADS=${_thr}"  >> "${_bat}"
+  if test ${_thr} -gt 1; then
+    echo "export KMP_LIBRARY=throughput" >> "${_bat}"
+  else
+    echo "export KMP_LIBRARY=serial"     >> "${_bat}"
+  fi
+}

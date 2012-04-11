@@ -129,3 +129,14 @@ function check() {
 function timestamp() {
   date +%Y-%m-%d-%H-%M-%S
 }
+
+function match() {
+  local _v="${1}"
+  local _m="${2}"
+  if empty "${_v}" || empty "${_m}" ; then $failure; fi
+
+  if test "${!_v/*${_m}*/${_m}}" = "${_m}" ; then
+    $success
+  fi
+  $failure
+}

@@ -1,0 +1,15 @@
+function hpc/omp/binding() {
+  local _thr=${1:-1}
+  local _bat=${2}
+  if empty "${_bat}" || \
+   ! readable "${_bat}" ; then
+    $failure
+  fi
+
+  echo "export OMP_NUM_THREADS=${_thr}" >> "${_bat}"
+  if test ${_thr} -gt 1 ; then
+    echo "export OMP_PROC_BIND=TRUE"    >> "${_bat}"
+    echo "export OMP_NESTED=FALSE"      >> "${_bat}"
+    echo "export OMP_STACKSIZE=16M"     >> "${_bat}"
+  fi
+}

@@ -398,6 +398,8 @@ function que/sub() {
   fi
 
   ### OMP
+  import hpc/omp
+  import hpc/kmp
   echo "### OMP Setup"                         >> "${_bat}"
   if test "${_mode}" = "omp" ; then
     echo "export PRERUN=\"${_bind} ${_prof}\"" >> "${_bat}"
@@ -408,16 +410,8 @@ function que/sub() {
     _threads=${_thrds}
   fi
   # threads
-  echo "export OMP_NUM_THREADS=${_threads}"    >> "${_bat}"
-  echo "export MKL_NUM_THREADS=${_threads}"    >> "${_bat}"
-  if test ${_threads} -gt 1; then
-    echo "export KMP_LIBRARY=throughput"       >> "${_bat}"
-    echo "export OMP_PROC_BIND=TRUE"           >> "${_bat}"
-    echo "export OMP_NESTED=FALSE"             >> "${_bat}"
-    echo "export OMP_STACKSIZE=16M"            >> "${_bat}"
-  else
-    echo "export KMP_LIBRARY=serial"           >> "${_bat}"
-  fi
+  hpc/omp/binding ${_threads} "${_bat}"
+  hpc/mkl/binding ${_threads} "${_bat}"
 
   ### requested MPI OMP resources
   _over=""
@@ -436,12 +430,32 @@ function que/sub() {
     printf "%12s %5s %5s %7d %s\n" ${MODE}  "-"    "-"    ${_threads} "${_over}"
   else
     printf "%12s %5d %5d %7d %s\n" ${MODE}  ${_np} ${_pn} ${_threads} "${_over}"
+    done
   fi
   gui/line
 
   ### command
+  # runprg wrapper
   echo "### Command" >> "${_bat}"
-  if test "${RUN/*runprg*/runprg}" = "runprg" ; then
+  if ! empty "${RUNPRG}" ; then
+    local _p=$(field "${RUNPRG}" 1 " ")
+    local _g=$(field "${RUNPRG}" 2 " ")
+    if empty "${_p}" ; then
+      msg "${FUNCNAME}: program not set"
+      $failure
+    fi
+    _p="-p ${_p}"
+    if ! empty "${_g}" ; then
+      _g="-g ${_g}"
+    else
+      _g="-g ${_p}.guide"
+    fi
+    RUN="runprg ${_p} ${_g}"
+  fi
+
+  # set scheduler
+  match RUN runprg
+  if succeed $? ; then
     # set scheduler
     RUN="${RUN} -s ${_sch}"
     if ${_chk} ; then
@@ -474,7 +488,7 @@ function que/sub() {
   answer "Submit job?"
   if failed $? ; then $failure; fi
 
-  # clean stderr/out
+  # clear stderr/out
   local i
   for i in "${QERR}" "${QOUT}" ; do
     if test -f "${i}" ; then

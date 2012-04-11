@@ -25,9 +25,9 @@ function hpc/mpi/mpt/verbose() {
   fi
 
   if test ${_v} -gt 0 ; then
-    echo "export MPI_VERBOSE=1"             >> "${_bat}"
-    echo "export MPI_DSM_VERBOSE=1"         >> "${_bat}"
-    echo "export MPI_DISPLAY_SETTINGS=1"    >> "${_bat}"
+    echo "export MPI_VERBOSE=1"           >> "${_bat}"
+    echo "export MPI_DSM_VERBOSE=1"       >> "${_bat}"
+    echo "export MPI_DISPLAY_SETTINGS=1"  >> "${_bat}"
   fi
   if test ${_v} -gt 1 ; then
     echo "export MPI_VERBOSE2=1"          >> "${_bat}"
@@ -42,6 +42,7 @@ function hpc/mpi/mpt/verbose() {
   fi
 }
 
+# TODO: verbose DSM cache bind?
 function hpc/mpi/mpt/binding() {
   local _m=${1:-core}
   local _b="dplace"
