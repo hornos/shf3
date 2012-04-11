@@ -430,7 +430,6 @@ function que/sub() {
     printf "%12s %5s %5s %7d %s\n" ${MODE}  "-"    "-"    ${_threads} "${_over}"
   else
     printf "%12s %5d %5d %7d %s\n" ${MODE}  ${_np} ${_pn} ${_threads} "${_over}"
-    done
   fi
   gui/line
 
