@@ -24,9 +24,9 @@ _c="LIST"
 _f=""
 _n=true
 _v=false
-while getopts hvns:l:f: o; do
+while getopts hvnb:l:f: o; do
   case "$o" in
-    s) _c="BATCH"; _j=$OPTARG;;
+    b) _c="BATCH"; _j=$OPTARG;;
     l) _c="LOGIN"; _j=$OPTARG;;
     f) _f=$OPTARG;;
     n) _n=false;;

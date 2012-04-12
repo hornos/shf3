@@ -500,11 +500,15 @@ function que/sub() {
       rm -f "${i}"
     fi
   done
-  ${_qsub} "${_bat}"
+  local _log="./${_qsub}.log"
+  ${_qsub} "${_bat}" | tee "${_log}"
   if failed $? ; then
-    msg "${FUNCNAME}: submit failed"
+    msg "${FUNCNAME}: Submit failed"
     $failure
   fi
+  # insert
+  # local _ctime
+
   msg "Submit success"
   $success
 }
