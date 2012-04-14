@@ -52,7 +52,7 @@ case ${_c} in
     ssh/mnt "${_m}" ${_f} false
     ;;
   UNMOUNT)
-    ssh/mnt "${_m}" ${_f} true
+    ssh/umnt "${_m}" ${_f}
     ;;
   KILL)
     ssh/mnt/kill "${_m}"
