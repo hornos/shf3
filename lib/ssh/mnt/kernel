@@ -82,8 +82,10 @@ function ssh/mnt() {
 
   # unmount
   if ${_u} ; then
-    if ! test -d "${_src}" ; then
-      return ${_false_}
+    if ! ${_f} ; then
+      if ! test -r "${_src}" ; then
+        return ${_false_}
+      fi
     fi
     if ! $(sys/lck "${_lck}") && ! ${_f}; then
       msg "Not mounted: ${_h}"
