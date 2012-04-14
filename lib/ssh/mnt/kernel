@@ -164,5 +164,5 @@ function ssh/mnt() {
 function ssh/umnt() {
   local _h="${1:-default}"
   local _f="${2:-false}"
-  ssh/mnt "${_h}" ${_f} false
+  ssh/mnt "${_h}" ${_f} true
 }

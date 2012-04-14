@@ -49,7 +49,7 @@ case ${_c} in
     ssh/mnt/ls
     ;;
   MOUNT)
-    ssh/mnt "${_m}" ${_f} false
+    ssh/mnt "${_m}" ${_f}
     ;;
   UNMOUNT)
     ssh/umnt "${_m}" ${_f}
