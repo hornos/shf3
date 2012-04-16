@@ -15,6 +15,7 @@ function ssh/mnt/ls() {
   return ${_true_}
 }
 
+
 function ssh/mnt/kill() {
   import gui
 
@@ -47,6 +48,28 @@ function ssh/mnt/kill() {
   kill -${_s} ${_p}
 }
 
+function ssh/mnt/sumnt() {
+  import sys
+  local _h="${1:-default}"
+
+  sys/mid "ssh/${_h}"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  local _src="${ssh_mnt_dir}/${_h}"
+
+  answer "Unmount by root ${_h}?"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+  sudo umount -l ${_src}
+
+  # clear lock
+  local _lck="${_h}.${gbn}"
+  sys/lck/rm "${_lck}"
+}
+
 function ssh/mnt() {
   import sys
   import gui
@@ -55,7 +78,6 @@ function ssh/mnt() {
   import ssh
   import ssh/key
 
-  local _h="${1:-default}"
   local _f="${2:-false}"
   local _u="${3:-false}"
   local _ret

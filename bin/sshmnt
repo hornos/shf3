@@ -11,6 +11,7 @@ SSH Mount
 Usage: ${gbn} options
               -m MID - mount
               -u MID - unmount
+              -s MID - unmount by root
               -k MID - kill mount process
               -l - list
               -f - force
@@ -23,10 +24,11 @@ EOF
 _m=""
 _f=false
 _c="LIST"
-while getopts hfvlk:m:u: o; do
+while getopts hfvlk:m:u:s: o; do
   case "$o" in
     m) _c="MOUNT"; _m=$OPTARG;;
     u) _c="UNMOUNT"; _m=$OPTARG;;
+    s) _c="SUNMOUNT"; _m=$OPTARG;;
     k) _c="KILL"; _m=$OPTARG;;
     l) _c="LIST";;
     f) _f=true;;
@@ -53,6 +55,9 @@ case ${_c} in
     ;;
   UNMOUNT)
     ssh/umnt "${_m}" ${_f}
+    ;;
+  SUNMOUNT)
+    ssh/sumnt "${_m}"
     ;;
   KILL)
     ssh/mnt/kill "${_m}"
