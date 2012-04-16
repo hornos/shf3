@@ -48,8 +48,9 @@ function ssh/mnt/kill() {
   kill -${_s} ${_p}
 }
 
-function ssh/mnt/sumnt() {
+function ssh/sumnt() {
   import sys
+  import sys/lck
   local _h="${1:-default}"
 
   sys/mid "ssh/${_h}"
