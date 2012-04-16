@@ -79,6 +79,7 @@ function ssh/mnt() {
   import ssh
   import ssh/key
 
+  local _h="${1:-default}"
   local _f="${2:-false}"
   local _u="${3:-false}"
   local _ret

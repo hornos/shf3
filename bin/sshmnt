@@ -26,9 +26,9 @@ _f=false
 _c="LIST"
 while getopts hfvlk:m:u:s: o; do
   case "$o" in
-    m) _c="MOUNT"; _m=$OPTARG;;
-    u) _c="UNMOUNT"; _m=$OPTARG;;
-    s) _c="SUNMOUNT"; _m=$OPTARG;;
+    m) _c="MNT"; _m=$OPTARG;;
+    u) _c="UMNT"; _m=$OPTARG;;
+    s) _c="SUMNT"; _m=$OPTARG;;
     k) _c="KILL"; _m=$OPTARG;;
     l) _c="LIST";;
     f) _f=true;;
@@ -50,13 +50,13 @@ case ${_c} in
   LIST)
     ssh/mnt/ls
     ;;
-  MOUNT)
+  MNT)
     ssh/mnt "${_m}" ${_f}
     ;;
-  UNMOUNT)
+  UMNT)
     ssh/umnt "${_m}" ${_f}
     ;;
-  SUNMOUNT)
+  SUMNT)
     ssh/sumnt "${_m}"
     ;;
   KILL)
