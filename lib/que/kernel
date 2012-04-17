@@ -219,10 +219,17 @@ function que/sub() {
   fi
   gui/line
   #     123456789012 12345 12345 12345 1234567 1234567
-  printf "%12s %5s %5s %7s %s\n" "QSCHED" "NODES"   "SCKTS"   "CORES"     "override"
-  printf "%12s %5d %5d %7d %s\n" ${_sch}  ${_nodes} ${_sckts} ${_cores}   " "
-  printf "%12s %5s %5s %7s %s\n" " "      "SLOTS"   "TASKS"   "sockets"   "${_over}"
-  printf "%12s %5d %5d %7d %s\n" " "      ${SLOTS}  ${TASKS}  ${_sockets} " "
+  printf "%12s %5s %5s %7s %s\n"   "QSCHED" "NODES"   "SCKTS"   "CORES"     "override"
+  printf "%12s %5d %5d %7d %s\n"   ${_sch}  ${_nodes} ${_sckts} ${_cores}   " "
+  printf "%12s %5s %5s %7s %s\n"   " "      "SLOTS"   "TASKS"   "sockets"   "${_over}"
+  printf "%12s %5d %5d %7d %s\n"   " "      ${SLOTS}  ${TASKS}  ${_sockets} " "
+
+  echo   "### Resource Allocation" >> "${_bat}"
+  printf "# %12s %5s %5s %7s %s\n" "QSCHED" "NODES"   "SCKTS"   "CORES"     "override" >> "${_bat}"
+  printf "# %12s %5d %5d %7d %s\n" ${_sch}  ${_nodes} ${_sckts} ${_cores}   " "        >> "${_bat}"
+  printf "# %12s %5s %5s %7s %s\n" " "      "SLOTS"   "TASKS"   "sockets"   "${_over}" >> "${_bat}"
+  printf "# %12s %5d %5d %7d %s\n" " "      ${SLOTS}  ${TASKS}  ${_sockets} " "        >> "${_bat}"
+  echo   "###"                     >> "${_bat}"
 
   ### queue login
   if test "${_sub}" = "LOGIN" ; then
@@ -431,12 +438,18 @@ function que/sub() {
       _over="${_over} threads"
     fi
   fi
+
   printf "%12s %5s %5s %7s\n" "MODE" "np" "pn" "threads"
+  echo "### Parallel Mode" >> "${_bat}"
+  printf "# %12s %5s %5s %7s\n" "MODE" "np" "pn" "threads"                         >> "${_bat}"
   if test "${_mode}" = "omp" ; then
     printf "%12s %5s %5s %7d %s\n" ${MODE}  "-"    "-"    ${_threads} "${_over}"
+    printf "# %12s %5s %5s %7d %s\n" ${MODE}  "-"    "-"    ${_threads} "${_over}" >> "${_bat}"
   else
     printf "%12s %5d %5d %7d %s\n" ${MODE}  ${_np} ${_pn} ${_threads} "${_over}"
+    printf "# %12s %5d %5d %7d %s\n" ${MODE}  ${_np} ${_pn} ${_threads} "${_over}" >> "${_bat}"
   fi
+  echo "###" >> "${_bat}"
   gui/line
 
   ### command
