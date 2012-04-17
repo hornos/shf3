@@ -229,7 +229,6 @@ function que/sub() {
   printf "# %12s %5d %5d %7d %s\n" ${_sch}  ${_nodes} ${_sckts} ${_cores}   " "        >> "${_bat}"
   printf "# %12s %5s %5s %7s %s\n" " "      "SLOTS"   "TASKS"   "sockets"   "${_over}" >> "${_bat}"
   printf "# %12s %5d %5d %7d %s\n" " "      ${SLOTS}  ${TASKS}  ${_sockets} " "        >> "${_bat}"
-  echo   "###"                     >> "${_bat}"
 
   ### queue login
   if test "${_sub}" = "LOGIN" ; then
@@ -449,7 +448,6 @@ function que/sub() {
     printf "%12s %5d %5d %7d %s\n" ${MODE}  ${_np} ${_pn} ${_threads} "${_over}"
     printf "# %12s %5d %5d %7d %s\n" ${MODE}  ${_np} ${_pn} ${_threads} "${_over}" >> "${_bat}"
   fi
-  echo "###" >> "${_bat}"
   gui/line
 
   ### command
