@@ -1,0 +1,42 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+
+function help/sgemgr() {
+  cat << EOF
+EOF
+  exit ${_false_}
+}
+
+### args
+_c="QUEUE"
+while getopts hvq o; do
+  case "$o" in
+    q) _q=$OPTARG;;
+    v) gdbg=true;;
+    h|*) help/sgemgr;;
+  esac
+done
+
+### main
+echo
+msg
+gui/line
+
+case "${_c}" in
+  QUEUE)
+    qstat -f | \
+    awk '{
+      if(match($0,"queuename"))
+        printf "%-32s %3s %3s %3s %4s\n","Queue","R","U","T","Load";
+      if(match($0,"\\.q@")) {
+        split($0,a," ");
+        split(a[3],b,"/");
+        U=b[2];
+        T=b[3];
+        if(U<T)
+        printf "%-32s %3d %3d %3d %s\n",a[1],b[1],b[2],b[3],a[4];
+      }
+    }'
+  ;;
+esac
