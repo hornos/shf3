@@ -1,0 +1,14 @@
+function hpc/fmp/binding() {
+  local _nodes=${1:-1}
+  local _pn=${2:-1}
+  local _bat=${3}
+
+  if empty "${_bat}" || \
+   ! readable "${_bat}" ; then
+    $failure
+  fi
+
+  # http://github.com/hornos/fmp
+  echo "export FMP_MPI_NODES=${_nodes}"  >> "${_bat}"
+  echo "export FMP_MPI_PERNODE=${_pn}"   >> "${_bat}"
+}

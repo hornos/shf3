@@ -218,12 +218,10 @@ function que/sub() {
     _over="SLOTS TASKS"
   fi
   gui/line
-  #     123456789012 12345 12345 12345 1234567 1234567
   printf "%12s %5s %5s %7s %s\n"   "QSCHED" "NODES"   "SCKTS"   "CORES"     "override"
   printf "%12s %5d %5d %7d %s\n"   ${_sch}  ${_nodes} ${_sckts} ${_cores}   " "
   printf "%12s %5s %5s %7s %s\n"   " "      "SLOTS"   "TASKS"   "sockets"   "${_over}"
   printf "%12s %5d %5d %7d %s\n"   " "      ${SLOTS}  ${TASKS}  ${_sockets} " "
-
   echo   "### Resource Allocation" >> "${_bat}"
   printf "# %12s %5s %5s %7s %s\n" "QSCHED" "NODES"   "SCKTS"   "CORES"     "override" >> "${_bat}"
   printf "# %12s %5d %5d %7d %s\n" ${_sch}  ${_nodes} ${_sckts} ${_cores}   " "        >> "${_bat}"
@@ -398,18 +396,21 @@ function que/sub() {
       esac
 
       # PRERUN  VERBOSE     OPTIONS     MACHINES      NPPN     NUMA     BINDING  BOOST     PROFILER
-      _mpi_opt="${_verbose} ${_mpi_opt} ${__machines} ${_nppn} \${NUMA} ${_bind} ${_boost} ${_prof}"
+      # _mpi_opt="${_verbose} ${_mpi_opt} ${__machines} ${_nppn} \${NUMA} ${_bind} ${_boost} ${_prof}"
+      _mpi_opt="${_verbose} ${_mpi_opt} ${__machines} \${NPPN} \${NUMA} ${_bind} ${_boost} ${_prof}"
       echo "export MPI_OPT=\"${_mpi_opt}\""             >> "${_bat}"
+      # TODO: kernel override and reconfigure distribution in multistep
+      echo "export NPPN=\"${_nppn}\""                   >> "${_bat}"
       echo "export PRERUN=\"${_mpirun} \${MPI_OPT}\""   >> "${_bat}"
     fi
 
-    # http://github.com/hornos/fmp
     echo "### Fortran Mulit-processing"                 >> "${_bat}"
-    echo "export FMP_MPI_NODES=${_nodes}"               >> "${_bat}"
-    echo "export FMP_MPI_PERNODE=${_pn}"                >> "${_bat}"
+    import hpc/fmp
+    hpc/fmp/binding ${_nodes} ${_pn} "${_bat}"
   fi
 
   ### OMP and Intel MKL
+  # TODO: ACML
   import hpc/omp
   import hpc/mkl
   echo "### OMP Setup"                         >> "${_bat}"
