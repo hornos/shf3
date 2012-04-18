@@ -187,7 +187,7 @@ function ssh/mgr() {
   esac
 }
 
-fucntion ssh/check() {
+function ssh/check() {
   import sys
   local _h="${1:-default}"
 
