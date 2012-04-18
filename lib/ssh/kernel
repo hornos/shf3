@@ -196,14 +196,8 @@ function ssh/check() {
     return ${_false_}
   fi
 
-  # connection check
-  ssh/conchk
-  if failed $? ; then
-    msg "Connection to ${_h} FAILED"
-    $failure
-  fi
-  msg "Connection to ${_h} OK"
-  $success
+  ssh/conchk true
+  return $?
 }
 
 function ssh/info() {
@@ -650,7 +644,12 @@ function ssh/cmd() {
 }
 
 function ssh/conchk() {
+  # verbose
+  local _v=${1:-false}
+
   if empty "${mid_ssh_port_check}" ; then
+    if ${_v} ; then
+      msg "mid_ssh_port_check not set"
     $success
   fi
   local i
@@ -659,15 +658,21 @@ function ssh/conchk() {
     if test "${i}" = "ping" ; then
       ${ssh_ping} ${mid_ssh_fqdn} &> /dev/null
       if failed $? ; then
-        msg "Connection failed"
+        msg "ping: Connection FAILED"
         $failure
+      fi
+      if ${_v} ; then
+        msg "ping: Connection OK"
       fi
     fi
     if test "${i}" = "nmap" ; then
       ${ssh_nmap} -p ${mid_ssh_port} ${mid_ssh_fqdn} 2>/dev/null | grep open &>/dev/null
       if failed $? ; then
-        msg "Connection failed"
+        msg "nmap: Connection FAILED"
         $failure
+      fi
+      if ${_v} ; then
+        msg "ping: Connection OK"
       fi
     fi
   done
