@@ -673,7 +673,7 @@ function ssh/conchk() {
         $failure
       fi
       if ${_v} ; then
-        msg "ping: Connection OK"
+        msg "nmap: Connection OK"
       fi
     fi
   done
