@@ -193,7 +193,7 @@ function ssh/check() {
 
   sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
-    return ${_false_}
+    $failure
   fi
 
   ssh/conchk true
@@ -654,7 +654,7 @@ function ssh/conchk() {
   fi
   local i
 
-  for i in ${mid_ssh_port_check}; do
+  for i in ${mid_ssh_port_check} ; do
     if test "${i}" = "ping" ; then
       ${ssh_ping} ${mid_ssh_fqdn} &> /dev/null
       if failed $? ; then
