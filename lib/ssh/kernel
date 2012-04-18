@@ -650,6 +650,7 @@ function ssh/conchk() {
   if empty "${mid_ssh_port_check}" ; then
     if ${_v} ; then
       msg "mid_ssh_port_check not set"
+    fi
     $success
   fi
   local i
