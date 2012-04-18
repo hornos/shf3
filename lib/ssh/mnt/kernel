@@ -91,7 +91,7 @@ function ssh/mnt() {
 
   # connection check
   if ! ${_u} ; then
-    ssh/check
+    ssh/conchk
     if failed $? ; then $failure; fi
   fi
 

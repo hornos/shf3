@@ -67,6 +67,9 @@ function ssh/mgr() {
     INFO)
       ssh/info "${_h}"
       ;;
+    CHECK)
+      ssh/check "${_h}"
+      ;;
     CREATE)
       answer "Create new SSH MID ${_h}?"
       if test $? -gt 0 ; then
@@ -184,6 +187,25 @@ function ssh/mgr() {
   esac
 }
 
+fucntion ssh/check() {
+  import sys
+  local _h="${1:-default}"
+
+  sys/mid "ssh/${_h}"
+  if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  # connection check
+  ssh/conchk
+  if failed $? ; then
+    msg "Connection to ${_h} FAILED"
+    $failure
+  fi
+  msg "Connection to ${_h} OK"
+  $success
+}
+
 function ssh/info() {
   import sys
   import gui
@@ -294,7 +316,7 @@ function ssh/login() {
   fi
 
   # connection check
-  ssh/check
+  ssh/conchk
   if failed $? ; then $failure; fi
 
   local _lck="${_h}.${gbn}"
@@ -404,6 +426,10 @@ function ssh/xfer() {
   if test $? -gt 0 ; then
     return ${_false_}
   fi
+
+  # connection check
+  ssh/conchk
+  if failed $? ; then $failure; fi
 
   # source
   local _src_url="${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_scp_dst}"
@@ -566,6 +592,10 @@ function ssh/cmd() {
     return ${_false_}
   fi
 
+  # connection check
+  ssh/conchk
+  if failed $? ; then $failure; fi
+
   # opts
   local _opt="${mid_ssh_ssh_opt}"
 
@@ -619,7 +649,7 @@ function ssh/cmd() {
   return ${_ret}
 }
 
-function ssh/check() {
+function ssh/conchk() {
   if empty "${mid_ssh_port_check}" ; then
     $success
   fi
