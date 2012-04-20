@@ -434,7 +434,6 @@ function que/sub() {
     _threads=${_thrds}
   fi
   # OMP threads
-  echo "export OMP_THREADS=${_threads}"        >> "${_bat}"
   hpc/omp/binding ${_threads} "${_bat}"
   hpc/mkl/binding ${_threads} "${_bat}"
 
