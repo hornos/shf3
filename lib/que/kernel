@@ -208,6 +208,7 @@ function que/sub() {
   fi
   echo "#!${que_shell}"               > "${_bat}"
   echo "### Date $(date)"            >> "${_bat}"
+  echo ""                            >> "${_bat}"
   echo "### Scheduler  : ${_sch}"    >> "${_bat}"
   que/${_sch} "${_sub}" "${_bat}"
   if failed $? ; then $failure; fi
@@ -222,7 +223,8 @@ function que/sub() {
   printf "%12s %5d %5d %7d %s\n"   ${_sch}  ${_nodes} ${_sckts} ${_cores}   " "
   printf "%12s %5s %5s %7s %s\n"   " "      "SLOTS"   "TASKS"   "sockets"   "${_over}"
   printf "%12s %5d %5d %7d %s\n"   " "      ${SLOTS}  ${TASKS}  ${_sockets} " "
-  echo   "### Resource Allocation" >> "${_bat}"
+  echo ""                                                                              >> "${_bat}"
+  echo   "### Resource Allocation"                                                     >> "${_bat}"
   printf "# %12s %5s %5s %7s %s\n" "QSCHED" "NODES"   "SCKTS"   "CORES"     "override" >> "${_bat}"
   printf "# %12s %5d %5d %7d %s\n" ${_sch}  ${_nodes} ${_sckts} ${_cores}   " "        >> "${_bat}"
   printf "# %12s %5s %5s %7s %s\n" " "      "SLOTS"   "TASKS"   "sockets"   "${_over}" >> "${_bat}"
@@ -248,6 +250,7 @@ function que/sub() {
   ### continue batch file
   # custom queue setup scripts
   if ! empty "${QSETUP}" ; then
+    echo ""                          >> "${_bat}"
     echo "### Queue Setup"           >> "${_bat}"
     local _s
     for _s in ${QSETUP} ; do
@@ -262,6 +265,7 @@ function que/sub() {
 
   # mail notifications
   if test "${QMAIL}" = "runprg" ; then
+    echo ""                          >> "${_bat}"
     echo "### Mail Setup"            >> "${_bat}"
     echo "export QMAILTO=${QMAILTO}" >> "${_bat}"
     msg "Mail by runprg"
@@ -269,6 +273,7 @@ function que/sub() {
 
   # custom job setup scripts
   if ! empty "${SETUP}" ; then
+    echo ""                          >> "${_bat}"
     echo "### Job Setup"             >> "${_bat}"
     local _s
     for _s in ${SETUP} ; do
@@ -278,6 +283,7 @@ function que/sub() {
 
   # environment modules
   if ! empty "${MODULE}" ; then
+    echo ""                          >> "${_bat}"
     echo "### Modules"               >> "${_bat}"
     local _m
     for _m in ${MODULE} ; do
@@ -287,6 +293,7 @@ function que/sub() {
 
   ### Toggle Options
   if ! empty "${TOGGLE}" ; then
+    echo ""                          >> "${_bat}"
     echo "### Options"               >> "${_bat}"
     local t
     for t in ${TOGGLE} ; do
@@ -361,6 +368,7 @@ function que/sub() {
     fi
     local _mpi_opt="${_mpirun_opt}"
 
+    echo ""                                             >> "${_bat}"
     echo "### MPI Setup"                                >> "${_bat}"
     if test "${_mpi}" = "self" ; then
       # implicit MPI
@@ -416,6 +424,7 @@ function que/sub() {
       echo "export PRERUN=\"${_mpirun} \${MPI_OPT}\"" >> "${_bat}"
     fi
 
+    echo ""                                    >> "${_bat}"
     echo "### Fortran Mulit-processing"        >> "${_bat}"
     import hpc/fmp
     hpc/fmp/binding ${_nodes} ${_pn} "${_bat}"
@@ -424,6 +433,7 @@ function que/sub() {
   ### OMP and Intel MKL
   import hpc/omp
   import hpc/mkl
+  echo ""                                      >> "${_bat}"
   echo "### OMP Setup"                         >> "${_bat}"
   if test "${_mode}" = "omp" ; then
     echo "export PRERUN=\"${_bind} ${_prof}\"" >> "${_bat}"
@@ -451,7 +461,8 @@ function que/sub() {
   fi
 
   printf "%12s %5s %5s %7s\n" "MODE" "np" "pn" "threads"
-  echo "### Parallel Mode" >> "${_bat}"
+  echo ""                                                                          >> "${_bat}"
+  echo "### Parallel Mode"                                                         >> "${_bat}"
   printf "# %12s %5s %5s %7s\n" "MODE" "np" "pn" "threads"                         >> "${_bat}"
   if test "${_mode}" = "omp" ; then
     printf "%12s %5s %5s %7d %s\n" ${MODE}  "-"    "-"    ${_threads} "${_over}"
@@ -464,6 +475,7 @@ function que/sub() {
 
   ### command
   # runprg wrapper
+  echo ""            >> "${_bat}"
   echo "### Command" >> "${_bat}"
   if ! empty "${RUNPRG}" ; then
     local _p=$(field "${RUNPRG}" 1 " ")
@@ -507,7 +519,7 @@ function que/sub() {
 
   local _qsub="que_${_sch}_qsub"
   _qsub=${!_qsub}
-  if ! $(installed "${_qsub}") ; then
+  if ! $(u/installed "${_qsub}") ; then
     msg "${FUNCNAME}: not found ${_qsub}"
     $failure
   fi

@@ -23,7 +23,7 @@ function help() {
     if ! empty "${i}" ; then
       echo "${i##/}"
     fi
-  done | column
+  done | u/column
 }
 
 function help/kernel() {
@@ -34,7 +34,7 @@ function help/kernel() {
   local i
   for i in error help import namespace util; do
     echo "kernel/${i} functions:"
-    ns/func/dir "${_l}/.kernel/${i}" | column
+    ns/func/dir "${_l}/.kernel/${i}" | u/column
     echo ""
   done
 }
@@ -53,7 +53,7 @@ function help/modules() {
         if ! empty "${i}"; then
           echo "${i##/}"
         fi
-      done | column
+      done | u/column
     done
   fi
 }

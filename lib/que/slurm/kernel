@@ -14,7 +14,7 @@ function que/slurm() {
   ### begin login
   if test "${_sub}" = "LOGIN" ; then
     local _qlogin="${que_slurm_qlogin}"
-    if ! $(installed "${_qlogin}") ; then
+    if ! $(u/installed "${_qlogin}") ; then
        msg "${_qlogin} not found"
        return ${_false_}
     fi

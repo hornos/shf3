@@ -531,7 +531,7 @@ function que/sub() {
 
   local _sub="que_${_sch}_qsub"
   _sub=${!_sub}
-  if ! $(installed "${_sub}") ; then
+  if ! $(u/installed "${_sub}") ; then
     msg "${FUNCNAME}: not found ${_sub}"
     $failure
   fi

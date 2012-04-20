@@ -1,4 +1,4 @@
-function column() {
+function u/column() {
   local _c=${1:-3}
   awk -v c=3 'BEGIN{i=0;s="";}{
     if(i==c) {
@@ -14,7 +14,7 @@ function column() {
   END{if(i>0) print s;}'
 }
 
-function installed() {
+function u/installed() {
   local _b="${1}"
   if empty "${_b}" ; then
     $failure
@@ -141,7 +141,7 @@ function match() {
   $failure
 }
 
-function calc() {
+function u/calc() {
   local _exp="${*}"
   if empty "${_exp}" ; then
     $failure

@@ -64,7 +64,7 @@ function sys/edit() {
   fi
   local i=""
   for i in ${sys_editor} ; do
-    if $(installed "${i}") ; then
+    if $(u/installed "${i}") ; then
       break
     fi
   done

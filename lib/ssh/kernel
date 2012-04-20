@@ -101,7 +101,7 @@ function ssh/mgr() {
       fi
 
       # test connection
-      if $(installed nmap) ; then
+      if $(u/installed nmap) ; then
         import net/port
         answer "Do you want to check connection to ${_h}?"
         if test $? -eq 0 ; then

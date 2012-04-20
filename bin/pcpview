@@ -56,13 +56,13 @@ done
 
 # TODO
 ### main
-if ! $(installed pmstat) ; then
+if ! $(u/installed pmstat) ; then
   msg "Not found: pmstat"
   exit ${_false_}
 fi
 
 if ${_c} ; then
-  if ! $(installed pmchart) ; then
+  if ! $(u/installed pmchart) ; then
     msg "Not found: pmchart"
     exit ${_false_}
   fi

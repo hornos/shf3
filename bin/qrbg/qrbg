@@ -1,7 +1,0 @@
-#!/bin/bash
-
-gbn=${BASH_SOURCE}
-out="${1:-${gbn}.rnd}"
-./qrand -u hornos -p Q2Cev2Oo1LVXtYsjGvXF \
-        -t b -c 1048576 -y -o "${out}" \
-        -h random.irb.hr -n 8000

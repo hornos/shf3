@@ -69,7 +69,7 @@ function sys/ser/osx/sysv/mdm() {
 
 function sys/ser/osx/sysv/mtmd() {
   if test "${1}" = "unload" ; then
-    if installed tmutil ; then
+    if u/installed tmutil ; then
       sudo tmutil disable
       sudo tmutil disablelocal
     fi
