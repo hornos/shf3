@@ -148,3 +148,11 @@ function calc() {
   fi
   echo "${_exp}" | bc
 }
+
+function evaluate() {
+  local _v="${1}"
+  if empty "${_v}" ; then $failure ; fi
+
+  local _w=$(echo "${!_v}" | sed s/@/\\\\$/g )
+  eval "${_v}=\"${_w}\""
+}

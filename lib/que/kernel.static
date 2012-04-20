@@ -394,25 +394,9 @@ function que/sub() {
 
       ### static distribution
       # PRERUN    VERBOSE     OPTIONS     MACHINES      NPPN     NUMA     BINDING  BOOST     PROFILER
-      # _mpi_opt="${_verbose} ${_mpi_opt} ${__machines} ${_nppn} \${NUMA} ${_bind} ${_boost} ${_prof}"
-      # echo "export MPI_OPT=\"${_mpi_opt}\""             >> "${_bat}"
-      # echo "export PRERUN=\"${_mpirun} \${MPI_OPT}\""   >> "${_bat}"
-
-      ### runtime redistribution for mpi mpiomp switch
-      echo "export MPI_MODE=\"${_mode}\""   >> "${_bat}"
-      echo "export MPI_MPI=\"${_mpi}\""     >> "${_bat}"
-      echo "export MPI_MAX_SLOTS=${SLOTS}"  >> "${_bat}"
-      echo "export MPI_MAX_TASKS=${TASKS}"  >> "${_bat}"
-      echo "export MPI_NUM_NODES=${NODES}"  >> "${_bat}"
-      echo "export MPI_NUM_SCKTS=${SCKTS}"  >> "${_bat}"
-      echo "export MPI_NUM_CORES=${CORES}"  >> "${_bat}"
-      echo "export MPI_NPPN=\"${_nppn}\""   >> "${_bat}"
-
-      # prerun should be @resolved
-      # PRERUN  VERBOSE     OPTIONS     MACHINES      NPPN        NUMA     BINDING  BOOST     PROFILER
-      _mpi_opt="${_verbose} ${_mpi_opt} ${__machines} @{MPI_NPPN} \${NUMA} ${_bind} ${_boost} ${_prof}"
-      echo "export MPI_OPT=\"${_mpi_opt}\""           >> "${_bat}"
-      echo "export PRERUN=\"${_mpirun} \${MPI_OPT}\"" >> "${_bat}"
+      _mpi_opt="${_verbose} ${_mpi_opt} ${__machines} ${_nppn} \${NUMA} ${_bind} ${_boost} ${_prof}"
+      echo "export MPI_OPT=\"${_mpi_opt}\""             >> "${_bat}"
+      echo "export PRERUN=\"${_mpirun} \${MPI_OPT}\""   >> "${_bat}"
     fi
 
     echo "### Fortran Mulit-processing"        >> "${_bat}"

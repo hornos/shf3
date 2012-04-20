@@ -15,6 +15,26 @@ mode:
 EOF
 }
 
+# switch between mpi and mpiomp
+function run/prg/mode() {
+  local _mode="${1:-mpi}"
+  local _sckts=${2:-MPI_NUM_SCKTS}
+  local _cores=${3:-MPI_NUM_CORES}
+
+  if test "${_mode}" != "mpi" ||
+     test "${_mode}"; then
+    msg "${FUNCNAME}: invalid mode: ${_mode}"
+    $failure
+  fi
+
+#  case "${_mode}" in 
+#    # mpi -> mpi
+#    mpi)
+#    ;;
+#  esac
+
+}
+
 function run/prg/step() {
   # start program
   if $(ns/op "${MAIN}" "<") ; then
@@ -207,6 +227,8 @@ function run/prg() {
   local _cmd="${PRGBIN}"
 
   if ! test -z "${PRERUN}" ; then
+    # resolv @
+    evaluate PRERUN
     _cmd="${PRERUN} ${_cmd}"
   fi
 
