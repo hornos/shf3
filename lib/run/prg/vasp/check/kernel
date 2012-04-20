@@ -14,3 +14,7 @@ function run/prg/vasp/check/timing() {
   run/valid/show OUTCAR "General timing"
 }
 
+function run/prg/vasp/check/header() {
+  head -n 6 OUTCAR
+}
+
