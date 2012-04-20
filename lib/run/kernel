@@ -30,7 +30,7 @@ function run/prg/mode() {
 
 function run/prg/step() {
   # start program
-  msg "Running : ${_cmd}"
+  _cmd="eval ${_cmd}"
   if $(ns/op "${MAIN}" "<") ; then
     ${_cmd} < "${_inp}" &> "${_out}"
   elif $(ns/op "${MAIN}" "-") ; then
