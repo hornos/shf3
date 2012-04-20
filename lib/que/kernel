@@ -395,12 +395,13 @@ function que/sub() {
         ;;
       esac
 
+      echo "export NPPN=\"${_nppn}\""                   >> "${_bat}"
+
       # PRERUN  VERBOSE     OPTIONS     MACHINES      NPPN     NUMA     BINDING  BOOST     PROFILER
       # _mpi_opt="${_verbose} ${_mpi_opt} ${__machines} ${_nppn} \${NUMA} ${_bind} ${_boost} ${_prof}"
       _mpi_opt="${_verbose} ${_mpi_opt} ${__machines} \${NPPN} \${NUMA} ${_bind} ${_boost} ${_prof}"
       echo "export MPI_OPT=\"${_mpi_opt}\""             >> "${_bat}"
       # TODO: kernel override and reconfigure distribution in multistep
-      echo "export NPPN=\"${_nppn}\""                   >> "${_bat}"
       echo "export PRERUN=\"${_mpirun} \${MPI_OPT}\""   >> "${_bat}"
     fi
 
