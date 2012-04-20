@@ -83,8 +83,11 @@ function run/prg/vasp/check() {
 }
 
 function run/prg/vasp/success() {
+  import gui
   import run/prg/vasp/check
+  gui/line
   run/prg/vasp/check/timing
+  gui/line
   return ${_true_}
 }
 
