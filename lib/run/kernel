@@ -26,17 +26,11 @@ function run/prg/mode() {
     msg "${FUNCNAME}: invalid mode: ${_mode}"
     $failure
   fi
-
-#  case "${_mode}" in 
-#    # mpi -> mpi
-#    mpi)
-#    ;;
-#  esac
-
 }
 
 function run/prg/step() {
   # start program
+  msg "Running : ${_cmd}"
   if $(ns/op "${MAIN}" "<") ; then
     ${_cmd} < "${_inp}" &> "${_out}"
   elif $(ns/op "${MAIN}" "-") ; then
@@ -227,8 +221,7 @@ function run/prg() {
   local _cmd="${PRGBIN}"
 
   if ! test -z "${PRERUN}" ; then
-    # resolv @
-    evaluate PRERUN
+    u/resolv PRERUN
     _cmd="${PRERUN} ${_cmd}"
   fi
 

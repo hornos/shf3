@@ -149,7 +149,7 @@ function calc() {
   echo "${_exp}" | bc
 }
 
-function evaluate() {
+function u/resolv() {
   local _v="${1}"
   if empty "${_v}" ; then $failure ; fi
 
