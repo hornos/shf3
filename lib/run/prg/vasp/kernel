@@ -82,6 +82,12 @@ function run/prg/vasp/check() {
   return ${_true_}
 }
 
+function run/prg/vasp/success() {
+  import run/prg/vasp/check
+  run/prg/vasp/check/timing
+  return ${_true_}
+}
+
 function run/prg/vasp/finish() {
   return ${_true_}
 }

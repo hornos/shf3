@@ -306,6 +306,7 @@ function run/prg() {
     fi
   else
     msg "Success"
+    run/prg/${_prg}/success
   fi
 
   # output save mode

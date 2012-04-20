@@ -20,10 +20,13 @@ function run/prg/exciting/check() {
   return ${_true_}
 }
 
-function run/prg/exciting/finish() {
+function run/prg/exciting/success() {
   return ${_true_}
 }
 
+function run/prg/exciting/finish() {
+  return ${_true_}
+}
 
 function run/prg/exciting/save() {
   import run/save

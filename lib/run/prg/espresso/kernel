@@ -20,6 +20,10 @@ function run/prg/espresso/check() {
   return ${_true_}
 }
 
+function run/prg/espresso/success() {
+  return ${_true_}
+}
+
 function run/prg/espresso/finish() {
   return ${_true_}
 }

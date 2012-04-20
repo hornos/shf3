@@ -20,10 +20,13 @@ function run/prg/siesta/check() {
   return ${_true_}
 }
 
-function run/prg/siesta/finish() {
+function run/prg/siesta/success() {
   return ${_true_}
 }
 
+function run/prg/siesta/finish() {
+  return ${_true_}
+}
 
 function run/prg/siesta/save() {
   import run/save

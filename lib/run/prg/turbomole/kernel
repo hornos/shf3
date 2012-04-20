@@ -41,6 +41,10 @@ function run/prg/turbomole/check() {
   return ${_true_}
 }
 
+function run/prg/turbomole/success() {
+  return ${_true_}
+}
+
 function run/prg/turbomole/finish() {
   return ${_true_}
 }

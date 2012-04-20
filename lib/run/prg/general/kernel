@@ -20,10 +20,13 @@ function run/prg/general/check() {
   return ${_true_}
 }
 
-function run/prg/general/finish() {
+function run/prg/general/success() {
   return ${_true_}
 }
 
+function run/prg/general/finish() {
+  return ${_true_}
+}
 
 function run/prg/general/save() {
   import run/save

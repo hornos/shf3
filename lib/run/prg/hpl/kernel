@@ -9,6 +9,10 @@ function run/prg/hpl/check() {
   return ${_true_}
 }
 
+function run/prg/hpl/success() {
+  return ${_true_}
+}
+
 function run/prg/hpl/finish() {
   return ${_true_}
 }
