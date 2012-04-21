@@ -1,0 +1,44 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+
+### args
+_p=""
+_c="STOP"
+while getopts hvs:r: o; do
+  case "$o" in
+    s) _c="STOP"; _p=$OPTARG;;
+    r) _c="RESUME"; _r=$OPTARG;;
+    h) help/proc;;
+    *) help/proc;;
+  esac
+done
+
+### main
+if empty "${_p}" ; then
+  exit 1
+fi
+
+msg
+gui/line
+procmgr_ps=$(ps aux | grep "${_p}" | grep -v grep)
+if empty "${proc_ps}" ; then
+  msg "Process not found"
+  exit 1
+fi
+
+echo "${procmgr_ps}"
+case "${_c}" in
+  STOP)
+    answer "Stop process?"
+    if failed $? ; then exit 1 ; fi
+
+    kill -SIGSTOP ${_p}
+  ;;
+  RESUME)
+    answer "Resume process?"
+    if failed $? ; then exit 1 ; fi
+
+    kill -SIGCONT ${_p}
+  ;;
+esac

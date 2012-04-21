@@ -29,3 +29,7 @@ alias vmdload="vmdmgr load"
 
 alias rapid="torto -r"
 alias rapidify="torto -x"
+
+alias suspend="procmgr -s"
+alias resume="procmgr -r"
+
