@@ -22,7 +22,7 @@ fi
 msg
 gui/line
 procmgr_ps=$(ps aux | grep "${_p}" | grep -v grep)
-if empty "${proc_ps}" ; then
+if empty "${procmgr_ps}" ; then
   msg "Process not found"
   exit 1
 fi
