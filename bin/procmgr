@@ -21,7 +21,7 @@ fi
 
 msg
 gui/line
-procmgr_ps=$(ps aux | grep "${_p}" | grep -v grep)
+procmgr_ps=$(ps ax | grep ^${_p})
 if empty "${procmgr_ps}" ; then
   msg "Process not found"
   exit 1
