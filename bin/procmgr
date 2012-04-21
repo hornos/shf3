@@ -7,8 +7,8 @@ _p=""
 _c="STOP"
 while getopts hvs:r: o; do
   case "$o" in
-    s) _c="STOP"; _p=$OPTARG;;
-    r) _c="RESUME"; _r=$OPTARG;;
+    s) _c="STOP";   _p=$OPTARG;;
+    r) _c="RESUME"; _p=$OPTARG;;
     h) help/proc;;
     *) help/proc;;
   esac
