@@ -9,10 +9,10 @@ function help/sshtx() {
 
 SSH Transfer
 
-Usage: ${gbn} CMD MID files
-              PUT
-              GET
-              BACKUP
+Usage: ${gbn} cmd MID files
+              put
+              get
+              backup
 EOF
   exit 1
 }

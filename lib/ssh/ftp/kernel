@@ -1,4 +1,7 @@
 
+function put() {
+  PUT $*
+}
 function PUT() {
   import ssh
   local _h=${1:-default}
@@ -47,6 +50,9 @@ function RPUT() {
   done
 }
 
+function get() {
+  GET $*
+}
 function GET() {
   import ssh
   local _h=${1:-default}
@@ -94,6 +100,9 @@ function LS() {
   ssh/cmd "${_h}" "ls -l ${_s}"
 }
 
+function backup() {
+  BACKUP $*
+}
 function BACKUP() {
   import sys
   import ssh
