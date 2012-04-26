@@ -156,3 +156,9 @@ function u/resolv() {
   local _w=$(echo "${!_v}" | sed s/@/\\\\$/g )
   eval "${_v}=\"${_w}\""
 }
+
+function u/title() {
+  import gui
+  echo -e "\n$*"
+  gui/line
+}
