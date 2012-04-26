@@ -19,8 +19,8 @@ EOF
 function run/prg/mode() {
   import gui
   local _mode="${1:-mpi}"
-  local _sckts=${2:-MPI_NUM_SCKTS}
-  local _cores=${3:-MPI_NUM_CORES}
+  local _sckts=${2:-${MPI_NUM_SCKTS}}
+  local _cores=${3:-${MPI_NUM_CORES}}
   local _mpi=${MPI_MPI}
 
   if test "${_mode}" != "mpi" && \
@@ -82,7 +82,7 @@ function run/prg/mode() {
   msg "New Parallel Mode"
   gui/line
   printf "%12s %5s %5s %7s\n" "MODE" "np" "pn" "threads"
-  printf "%12s %5d %5d %7d %s\n" ${_mode}  ${_np} ${_pn} ${_threads} "${_over}"
+  printf "%12s %5d %5d %7d\n" ${_mode}  ${_np} ${_pn} ${_threads}
   echo ""
 }
 

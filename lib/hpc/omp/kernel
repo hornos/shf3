@@ -12,6 +12,7 @@ function hpc/omp/binding() {
       export OMP_NESTED=FALSE
       export OMP_STACKSIZE=16M
     fi
+    echo "OMP binding threads=${_thr}"
     $success
   fi
 
