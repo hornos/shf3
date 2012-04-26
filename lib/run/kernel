@@ -23,8 +23,7 @@ function run/prg/mode() {
   local _cores=${3:-MPI_NUM_CORES}
   local _mpi=${MPI_MPI}
 
-  if test "${_mode}" != "mpi" || \
-     test "${_mode}  != "mpiomp" ; then
+  if test "${_mode}" != "mpi" || test "${_mode}" != "mpiomp" ; then
     msg "${FUNCNAME}: invalid mode: ${_mode}"
     $failure
   fi
