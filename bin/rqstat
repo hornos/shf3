@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if test -z "${1}" ; then
+  exit 1
+fi
+sshcmd "${1}" qstat -g c 2>/dev/null | \
+awk 'BEGIN{p=0} {if(match($0,"CLUSTER.*")) p=1; if(1) print}'
