@@ -24,7 +24,7 @@ function run/prg/mode() {
   local _mpi=${MPI_MPI}
 
   if test "${_mode}" != "mpi" ||
-     test "${_mode}"; then
+     test "${_mode}  != "mpiomp""; then
     msg "${FUNCNAME}: invalid mode: ${_mode}"
     $failure
   fi
@@ -75,8 +75,8 @@ function run/prg/mode() {
   hpc/mkl/binding ${_threads}
 
   import hpc/fmp
-  hpc/fmp/binding ${_nodes} ${_pn}    
-    
+  hpc/fmp/binding ${_nodes} ${_pn}
+
   # summary
   echo ""
   msg "New Parallel Mode"
