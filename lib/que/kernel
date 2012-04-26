@@ -412,14 +412,16 @@ function que/sub() {
       echo "export MPI_MAX_SLOTS=${SLOTS}"  >> "${_bat}"
       echo "export MPI_MAX_TASKS=${TASKS}"  >> "${_bat}"
       echo "export MPI_NUM_NODES=${NODES}"  >> "${_bat}"
-      echo "export MPI_NUM_SCKTS=${SCKTS}"  >> "${_bat}"
-      echo "export MPI_NUM_CORES=${CORES}"  >> "${_bat}"
       echo "export MPI_NPPN=\"${_nppn}\""   >> "${_bat}"
-      echo "export MPI_BIND=\"${_bind}\""   >> "${_bat}"
+
+      ### job file compliance for easy syntax
+      echo "export SCKTS=${SCKTS}"          >> "${_bat}"
+      echo "export CORES=${CORES}"          >> "${_bat}"
+      echo "export BIND=\"${_bind}\""       >> "${_bat}"
 
       # prerun should be @resolved
-      # PRERUN  VERBOSE     OPTIONS     MACHINES      NPPN        NUMA     BINDING     BOOST     PROFILER
-      _mpi_opt="${_verbose} ${_mpi_opt} ${__machines} @{MPI_NPPN} \${NUMA} @{MPI_BIND} ${_boost} ${_prof}"
+      # PRERUN  VERBOSE     OPTIONS     MACHINES      NPPN        NUMA     BINDING BOOST     PROFILER
+      _mpi_opt="${_verbose} ${_mpi_opt} ${__machines} @{MPI_NPPN} \${NUMA} @{BIND} ${_boost} ${_prof}"
       echo "export MPI_OPT=\"${_mpi_opt}\""           >> "${_bat}"
       echo "export PRERUN=\"${_mpirun} \${MPI_OPT}\"" >> "${_bat}"
     fi

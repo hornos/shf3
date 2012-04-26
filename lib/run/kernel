@@ -19,8 +19,8 @@ EOF
 function run/prg/mode() {
   import gui
   local _mode="${1:-mpi}"
-  local _sckts=${2:-${MPI_NUM_SCKTS}}
-  local _cores=${3:-${MPI_NUM_CORES}}
+  local _sckts=${2:-${SCKTS}}
+  local _cores=${3:-${CORES}}
   local _mpi=${MPI_MPI}
 
   if test "${_mode}" != "mpi" && \
