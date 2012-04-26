@@ -1,10 +1,22 @@
+# OpenMP
+
 function hpc/omp/binding() {
   local _thr=${1:-1}
   local _bat=${2}
-  if empty "${_bat}" || \
-   ! readable "${_bat}" ; then
-    $failure
+
+  # redistribution for multi-step
+  if empty "${_bat}" ; then
+    export OMP_NUM_THREADS=${_thr}
+    if test ${_thr} -gt 1 ; then
+      export OMP_PROC_BIND=TRUE
+      export OMP_NESTED=FALSE
+      export OMP_STACKSIZE=16M
+    fi
+    $success
   fi
+
+  # static
+  if ! readable "${_bat}" ; then $failure ; fi
 
   echo "export OMP_NUM_THREADS=${_thr}" >> "${_bat}"
   if test ${_thr} -gt 1 ; then

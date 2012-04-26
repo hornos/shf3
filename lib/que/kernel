@@ -427,7 +427,7 @@ function que/sub() {
     echo ""                                    >> "${_bat}"
     echo "### Fortran Mulit-processing"        >> "${_bat}"
     import hpc/fmp
-    hpc/fmp/binding ${_nodes} ${_pn} "${_bat}"
+    hpc/fmp/binding ${_nodes} ${_pn}           "${_bat}"
   fi
 
   ### OMP and Intel MKL
@@ -444,8 +444,8 @@ function que/sub() {
     _threads=${_thrds}
   fi
   # OMP threads
-  hpc/omp/binding ${_threads} "${_bat}"
-  hpc/mkl/binding ${_threads} "${_bat}"
+  hpc/omp/binding ${_threads}                  "${_bat}"
+  hpc/mkl/binding ${_threads}                  "${_bat}"
 
   ### requested MPI OMP resources
   _over=""

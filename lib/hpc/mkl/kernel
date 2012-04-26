@@ -1,10 +1,22 @@
+# Intel MKL
+
 function hpc/mkl/binding() {
   local _thr=${1:-1}
   local _bat=${2}
-  if empty "${_bat}" || \
-   ! readable "${_bat}" ; then
-    $failure
+
+  # multi-step redistribution
+  if empty "${_bat}" ; then
+    export MKL_NUM_THREADS=${_thr}
+    if test ${_thr} -gt 1; then
+      export KMP_LIBRARY=throughput
+    else
+      export KMP_LIBRARY=serial
+    fi
+    $success
   fi
+
+  # static
+  if ! readable "${_bat}" ; then $failure ; fi
 
   echo "export MKL_NUM_THREADS=${_thr}"  >> "${_bat}"
   if test ${_thr} -gt 1; then

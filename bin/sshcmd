@@ -1,0 +1,28 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+import ssh
+
+function help/sshcmd() {
+  cat << EOF
+
+SSH Command
+
+Usage: ${gbn} machine command
+
+EOF
+  exit ${_false_}
+}
+
+### args
+if test $# -lt 2 ; then
+  help/sshcmd
+fi
+_m="${1}"
+shift
+_x="$*"
+
+if ! test -z "${_x}" ; then
+  ssh/cmd "${_m}" "${_x}"
+  exit $?
+fi

@@ -17,15 +17,73 @@ EOF
 
 # switch between mpi and mpiomp
 function run/prg/mode() {
+  import gui
   local _mode="${1:-mpi}"
   local _sckts=${2:-MPI_NUM_SCKTS}
   local _cores=${3:-MPI_NUM_CORES}
+  local _mpi=${MPI_MPI}
 
   if test "${_mode}" != "mpi" ||
      test "${_mode}"; then
     msg "${FUNCNAME}: invalid mode: ${_mode}"
     $failure
   fi
+
+  if empty "${_mpi}" ; then
+    msg "${FUNCNAME}: mpi not set"
+    $failure
+  fi
+
+  local _nodes=${MPI_NUM_NODES}
+  local _sockets=$((_nodes*_sckts))
+  local _tasks=$((_sckts*_cores))
+  local _slots=$((_nodes*_tasks))
+  local _threads=${_tasks}
+  # limits
+  local _max_slots=${MPI_MAX_SLOTS}
+  local _max_tasks=${MPI_MAX_TASKS}
+
+  if test ${_tasks} -gt ${_max_tasks} ; then
+    msg "${FUNCNAME}: task overload"
+    $failure
+  fi
+
+  # mpi -> mpi
+  if test "${_mode}" = "mpi" ; then
+    _np=${_slots}
+    _pn=${_tasks}
+    _threads=1
+  fi
+
+  # mpi -> mpiomp
+  if test "${_mode}" = "mpiomp" ; then
+    local _np=${_sockets}
+    local _pn=${_sckts}
+    _threads=${_cores}
+  fi
+
+  export MPI_MODE="${_mode}"
+
+  import hpc/mpi/${_mpi}
+  local _nppn=$(hpc/mpi/${_mpi}/nppn ${_np} ${_pn})
+  export MPI_NPPN="${_nppn}"
+
+  import hpc/omp
+  hpc/omp/binding ${_threads}
+
+  import hpc/mkl
+  hpc/mkl/binding ${_threads}
+
+  import hpc/fmp
+  hpc/fmp/binding ${_nodes} ${_pn}    
+    
+  # summary
+  echo ""
+  msg "New Parallel Mode"
+  gui/line
+  printf "%12s %5s %5s %7s\n" "MODE" "np" "pn" "threads"
+  printf "%12s %5d %5d %7d %s\n" ${_mode}  ${_np} ${_pn} ${_threads} "${_over}"
+  echo ""
 }
 
 function run/prg/step() {

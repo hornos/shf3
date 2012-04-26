@@ -12,6 +12,7 @@ Usage: ${gbn} options
               -m MID
               -f - force
               -v - verbose
+              -x CMD
 EOF
   exit ${_false_}
 }
