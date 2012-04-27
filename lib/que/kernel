@@ -154,10 +154,15 @@ function que/sub() {
 
   ### nodes
   local _nodes=${NODES:-1}
-  if test "${_mode}" = "omp" || \
-     test "${_mode}" = "fco" ; then
+  if test "${_mode}" = "omp" ; then
     if test ${_nodes} -gt 1 ; then
       msg "${FUNCNAME}: for OMP set NODES=1"
+      $failure
+    fi
+  fi
+  if test "${_mode}" = "caf" ; then
+    if test ${_nodes} -gt 1 ; then
+      msg "${FUNCNAME}: for CAF set NODES=1"
       $failure
     fi
   fi
@@ -437,7 +442,7 @@ function que/sub() {
 
   # TODO: bind and numa
   ### Co-array Fortran
-  if test "${_mode}" = "fco" ; then
+  if test "${_mode}" = "caf" ; then
     echo ""                                    >> "${_bat}"
     echo "### Co-array Fortran Setup"          >> "${_bat}"
     echo "export PRERUN=\"${_bind} ${_prof}\"" >> "${_bat}"
@@ -445,7 +450,7 @@ function que/sub() {
     _threads=1
     # FCO images
     import hpc/fco
-    hpc/fco/binding ${_images}                 "${_bat}"
+    hpc/caf/binding ${_images}                 "${_bat}"
   fi
 
   ### OMP and Intel MKL

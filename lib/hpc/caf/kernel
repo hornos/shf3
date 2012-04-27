@@ -1,13 +1,13 @@
 # Co-array Fortran
 
-function hpc/fco/binding() {
+function hpc/caf/binding() {
   local _img=${1:-1}
   local _bat=${2}
 
   # redistribution for multi-step
   if empty "${_bat}" ; then
     export FOR_COARRAY_NUM_IMAGE=${_img}
-    echo "FCO binding: ${_img} images"
+    echo "CAF binding: ${_img} images"
     $success
   fi
 
