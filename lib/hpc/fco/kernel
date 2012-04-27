@@ -1,0 +1,18 @@
+# Co-array Fortran
+
+function hpc/fco/binding() {
+  local _img=${1:-1}
+  local _bat=${2}
+
+  # redistribution for multi-step
+  if empty "${_bat}" ; then
+    export FOR_COARRAY_NUM_IMAGE=${_img}
+    echo "FCO binding: ${_img} images"
+    $success
+  fi
+
+  # static
+  if ! readable "${_bat}" ; then $failure ; fi
+
+  echo "export FOR_COARRAY_NUM_IMAGE=${_img}" >> "${_bat}"
+}

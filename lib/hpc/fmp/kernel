@@ -9,7 +9,7 @@ function hpc/fmp/binding() {
   if empty "${_bat}" ; then
     export FMP_MPI_NODES=${_nodes}
     export FMP_MPI_PERNODE=${_pn}
-    echo "FMP binding nodes=${_nodes} pernode=${_pn}"
+    echo "FMP binding: ${_pn} procs per ${_nodes} nodes"
     $success
   fi
   

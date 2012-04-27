@@ -12,7 +12,7 @@ function hpc/mkl/binding() {
     else
       export KMP_LIBRARY=serial
     fi
-    echo "MKL binding threads=${_thr}"
+    echo "MKL binding: ${_thr} threads (${KMP_LIBRARY})"
     $success
   fi
 

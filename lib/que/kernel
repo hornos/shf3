@@ -154,7 +154,8 @@ function que/sub() {
 
   ### nodes
   local _nodes=${NODES:-1}
-  if test "${_mode}" = "omp" ; then
+  if test "${_mode}" = "omp" || \
+     test "${_mode}" = "fco" ; then
     if test ${_nodes} -gt 1 ; then
       msg "${FUNCNAME}: for OMP set NODES=1"
       $failure
@@ -191,6 +192,8 @@ function que/sub() {
   local __slots=$((_nodes*_sltpn))
   # threads
   local _threads=${_tasks}
+  # images
+  local _images=1
 
   ### global compound resources
   SLOTS=${_slots}
@@ -432,9 +435,20 @@ function que/sub() {
     hpc/fmp/binding ${_nodes} ${_pn}           "${_bat}"
   fi
 
+  # TODO: bind and numa
+  ### Co-array Fortran
+  if test "${_mode}" = "fco" ; then
+    echo ""                                    >> "${_bat}"
+    echo "### Co-array Fortran Setup"          >> "${_bat}"
+    echo "export PRERUN=\"${_bind} ${_prof}\"" >> "${_bat}"
+    _images=${_tasks}
+    _threads=1
+    # FCO images
+    import hpc/fco
+    hpc/fco/binding ${_images}                 "${_bat}"
+  fi
+
   ### OMP and Intel MKL
-  import hpc/omp
-  import hpc/mkl
   echo ""                                      >> "${_bat}"
   echo "### OMP Setup"                         >> "${_bat}"
   if test "${_mode}" = "omp" ; then
@@ -445,8 +459,13 @@ function que/sub() {
   if test ${_thrds} -gt 0 ; then
     _threads=${_thrds}
   fi
+
   # OMP threads
+  import hpc/omp
   hpc/omp/binding ${_threads}                  "${_bat}"
+
+  # MKL threads
+  import hpc/mkl
   hpc/mkl/binding ${_threads}                  "${_bat}"
 
   ### requested MPI OMP resources
@@ -462,17 +481,28 @@ function que/sub() {
     fi
   fi
 
-  printf "%12s %5s %5s %7s\n" "MODE" "np" "pn" "threads"
-  echo ""                                                                          >> "${_bat}"
-  echo "### Parallel Mode"                                                         >> "${_bat}"
-  printf "# %12s %5s %5s %7s\n" "MODE" "np" "pn" "threads"                         >> "${_bat}"
-  if test "${_mode}" = "omp" ; then
-    printf "%12s %5s %5s %7d %s\n" ${MODE}  "-"    "-"    ${_threads} "${_over}"
-    printf "# %12s %5s %5s %7d %s\n" ${MODE}  "-"    "-"    ${_threads} "${_over}" >> "${_bat}"
-  else
-    printf "%12s %5d %5d %7d %s\n" ${MODE}  ${_np} ${_pn} ${_threads} "${_over}"
-    printf "# %12s %5d %5d %7d %s\n" ${MODE}  ${_np} ${_pn} ${_threads} "${_over}" >> "${_bat}"
-  fi
+  echo ""                                                                            >> "${_bat}"
+  echo "### Parallel Mode"                                                           >> "${_bat}"
+  case "${_mode}" in
+    omp)
+      printf "%12s %7s\n"      "MODE"  "threads"
+      printf "# %12s %7s\n"    "MODE"  "threads"                                     >> "${_bat}"
+      printf "%12s %7d %s\n"   ${MODE} ${_threads} "${_over}"
+      printf "# %12s %7d %s\n" ${MODE} ${_threads} "${_over}"                        >> "${_bat}"
+    ;;
+    fco)
+      printf "%12s %6s %7s\n"      "MODE"  "images" "threads"
+      printf "# %12s %6s %7s\n"    "MODE"  "images" "threads"                        >> "${_bat}"
+      printf "%12s %6s %7d %s\n"   ${MODE} ${_images} ${_threads} "${_over}"
+      printf "# %12s %6s %7d %s\n" ${MODE} ${_images} ${_threads} "${_over}"         >> "${_bat}"
+    ;;
+    mpi|mpiomp)
+      printf "%12s %5s %5s %7s\n"      "MODE"  "np"   "pn"   "threads"
+      printf "# %12s %5s %5s %7s\n"    "MODE"  "np"   "pn"   "threads"               >> "${_bat}"
+      printf "%12s %5d %5d %7d %s\n"   ${MODE} ${_np} ${_pn} ${_threads} "${_over}"
+      printf "# %12s %5d %5d %7d %s\n" ${MODE} ${_np} ${_pn} ${_threads} "${_over}"  >> "${_bat}"
+    ;;
+  esac
   gui/line
 
   ### command
