@@ -4,6 +4,7 @@ function run/save() {
   local _pre="${PREFIX}"
 
   import sys/dir
+  import sys/zip
 
   if test -z "${WORKDIR}" || \
      test -z "${RESULT}"  || \
