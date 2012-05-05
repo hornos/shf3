@@ -667,7 +667,7 @@ function ssh/conchk() {
       fi
     fi
     if test "${i}" = "nmap" ; then
-      ${ssh_nmap} -p ${mid_ssh_port} ${mid_ssh_fqdn} 2>/dev/null | grep open &>/dev/null
+      ${ssh_nmap} -P0 -p ${mid_ssh_port} ${mid_ssh_fqdn} 2>/dev/null | grep open &>/dev/null
       if failed $? ; then
         msg "nmap: Connection FAILED"
         $failure

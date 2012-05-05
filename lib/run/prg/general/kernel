@@ -2,9 +2,9 @@
 function run/prg/general/check() {
   # main input check
   run/check/main
-  if test $? -gt 0 ; then
-    return ${_false_}
-  fi
+  # if test $? -gt 0 ; then
+  #   return ${_false_}
+  # fi
 
   # other input check
   run/check/other
@@ -38,10 +38,10 @@ function run/prg/general/init() {
   import run/init
 
   run/init/main
-  if test $? -gt 0 ; then
-    msg "run/init/main failed"
-    return ${_false_}
-  fi
+  # if test $? -gt 0 ; then
+  #  msg "run/init/main failed"
+  #  return ${_false_}
+  # fi
 
   # init data
   run/init/data
