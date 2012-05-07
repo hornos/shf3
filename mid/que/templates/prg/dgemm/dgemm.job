@@ -1,0 +1,8 @@
+NAME=dgemm
+TIME=06:00:00
+NODES=1
+SCKTS=2
+CORES=4
+QUEUE=service
+MODE=omp
+RUN="runprg -p general -g dgemm.guide"

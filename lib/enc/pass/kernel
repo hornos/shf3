@@ -94,7 +94,7 @@ function enc/pass/mgr() {
       printf "${_frm1}" "uid" "created" "modified"
       gui/line
       local i
-      for i in $(sql/select "${enc_pass_db}" "${enc_pass_tb}" "${enc_pass_acc},ctime,mtime") ; do
+      for i in $(sql/selectby "${enc_pass_acc}" "${enc_pass_db}" "${enc_pass_tb}" "${enc_pass_acc},ctime,mtime") ; do
         printf "${_frm1}" $(field "${i}") "$(epoch $(field "${i}" 2))" "$(epoch $(field "${i}" 3))"
       done
       ;;

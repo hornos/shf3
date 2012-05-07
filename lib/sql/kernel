@@ -68,6 +68,35 @@ function sql/select() {
   ${sql_sqlite} "${_db}" "${_q}"
 }
 
+function sql/selectby() {
+  local _by="${1}"
+  local _db="${2}"
+  local _tb="${3}"
+  local _f=${4:-*}
+  local _o=${5:-0}
+  local _l=${6:-0}
+  local _w=${7}
+
+  if empty "${_by}" ; then $failure; fi
+
+  local _q="SELECT ${_f} FROM ${_tb}"
+
+  if ! test -z "${_w}" ; then
+    _q="${_q} WHERE ${_w}"
+  fi
+
+  if test ${_o} -gt 0 ; then
+    _q="${_q} OFFSET ${_o}"
+  fi
+
+  if test ${_l} -gt 0 ; then
+    _q="${_q} LIMIT ${_l}"
+  fi
+
+  _q="${_q} ORDER BY ${_by}"
+  ${sql_sqlite} "${_db}" "${_q}"
+}
+
 function sql/insert() {
   local _db="${1}"
   local _tb="${2}"
