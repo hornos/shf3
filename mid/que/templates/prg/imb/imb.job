@@ -1,0 +1,9 @@
+NAME=imb
+TIME=01:00:00
+NODES=2
+SCKTS=1
+CORES=1
+SLTPN=8
+QUEUE=default
+MODE=mpi/impi
+RUN="runprg -p general -g imb.guide"

@@ -1,0 +1,15 @@
+INPUTDIR="${PWD}"
+WORKDIR="${SCRATCH}/imb-${USER}-${HOSTNAME}-$$"
+RESULTDIR="${INPUTDIR}"
+
+PRGBIN="${INPUTDIR}/IMB-MPI1"
+PRGOPT="-iter 2000 PingPong PingPing Sendrecv Exchange Bcast Allgather Allgatherv Gather Gatherv Scatter Scatterv Alltoall Alltoallv Reduce Reduce_scatter Allreduce Barrier"
+
+DATADIR=""
+DATA=""
+
+MAIN=""
+# OTHER=""
+
+ERROR="save"
+RESULT="*"
