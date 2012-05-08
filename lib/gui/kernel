@@ -77,8 +77,13 @@ function gui/wrn() {
   gui/txt "${*}" "yellow"
 }
 
-function gui/header() {
+function gui/section() {
   echo ""
   msg $*
   gui/line
+}
+
+# depricated
+function gui/header() {
+  gui/section $*
 }
