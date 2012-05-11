@@ -24,7 +24,7 @@ function shf3/mc/color() {
 ### PS1
 function shf3/ps1() {
   local _h=${1:-${HOSTNAME}}
-  export PS1="${_h} \W (\$?)\$ "
+  export PS1="${_h} \W (\$?)\\$ "
 }
 
 ### screen
