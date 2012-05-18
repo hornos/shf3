@@ -303,15 +303,13 @@ function ssh/login() {
   local _h="${1:-default}"
   local _f="${2:-false}"
 
-  # flags
-  local _hoping=false
-
   # init
   sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
     return ${_false_}
   fi
 
+  local _hoping=false
   if ! empty "${mid_ssh_hop}" ; then
     import ssh/hop
     local _hop_cmd=""
@@ -438,13 +436,21 @@ function ssh/xfer() {
 
   # init
   sys/mid "ssh/${_h}"
-  if test $? -gt 0 ; then
-    return ${_false_}
-  fi
+  if failed $? ; then $failure ; fi
 
-  # connection check
-  ssh/conchk
-  if failed $? ; then $failure; fi
+  local _hoping=false
+  if ! empty "${mid_ssh_hop}" ; then
+    import ssh/hop
+    local _hop_cmd=""
+    ssh/hop "${mid_ssh_hop}"
+    _hoping=true
+    # reinit hoping endpoint
+    sys/mid "ssh/${_h}"
+  else
+    # connection check
+    ssh/conchk
+    if failed $? ; then $failure; fi
+  fi
 
   # source
   local _src_url="${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_scp_dst}"
@@ -462,11 +468,11 @@ function ssh/xfer() {
   case ${_mode} in
     1)
       local _opt="${mid_ssh_scp_opt}"
-      local _url="${_src_url}"
-      local _mtxt="scp"
       if ${_r} ; then
         _opt="-r ${_opt}"
       fi
+      local _url="${_src_url}"
+      local _mtxt="scp"
     ;;
     2)
       local _opt="-p ${mid_ssh_port}"
@@ -486,6 +492,16 @@ function ssh/xfer() {
        return ${_false_}
     ;;
   esac
+
+  if ${_hoping} ; then
+    _opt="${_opt} -o CheckHostIP=no"
+    case "${_mode}" in
+      3)
+        _hop_cmd=$(echo "${_hop_cmd}" | sed s/\"/\\\\\"/g)
+      ;;
+    esac
+    _opt="${_opt} -o ProxyCommand='${_hop_cmd}'"
+  fi
 
   # begin gsi
   if test "${mid_ssh_type}" = "gsi" ; then

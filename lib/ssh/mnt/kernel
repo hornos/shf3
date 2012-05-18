@@ -85,14 +85,23 @@ function ssh/mnt() {
   local _ret
 
   sys/mid "ssh/${_h}"
-  if test $? -gt 0 ; then
-    return ${_false_}
-  fi
+  if failed $? ; then $failure ; fi
 
-  # connection check
+  local _hoping=false
+  # hoping
   if ! ${_u} ; then
-    ssh/conchk
-    if failed $? ; then $failure; fi
+    if ! empty "${mid_ssh_hop}" ; then
+      import ssh/hop
+      local _hop_cmd=""
+      ssh/hop "${mid_ssh_hop}"
+      _hoping=true
+      # reinit hoping endpoint
+      sys/mid "ssh/${_h}"
+    else
+      # connection check
+      ssh/conchk
+      if failed $? ; then $failure; fi
+    fi
   fi
 
   # lock
@@ -167,6 +176,11 @@ function ssh/mnt() {
     if test -r "${_ico}" ; then
       _opt="${_opt} -o modules=volicon -o volicon=${_ico}"
     fi
+  fi
+
+  if ${_hoping} ; then
+    _opt="${_opt} -o CheckHostIP=no"
+    _opt="${_opt} -o ProxyCommand='${_hop_cmd}'"
   fi
 
   local _cmd="${ssh_mnt_mnt} ${_url} \"${_src}\" ${_opt}"
