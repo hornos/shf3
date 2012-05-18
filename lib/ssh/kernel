@@ -303,15 +303,27 @@ function ssh/login() {
   local _h="${1:-default}"
   local _f="${2:-false}"
 
+  # flags
+  local _hoping=false
+
   # init
   sys/mid "ssh/${_h}"
   if test $? -gt 0 ; then
     return ${_false_}
   fi
 
-  # connection check
-  ssh/conchk
-  if failed $? ; then $failure; fi
+  if ! empty "${mid_ssh_hop}" ; then
+    import ssh/hop
+    local _hop_cmd=""
+    ssh/hop "${mid_ssh_hop}"
+    _hoping=true
+    # reinit hoping endpoint
+    sys/mid "ssh/${_h}"
+  else
+    # connection check
+    ssh/conchk
+    if failed $? ; then $failure; fi
+  fi
 
   local _lck="${_h}.${gbn}"
   # force
@@ -324,14 +336,18 @@ function ssh/login() {
 
   # tunnel
   local _tunnel=false
-  if ! test -z "${mid_ssh_tunnel}" ; then
-    if sys/lck/mk "${_lck}" ; then
-      _tunnel=true
-      _opt="${_opt} ${mid_ssh_tunnel}"
-      # TODO: tunnel parse
-      msg "Connect tunnels: ${mid_ssh_tunnel}"
-    else
-      msg "Active tunnels: ${mid_ssh_tunnel}"
+
+  # TODO: hoping
+  if ! ${_hoping} ; then
+    if ! test -z "${mid_ssh_tunnel}" ; then
+      if sys/lck/mk "${_lck}" ; then
+        _tunnel=true
+        _opt="${_opt} ${mid_ssh_tunnel}"
+        # TODO: tunnel parse
+        msg "Connect tunnels: ${mid_ssh_tunnel}"
+      else
+        msg "Active tunnels: ${mid_ssh_tunnel}"
+      fi
     fi
   fi
 
@@ -359,13 +375,18 @@ function ssh/login() {
     _opt="-v ${_opt}"
   fi
 
+  if ${_hoping} ; then
+    _opt="${_opt} -o CheckHostIP=no"
+    _opt="${_opt} -o ProxyCommand='${_hop_cmd}'"
+  fi
+
   # login
   local _url="${mid_ssh_user}@${mid_ssh_fqdn}"
   msg "Login to ${_url}"
   gui/line
   local _cmd="${ssh_ssh} ${_opt} ${_url}"
   msg/debug "${_cmd}"
-  ${_cmd}
+  eval ${_cmd}
   local _ret=$?
 
   gui/line

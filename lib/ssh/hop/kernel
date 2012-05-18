@@ -1,0 +1,52 @@
+function ssh/hop() {
+  import sys
+  import ssh
+
+  local _hop="${1}"
+
+  if empty "${_hop}" ; then
+    echo ""
+    $failure
+  fi
+
+  sys/mid "ssh/${_hop}"
+  if failed $? ; then $failure ; fi
+
+  # connection check
+  ssh/conchk
+  if failed $? ; then $failure; fi
+
+  local _hop_opt="${mid_ssh_ssh_opt}"
+
+  # TODO: tunnels
+
+  if test "${mid_ssh_type}" = "gsi" ; then
+    msg "GSI SSH hoping is not implemented"
+    echo ""
+    $failure
+  else
+    # ssh bug: no different keys in the hoping chain
+    local _hop_sec="$(ssh/key/sec ${_hop})"
+    # check
+    if test -r "${_hop_sec}" ; then
+      _hop_opt="${_hop_opt} -i ${_hop_sec}"
+    else
+      msg "Key not found ${_hop_sec}"
+    fi
+  fi
+
+  # debug
+  if ${gdbg} ; then
+    _hop_opt="-v ${_hop_opt}"
+  fi
+
+  # hoping options
+  # _hop_opt="${_hop_opt} -o ClearAllForwardings=yes"
+
+  # hoping command
+  local _hop_url="${mid_ssh_user}@${mid_ssh_fqdn}"
+  msg "Hoping to ${_hop_url}"
+  gui/line
+  _hop_cmd="${ssh_ssh} ${_hop_opt} ${_hop_url} \"${ssh_netcat} %h %p\""
+  msg/debug "${_hop_cmd}"
+}
