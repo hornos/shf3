@@ -10,6 +10,9 @@ mid_ssh_fqdn="default"
 # username
 mid_ssh_user="${USER}"
 
+# hoping gateway
+# mid_ssh_hop=""
+
 # SSH port
 # gsi: 2222
 mid_ssh_port=22
