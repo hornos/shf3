@@ -149,7 +149,11 @@ function ssh/mnt() {
     return ${_false_}
   fi
 
-  msg "Mount directory : ${_src}"
+  local _url="${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_sshfs_dst}"
+
+  msg "Source : ${_url}"
+  msg "Target : ${_src}"
+
   answer "Mount ${_h}?"
   if test $? -gt 0 ; then
     return ${_false_}
@@ -166,7 +170,6 @@ function ssh/mnt() {
     msg "Key not found ${_sec}"
   fi
 
-  local _url="${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_sshfs_dst}"
   sys/dir/mk "${_src}"
 
   if test "$(sys/os)" = "osx" ; then
