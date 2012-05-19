@@ -216,6 +216,9 @@ function ssh/info() {
   echo
   echo "Type        : ${mid_ssh_type}"
   echo "URL         : ${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_port}"
+  if ! empty "${mid_ssh_hop}" ; then
+    echo "Hoping GW   : ${mid_ssh_hop}"
+  fi
   echo "SSH Opts    : ${mid_ssh_ssh_opt}"
   echo "SCP Opts    : ${mid_ssh_scp_opt}"
   echo "SSH Env     : ${mid_ssh_env}"
