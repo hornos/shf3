@@ -17,7 +17,7 @@ function ssh/mgr() {
     LIST)
       import ssh/key
       # format
-      local _frm1="%-21s%-6s%-8s%-42s\n"
+      local _frm1="%-21s%-6s%-12s%-42s\n"
 
       # header
       echo
@@ -30,7 +30,8 @@ function ssh/mgr() {
           i=$(basename "${i}")
           sys/mid "ssh/${i}"
           if ! test -z "${mid_ssh_type}" ; then
-            printf "${_frm1}" "${i}" "${mid_ssh_type}" "${mid_ssh_cluster}" "${mid_ssh_user}@${mid_ssh_fqdn}"
+            printf "${_frm1}" "${i}" "${mid_ssh_type}" \
+                   "${mid_ssh_cluster}" "${mid_ssh_user}@${mid_ssh_fqdn}"
           fi
         fi
       done
