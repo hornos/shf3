@@ -78,7 +78,6 @@ function enc/ca/init() {
   # end ca dir
 }
 
-
 function enc/ca/mgr() {
   local _a="${1}"
   if test -z "${_a}" ; then

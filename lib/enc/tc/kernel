@@ -31,7 +31,9 @@ function enc/tc/init() {
     if failed $? ; then $failure; fi
 
     # create disk image
-    _opt="${_opt} --size=${mid_tc_vol_size:-${enc_tc_vol_size}}"
+    local _size=${enc_tc_vol_size}
+    _size=$((${_size}*1024*1024))
+    _opt="${_opt} --size=${_size}"
     _d=false
   fi
 

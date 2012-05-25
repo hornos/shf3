@@ -128,7 +128,11 @@ function sql/insert() {
   done
   _qv="${_qv})"
   _q="${_q} ${_qf} ${_qv}"
-  ${sql_sqlite} "${_db}" "${_q}"
+  if ${gdbg} ; then
+    ${sql_sqlite} "${_db}" "${_q}"
+  else
+    ${sql_sqlite} "${_db}" "${_q}" 2>/dev/null
+  fi
 }
 
 function sql/update() {

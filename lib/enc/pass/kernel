@@ -73,7 +73,7 @@ function enc/pass/mgr() {
       if test ${_c} -lt 0 ; then
         return ${_false_}
       fi
-      if ! test -z "${_u}" ; then
+      if ! empty "${_u}" ; then
         answer "Retrieve password for ${_u}?"
         if test $? -gt 0 ; then
           return ${_false_}
@@ -119,11 +119,14 @@ function enc/pass/mgr() {
       local _date=$(epoch)
       local _f=("${enc_pass_acc}" "pass" "ctime" "mtime")
       local _v=("${_u}" "${_p}" "${_date}" "${_date}")
-      if ${gdbg} ; then
-        sql/insert "${enc_pass_db}" "${enc_pass_tb}" "${_f[*]}" "${_v[*]}"
-      else
-        sql/insert "${enc_pass_db}" "${enc_pass_tb}" "${_f[*]}" "${_v[*]}" 2>/dev/null
-      fi
+
+#      if ${gdbg} ; then
+#        sql/insert "${enc_pass_db}" "${enc_pass_tb}" "${_f[*]}" "${_v[*]}"
+#      else
+#        sql/insert "${enc_pass_db}" "${enc_pass_tb}" "${_f[*]}" "${_v[*]}" 2>/dev/null
+#      fi
+
+      sql/insert "${enc_pass_db}" "${enc_pass_tb}" "${_f[*]}" "${_v[*]}"
       if test $? -gt 0 ; then
         msg "Insert failed"
         return ${_false_}
