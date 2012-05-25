@@ -172,7 +172,7 @@ function ssh/mgr() {
         fi
       done
       ;;
-    UPDATE)
+    GRID)
       import ssh/key/crt
       ssh/key/crt/upd "${_h}"
       ;;
