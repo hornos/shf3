@@ -26,7 +26,7 @@ while getopts hvl:qsi o; do
     s) _m=0;;
     i) _m=1;;
     q) _q=false;;
-    h) random/help;;
+    h) help/random;;
     v) gdbg=true;;
     *) random/help;;
   esac
@@ -34,10 +34,10 @@ done
 
 ### main
 rnd/net/test
-echo $?
-exit
+if failed $? ; then
   msg "Network failure"
-  exit ${_false_}
+  exit 1
+fi
 
 if test ${_m} -eq 1 ; then
   rnd/net/int ${_l} 1 100
