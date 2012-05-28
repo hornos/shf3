@@ -81,12 +81,6 @@ function sys/pkg/osx/info() {
   ${sys_pkg_osx} info $*
 }
 
-# function sys/pkg/osx/search() {
-#   if empty "$*" ; then $failure; fi
-#
-#   ${sys_pkg_osx} search $*
-# }
-
 function sys/pkg/osx/search() {
   if empty "$*" ; then $failure; fi
 
@@ -103,4 +97,16 @@ function sys/pkg/osx/search() {
       ${sys_pkg_osx} search "${_m}"
     ;;
   esac
+}
+
+function sys/pkg/osx/clean() {
+  answer "Clean all installed packages?"
+  if succeed $? ; then
+    ${sys_pkg_osx} clean --all installed
+  fi
+
+  answer "Uninstalled inactive packages?"
+  if succeed $? ; then
+    ${sys_pkg_osx} -f uninstall inactive
+  fi
 }

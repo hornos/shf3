@@ -1,0 +1,13 @@
+function sys/pkg/rpm/query() {
+  ${sys_pkg_rpm} -qa | grep $*
+}
+
+function sys/pkg/rpm/require() {
+  ${sys_pkg_rpm} -qR $*
+}
+
+function sys/pkg/rpm/files() {
+  ${sys_pkg_rpm} -ql $*
+}
+
+

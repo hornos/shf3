@@ -1,0 +1,28 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+import sys/mgr
+
+function help/sysutil() {
+  cat << EOF
+Usage: sysutil commands
+               dus      - Sorted Disk Usage
+EOF
+  exit 1
+}
+
+if lessthan $# 1 ; then
+  help/sysutil
+fi
+
+cmd=$1
+shift
+case "${cmd}" in 
+  dus)
+    du -sm $* | \
+    sort -nk 1
+    ;;
+  help|*)
+    help/sysutil
+    ;;
+esac

@@ -37,5 +37,13 @@ function sys/pkg/suse/search() {
    if empty "$*" ; then $failure; fi
 }
 
-function sys/pkg/suse/info() {
+function sys/pkg/suse/require() {
+  import sys/pkg/rpm
+  sys/pkg/rpm/require $(sys/pkg/rpm/query $*)
 }
+
+function sys/pkg/suse/files() {
+  import sys/pkg/rpm
+  sys/pkg/rpm/files $(sys/pkg/rpm/query $*)
+}
+

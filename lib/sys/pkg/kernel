@@ -66,6 +66,10 @@ function sys/pkg() {
       sys/call sys/pkg info $*
     ;;
 
+    clean)
+      sys/call sys/pkg clean $*
+    ;;
+
     *|help)
       help/sys/pkg
     ;;
