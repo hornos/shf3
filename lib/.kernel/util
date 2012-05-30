@@ -162,3 +162,12 @@ function u/title() {
   echo -e "\n$*"
   gui/line
 }
+
+function u/sudo() {
+  local _u=$(whoami)
+  if test "${_u}" != "root" ; then
+    sudo $*
+  else
+    $*
+  fi
+}

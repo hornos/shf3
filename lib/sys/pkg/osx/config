@@ -1,2 +1,2 @@
-sys_pkg_osx="sudo port"
+sys_pkg_osx="u/sudo port"
 sys_pkg_osx_repos="/opt/local/etc/macports/sources.conf"

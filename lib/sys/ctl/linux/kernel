@@ -1,0 +1,24 @@
+
+function sys/ctl/linux/lsmod() {
+  ${sys_ctl_linux_lsmod} | \
+  awk 'BEGIN{i=1} {
+    print
+  }'
+}
+
+function sys/ctl/linux/modinfo() {
+  ${sys_ctl_linux_modinfo} $(${sys_ctl_linux_lsmod} | \
+  awk '{print $1}')
+}
+
+function sys/ctl/linux/modules() {
+  sys/ctl/linux/modinfo | \
+  grep filename | \
+  awk '{print $2}'
+}
+
+# in MB
+function sys/ctl/linux/meminfo() {
+  head -1 "${sys_ctl_linux_meminfo}"  | \
+  awk '{printf "%.0f\n", $2/1024;}'
+}

@@ -1,7 +1,0 @@
-
-function sys/ctl/ubuntu/lsmod() {
-  ${sys_ctl_ubuntu_lsmod} | \
-  awk 'BEGIN{i=1} {
-    print
-  }'
-}

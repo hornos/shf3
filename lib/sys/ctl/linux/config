@@ -1,0 +1,4 @@
+sys_ctl_linux_proc="/proc"
+sys_ctl_linux_lsmod="lsmod"
+sys_ctl_linux_modinfo="modinfo"
+sys_ctl_linux_meminfo="${sys_ctl_linux_proc}/meminfo"
