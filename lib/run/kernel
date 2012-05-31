@@ -273,7 +273,7 @@ function run/prg() {
     echo "### Job Setup"
     local _s
     for _s in ${SETUP} ; do
-      ${_s}
+      source ${_s}
       echo ${_s}
     done
   fi
