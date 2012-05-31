@@ -267,6 +267,14 @@ function run/prg() {
 
   ### program run
 
+  # environment modules
+  if ! empty "${MODULE}" ; then
+    local _m
+    for _m in ${MODULE} ; do
+      module load ${_m}
+    done
+  fi
+
   # enter work dir
   sys/dir/svwd "${_wdir}"
 
