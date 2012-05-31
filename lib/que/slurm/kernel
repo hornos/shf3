@@ -42,6 +42,11 @@ function que/slurm() {
       _qlogin="${_qlogin} --ntasks-per-node=${TASKS}"
     fi
 
+    # gpus
+    if ! test -z "${GPUS}" ; then
+      _qlogin="${_qlogin} --gres=gpu:${GPUS}"
+    fi
+
     # other constraints
     if ! test -z "${QCONST}" ; then
       local _const=""
@@ -103,6 +108,10 @@ function que/slurm() {
 
   if ! test -z "${TASKS}" ; then
       echo "#${que_slurm} --ntasks-per-node=${TASKS}" >> "${_bat}"
+  fi
+
+  if ! test -z "${GPUS}" ; then
+      echo "#${que_slurm} --gres=gpu:${GPUS}"         >> "${_bat}"
   fi
 
   # other constraints
