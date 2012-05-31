@@ -269,17 +269,23 @@ function run/prg() {
 
   # custom queue setup scripts
   if ! empty "${SETUP}" ; then
+    echo ""
+    echo "### job Setup"
     local _s
     for _s in ${SETUP} ; do
       source ${_s}
+      echo ${s}
     done
   fi
 
   # environment modules
   if ! empty "${MODULE}" ; then
+    echo ""
+    echo "### Job Modules"
     local _m
     for _m in ${MODULE} ; do
       module load ${_m}
+      echo ${_m}
     done
   fi
 
