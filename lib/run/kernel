@@ -270,11 +270,11 @@ function run/prg() {
   # custom queue setup scripts
   if ! empty "${SETUP}" ; then
     echo ""
-    echo "### job Setup"
+    echo "### Job Setup"
     local _s
     for _s in ${SETUP} ; do
-      source ${_s}
-      echo ${s}
+      ${_s}
+      echo ${_s}
     done
   fi
 
