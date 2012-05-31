@@ -267,6 +267,14 @@ function run/prg() {
 
   ### program run
 
+  # custom queue setup scripts
+  if ! empty "${SETUP}" ; then
+    local _s
+    for _s in ${SETUP} ; do
+      source ${_s}
+    done
+  fi
+
   # environment modules
   if ! empty "${MODULE}" ; then
     local _m
