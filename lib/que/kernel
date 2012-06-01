@@ -195,10 +195,15 @@ function que/sub() {
   local _slots=$((_nodes*_tasks))
   # forced slots
   local __slots=$((_nodes*_sltpn))
-  # threads
+
+  ### SMP resources
+  # OMP threads
   local _threads=${_tasks}
-  # images
+  # CAF images
   local _images=1
+
+  ### GPU resources
+  local _gpus=${GPUS:-0}
 
   ### global compound resources
   SLOTS=${_slots}
@@ -227,16 +232,17 @@ function que/sub() {
     _over="SLOTS TASKS"
   fi
   gui/line
-  printf "%12s %5s %5s %7s %s\n"   "QSCHED" "NODES"   "SCKTS"   "CORES"     "override"
-  printf "%12s %5d %5d %7d %s\n"   ${_sch}  ${_nodes} ${_sckts} ${_cores}   " "
-  printf "%12s %5s %5s %7s %s\n"   " "      "SLOTS"   "TASKS"   "sockets"   "${_over}"
-  printf "%12s %5d %5d %7d %s\n"   " "      ${SLOTS}  ${TASKS}  ${_sockets} " "
-  echo ""                                                                              >> "${_bat}"
-  echo   "### Resource Allocation"                                                     >> "${_bat}"
-  printf "# %12s %5s %5s %7s %s\n" "QSCHED" "NODES"   "SCKTS"   "CORES"     "override" >> "${_bat}"
-  printf "# %12s %5d %5d %7d %s\n" ${_sch}  ${_nodes} ${_sckts} ${_cores}   " "        >> "${_bat}"
-  printf "# %12s %5s %5s %7s %s\n" " "      "SLOTS"   "TASKS"   "sockets"   "${_over}" >> "${_bat}"
-  printf "# %12s %5d %5d %7d %s\n" " "      ${SLOTS}  ${TASKS}  ${_sockets} " "        >> "${_bat}"
+  printf "%12s %5s %5s %7s %4s %s\n"   "QSCHED" "NODES"   "SCKTS"   "CORES"     "GPUS"   "override"
+  printf "%12s %5d %5d %7d %4s %s\n"   ${_sch}  ${_nodes} ${_sckts} ${_cores}   ${_gpus} " "
+  printf "%12s %5s %5s %7s %4s %s\n"   " "      "SLOTS"   "TASKS"   "sockets"   " "      "${_over}"
+  printf "%12s %5d %5d %7d %4s %s\n"   " "      ${SLOTS}  ${TASKS}  ${_sockets} " "      " "
+
+  echo ""                                                                                           >> "${_bat}"
+  echo   "### Resource Allocation"                                                                  >> "${_bat}"
+  printf "# %12s %5s %5s %7s %4s %s\n" "QSCHED" "NODES"   "SCKTS"   "CORES"     "GPUS"   "override" >> "${_bat}"
+  printf "# %12s %5d %5d %7d %4s %s\n" ${_sch}  ${_nodes} ${_sckts} ${_cores}   ${_gpus} " "        >> "${_bat}"
+  printf "# %12s %5s %5s %7s %4s %s\n" " "      "SLOTS"   "TASKS"   "sockets"   " "      "${_over}" >> "${_bat}"
+  printf "# %12s %5d %5d %7d %4s %s\n" " "      ${SLOTS}  ${TASKS}  ${_sockets} " "      " "        >> "${_bat}"
 
   ### queue login
   if test "${_sub}" = "LOGIN" ; then
