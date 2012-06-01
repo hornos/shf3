@@ -1,3 +1,20 @@
+function cmp/ssh/ftp() {
+  local _cur
+  local _prev
+  local _opts
+  local _base
+  COMPREPLY=()
+  _cur="${COMP_WORDS[COMP_CWORD]}"
+  _prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+  # options
+  _opts="put get mode backup archive"
+
+  COMPREPLY=($(compgen -W "${_opts}" -- ${_cur}))
+  return 0
+}
+# TODO
+# complete -F cmp/${i} ${i}
 
 function put() {
   PUT $*
@@ -87,6 +104,9 @@ function RGET() {
   done
 }
 
+function mode() {
+  MODE $*
+}
 function MODE() {
   local _m="${1:-3}"
   _t=${_m}
@@ -98,6 +118,15 @@ function LS() {
   shift
   local _s="${*}"
   ssh/cmd "${_h}" "ls -l ${_s}"
+}
+
+# TODO USB sysarchive
+function archive() {
+  ARCHIVE $*
+}
+function ARCHIVE() {
+  MODE 4
+  BACKUP $*
 }
 
 function backup() {
