@@ -474,6 +474,10 @@ function que/sub() {
   # OMP threads
   import hpc/omp
   hpc/omp/binding ${_threads}                  "${_bat}"
+  # set affinity
+  if test "${_mode}" = "omp" ; then
+    hpc/omp/affinity ${_threads}               "${_bat}"
+  fi
 
   # MKL threads
   import hpc/mkl

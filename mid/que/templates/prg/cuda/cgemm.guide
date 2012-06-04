@@ -1,0 +1,15 @@
+INPUTDIR="${PWD}"
+WORKDIR="${SCRATCH}/hpl-${USER}-${HOSTNAME}-$$"
+RESULTDIR="${INPUTDIR}"
+
+PRGBIN="${PWD}/testing_cgemm"
+PRGOPT=""
+
+DATADIR=""
+DATA=""
+
+MAIN=""
+# OTHER=""
+
+ERROR="save"
+RESULT="*"

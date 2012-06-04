@@ -1,0 +1,9 @@
+NAME=GPU0
+TIME=48:00:00
+NODES=1
+SCKTS=1
+CORES=4
+GPUS=1
+QUEUE=devel
+MODE=omp
+RUN="runprg -p general -g cuda_memtest.guide"

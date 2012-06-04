@@ -1,0 +1,15 @@
+INPUTDIR="${PWD}"
+WORKDIR="${SCRATCH}/hpl-${USER}-${HOSTNAME}-$$"
+RESULTDIR="${INPUTDIR}"
+
+PRGBIN="${PWD}/testing_cgeqrf_mgpu"
+PRGOPT="-NGPU 2 -M 10000 -N 10000"
+
+DATADIR=""
+DATA=""
+
+MAIN=""
+# OTHER=""
+
+ERROR="save"
+RESULT="*"

@@ -1,0 +1,10 @@
+NAME=GPU0
+TIME=12:00:00
+NODES=1
+SCKTS=2
+CORES=4
+GPUS=2
+QUEUE=devel
+MODE=omp
+# BIND="dplace -s 1"
+RUN="runprg -p general -g cgemm.guide"

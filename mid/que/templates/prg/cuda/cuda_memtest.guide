@@ -1,0 +1,15 @@
+INPUTDIR="${PWD}"
+WORKDIR="${SCRATCH}/hpl-${USER}-${HOSTNAME}-$$"
+RESULTDIR="${INPUTDIR}"
+
+PRGBIN="${PWD}/cuda_memtest"
+PRGOPT="--stress"
+
+DATADIR=""
+DATA=""
+
+MAIN=""
+# OTHER=""
+
+ERROR="save"
+RESULT="*"

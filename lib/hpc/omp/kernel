@@ -11,6 +11,7 @@ function hpc/omp/binding() {
       export OMP_PROC_BIND=TRUE
       export OMP_NESTED=FALSE
       export OMP_STACKSIZE=16M
+      if ${_mode}
     fi
     echo "OMP binding: ${_thr} threads"
     $success
@@ -26,3 +27,26 @@ function hpc/omp/binding() {
     echo "export OMP_STACKSIZE=16M"     >> "${_bat}"
   fi
 }
+
+function help/hpc/omp/affinity() {
+  cat <<EOF
+Manual: http://software.intel.com/sites/products/documentation/studio/composer/en-us/2011/compiler_c/optaps/common/optaps_openmp_thread_affinity.htm"
+
+use compact or scatter for binding
+
+EOF
+}
+
+function hpc/omp/affinity() {
+  local _thr=${1:-1}
+  local _bat=${2}
+
+  if ! empty "${BIND}" ; then
+    if empty "${_bat}" ; then
+      export KMP_AFFINITY="${BIND}"
+    else
+      export KMP_AFFINITY="${BIND}"
+    fi
+  fi
+}
+
