@@ -422,6 +422,7 @@ EOF
 }
 
 function ssh/xfer() {
+  import gui
   import sys
   import ssh/key
   local _h="${1:-default}"
