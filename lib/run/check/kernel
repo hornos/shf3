@@ -33,7 +33,7 @@ function run/check() {
 
   # check program binary
   if ! test -x "${PRGBIN}" ; then
-    msg "Program binary not found: ${PRGBIN}"
+    msg "Program not found: ${PRGBIN}"
     return ${_false_}
   fi
 
