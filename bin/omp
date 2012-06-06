@@ -34,7 +34,7 @@ shift
 _b=$1
 
 export OMP_NUM_THREADS=${_t}
-export KMP_NUM_THREADS=${_t}
+export MKL_NUM_THREADS=${_t}
 
 if ! test -z "${_b}" ; then
   export OMP_PROC_BIND=true
