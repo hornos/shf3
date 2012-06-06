@@ -44,7 +44,7 @@ function hpc/omp/affinity() {
     if empty "${_bat}" ; then
       export KMP_AFFINITY="${BIND}"
     else
-      export KMP_AFFINITY="${BIND}"     >> "${_bat}"
+      echo "export KMP_AFFINITY=\"${BIND}\"" >> "${_bat}"
     fi
   fi
 }
