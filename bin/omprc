@@ -19,7 +19,7 @@ function omp() {
   if test $# -lt 1 ; then
     echo "Current OpenMP Environment Settings"
     omp/info
-    exit 1
+    return
   fi
 
   local _t=$1
@@ -37,4 +37,3 @@ function omp() {
   echo "New OpenMP Environment Settings"
   omp/info
 }
-
