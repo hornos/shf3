@@ -98,7 +98,7 @@ function que/run() {
   local _queue=$(field "${_r}" 1 :)
 
   local _nodes=1
-  local _gpus=1
+  local _gpus=0
  
   ### sockets per node
   SCKTS=$(que/autoenv SCKTS)
