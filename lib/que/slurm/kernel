@@ -152,6 +152,19 @@ function que/slurm() {
   fi
 }
 
+function que/slurm/run() {
+  local _q=$1
+  shift
+  local _s=$1
+  shift
+  local _c=$1
+  shift
+  local _x=$*
+
+  ${que_slurm_run} -p ${_q} -B ${_s}:${_c} ${_x}
+}
+
+
 function que/slurm/mail/sub() {
   echo "Job ${SLURM_JOB_ID} (${SLURM_JOB_NAME})"
 }

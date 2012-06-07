@@ -3,6 +3,10 @@ source $(dirname ${BASH_SOURCE})/../lib/header
 import que
 import gui
 
+# track database
+import que/track
+que_track_db="${grd}/sql/${que_track_db}"
+
 function help/jobmgr() {
   cat << EOF
 
@@ -12,7 +16,9 @@ Usage: ${gbn} options
               -b jobfile  - submitt
               -l jobfile  - login
               -d database - job track
-              -n - no check
+              -f force    - no check
+              -x command  - run omp command
+              -r resource - resource allocation
               -v - verbose
 EOF
   exit ${_false_}
@@ -23,16 +29,16 @@ _j="batch.job"
 _c="LIST"
 _d=""
 _x=""
-_q="batch:1:8"
+_r="batch:1:8"
 _f=true
 _v=false
-while getopts hvnb:l:d:q:x: o; do
+while getopts hvnb:l:d:r:x: o; do
   case "$o" in
     b) _c="BATCH"; _j=$OPTARG;;
     l) _c="LOGIN"; _j=$OPTARG;;
     d) _d=$OPTARG;;
-    q) _q=$OPTARG;;
-    x) _x=$OPTARG;;
+    r) _r=$OPTARG; _c="OMPRUN";;
+    x) _x=$OPTARG; _c="OMPRUN";;
     f) _f=false;;
     v) gdbg=true;;
     h|*) help/jobmgr;;
@@ -50,9 +56,11 @@ case "${_c}" in
   LIST)
     _msg="Job Track"
     ;;
-  EXEC)
-    _msg="Execute"
-    que/exec "${_q}" "${_x}"
+  OMPRUN)
+    _msg="OpenMP Run"
+    msg "${_msg}"
+    gui/line
+    que/run "${_r}" "${_x}"
     exit $?
     ;;
 esac
@@ -60,10 +68,6 @@ esac
 echo
 msg "${_msg}"
 gui/line
-
-# track database
-import que/track
-que_track_db="${grd}/sql/${que_track_db}"
 
 # override
 if ! test -z "${_d}" ; then

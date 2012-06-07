@@ -87,18 +87,31 @@ function que/check() {
   run/check 2 "${_prg}" "${_guide}"
 }
 
-function que/exec() {
+function que/run() {
   import gui
   import que
-  import que/track
-  local _q=${1}
+
+  local _r=${1}
   shift
   local _x=${*}
 
-  local _queue=$(field "${_q}" 1 :)
-  local _nodes=$(field "${_q}" 2 :)
-  local _tasks=$(field "${_q}" 3 :)
+  local _queue=$(field "${_r}" 1 :)
+
+  local _nodes=1
+  local _gpus=1
+ 
+  ### sockets per node
+  SCKTS=$(que/autoenv SCKTS)
+  local _sckts=${SCKTS:-1}
+  _sckts=$(field "${_r}" 2 :)
+
+  ### cores per socket
+  CORES=$(que/autoenv CORES)
+  local _cores=${CORES:-2}
+  _cores=$(field "${_r}" 3 :)
   
+  local _threads=$((_sckts*_cores))
+
   ### read queue file
   local _que="${que_dir}/${_q:-default}"
   if ! readable "${_que}" ; then
@@ -110,17 +123,38 @@ function que/exec() {
   if failed $? ; then $failure; fi
 
   msg "Queue file  : ${_que}"
-  # TODO
+
   ### scheduler
   QSCHED=$(que/autoenv QSCHED)
   local _sch=${QSCHED}
   import que/${_sch}
   if failed $?; then $failure ; fi
 
-  ### forced slots per node
-  SLTPN=$(que/autoenv SLTPN)
-  local _sltpn=${SLTPN:-0}
+  gui/line
+  printf "%12s %5s %5s %7s %4s\n"   "QSCHED" "NODES"   "SCKTS"   "CORES"     "GPUS"
+  printf "%12s %5d %5d %7d %4s\n"   ${_sch}  ${_nodes} ${_sckts} ${_cores}   ${_gpus}
+  printf "%12s %7s\n"      "MODE"  "threads"
+  printf "%12s %7d\n"      "omp" ${_threads}
 
+  # OMP threads
+  echo ""
+  import hpc/omp
+  hpc/omp/binding ${_threads}
+  # TODO set affinity
+  # if test "${_mode}" = "omp" ; then
+  #    hpc/omp/affinity ${_threads}
+  # fi
+
+  # MKL threads
+  import hpc/mkl
+  hpc/mkl/binding ${_threads}
+
+
+  # submit
+  answer "Run omp job?"
+  if failed $? ; then $failure; fi
+
+  que/${_sch}/run ${_queue} ${_sckts} ${_cores} ${_x}
 }
 
 function que/sub() {
