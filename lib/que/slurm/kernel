@@ -166,7 +166,14 @@ function que/slurm/run() {
   local _g=$1
   shift
   local _x=$*
-  ${que_slurm_run} -p ${_q} --gres=gpu:${_g} -B ${_s}:${_c} ${_x}
+  local _cmd="${que_slurm_run} -p ${_q} --gres=gpu:${_g} -B ${_s}:${_c} ${_x}"
+  answer "Show command?"
+  if success $? ; then
+    echo "${_cmd}"
+  fi
+  answer "Run omp job?"
+  if failed $? ; then $failure; fi
+  ${_cmd}
 }
 
 function que/slurm/mail/sub() {

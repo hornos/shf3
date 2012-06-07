@@ -153,11 +153,6 @@ function que/run() {
   import hpc/mkl
   hpc/mkl/binding ${_threads}
 
-
-  # submit
-  answer "Run omp job?"
-  if failed $? ; then $failure; fi
-
   que/${_sch}/run ${QPART} ${_sckts} ${_cores} ${_gpus} ${_x}
 }
 
