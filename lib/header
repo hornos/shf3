@@ -12,6 +12,9 @@
 gbn=$(basename "${0}")
 gdn=$(dirname "${0}")
 gkn="$(dirname ${BASH_SOURCE})/kernel"
+grc=".${gbn}.rc.$$"
+gsh="bash --noprofile --rcfile ${grc}"
+
 gdbg=false
 
 ### load kernel

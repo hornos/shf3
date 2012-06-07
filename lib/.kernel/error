@@ -87,3 +87,17 @@ function args() {
   fi
   return ${_true_}
 }
+
+function stop() {
+  if test -r "${grc}" ; then
+    rm -f "${grc}"
+  fi
+  exit 1
+}
+
+function error/stop() {
+  local _f="${1:-stop}"
+  shift
+  local _s="${*:-INT TERM EXIT}"
+  trap ${_f} ${_s}
+}

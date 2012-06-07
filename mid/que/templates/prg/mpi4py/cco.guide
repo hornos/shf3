@@ -1,0 +1,15 @@
+INPUTDIR="${PWD}"
+WORKDIR="${SCRATCH}/hpl-${USER}-${HOSTNAME}-$$"
+RESULTDIR="${INPUTDIR}"
+
+PRGBIN="${PWD}/cpi-cco.py"
+PRGOPT="10"
+
+DATADIR=""
+DATA=""
+
+MAIN=""
+# OTHER=""
+
+ERROR="save"
+RESULT="*"
