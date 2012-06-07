@@ -95,11 +95,10 @@ function que/run() {
   shift
   local _x=${*}
 
+  local _nodes=1
+
   local _queue=$(field "${_r}" 1 :)
 
-  local _nodes=1
-  local _gpus=0
- 
   ### sockets per node
   SCKTS=$(que/autoenv SCKTS)
   local _sckts=${SCKTS:-1}
@@ -109,8 +108,13 @@ function que/run() {
   CORES=$(que/autoenv CORES)
   local _cores=${CORES:-2}
   _cores=$(field "${_r}" 3 :)
-  
+
   local _threads=$((_sckts*_cores))
+
+  local _gpus=$(field "${_r}" 4 :)
+  if empty "${_gpus}" ; then
+    _gpus=0
+  fi
 
   ### read queue file
   local _que="${que_dir}/${_q:-default}"
@@ -154,7 +158,7 @@ function que/run() {
   answer "Run omp job?"
   if failed $? ; then $failure; fi
 
-  que/${_sch}/run ${_queue} ${_sckts} ${_cores} ${_x}
+  que/${_sch}/run ${_queue} ${_sckts} ${_cores} ${_gpus} ${_x}
 }
 
 function que/sub() {

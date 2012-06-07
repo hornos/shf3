@@ -153,17 +153,21 @@ function que/slurm() {
 }
 
 function que/slurm/run() {
+  # queue
   local _q=$1
   shift
+  # sockets
   local _s=$1
   shift
+  # cores
   local _c=$1
   shift
+  # gpus
+  local _g=$1
+  shift
   local _x=$*
-
-  ${que_slurm_run} -p ${_q} -B ${_s}:${_c} ${_x}
+  ${que_slurm_run} -p ${_q} --gres=gpu:${_g} -B ${_s}:${_c} ${_x}
 }
-
 
 function que/slurm/mail/sub() {
   echo "Job ${SLURM_JOB_ID} (${SLURM_JOB_NAME})"

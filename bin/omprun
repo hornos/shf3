@@ -1,0 +1,6 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+_r=$1
+shift
+_x=$*
+jobmgr -r ${_r} -x ${_x}
