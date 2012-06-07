@@ -87,6 +87,42 @@ function que/check() {
   run/check 2 "${_prg}" "${_guide}"
 }
 
+function que/exec() {
+  import gui
+  import que
+  import que/track
+  local _q=${1}
+  shift
+  local _x=${*}
+
+  local _queue=$(field "${_q}" 1 :)
+  local _nodes=$(field "${_q}" 2 :)
+  local _tasks=$(field "${_q}" 3 :)
+  
+  ### read queue file
+  local _que="${que_dir}/${_q:-default}"
+  if ! readable "${_que}" ; then
+    msg "${FUNCNAME}: queue file not found ${_que}"
+    $failure
+  fi
+  source "${_que}"
+  que/quechk
+  if failed $? ; then $failure; fi
+
+  msg "Queue file  : ${_que}"
+  # TODO
+  ### scheduler
+  QSCHED=$(que/autoenv QSCHED)
+  local _sch=${QSCHED}
+  import que/${_sch}
+  if failed $?; then $failure ; fi
+
+  ### forced slots per node
+  SLTPN=$(que/autoenv SLTPN)
+  local _sltpn=${SLTPN:-0}
+
+}
+
 function que/sub() {
   import gui
   import que

@@ -11,7 +11,7 @@ Job Submitter
 Usage: ${gbn} options
               -b jobfile  - submitt
               -l jobfile  - login
-              -f database - job track
+              -d database - job track
               -n - no check
               -v - verbose
 EOF
@@ -21,15 +21,19 @@ EOF
 ### args
 _j="batch.job"
 _c="LIST"
-_f=""
-_n=true
+_d=""
+_x=""
+_q="batch:1:8"
+_f=true
 _v=false
-while getopts hvnb:l:f: o; do
+while getopts hvnb:l:d:q:x: o; do
   case "$o" in
     b) _c="BATCH"; _j=$OPTARG;;
     l) _c="LOGIN"; _j=$OPTARG;;
-    f) _f=$OPTARG;;
-    n) _n=false;;
+    d) _d=$OPTARG;;
+    q) _q=$OPTARG;;
+    x) _x=$OPTARG;;
+    f) _f=false;;
     v) gdbg=true;;
     h|*) help/jobmgr;;
   esac
@@ -38,11 +42,19 @@ done
 ### main
 case "${_c}" in
   BATCH)
-    _msg="Batch";;
+    _msg="Batch"
+    ;;
   LOGIN)
-    _msg="Login";;
+    _msg="Login"
+    ;;
   LIST)
-    _msg="Job Track";;
+    _msg="Job Track"
+    ;;
+  EXEC)
+    _msg="Execute"
+    que/exec "${_q}" "${_x}"
+    exit $?
+    ;;
 esac
 
 echo
@@ -53,9 +65,9 @@ gui/line
 import que/track
 que_track_db="${grd}/sql/${que_track_db}"
 
-# overrides
-if ! test -z "${_f}" ; then
-  que_track_db="${_f}"
+# override
+if ! test -z "${_d}" ; then
+  que_track_db="${_d}"
 fi
 
-que/sub "${_c}" "${_j}" ${_n}
+que/sub "${_c}" "${_j}" ${_f}
