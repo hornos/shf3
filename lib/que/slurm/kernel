@@ -164,11 +164,16 @@ function que/slurm/run() {
   shift
   # gpus
   local _g=$1
+  if test ${_g} -lt 1 ; then
+    _g=""
+  else
+    _g="--gres=gpu:${_g}"
+  fi
   shift
   local _x=$*
-  local _cmd="${que_slurm_run} -p ${_q} --gres=gpu:${_g} -B ${_s}:${_c} ${_x}"
+  local _cmd="${que_slurm_run} -p ${_q} ${_g} -B ${_s}:${_c} ${_x}"
   answer "Show command?"
-  if success $? ; then
+  if succeed $? ; then
     echo "${_cmd}"
   fi
   answer "Run omp job?"
