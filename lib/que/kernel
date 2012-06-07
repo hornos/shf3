@@ -117,7 +117,7 @@ function que/run() {
   fi
 
   ### read queue file
-  local _que="${que_dir}/${_q:-default}"
+  local _que="${que_dir}/${_queue:-default}"
   if ! readable "${_que}" ; then
     msg "${FUNCNAME}: queue file not found ${_que}"
     $failure
