@@ -1,0 +1,23 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+
+function help/runomp() {
+  cat << EOF
+Usage: ${gbn} queue:sockets:cores command
+EOF
+  exit 1
+}
+
+if test $# -lt 2 ; then
+  help/runomp
+fi
+
+if test $1 = "-h" || \
+   test $1 = "help" ; then
+  help/runomp
+fi
+
+_r=$1
+shift
+_x=$*
+jobmgr -r ${_r} -o ${_x}
