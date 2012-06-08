@@ -32,13 +32,14 @@ _x=""
 _r="batch:1:8"
 _f=true
 _v=false
-while getopts hvnb:l:d:r:x: o; do
+while getopts hvnb:l:d:r:o:a: o; do
   case "$o" in
     b) _c="BATCH"; _j=$OPTARG;;
     l) _c="LOGIN"; _j=$OPTARG;;
     d) _d=$OPTARG;;
-    r) _r=$OPTARG; _c="OMPRUN";;
-    x) _x=$OPTARG; _c="OMPRUN";;
+    r) _r=$OPTARG;;
+    o) _x=$OPTARG; _c="RUNOMP";;
+    a) _x=$OPTARG; _c="RUNARR";;
     f) _f=false;;
     v) gdbg=true;;
     h|*) help/jobmgr;;
@@ -56,11 +57,18 @@ case "${_c}" in
   LIST)
     _msg="Job Track"
     ;;
-  OMPRUN)
+  RUNOMP)
     _msg="OpenMP Run"
     msg "${_msg}"
     gui/line
-    que/run "${_r}" "${_x}"
+    que/run omp "${_r}" "${_x}"
+    exit $?
+    ;;
+  RUNARR)
+    _msg="Array Run"
+    msg "${_msg}"
+    gui/line
+    que/run arr "${_r}" "${_x}"
     exit $?
     ;;
 esac

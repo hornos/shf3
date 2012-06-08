@@ -91,6 +91,8 @@ function que/run() {
   import gui
   import que
 
+  local _mode=${1}
+  shift
   local _r=${1}
   shift
   local _x=${*}
@@ -137,23 +139,31 @@ function que/run() {
   gui/line
   printf "%12s %5s %5s %7s %4s\n"   "QSCHED" "NODES"   "SCKTS"   "CORES"     "GPUS"
   printf "%12s %5d %5d %7d %4s\n"   ${_sch}  ${_nodes} ${_sckts} ${_cores}   ${_gpus}
-  printf "%12s %7s\n"      "MODE"  "threads"
-  printf "%12s %7d\n"      "omp" ${_threads}
 
-  # OMP threads
+  if test "${_mode}" = "arr" ; then
+    printf "%12s %7s\n"      "MODE"  "arrays"
+    printf "%12s %7d\n"      "${_mode}" ${_threads}
+    _threads=1
+  else
+    printf "%12s %7s\n"      "MODE"  "threads"
+    printf "%12s %7d\n"      "${_mode}" ${_threads}
+  fi
+
   echo ""
   import hpc/omp
+  import hpc/mkl
+
+  # OMP threads
   hpc/omp/binding ${_threads}
-  # TODO set affinity
-  # if test "${_mode}" = "omp" ; then
-  #    hpc/omp/affinity ${_threads}
-  # fi
+  if test "${_mode}" = "omp" ; then
+    hpc/omp/affinity ${_threads}
+  fi
 
   # MKL threads
-  import hpc/mkl
   hpc/mkl/binding ${_threads}
 
-  que/${_sch}/run ${QPART} ${_sckts} ${_cores} ${_gpus} ${_x}
+  echo ""
+  que/${_sch}/run ${_mode} ${QPART} ${_sckts} ${_cores} ${_gpus} ${_x}
 }
 
 function que/sub() {

@@ -153,28 +153,48 @@ function que/slurm() {
 }
 
 function que/slurm/run() {
+  # mode
+  local _mode=$1
+  shift
+
   # queue
-  local _q=$1
+  local _queue=$1
   shift
+
   # sockets
-  local _s=$1
+  local _sckts=$1
   shift
+
   # cores
-  local _c=$1
+  local _cores=$1
   shift
+
+  # tasks
+  local _tasks=$((_cores*_sckts))
+
   # gpus
-  local _g=$1
-  if test ${_g} -lt 1 ; then
-    _g=""
+  local _gpus=$1
+  if test ${_gpus} -lt 1 ; then
+    _gpus=""
   else
-    _g="--gres=gpu:${_g}"
+    _gpus="--gres=gpu:${_gpus}"
   fi
   shift
   local _x=$*
-  local _cmd="${que_slurm_run} -p ${_q} ${_g} -B ${_s}:${_c} ${_x}"
+
+  # cpus
+  local _cpus=""
+  if test "${_mode}" = "arr" ; then
+    _cpus="-n ${_tasks}"
+  else
+    _cpus="-B ${_sckts}:${_cores}"
+  fi
+
+  local _cmd="${que_slurm_run} -p ${_queue} ${_cpus} ${_gpus} ${_x}"
   answer "Show command?"
   if succeed $? ; then
     echo "${_cmd}"
+    echo ""
   fi
   answer "Run omp job?"
   if failed $? ; then $failure; fi
