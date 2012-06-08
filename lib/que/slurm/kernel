@@ -196,7 +196,7 @@ function que/slurm/run() {
     echo "${_cmd}"
     echo ""
   fi
-  answer "Run omp job?"
+  answer "Run interactive job?"
   if failed $? ; then $failure; fi
   ${_cmd}
 }
