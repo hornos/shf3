@@ -1,0 +1,41 @@
+
+function srv/sig() {
+  local _pid="${1}"
+  local _sig="${2}"
+  if ! readable "${_pid}" || \
+    empty "${_sig}" ; then
+    $failure
+  fi
+
+  _pid=$(cat "${_pid}")
+  if empty "${_pid}" ; then
+    $failure
+  fi
+
+  ps -p ${_pid} &> /dev/null
+  if ! test $? -gt 0 ; then
+    echo "Signal (${_pid}): ${_sig}"
+    kill ${_pid} -${_sig}
+  fi
+  return $?
+}
+
+function srv/kill() {
+  local _pid="${1}"
+  local _msg="${2}"
+  if ! readable "${_pid}" ; then
+    $failure
+  fi
+
+  _pid=$(cat "${_pid}")
+  if empty "${_pid}" ; then
+    $failure
+  fi
+
+  ps -p ${_pid} &> /dev/null
+  if ! test $? -gt 0 ; then
+    echo "Stopping (${_pid}): ${_msg}"
+    kill ${_pid}
+  fi
+  return $?
+}

@@ -10,6 +10,5 @@ ssh_ServerAliveInterval=30
 ssh_ping="ping -c 3 -t 10"
 ssh_nmap="nmap -sT -P0 --max-retries 3 --host-timeout 10"
 # hoping
-ssh_netcat="netcat"
-
+ssh_netcat="nc"
 
