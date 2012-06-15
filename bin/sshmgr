@@ -43,10 +43,6 @@ while getopts hvki:n:d:e:p:u:s:c: o; do
 done
 
 ### main
-echo
-msg
-gui/line
-
 case "${_c}" in
   KILL)
     _apid=$(ps ax | grep ssh-agent | awk '/\?\?/{print $1}')

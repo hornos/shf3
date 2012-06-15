@@ -16,12 +16,11 @@ function ssh/mgr() {
   case "${_m}" in
     LIST)
       import ssh/key
-      # format
-      local _frm1="%-21s%-6s%-12s%-42s\n"
-
+      # list format
+      local _frm1="%-21s%-6s%-14s%-42s\n"
+      echo ""
       # header
-      echo
-      printf "${_frm1}" "mid" "type" "cluster" "url"
+      printf "${_frm1}" "MID" "Type" "Cluster" "URL"
       gui/line
       local i
       for i in ${sys_mid_dir}/ssh/* ; do
@@ -35,6 +34,7 @@ function ssh/mgr() {
           fi
         fi
       done
+      echo ""
       ;;
     EDIT)
       local _mid="${sys_mid_dir}/ssh/${_h}"
@@ -403,7 +403,7 @@ function ssh/login() {
 
   # login
   local _url="${mid_ssh_user}@${mid_ssh_fqdn}"
-  msg "Login to ${_url}"
+  msg "URL  : ${_url}"
   gui/line
   local _cmd="${ssh_ssh} ${_opt} ${_url}"
   msg/debug "${_cmd}"
@@ -655,6 +655,7 @@ function ssh/cmd() {
   local _x="${2:-ls -lA ${mid_ssh_scp_dst}}"
   local _t=${3:-false}
 
+  echo ""
   # hoping
   local _hoping=$(ssh/ishop "${_mid}")
   if ${_hoping} ; then
@@ -717,8 +718,8 @@ function ssh/cmd() {
   fi
 
   local _url="${mid_ssh_user}@${mid_ssh_fqdn}"
-  msg "URL     : ${_url}"
-  msg "Command : ${_x}"
+  msg "URL  : ${_url}"
+  msg "cmd  : ${_x}"
   gui/line
   answer "Run command?"
   if test $? -gt 0 ; then 
@@ -727,7 +728,7 @@ function ssh/cmd() {
 
   # ssh
   if ! test -z "${mid_ssh_env}"; then
-    _x="source \${HOME}/${mid_ssh_env};echo;${_x}"
+    _x="source \\\${HOME}/${mid_ssh_env};echo;${_x}"
   fi
   local _cmd="${ssh_ssh} ${_opt} ${_url} ${_x}"
   eval ${_cmd}

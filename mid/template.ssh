@@ -10,8 +10,7 @@ mid_ssh_fqdn="default"
 # username
 mid_ssh_user="${USER}"
 
-# hoping gateway
-# mid_ssh_hop=""
+# hoping gateway, use hop/mid notation
 
 # SSH port
 # gsi: 2222
@@ -34,13 +33,15 @@ mid_ssh_ssh_opt="-XC -p ${mid_ssh_port} ${mid_ssh_opt}"
 mid_ssh_scp_opt="-C -P ${mid_ssh_port} ${mid_ssh_opt}"
 
 # environment to load for sshcmd
-mid_ssh_env=".bashrc"
+# relative to $HOME
+# mid_ssh_env=".bashrc"
+mid_ssh_env=".profile"
 
 # SCP remote destination
 mid_ssh_scp_dst="/home/${mid_ssh_user}"
 
 # SSH tunnels
-mid_ssh_tunnel="-L63128:localhost:3128"
+# mid_ssh_tunnel="-L63128:localhost:3128"
 
 # SSHFS remote destination
 mid_ssh_sshfs_dst="/home/${mid_ssh_user}"
