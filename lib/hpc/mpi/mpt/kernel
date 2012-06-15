@@ -56,6 +56,9 @@ function hpc/mpi/mpt/binding() {
     socket)
       _b="${_b} -s 1 -c BS"
     ;;
+    general)
+      _b="${_b} -s 1"
+    ;;
   esac
   echo "${_b}"
 }
