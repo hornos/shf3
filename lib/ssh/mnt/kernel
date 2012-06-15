@@ -79,24 +79,30 @@ function ssh/mnt() {
   import ssh
   import ssh/key
 
-  local _h="${1:-default}"
+  local _mid="${1:-default}"
+  local _hop=""
   local _f="${2:-false}"
   local _u="${3:-false}"
   local _ret
 
-  sys/mid "ssh/${_h}"
+  # hoping
+  local _hoping=$(ssh/ishop "${_mid}")
+  if ${_hoping} ; then
+    _hop=$(field "${_mid}" 1 "/")
+    _mid=$(field "${_mid}" 2 "/")
+  fi
+
+  sys/mid "ssh/${_mid}"
   if failed $? ; then $failure ; fi
 
-  local _hoping=false
   # hoping
   if ! ${_u} ; then
-    if ! empty "${mid_ssh_hop}" ; then
+    if ${_hoping} ; then
       import ssh/hop
       local _hop_cmd=""
-      ssh/hop "${mid_ssh_hop}"
-      _hoping=true
+      ssh/hop "${_hop}"
       # reinit hoping endpoint
-      sys/mid "ssh/${_h}"
+      sys/mid "ssh/${_mid}"
     else
       # connection check
       ssh/conchk
@@ -106,12 +112,12 @@ function ssh/mnt() {
 
   # lock
   # clear lock
-  local _lck="${_h}.${gbn}"
+  local _lck="${_mid}.${gbn}"
   if ${_f} ; then
     sys/lck/rm "${_lck}"
   fi
 
-  local _src="${ssh_mnt_dir}/${_h}"
+  local _src="${ssh_mnt_dir}/${_mid}"
 
   # unmount
   if ${_u} ; then
@@ -121,12 +127,12 @@ function ssh/mnt() {
       fi
     fi
     if ! $(sys/lck "${_lck}") && ! ${_f}; then
-      msg "Not mounted: ${_h}"
+      msg "Not mounted: ${_mid}"
       return ${_false_}
     fi
 
     msg "Mount directory : ${_src}"
-    answer "Unmount ${_h}?"
+    answer "Unmount ${_mid}?"
     if test $? -gt 0 ; then
       return ${_false_}
     fi
@@ -145,7 +151,7 @@ function ssh/mnt() {
 
   # mount
   if $(sys/lck "${_lck}") && ! ${_f} ; then
-    msg "Mounted: ${_h}"
+    msg "Mounted: ${_mid}"
     return ${_false_}
   fi
 
@@ -154,7 +160,7 @@ function ssh/mnt() {
   msg "Source : ${_url}"
   msg "Target : ${_src}"
 
-  answer "Mount ${_h}?"
+  answer "Mount ${_mid}?"
   if test $? -gt 0 ; then
     return ${_false_}
   fi
@@ -163,7 +169,7 @@ function ssh/mnt() {
   local _opt="${mid_ssh_sshfs_opt}"
 
   # key
-  local _sec="$(ssh/key/sec ${_h})"
+  local _sec="$(ssh/key/sec ${_mid})"
   if test -r "${_sec}" ; then
     _opt="${_opt} -o IdentityFile=${_sec}"
   else
@@ -173,7 +179,7 @@ function ssh/mnt() {
   sys/dir/mk "${_src}"
 
   if test "$(sys/os)" = "osx" ; then
-    local _vol="sshfs/${_h}:${mid_ssh_user}@${mid_ssh_fqdn}"
+    local _vol="sshfs/${_mid}:${mid_ssh_user}@${mid_ssh_fqdn}"
     _opt="${_opt} -o volname=${_vol}"
     local _ico="${sys_img_dir}/sshfs.icns"
     if test -r "${_ico}" ; then
@@ -205,7 +211,7 @@ function ssh/mnt() {
 }
 
 function ssh/umnt() {
-  local _h="${1:-default}"
+  local _mid="${1:-default}"
   local _f="${2:-false}"
-  ssh/mnt "${_h}" ${_f} true
+  ssh/mnt "${_mid}" ${_f} true
 }
