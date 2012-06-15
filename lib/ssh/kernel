@@ -323,7 +323,10 @@ function ssh/login() {
   local _f="${2:-false}"
 
   # hoping
-  local _hoping=$(ssh/ishop "${_mid}")
+  local _hoping=false
+  if ssh/ishop "${_mid}" ; then
+    _hoping=true
+  fi
   if ${_hoping} ; then
     _hop=$(field "${_mid}" 1 "/")
     _mid=$(field "${_mid}" 2 "/")
@@ -460,7 +463,10 @@ function ssh/xfer() {
   fi
 
   # hoping
-  local _hoping=$(ssh/ishop "${_mid}")
+  local _hoping=false
+  if ssh/ishop "${_mid}" ; then
+    _hoping=true
+  fi
   if ${_hoping} ; then
     _hop=$(field "${_mid}" 1 "/")
     _mid=$(field "${_mid}" 2 "/")
@@ -657,7 +663,10 @@ function ssh/cmd() {
 
   echo ""
   # hoping
-  local _hoping=$(ssh/ishop "${_mid}")
+  local _hoping=false
+  if ssh/ishop "${_mid}" ; then
+    _hoping=true
+  fi
   if ${_hoping} ; then
     _hop=$(field "${_mid}" 1 "/")
     _mid=$(field "${_mid}" 2 "/")
