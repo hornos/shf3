@@ -584,7 +584,7 @@ function que/sub() {
       printf "%12s %7d %s\n"   ${MODE} ${_threads} "${_over}"
       printf "# %12s %7d %s\n" ${MODE} ${_threads} "${_over}"                        >> "${_bat}"
     ;;
-    fco)
+    caf)
       printf "%12s %6s %7s\n"      "MODE"  "images" "threads"
       printf "# %12s %6s %7s\n"    "MODE"  "images" "threads"                        >> "${_bat}"
       printf "%12s %6s %7d %s\n"   ${MODE} ${_images} ${_threads} "${_over}"
