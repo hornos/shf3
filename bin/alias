@@ -9,7 +9,7 @@ alias mdp="module display"
 alias shfupd="shfmgr -u"
 
 alias sshpub="sshmgr -s"
-alias sshin="sshto -m"
+# alias sshin="sshto -m"
 alias sshmount="sshmnt -m"
 alias sshumount="sshmnt -u"
 

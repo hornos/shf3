@@ -45,7 +45,8 @@ function ssh/hop() {
 
   # hoping command
   local _hop_url="${mid_ssh_user}@${mid_ssh_fqdn}"
-  msg "Hoping to ${_hop_url}"
+  echo ""
+  msg "Via  : ${_hop_url}"
   gui/line
   _hop_cmd="${ssh_ssh} ${_hop_opt} ${_hop_url} \"${ssh_netcat} %h %p\""
   msg/debug "${_hop_cmd}"

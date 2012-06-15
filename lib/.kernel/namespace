@@ -90,7 +90,10 @@ function ns/func/dir() {
   IFS="${_IFS}"
 }
 
-# operators
+# check for operators
+# if ns/op "string" "ops" ; then
+#   with operator
+
 function ns/op() {
   local _s="${1}"
   local _m="${2}"

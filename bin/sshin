@@ -1,0 +1,33 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import ssh
+
+function help/sshin() {
+  cat << EOF
+
+Usage: ${gbn} [+][hop MID/]MID
+               + force
+                  hoping via
+                           ssh to MID
+EOF
+  exit ${_false_}
+}
+
+
+### args
+_m=$*
+_f=false
+_h=false
+
+if empty "${_m}" ; then
+  help/sshin
+fi
+
+### main
+if ns/op "${_m}" "+" ; then
+  # force
+  _f=true
+  _m=$(ns/op/value "${_m}" "+")
+fi
+
+ssh/login "${_m}" ${_f}

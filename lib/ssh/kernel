@@ -217,9 +217,9 @@ function ssh/info() {
   echo
   echo "Type        : ${mid_ssh_type}"
   echo "URL         : ${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_port}"
-  if ! empty "${mid_ssh_hop}" ; then
-    echo "Hoping GW   : ${mid_ssh_hop}"
-  fi
+#  if ! empty "${mid_ssh_hop}" ; then
+#    echo "Hoping GW   : ${mid_ssh_hop}"
+#  fi
   echo "SSH Opts    : ${mid_ssh_ssh_opt}"
   echo "SCP Opts    : ${mid_ssh_scp_opt}"
   echo "SSH Env     : ${mid_ssh_env}"
@@ -299,39 +299,58 @@ Logins to host
 EOF
 }
 
+function ssh/ishop() {
+  local _h=$*
+  if empty "${_h}" ; then
+    $failure
+  fi
+  local _h1=$(field "${_h}" 1 "/")
+  local _h2=$(field "${_h}" 2 "/")
+  if test "${_h1}" != "${_h2}" ; then
+    $success
+  fi
+  $failure
+}
+
+# TODO: better names
 function ssh/login() {
   import gui
   import sys
   import sys/lck
   import ssh/key
-  local _h="${1:-default}"
+  local _mid="${1:-default}"
+  local _hop=""
   local _f="${2:-false}"
 
+  # hoping
+  local _hoping=$(ssh/ishop "${_mid}")
+  if ${_hoping} ; then
+    _hop=$(field "${_mid}" 1 "/")
+    _mid=$(field "${_mid}" 2 "/")
+  fi
+
   # init
-  sys/mid "ssh/${_h}"
+  sys/mid "ssh/${_mid}"
   if test $? -gt 0 ; then
     return ${_false_}
   fi
 
-  local _hoping=false
-  if ! empty "${mid_ssh_hop}" ; then
+  # TODO: hoping connection check
+  if ${_hoping} ; then
     import ssh/hop
     local _hop_cmd=""
-    ssh/hop "${mid_ssh_hop}"
-    _hoping=true
-    # reinit hoping endpoint
-    sys/mid "ssh/${_h}"
+    ssh/hop "${_hop}"
+    # reinit endpoint
+    sys/mid "ssh/${_mid}"
   else
     # connection check
     ssh/conchk
     if failed $? ; then $failure; fi
   fi
 
-  local _lck="${_h}.${gbn}"
+  local _lck="${_mid}.${gbn}"
   # force
-  if ${_f} ; then
-    sys/lck/rm "${_lck}"
-  fi
+  if ${_f} ; then sys/lck/rm "${_lck}" ; fi
 
   # opts
   local _opt="${mid_ssh_ssh_opt}"
@@ -339,7 +358,7 @@ function ssh/login() {
   # tunnel
   local _tunnel=false
 
-  # TODO: hoping
+  # TODO: hoping tunnels
   if ! ${_hoping} ; then
     if ! test -z "${mid_ssh_tunnel}" ; then
       if sys/lck/mk "${_lck}" ; then
@@ -356,14 +375,14 @@ function ssh/login() {
   if test "${mid_ssh_type}" = "gsi" ; then
     # gsi
     import ssh/gsi
-    ssh/gsi/init "${_h}"
+    ssh/gsi/init "${_mid}"
     if test $? -gt 0 ; then
       return ${_false_}
     fi
     gui/line
   else
     # ssh
-    local _sec="$(ssh/key/sec ${_h})"
+    local _sec="$(ssh/key/sec ${_mid})"
     # check
     if test -r "${_sec}" ; then
       _opt="${_opt} -i ${_sec}"
@@ -425,7 +444,8 @@ function ssh/xfer() {
   import gui
   import sys
   import ssh/key
-  local _h="${1:-default}"
+  local _mid="${1:-default}"
+  local _hop=""
   # mode
   local _m="${2:-1}"
   # recursive
@@ -439,18 +459,23 @@ function ssh/xfer() {
     _put=false
   fi
 
+  # hoping
+  local _hoping=$(ssh/ishop "${_mid}")
+  if ${_hoping} ; then
+    _hop=$(field "${_mid}" 1 "/")
+    _mid=$(field "${_mid}" 2 "/")
+  fi
+
   # init
-  sys/mid "ssh/${_h}"
+  sys/mid "ssh/${_mid}"
   if failed $? ; then $failure ; fi
 
-  local _hoping=false
-  if ! empty "${mid_ssh_hop}" ; then
+  if ${_hoping} ; then
     import ssh/hop
     local _hop_cmd=""
-    ssh/hop "${mid_ssh_hop}"
-    _hoping=true
+    ssh/hop "${_hop}"
     # reinit hoping endpoint
-    sys/mid "ssh/${_h}"
+    sys/mid "ssh/${_mid}"
   else
     # connection check
     ssh/conchk
@@ -518,14 +543,14 @@ function ssh/xfer() {
   if test "${mid_ssh_type}" = "gsi" ; then
     # gsi
     import ssh/gsi
-    ssh/gsi/init "${_h}"
+    ssh/gsi/init "${_mid}"
     if test $? -gt 0 ; then
       return ${_false_}
     fi
     gui/line
   else
     # private key
-    local _sec="$(ssh/key/sec ${_h})"
+    local _sec="$(ssh/key/sec ${_mid})"
     if test -r "${_sec}" ; then
       _opt="${_opt} -i ${_sec}"
     else
@@ -590,27 +615,27 @@ function ssh/xfer() {
 }
 
 function ssh/put() {
-  local _h="${1:-default}"
+  local _mid="${1:-default}"
   local _s="${2}"
   local _m="${3:-1}"
   local _r=${4:-false}
-  if test -z "${_h}" || test -z "${_s}" ; then
-    return ${_false_}
+  if test -z "${_mid}" || test -z "${_s}" ; then
+    $failure
   fi
   _m=$((_m%10))
-  ssh/xfer "${_h}" ${_m} ${_r} "${_s}"
+  ssh/xfer "${_mid}" ${_m} ${_r} "${_s}"
 }
 
 function ssh/get() {
-  local _h="${1:-default}"
+  local _mid="${1:-default}"
   local _s="${2}"
   local _m="${3:-11}"
   local _r=${4:-false}
-  if test -z "${_h}" || test -z "${_s}" ; then
-    return ${_false_}
+  if test -z "${_mid}" || test -z "${_s}" ; then
+    $failure
   fi
   _m=$((_m%10+10))
-  ssh/xfer "${_h}" ${_m} ${_r} "${_s}"
+  ssh/xfer "${_mid}" ${_m} ${_r} "${_s}"
 }
 
 
@@ -625,18 +650,34 @@ EOF
 function ssh/cmd() {
   import sys
   import ssh/key
-  local _h="${1:-default}"
+  local _mid="${1:-default}"
+  local _hop=""
   local _x="${2:-ls -lA ${mid_ssh_scp_dst}}"
   local _t=${3:-false}
 
-  sys/mid "ssh/${_h}"
-  if test $? -gt 0 ; then
-    return ${_false_}
+  # hoping
+  local _hoping=$(ssh/ishop "${_mid}")
+  if ${_hoping} ; then
+    _hop=$(field "${_mid}" 1 "/")
+    _mid=$(field "${_mid}" 2 "/")
   fi
 
-  # connection check
-  ssh/conchk
-  if failed $? ; then $failure; fi
+  sys/mid "ssh/${_mid}"
+  if test $? -gt 0 ; then
+    $failure
+  fi
+
+  if ${_hoping} ; then
+    import ssh/hop
+    local _hop_cmd=""
+    ssh/hop "${_hop}"
+    # reinit hoping endpoint
+    sys/mid "ssh/${_mid}"
+  else
+    # connection check
+    ssh/conchk
+    if failed $? ; then $failure; fi
+  fi
 
   # opts
   local _opt="${mid_ssh_ssh_opt}"
@@ -650,14 +691,14 @@ function ssh/cmd() {
   if test "${mid_ssh_type}" = "gsi" ; then
     # gsi
     import ssh/gsi
-    ssh/gsi/init "${_h}"
+    ssh/gsi/init "${_mid}"
     if test $? -gt 0 ; then
       return ${_false_}
     fi
     gui/line
   else
     # private key
-    local _sec="$(ssh/key/sec ${_h})"
+    local _sec="$(ssh/key/sec ${_mid})"
     if test -r "${_sec}" ; then
       _opt="${_opt} -i ${_sec}"
     else
@@ -670,17 +711,26 @@ function ssh/cmd() {
     _opt="-v ${_opt}"
   fi
 
+  if ${_hoping} ; then
+    _opt="${_opt} -o CheckHostIP=no"
+    _opt="${_opt} -o ProxyCommand='${_hop_cmd}'"
+  fi
+
   local _url="${mid_ssh_user}@${mid_ssh_fqdn}"
   msg "URL     : ${_url}"
   msg "Command : ${_x}"
   gui/line
+  answer "Run command?"
+  if test $? -gt 0 ; then 
+    return ${_false_};
+  fi
 
   # ssh
-  if ! test -z "${mid_ssh_env}" ; then
+  if ! test -z "${mid_ssh_env}"; then
     _x="source \${HOME}/${mid_ssh_env};echo;${_x}"
   fi
   local _cmd="${ssh_ssh} ${_opt} ${_url} ${_x}"
-  ${_cmd}
+  eval ${_cmd}
   local _ret=$?
 
   gui/line

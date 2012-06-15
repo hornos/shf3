@@ -90,11 +90,17 @@ function choose() {
   done
 }
 
-function field() {
+
+function u/split() {
   local _s="${1}"
   local _f=${2:-1}
   local _x="${3:-|}"
   echo "${_s}" | cut  -d "${_x}" -f ${_f}
+}
+
+# TODO: to be removed
+function field() {
+  u/split $*
 }
 
 function epoch() {
