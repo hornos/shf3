@@ -28,6 +28,11 @@ function que/sge() {
       _qlogin="${_qlogin} -l h_vmem=${MEMORY}${que_slurm_unit}"
     fi
 
+    # gpus
+    if ! test -z "${GPUS}" ; then
+      _qlogin="${_qlogin} -l gpu=${GPUS}"
+    fi
+
     # pe
     if ! test -z "${QPE}" ; then
       _qlogin="${_qlogin} -pe ${QPE} ${SLOTS}"
@@ -79,8 +84,8 @@ function que/sge() {
   if ! test -z "${MEMORY}" ; then
     local _mem=${MEMORY}
     # _mem=$((SLOTS*_mem))
-    _mem=$((TASKS*_mem))
-    echo "#${que_sge} -l h_vmem=${_mem}${que_sge_unit}" >> "${_bat}"
+    # _mem=$((TASKS*_mem))
+    echo "#${que_sge} -l mem=${_mem}${que_sge_unit}"    >> "${_bat}"
   fi
 
   # binding
@@ -116,6 +121,11 @@ function que/sge() {
 
   if test "${QEXCL}" = "yes" ; then
     echo "#${que_sge} -l exclusive=true"                >> "${_bat}"
+  fi
+
+  # gpus
+  if ! test -z "${GPUS}" ; then
+    echo "#${que_sge} -l gpu=${GPUS}"                   >> "${_bat}"
   fi
 
   if ! test -z "${QJSV}" ; then
