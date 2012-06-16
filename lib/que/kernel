@@ -232,6 +232,13 @@ function que/sub() {
   if failed $?; then $failure ; fi
 
   ### nodes
+  # parser for NODES=NODES:SCKTS:CORES/SLTPN notation
+  local __nodes=$(field "${NODES}" 1 "/")
+  local __sltpn=$(field "${NODES}" 2 "/")
+  local __sckts=$(field "${__nodes}" 2 ":")
+  local __cores=$(field "${__nodes}" 3 ":")
+  local __nodes=$(field "${__nodes}" 1 ":")
+
   local _nodes=${NODES:-1}
   if test "${_mode}" = "omp" ; then
     if test ${_nodes} -gt 1 ; then
