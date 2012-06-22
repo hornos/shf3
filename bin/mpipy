@@ -1,0 +1,8 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+
+_np=$1
+shift
+_x=$*
+
+mpirun -np ${_np} python ${_x}
