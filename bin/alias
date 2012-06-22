@@ -33,3 +33,4 @@ alias rapidify="torto -x"
 alias suspend="procmgr -s"
 alias resume="procmgr -r"
 
+alias ltr="ls -tr"
