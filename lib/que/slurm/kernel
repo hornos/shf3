@@ -161,6 +161,10 @@ function que/slurm/run() {
   local _queue=$1
   shift
 
+  # nodes
+  local _nodes=$1
+  shift
+
   # sockets
   local _sckts=$1
   shift
@@ -187,7 +191,7 @@ function que/slurm/run() {
   if test "${_mode}" = "arr" ; then
     _cpus="-n ${_tasks}"
   else
-    _cpus="-B ${_sckts}:${_cores}"
+    _cpus="-B ${_nodes}:${_sckts}:${_cores}"
   fi
 
   local _cmd="${que_slurm_run} -p ${_queue} ${_cpus} ${_gpus} ${_x}"

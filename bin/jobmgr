@@ -17,7 +17,9 @@ Usage: ${gbn} options
               -l jobfile  - login
               -d database - job track
               -f force    - no check
-              -x command  - run omp command
+              -o command  - omp run (obsolete)
+              -a command  - array run
+              -p command  - parallel run
               -r resource - resource allocation
               -v - verbose
 EOF
@@ -32,7 +34,7 @@ _x=""
 _r="batch:1:8"
 _f=true
 _v=false
-while getopts hvnb:l:d:r:o:a: o; do
+while getopts hvnb:l:d:r:o:a:p: o; do
   case "$o" in
     b) _c="BATCH"; _j=$OPTARG;;
     l) _c="LOGIN"; _j=$OPTARG;;
@@ -40,6 +42,7 @@ while getopts hvnb:l:d:r:o:a: o; do
     r) _r=$OPTARG;;
     o) _x=$OPTARG; _c="RUNOMP";;
     a) _x=$OPTARG; _c="RUNARR";;
+    p) _x=$OPTARG; _c="RUNPAR";;
     f) _f=false;;
     v) gdbg=true;;
     h|*) help/jobmgr;;
@@ -61,14 +64,22 @@ case "${_c}" in
     _msg="OpenMP Run"
     msg "${_msg}"
     gui/line
-    que/run omp "${_r}" "${_x}"
+    que/omp/run omp "${_r}" "${_x}"
     exit $?
     ;;
   RUNARR)
     _msg="Array Run"
     msg "${_msg}"
     gui/line
-    que/run arr "${_r}" "${_x}"
+    que/omp/run arr "${_r}" "${_x}"
+    exit $?
+    ;;
+  # general parallel runner
+  RUNPAR)
+    _msg="Parallel Run"
+    msg "${_msg}"
+    gui/line
+    que/run "${_r}" "${_x}"
     exit $?
     ;;
 esac
