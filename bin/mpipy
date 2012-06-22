@@ -1,6 +1,22 @@
 #!/bin/bash
 source $(dirname ${BASH_SOURCE})/../lib/header
 
+function help/mpipy() {
+  cat << EOF
+Usage: ${gbn} np command
+EOF
+  exit 1
+}
+
+if test $# -lt 2 ; then
+  help/mpipy
+fi
+
+if test $1 = "-h"  || \
+   test $1 = "--help" ; then
+  help/mpipy
+fi
+
 _np=$1
 shift
 _x=$*
