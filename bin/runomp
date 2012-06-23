@@ -24,4 +24,4 @@ fi
 _r=$1
 shift
 _x=$*
-jobmgr -r ${_r} -o ${_x}
+jobmgr -r "${_r}" -o "${_x}"
