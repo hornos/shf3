@@ -3,7 +3,11 @@ source $(dirname ${BASH_SOURCE})/../lib/header
 
 function help/runomp() {
   cat << EOF
-Usage: ${gbn} queue:sockets:cores command
+
+Run interactive OpenMP/GPU program in a queue.
+
+Usage: ${gbn} queue:sockets:cores[:gpus] command
+
 EOF
   exit 1
 }
