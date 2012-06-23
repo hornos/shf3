@@ -1,0 +1,24 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+
+function help/omppy() {
+  cat << EOF
+Usage: ${gbn} np command
+EOF
+  exit 1
+}
+
+if test $# -lt 2 ; then
+  help/omppy
+fi
+
+if test $1 = "-h"  || \
+   test $1 = "--help" ; then
+  helpomppy
+fi
+
+_np=$1
+shift
+_x=$*
+
+OMP_NUM_THREADS=${_np} python ${_x}
