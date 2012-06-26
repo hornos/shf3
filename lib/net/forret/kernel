@@ -1,0 +1,19 @@
+
+function net/forret/bandwidth() {
+  import net
+
+  if test $# -lt 2 ; then
+    $failure
+  fi
+
+  local _s=$1
+  shift
+  local _u=$2
+
+  local _url="${net_forret_url}?speed=${_s}&unit=${_u}"
+  net/get "${_url}" | \
+  grep "href='?speed=" | \
+  sed s/.*\'\>// | \
+  sed s/\<.*//
+}
+
