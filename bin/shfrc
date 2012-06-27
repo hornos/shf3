@@ -21,6 +21,14 @@ function shf3/mc/color() {
   fi
 }
 
+function shf3/ls/color() {
+  if test "${_f}" = "yes" ; then
+    export CLICOLOR=true
+  else
+    unset CLICOLOR
+  fi
+}
+
 ### PS1
 function shf3/ps1() {
   local _h=${1:-${HOSTNAME}}
