@@ -22,6 +22,7 @@ function shf3/mc/color() {
 }
 
 function shf3/ls/color() {
+  local _f="${1:-yes}"
   if test "${_f}" = "yes" ; then
     export CLICOLOR=true
   else
