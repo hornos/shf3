@@ -16,6 +16,7 @@ Usage: ${gbn} options
               -c uid - change
               -n uid - new
               -d uid - delete
+              -s uid - search
 EOF
   exit ${_false_}
 }
@@ -27,7 +28,7 @@ _m="LIST"
 _f=""
 _t=""
 _a=""
-while getopts hf:t:a:l:p:n:d:u:v o; do
+while getopts hf:t:a:l:p:n:d:u:s:v o; do
   case "$o" in
     f) _f=$OPTARG;;
     t) _t=$OPTARG;;
@@ -37,6 +38,7 @@ while getopts hf:t:a:l:p:n:d:u:v o; do
     p) _m="CHANGE"; _u=$OPTARG;;
     n) _m="CREATE"; _u=$OPTARG;;
     d) _m="DELETE"; _u=$OPTARG;;
+    s) _m="SEARCH"; _u=$OPTARG;;
     v) gdbg=true;;
     h|*) help/passmgr;;
   esac
@@ -60,4 +62,9 @@ if ! test -z "${_a}" ; then
   enc_pass_acc="${_a}"
 fi
 
-enc/pass/mgr "${_m}" ${_l} "${_u}"
+if test "${_m}" = "SEARCH" ; then
+  _m="LIST"
+  enc/pass/mgr "${_m}" ${_l} | grep "${_u}"
+else
+  enc/pass/mgr "${_m}" ${_l} "${_u}"
+fi
