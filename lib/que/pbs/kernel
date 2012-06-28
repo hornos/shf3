@@ -43,6 +43,11 @@ function que/pbs() {
       _tasks=":ppn=${TASKS}"
     fi
 
+    # gpus
+    if ! test -z "${GPUS}" ; then
+      _tasks="${_tasks}:gpus=${GPUS}"
+    fi
+
     # nodes
     if ! test -z "${NODES}" ; then
       _qlogin="${_qlogin} -lnodes=${NODES}${_tasks}${_const}"
@@ -97,6 +102,11 @@ function que/pbs() {
   local _tasks=""
   if ! test -z "${TASKS}" ; then
     _tasks=":ppn=${TASKS}"
+  fi
+
+  # gpus
+  if ! test -z "${GPUS}" ; then
+    _tasks="${_tasks}:gpus=${GPUS}"
   fi
 
   if ! test -z "${NODES}" ; then
