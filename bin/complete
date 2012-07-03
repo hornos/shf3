@@ -1,7 +1,9 @@
 # Tab complete
-for i in sshin sshtx ; do
-  if test -r "${shf3_root}/bin/${i}.cmp" ; then
-    source "${shf3_root}/bin/${i}.cmp"
+for __cmp in ${shf3_root}/bin/*.cmp ; do
+  if test -r "${__cmp}" ; then
+    source "${__cmp}"
+    __cmp=$(basename "${_cmp}")
+    __cmp=${__cmp%%.cmp}
     complete -F cmp/${i} ${i}
   fi
 done
