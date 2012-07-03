@@ -45,6 +45,11 @@ function sys/mgr() {
       sys/net $*
     ;;
 
+    vm|vbox)
+      import sys/vm/vbox
+      sys/vm/vbox $*
+    ;;
+
     *|help)
       help/sys/mgr
     ;;

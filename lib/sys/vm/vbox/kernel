@@ -1,0 +1,83 @@
+function sys/vm/vbox() {
+  import sys
+  local _cmd=${1:-help}
+  shift
+  sys/vm/vbox/${_cmd} $*
+}
+
+function sys/vm/vbox/list() {
+  import gui
+  local i
+  local _fmt="%7s %-8s %s\n"
+  local _s=false
+  local _vm
+  local _id
+  printf "${_fmt}" "State" "VM" "ID"
+  gui/line
+
+  local j=1
+  for i in $(${sys_vm_vbox_mgr} list vms) ; do
+    j=$((++j%2))
+    k=$((j+1))
+    if test "$k" == "1" ; then
+      _vm=$(echo "${i}" | sed s/\"//g)
+      continue
+    fi
+    _id="${i}"
+
+    sys/vm/vbox/running "${_vm}"
+    if succeed $? ; then
+      _s="Running"
+    else
+      _s="Down"
+    fi
+    printf "${_fmt}" "${_s}" "${_vm}" "${_id}"
+  done
+}
+
+function sys/vm/vbox/host() {
+  ${sys_vm_vbox_mgr} list hostinfo
+}
+
+function sys/vm/vbox/state() {
+  local _vm="${1}"
+  if empty "${_vm}" ; then echo ""; $failure ; fi
+
+  ${sys_vm_vbox_mgr} showvminfo "${_vm}" 2>/dev/null | grep State
+}
+
+function sys/vm/vbox/running() {
+  local _vm="${1}"
+  if empty "${_vm}" ; then $failure ; fi
+
+  local _s=$(sys/vm/vbox/state "${_vm}" | grep running)
+  if empty "${_s}" ; then $failure ; fi
+
+  $success
+}
+
+function sys/vm/vbox/start() {
+  local _vm="${1}"
+  if empty "${_vm}" ; then $failure ; fi
+
+  local _s=$(sys/vm/vbox/state "${_vm}" | grep running)
+  if ! empty "${_s}" ; then $failure ; fi
+
+  answer "Start VM ${_vm}?"
+  if failed $? ; then $failure ; fi
+
+  ${sys_vm_vbox_mgr} startvm "${_vm}" --type headless
+}
+
+function sys/vm/vbox/pause() {
+  local _vm="${1}"
+  if empty "${_vm}" ; then $failure ; fi
+
+  local _s=$(sys/vm/vbox/state "${_vm}" | grep running)
+  if empty "${_s}" ; then $failure ; fi
+
+  answer "Pause VM ${_vm}?"
+  if failed $? ; then $failure ; fi
+
+  ${sys_vm_vbox_mgr} controlvm "${_vm}" savestate
+}
