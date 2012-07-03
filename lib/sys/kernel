@@ -102,8 +102,6 @@ function sys/call() {
     osx)
       import ${_mod}
       if failed $? ; then $failure; fi
-
-      ${_mod}${_func} $*
     ;;
 
     linux)
@@ -111,10 +109,15 @@ function sys/call() {
       _mod="${_mod}/${_lnx}"
       import ${_mod}
       if failed $? ; then $failure; fi
-
-      ${_mod}${_func} $*
     ;;
   esac
+
+  _func="${_mod}${_func}"
+  if ! ns/isfunc "${_func}" ; then
+    echo "Function not found: ${_func}"
+    $failure
+  fi
+  ${_func} $*
 }
 
 function sys/help() {
