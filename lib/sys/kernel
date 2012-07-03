@@ -101,16 +101,18 @@ function sys/call() {
   case "${_os}" in
     osx)
       import ${_mod}
-      if failed $? ; then $failure; fi
     ;;
 
     linux)
       local _lnx=$(sys/linux)
       _mod="${_mod}/${_lnx}"
       import ${_mod}
-      if failed $? ; then $failure; fi
     ;;
   esac
+  if failed $? ; then 
+    echo "Module not found: ${_mod}"
+    $failure
+  fi
 
   _func="${_mod}${_func}"
   if ! ns/isfunc "${_func}" ; then
