@@ -1,0 +1,45 @@
+
+function sys/net/linux/ubuntu() {
+  local _opt="${1:-info}"
+  shift
+  local _arg="${1:-down}"
+
+  if ! readable "${sys_net_linux_ubuntu_if}" ; then
+    msg "Interfaces not found: ${sys_net_linux_ubuntu_if}"
+    $failure
+  fi
+
+  local _def=$(cat "${sys_net_linux_ubuntu_if}" | grep "${_opt}")
+  case "${_opt}" in
+    info)
+      echo "info"
+    ;;
+    host|elan|wlan)
+      if empty "${_def}" ; then
+        msg "Alias not found: ${_opt}"
+        $failure
+      fi
+      local _dev=$(field "${_def}" 3 " ")
+      if empty "${_dev}" ; then
+        msg "Device not found: ${_dev}"
+        $failure
+      fi
+
+      answer "Bring device "${_dev} ${_arg}?"
+      if failed $? ; then $failure; fi
+
+      ### down
+      if test "${_arg}" = "down" ; then
+        # ${sys_net_linux_ubuntu_ifcfg} "${_dev}" ${_arg}
+        sudo if${_arg} "${_dev}"
+        return $?
+      fi
+
+      ### up
+      # reset mac
+      ${sys_net_linux_ubuntu_mccfg} -r "${_dev}"
+      sleep 1
+      sudo if${_arg} "${_dev}"
+    ;;
+  esac
+}
