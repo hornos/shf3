@@ -4,6 +4,6 @@ for __cmp in ${shf3_root}/bin/*.cmp ; do
     source "${__cmp}"
     __cmp=$(basename "${_cmp}")
     __cmp=${__cmp%%.cmp}
-    complete -F cmp/${i} ${i}
+    complete -F cmp/${__cmp} ${__cmp}
   fi
 done
