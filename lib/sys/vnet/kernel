@@ -1,0 +1,13 @@
+
+function sys/vnet() {
+  import sys
+  local _cmd=${1:-help}
+  shift
+
+  case "${_cmd}" in
+    # virtualbox guest
+    elan|wlan|send|recv)
+      sys/call sys/vnet "${_cmd}" $*
+    ;;
+  esac
+}
