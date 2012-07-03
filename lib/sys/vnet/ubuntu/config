@@ -1,0 +1,4 @@
+sys_vnet_linux_ubuntu_if="/etc/network/interfaces"
+sys_vnet_linux_ubuntu_mccfg="sudo macchanger"
+sys_vnet_linux_ubuntu_ifcfg="sudo ifconfig"
+
