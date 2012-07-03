@@ -1,4 +1,4 @@
-function cmp/tcmount() {
+function cmp/vmdmgr() {
   local _cur
   local _prev
   local _opts

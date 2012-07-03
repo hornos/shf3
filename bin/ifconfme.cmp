@@ -1,4 +1,4 @@
-function cmp/encfsmount() {
+function cmp/ifconfme() {
   local _cur
   local _prev
   local _opts
