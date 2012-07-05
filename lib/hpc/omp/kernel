@@ -48,4 +48,3 @@ function hpc/omp/affinity() {
     fi
   fi
 }
-

@@ -1,0 +1,34 @@
+# PhiGemm - http://qe-forge.org/projects/phigemm/
+# There are 4 recognized variables, one for each *GEMM routine implemented. This.
+# factor, a value strictly between 0 and 1, tells to the library how much of the.
+# calculation has to be performed on the CPU and how much on the GPU. In detail,.
+# if PHI_DGEMM_SPLIT is 0.9 it means that the 95% of the computation will be.
+# performed by the GPU, the 5% by the CPU.
+
+function hpc/phigemm/binding() {
+  local _scdz=${1:-0.95:0.875:0.9:0.925}
+  local _bat=${2}
+
+  local _s=$(u/split "${_scdz}" 1 ":")
+  local _c=$(u/split "${_scdz}" 2 ":")
+  local _d=$(u/split "${_scdz}" 3 ":")
+  local _z=$(u/split "${_scdz}" 4 ":")
+
+  # redistribution for multi-step
+  if empty "${_bat}" ; then
+    export PHI_SGEMM_SPLIT=${_s}
+    export PHI_CGEMM_SPLIT=${_c}
+    export PHI_DGEMM_SPLIT=${_d}
+    export PHI_ZGEMM_SPLIT=${_z}
+    echo "PhiGEMM SCDZ binding: ${_scdz}"
+    $success
+  fi
+
+  # static
+  if ! readable "${_bat}" ; then $failure ; fi
+
+  echo "export PHI_SGEMM_SPLIT=${_s}" >> "${_bat}"
+  echo "export PHI_CGEMM_SPLIT=${_c}" >> "${_bat}"
+  echo "export PHI_DGEMM_SPLIT=${_d}" >> "${_bat}"
+  echo "export PHI_ZGEMM_SPLIT=${_z}" >> "${_bat}"
+}

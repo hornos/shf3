@@ -412,6 +412,12 @@ function que/sub() {
     # msg "CPU Binding : ${_bind}"
   fi
 
+  # phigemm
+  local _phigemm=""
+  if ! empty "${PHIGEMM}" ; then
+    _phigemm="${PHIGEMM}"
+  fi
+
   # profiler
   local _prof=""
   if ! empty "${PROF}" ; then
@@ -572,6 +578,12 @@ function que/sub() {
   # MKL threads
   import hpc/mkl
   hpc/mkl/binding ${_threads}                  "${_bat}"
+
+  # PhiGEMM
+  if ! empty "${_phigemm}" ; then
+    import hpc/phigemm
+    hpc/phigemm/binding "${_phigemm}"          "${_bat}"
+  fi
 
   ### requested MPI OMP resources
   _over=""
