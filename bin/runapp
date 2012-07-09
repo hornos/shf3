@@ -12,26 +12,23 @@ EOF
   exit 1
 }
 
+
 if test $# -lt 1 ; then
   help/runapp
 fi
 
-if test $1 = "-h" || \
-   test $1 = "help" ; then
+if test "${1}" = "-h" || \
+   test "${1}" = "help" ; then
   help/runapp
 fi
 
-_app=$1
+_app="${1}"
+
 shift
 
 import sys
 
 _os=$(sys/os)
-
-if ! test -x "${_app}" ; then
-  msg "Application not found: ${_app}"
-  exit 1
-fi
 
 if test "${_os}" = "linux" ; then
   _exe="${_app}"
@@ -45,4 +42,4 @@ if ! test -x "${_exe}" ; then
   exit 1
 fi
 
-exec ${_exe} $*
+exec "${_exe}" $*
