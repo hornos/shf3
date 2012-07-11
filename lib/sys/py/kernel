@@ -111,3 +111,14 @@ function sys/py/run() {
   fi
   ${_py} $*
 }
+
+function sys/py/mpirun() {
+  local _np=$1
+  shift
+  local _py="${gdn}/${gbn}.py"
+  if ! test -x ${_py} ; then
+    msg "Executable not found: ${_py}"
+    return ${_false_}
+  fi
+  mpirun -np ${_np} ${_py} $*
+}
