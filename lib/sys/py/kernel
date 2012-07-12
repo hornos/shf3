@@ -120,6 +120,13 @@ function sys/py/mpirun() {
     msg "Executable not found: ${_py}"
     return ${_false_}
   fi
-  echo "mpirun -np ${_np} ${BIND} ${_py} $*"
-  mpirun -np ${_np} ${BIND} ${_py} $*
+  import sys
+  local _os=$(sys/os)
+  local _bind="${BIND}"
+  # http://www.open-mpi.org/community/lists/users/2011/07/16950.php
+  if test "${_os}" = "osx" ; then
+    _bind=""
+  fi
+  echo "mpirun -np ${_np} ${_bind} ${_py} $*"
+  mpirun -np ${_np} ${_bind} ${_py} $*
 }
