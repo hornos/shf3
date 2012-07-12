@@ -120,5 +120,6 @@ function sys/py/mpirun() {
     msg "Executable not found: ${_py}"
     return ${_false_}
   fi
+  echo "mpirun -np ${_np} ${BIND} ${_py} $*"
   mpirun -np ${_np} ${BIND} ${_py} $*
 }
