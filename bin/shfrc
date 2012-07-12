@@ -80,3 +80,9 @@ function shf3/is/screen() {
   # false
   return 1
 }
+
+# OS X
+__os=${OSTYPE##darwin}
+if ! test -z "${__os}" ; then
+  alias ldd="otool -L"
+fi
