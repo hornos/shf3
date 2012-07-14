@@ -1,0 +1,18 @@
+# basic parallel functions
+# mpirun -np N script.sh
+
+function mpi/rank() {
+  echo ${PMI_RANK}
+}
+
+function mpi/size() {
+  echo ${PMI_SIZE}
+}
+
+function mpi/master() {
+  local _r=$(mpi/rank)
+  if test "${_r}" = "0" ; then
+    return ${_true_}
+  fi
+  return ${_false_}
+}

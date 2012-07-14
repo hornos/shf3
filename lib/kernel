@@ -20,7 +20,7 @@ success="return ${_true_}"
 abort="return ${_abort_}"
 
 # bootstrap
-for i in util help error namespace import; do
+for i in util help error namespace import parallel; do
   __k="${grd}/lib/.kernel/${i}"
   if ! test -r "${__k}" ; then
     "SHF3: Not found ${__k}"
