@@ -319,7 +319,7 @@ function ssh/login() {
   import sys/lck
   import ssh/key
   local _mid="${1:-default}"
-  local _hop=""
+  local _hop=false
   local _f="${2:-false}"
 
   # hoping
@@ -334,19 +334,19 @@ function ssh/login() {
 
   # init
   sys/mid "ssh/${_mid}"
-  if test $? -gt 0 ; then
-    return ${_false_}
-  fi
+  if failed $? ; then $failure; fi
 
-  # TODO: hoping connection check
+  # hoping
   if ${_hoping} ; then
     import ssh/hop
     local _hop_cmd=""
     ssh/hop "${_hop}"
   fi
 
-  ssh/conchk
+  # check connection
+  ssh/conchk "${_hop}"
   if failed $? ; then $failure; fi
+
   # reinit endpoint
   sys/mid "ssh/${_mid}"
 
@@ -451,7 +451,7 @@ function ssh/xfer() {
   import sys
   import ssh/key
   local _mid="${1:-default}"
-  local _hop=""
+  local _hop=false
   # mode
   local _m="${2:-1}"
   # recursive
@@ -479,20 +479,29 @@ function ssh/xfer() {
   sys/mid "ssh/${_mid}"
   if failed $? ; then $failure ; fi
 
+  # hoping
   if ${_hoping} ; then
     import ssh/hop
     local _hop_cmd=""
     ssh/hop "${_hop}"
-    # reinit hoping endpoint
-    sys/mid "ssh/${_mid}"
-  else
-    # connection check
-    ssh/conchk
-    if failed $? ; then $failure; fi
+  fi
+
+  # connection check
+  ssh/conchk "${_hop}"
+  if failed $? ; then $failure; fi
+
+  # reinit hoping endpoint
+  sys/mid "ssh/${_mid}"
+
+  local _fqdn="${mid_ssh_fqdn}"
+  if ${_hoping} ; then
+    if test "${_hop}" = "tor" ; then
+      _fqdn="${mid_tor_fqdn}"
+    fi
   fi
 
   # source
-  local _src_url="${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_scp_dst}"
+  local _src_url="${mid_ssh_user}@${_fqdn}:${mid_ssh_scp_dst}"
 
   if ${_put} ; then
     if ! test -r "${_src}" ; then
@@ -515,7 +524,7 @@ function ssh/xfer() {
     ;;
     2)
       local _opt="-p ${mid_ssh_port}"
-      local _url="${mid_ssh_user}@${mid_ssh_fqdn}"
+      local _url="${mid_ssh_user}@${_fqdn}"
       local _mtxt="tar/ssh"
     ;;
     3)
@@ -539,7 +548,7 @@ function ssh/xfer() {
   esac
 
   if ${_hoping} ; then
-    _opt="${_opt} -o CheckHostIP=no"
+    # _opt="${_opt} -o CheckHostIP=no"
     case "${_mode}" in
       3)
         _hop_cmd=$(echo "${_hop_cmd}" | sed s/\"/\\\\\"/g)
@@ -660,7 +669,7 @@ function ssh/cmd() {
   import sys
   import ssh/key
   local _mid="${1:-default}"
-  local _hop=""
+  local _hop=false
   local _x="${2:-ls -lA ${mid_ssh_scp_dst}}"
   local _t=${3:-false}
 
@@ -680,17 +689,19 @@ function ssh/cmd() {
     $failure
   fi
 
+  # hoping
   if ${_hoping} ; then
     import ssh/hop
     local _hop_cmd=""
     ssh/hop "${_hop}"
-    # reinit hoping endpoint
-    sys/mid "ssh/${_mid}"
-  else
-    # connection check
-    ssh/conchk
-    if failed $? ; then $failure; fi
   fi
+
+  # connection check
+  ssh/conchk "${_hop}"
+  if failed $? ; then $failure; fi
+
+  # reinit hoping endpoint
+  sys/mid "ssh/${_mid}"
 
   # opts
   local _opt="${mid_ssh_ssh_opt}"
@@ -724,12 +735,16 @@ function ssh/cmd() {
     _opt="-v ${_opt}"
   fi
 
+  local _fqdn="${mid_ssh_fqdn}"
   if ${_hoping} ; then
-    _opt="${_opt} -o CheckHostIP=no"
+    # _opt="${_opt} -o CheckHostIP=no"
     _opt="${_opt} -o ProxyCommand='${_hop_cmd}'"
+    if test "${_hop}" = "tor" ; then
+      _fqdn="${mid_tor_fqdn}"
+    fi
   fi
 
-  local _url="${mid_ssh_user}@${mid_ssh_fqdn}"
+  local _url="${mid_ssh_user}@${_fqdn}"
   msg "URL  : ${_url}"
   msg "cmd  : ${_x}"
   gui/line
@@ -757,6 +772,20 @@ function ssh/cmd() {
 function ssh/conchk() {
   # verbose
   local _v=${1:-false}
+
+  if test "${_v}" = "tor" ; then
+    if empty "${mid_tor_proxy}" ; then
+      $success
+    fi
+    local _ph=$(field "${mid_tor_proxy}" 1 ":")
+    local _pp=$(field "${mid_tor_proxy}" 2 ":")
+    ${ssh_nmap} -P0 -p ${_pp} ${_ph} 2>/dev/null | grep open &>/dev/null
+    if failed $? ; then
+      msg "nmap: Connection FAILED"
+      $failure
+    fi
+    $success
+  fi
 
   if empty "${mid_ssh_port_check}" ; then
     if ${_v} ; then

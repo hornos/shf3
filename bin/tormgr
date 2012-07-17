@@ -31,7 +31,7 @@ _m=""
 while getopts hv:cni o; do
   case "$o" in
     v) gdbg=true;;
-    c) _c="CONNECT";;
+    c) _c="CONNECT"; _m="${OPTARG}";;
     n) _c="NEW"; _m="${OPTARG}";;
     i) _c="IDENTITY";;
     h|*) help/tormgr;;

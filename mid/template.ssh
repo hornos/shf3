@@ -7,13 +7,15 @@ mid_ssh_cluster="default"
 # FQDN
 mid_ssh_fqdn="default"
 
-
 # username
 mid_ssh_user="${USER}"
 
 # Regular hoping: use MID1/MID2 to login to MID2 via MID1
 # Tor hoping: use tor/MID to login via tor
 # mid_tor_fqdn=".onion"
+# for rapid
+# mid_tor_proxy="localhost:8051"
+# tor default
 mid_tor_proxy="localhost:9050"
 
 # SSH port

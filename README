@@ -1,3 +1,20 @@
-Modular Bash framework for Linux and OS X.
+# SHF3 #
+Modular Bash framework for Unix
+
+## SSH-related stuff ##
+### Login ###
+#### Hoping with a host ####
+    sshin HOP/MID
+#### Hoping with Tor ####
+    sshin tor/MID
+
+On the ssh host set in /etc/tor/torrc:
+    HiddenServiceDir /var/lib/tor/ssh/
+    HiddenServicePort port 127.0.0.1:port
+
+Tor fqdn is in /var/lib/tor/ssh/hostname
+* https://www.torproject.org/docs/tor-hidden-service.html.en
+* http://mancoosi.org/~abate/hidden-ssh-service-tor
+
 
 
