@@ -1,0 +1,2 @@
+ssh_hop_connect="connect"
+ssh_hop_connect_opt="-w 15 -R remote -5"

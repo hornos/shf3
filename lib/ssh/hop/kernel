@@ -16,7 +16,7 @@ function ssh/hop() {
     fi
     local _proxy="${mid_tor_proxy:-localhost:9050}"
     msg "Tor  : ${_proxy}"
-    _hop_cmd="connect -R remote -5 -S ${_proxy} %h %p"
+    _hop_cmd="${ssh_hop_connect} ${ssh_hop_connect_opt} -S ${_proxy} %h %p"
     msg/debug "${_hop_cmd}"
     $success
   fi
