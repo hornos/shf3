@@ -7,10 +7,14 @@ mid_ssh_cluster="default"
 # FQDN
 mid_ssh_fqdn="default"
 
+
 # username
 mid_ssh_user="${USER}"
 
-# hoping gateway, use hop/mid notation
+# Regular hoping: use MID1/MID2 to login to MID2 via MID1
+# Tor hoping: use tor/MID to login via tor
+# mid_tor_fqdn=".onion"
+mid_tor_proxy="localhost:9050"
 
 # SSH port
 # gsi: 2222

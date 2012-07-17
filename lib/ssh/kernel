@@ -217,9 +217,9 @@ function ssh/info() {
   echo
   echo "Type        : ${mid_ssh_type}"
   echo "URL         : ${mid_ssh_user}@${mid_ssh_fqdn}:${mid_ssh_port}"
-#  if ! empty "${mid_ssh_hop}" ; then
-#    echo "Hoping GW   : ${mid_ssh_hop}"
-#  fi
+  if ! empty "${mid_tor_fqdn}" ; then
+    echo "Tor URL     : ${mid_ssh_user}@${mid_tor_fqdn}"
+  fi
   echo "SSH Opts    : ${mid_ssh_ssh_opt}"
   echo "SCP Opts    : ${mid_ssh_scp_opt}"
   echo "SSH Env     : ${mid_ssh_env}"
@@ -343,13 +343,12 @@ function ssh/login() {
     import ssh/hop
     local _hop_cmd=""
     ssh/hop "${_hop}"
-    # reinit endpoint
-    sys/mid "ssh/${_mid}"
-  else
-    # connection check
-    ssh/conchk
-    if failed $? ; then $failure; fi
   fi
+
+  ssh/conchk
+  if failed $? ; then $failure; fi
+  # reinit endpoint
+  sys/mid "ssh/${_mid}"
 
   local _lck="${_mid}.${gbn}"
   # force
@@ -399,13 +398,17 @@ function ssh/login() {
     _opt="-v ${_opt}"
   fi
 
+  local _fqdn="${mid_ssh_fqdn}"
   if ${_hoping} ; then
-    _opt="${_opt} -o CheckHostIP=no"
+    # _opt="${_opt} -o CheckHostIP=no"
     _opt="${_opt} -o ProxyCommand='${_hop_cmd}'"
+    if test "${_hop}" = "tor" ; then
+      _fqdn="${mid_tor_fqdn}"
+    fi
   fi
 
   # login
-  local _url="${mid_ssh_user}@${mid_ssh_fqdn}"
+  local _url="${mid_ssh_user}@${_fqdn}"
   msg "URL  : ${_url}"
   gui/line
   local _cmd="${ssh_ssh} ${_opt} ${_url}"

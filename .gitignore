@@ -8,3 +8,7 @@
 scr/*
 _*
 ca/mighty
+bin/connect/connect
+*.o
+*.so
+*.a

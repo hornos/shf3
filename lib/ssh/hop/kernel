@@ -5,16 +5,24 @@ function ssh/hop() {
   local _hop="${1}"
 
   if empty "${_hop}" ; then
-    echo ""
     $failure
+  fi
+
+  # Tor hoping
+  if test "${_hop}" = "tor" ; then
+    if empty "${mid_tor_fqdn}" ; then
+      msg "TOR host not found"
+      $failure
+    fi
+    local _proxy="${mid_tor_proxy:-localhost:9050}"
+    msg "Tor  : ${_proxy}"
+    _hop_cmd="connect -R remote -5 -S ${_proxy} %h %p"
+    msg/debug "${_hop_cmd}"
+    $success
   fi
 
   sys/mid "ssh/${_hop}"
   if failed $? ; then $failure ; fi
-
-  # connection check
-  ssh/conchk
-  if failed $? ; then $failure; fi
 
   local _hop_opt="${mid_ssh_ssh_opt}"
 
@@ -22,7 +30,6 @@ function ssh/hop() {
 
   if test "${mid_ssh_type}" = "gsi" ; then
     msg "GSI SSH hoping is not implemented"
-    echo ""
     $failure
   else
     # ssh bug: no different keys in the hoping chain
