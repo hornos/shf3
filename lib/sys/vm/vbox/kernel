@@ -81,3 +81,17 @@ function sys/vm/vbox/pause() {
 
   ${sys_vm_vbox_mgr} controlvm "${_vm}" savestate
 }
+
+function sys/vm/vbox/stop() {
+  local _vm="${1}"
+  if empty "${_vm}" ; then $failure ; fi
+
+  local _s=$(sys/vm/vbox/state "${_vm}" | grep running)
+  if empty "${_s}" ; then $failure ; fi
+
+  answer "Pause VM ${_vm}?"
+  if failed $? ; then $failure ; fi
+
+  ${sys_vm_vbox_mgr} controlvm "${_vm}" acpipowerbutton
+  # ${sys_vm_vbox_mgr} controlvm "${_vm}" poweroff
+}
