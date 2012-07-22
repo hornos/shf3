@@ -8,7 +8,7 @@ function cmp/sshtx() {
   _prev="${COMP_WORDS[COMP_CWORD-1]}"
 
   case "${prev}" in
-    PUT|GET|BACKUP)
+    put|get|backup)
       local _mid=$(ls ${shf3_root}/mid/ssh | \
                    awk '{if(!match($0,"README")) print}')
       COMPREPLY=( $(compgen -W "${_mid}" -- ${_cur}) )
