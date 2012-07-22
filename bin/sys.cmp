@@ -37,7 +37,7 @@ function cmp/sys() {
   esac
 
   # options
-  opts="ctl control ser service pkg package net network"
+  _opts="ctl control ser service pkg package net network"
 
   COMPREPLY=($(compgen -W "${_opts}" -- ${_cur}))
   return 0
