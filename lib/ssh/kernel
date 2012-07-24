@@ -786,7 +786,7 @@ function ssh/conchk() {
 
   # verbose
   local _v=false
-  if test "${1}" != "" ; then
+  if test "${1}" == "true" ; then
     _v=true
   fi
 
