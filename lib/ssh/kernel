@@ -197,7 +197,7 @@ function ssh/check() {
     $failure
   fi
 
-  ssh/conchk true
+  ssh/conchk "${_h}"
   return $?
 }
 
@@ -770,9 +770,6 @@ function ssh/cmd() {
 }
 
 function ssh/conchk() {
-  # verbose
-  local _v=${1:-false}
-
   if test "${_v}" = "tor" ; then
     if empty "${mid_tor_proxy}" ; then
       $success
@@ -785,6 +782,12 @@ function ssh/conchk() {
       $failure
     fi
     $success
+  fi
+
+  # verbose
+  local _v=false
+  if test "${1}" != "" ; then
+    _v=true
   fi
 
   if empty "${mid_ssh_port_check}" ; then
