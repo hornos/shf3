@@ -97,9 +97,9 @@ function sys/call() {
   fi
   local _mod=${_mod##help/}
   local _os=$(sys/os)
-  _mod="${_mod}/${_os}"
   case "${_os}" in
     osx)
+      _mod="${_mod}/${_os}"
       import ${_mod}
     ;;
 
