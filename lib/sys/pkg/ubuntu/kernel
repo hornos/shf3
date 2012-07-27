@@ -45,7 +45,7 @@ function sys/pkg/ubuntu/addrepo() {
 
 function sys/pkg/ubuntu/removerepo() {
   answer "Edit ${sys_pkg_ubuntu_repos}?"
-  if failed $?; $failure; fi
+  if failed $?; then $failure; fi
 
   sudo mc -e "${sys_pkg_ubuntu_repos}"
   sys/pkg/ubuntu/refresh
