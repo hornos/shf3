@@ -3,13 +3,21 @@ function sys/net/ubuntu/ifconfig() {
   shift
   case "${_cmd}" in
     ether)
-      ${sys_net_osx_ifconfig} $* | \
+      u/sudo ${sys_net_ubuntu_ifconfig} $* | \
       awk '/HWaddr/{print $5}'
     ;;
     ip4)
-      ${sys_net_osx_ifconfig} $* | \
+      u/sudo ${sys_net_ubuntu_ifconfig} $* | \
       awk '/inet addr/{print $2}' | \
       sed s/addr://
     ;;
   esac
+}
+
+function sys/net/ubuntu/stat() {
+  local _cmd="${1}"
+  shift
+  u/sudo ${sys_net_ubuntu_netstat} -tupane | awk '{if(NR>1) print}'
+  echo ""
+  u/sudo ${sys_net_ubuntu_ufw} status numbered
 }

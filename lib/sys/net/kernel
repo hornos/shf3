@@ -31,6 +31,10 @@ function sys/net() {
       sys/call sys/net "${_cmd}" $*
     ;;
 
+    stat)
+      sys/call sys/net "${_cmd}" $*
+    ;;
+
     *|help)
       help/sys/net $*
     ;;
