@@ -1,7 +1,27 @@
+function help/sys/vm/vbox() {
+  cat << EOF
+
+Virtual Box Manager
+
+  list
+  start
+  pause
+  stop
+  off
+  state
+
+EOF
+  $success
+}
+
 function sys/vm/vbox() {
   import sys
   local _cmd=${1:-help}
   shift
+  if test "${_cmd}" = "help" ; then
+    help/sys/vm/vbox
+    return $?
+  fi
   sys/vm/vbox/${_cmd} $*
 }
 
