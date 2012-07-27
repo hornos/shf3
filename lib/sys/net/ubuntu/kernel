@@ -32,32 +32,46 @@ function sys/net/ubuntu/allow() {
   local _mask=""
 
   if empty "${_port}" ; then
+    msg "Destination port not set"
     $failure
   fi
 
   if empty "${_addr}" ; then
+    msg "Source address not set"
     $failure
   fi
 
   # defaults
   _proto=$(u/split "${_port}" 2 "/")
   _port=$(u/split "${_port}" 1 "/")
-  if "${_port}" = "${_proto}" ; then
+  if test "${_port}" = "${_proto}" ; then
     _proto="tcp"
   fi
 
   _mask=$(u/split "${_addr}" 2 "/")
   _addr=$(u/split "${_addr}" 1 "/")
-  if "${_addr}" = "${_mask}" ; then
+  if test "${_addr}" = "${_mask}" ; then
     _mask=32
   fi
 
+  msg "ALLOW to ${_port}/${_proto} from ${_addr}/${_mask}"
+  answer "Enable new rule?"
+  if failed $? ; then
+    $failure
+  fi
   u/sudo ${sys_net_ubuntu_ufw} allow proto ${_proto} from ${_addr}/${_mask} to any port ${_port}
 }
 
 function sys/net/ubuntu/deny() {
   local _n="${1}"
   if empty "${_n}" ; then
+    msg "Rule number not set"
+    $failure
+  fi
+
+  u/sudo ${sys_net_ubuntu_ufw} status numbered
+  answer "Delete rule ${_n}?"
+  if failed $? ; then
     $failure
   fi
 
