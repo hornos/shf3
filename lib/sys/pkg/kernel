@@ -1,8 +1,4 @@
 function help/sys/pkg() {
-  import sys
-  import gui
-  msg "Package Manager Help"
-  gui/line
   cat <<EOF
   ## Repositories
   lr      - list repos
