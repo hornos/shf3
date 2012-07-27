@@ -1,6 +1,21 @@
 # SHF3 #
 Modular Bash framework for Unix
 
+## Install ##
+    cd $HOME
+    git clone git://github.com/hornos/shf3.git
+
+Source and setup the Shell Framework in $HOME/.profile or .bashrc:
+    source $HOME/shf3/bin/shfrc
+    shf3/ps1 MACHINE[\\h]
+    shf3/alias yes
+    shf3/screen yes
+    shf3/mc/color yes
+    if shf3/is/screen ; then
+      source "/etc/profile.d/modules.sh"
+    fi
+    source $HOME/shf3/bin/complete
+
 ## SSH-related stuff ##
 ### Login ###
 #### Hoping with a host ####
