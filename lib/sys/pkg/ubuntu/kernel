@@ -20,7 +20,7 @@ function sys/pkg/ubuntu/repos() {
 
 function sys/pkg/ubuntu/refresh() {
   answer "Refresh repos?"
-  if failed $?; $failure; fi
+  if failed $?; then $failure; fi
 
   ${sys_pkg_ubuntu}get update $*
 }
