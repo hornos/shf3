@@ -3,7 +3,7 @@ function help/sys/pkg() {
   import gui
   msg "Package Manager Help"
   gui/line
-  cat << EOF
+  cat <<EOF
   ## Repositories
   lr      - list repos
   ref     - refresh/upgrade repos
@@ -18,7 +18,7 @@ function help/sys/pkg() {
   if PKG - package info
   ## Sanity
   clean  - system dependent cleaner
-  EOF
+EOF
   $success
 }
 
