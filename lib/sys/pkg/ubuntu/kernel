@@ -83,7 +83,7 @@ function sys/pkg/ubuntu/info() {
   ${sys_pkg_ubuntu}cache showpkg $*
 }
 
-function sys/pkg/ubuntu/info() {
+function sys/pkg/ubuntu/list() {
   if empty "$*" ; then $failure; fi
 
   u/sudo ${sys_pkg_ubuntu_dpkg} -L $*
