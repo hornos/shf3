@@ -12,6 +12,7 @@ function help/sys/pkg() {
   lu     - list updates
   se PKG - search for pattern
   if PKG - package info
+  ls PKG - package list
   ## Sanity
   clean  - system dependent cleaner
 EOF
@@ -75,6 +76,10 @@ function sys/pkg() {
 
     if|info)
       sys/call sys/pkg info $*
+    ;;
+
+    ls|list)
+      sys/call sys/pkg list $*
     ;;
 
     clean)

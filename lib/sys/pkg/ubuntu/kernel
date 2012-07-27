@@ -72,13 +72,19 @@ function sys/pkg/ubuntu/update() {
 }
 
 function sys/pkg/ubuntu/search() {
-   if empty "$*" ; then $failure; fi
+  if empty "$*" ; then $failure; fi
 
   ${sys_pkg_ubuntu}cache search $*
 }
 
 function sys/pkg/ubuntu/info() {
-   if empty "$*" ; then $failure; fi
+  if empty "$*" ; then $failure; fi
 
   ${sys_pkg_ubuntu}cache showpkg $*
+}
+
+function sys/pkg/ubuntu/info() {
+  if empty "$*" ; then $failure; fi
+
+  u/sudo ${sys_pkg_ubuntu_dpkg} -L $*
 }

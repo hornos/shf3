@@ -1,2 +1,3 @@
 sys_pkg_ubuntu="u/sudo apt-"
 sys_pkg_ubuntu_repos="/etc/apt/sources.list"
+sys_pkg_ubuntu_dpkg="dpkg"
