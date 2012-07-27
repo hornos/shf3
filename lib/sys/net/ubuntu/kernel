@@ -21,3 +21,45 @@ function sys/net/ubuntu/stat() {
   echo ""
   u/sudo ${sys_net_ubuntu_ufw} status numbered
 }
+
+function sys/net/ubuntu/allow() {
+  # in  format: $_port[/${_proto:-tcp}] $_addr[/${_mask:-32}]
+  # out format: sudo ufw allow proto $_proto from $_addr/$_mask to any port $_port
+
+  local _port="${1}"
+  local _addr="${2}"
+  local _proto=""
+  local _mask=""
+
+  if empty "${_port}" ; then
+    $failure
+  fi
+
+  if empty "${_addr}" ; then
+    $failure
+  fi
+
+  # defaults
+  _proto=$(u/split "${_port}" 2 "/")
+  _port=$(u/split "${_port}" 1 "/")
+  if "${_port}" = "${_proto}" ; then
+    _proto="tcp"
+  fi
+
+  _mask=$(u/split "${_addr}" 2 "/")
+  _addr=$(u/split "${_addr}" 1 "/")
+  if "${_addr}" = "${_mask}" ; then
+    _mask=32
+  fi
+
+  u/sudo ${sys_net_ubuntu_ufw} allow proto ${_proto} from ${_addr}/${_mask} to any port ${_port}
+}
+
+function sys/net/ubuntu/deny() {
+  local _n="${1}"
+  if empty "${_n}" ; then
+    $failure
+  fi
+
+  u/sudo ${sys_net_ubuntu_ufw} delete ${_n}
+}

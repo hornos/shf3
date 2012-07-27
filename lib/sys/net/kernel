@@ -35,6 +35,21 @@ function sys/net() {
       sys/call sys/net "${_cmd}" $*
     ;;
 
+    # fw stat
+    fw)
+      sys/call sys/net "${_cmd}" $*
+    ;;
+
+    # fw allow rule
+    allow)
+      sys/call sys/net "${_cmd}" $*
+    ;;
+
+    # fw delete rule
+    deny)
+      sys/call sys/net "${_cmd}" $*
+    ;;
+
     *|help)
       help/sys/net $*
     ;;
