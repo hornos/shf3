@@ -3,8 +3,23 @@ function help/sys/pkg() {
   import gui
   msg "Package Manager Help"
   gui/line
-  sys/help ${FUNCNAME} $*
-  $failure
+  cat << EOF
+  ## Repositories
+  lr      - list repos
+  ref     - refresh/upgrade repos
+  ar REPO - add repo
+  rr REPO - remove reppo
+  ## Packages
+  in PKG - install packages
+  rm PKG - remove packages
+  up PKG - update packages
+  lu     - list updates
+  se PKG - search for pattern
+  if PKG - package info
+  ## Sanity
+  clean  - system dependent cleaner
+  EOF
+  $success
 }
 
 ### zypper interface
