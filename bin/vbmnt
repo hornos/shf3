@@ -1,0 +1,25 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import gui
+
+function help/vbmnt() {
+  cat << EOF
+
+VirtualBox Mount
+
+EOF
+  $failure
+}
+
+### args
+_s=$*
+if empty "${_s}" ; then
+  for __s in ${_s} ; do
+    echo ""
+    answer "Mount ${__s}?"
+    if failed $? ; then
+      continue
+    fi
+    u/sudo mount -t vboxsf ${__s} /media/sf_${__s}
+  done
+fi
