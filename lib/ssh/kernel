@@ -8,6 +8,30 @@ SSH module
 EOF
 }
 
+# TODO: fix fqdn
+function ssh/fqdn() {
+  local _mid="${1}"
+  local _fqdn="${2}"
+  if empty "${_mid}" || empty "${_fqdn}" ; then
+    echo ""
+    $failure
+  fi
+  local _m=$(u/split "${_fqdn}" 1 ":")
+  if test "${_m}" = "vbox" ; then
+    _fqdn=$(u/split "${_fqdn}" 2 ":")
+    import sys/vm/vbox/guest
+    _fqdn=$(sys/vm/vbox/guest/get "${_mid}" "/VirtualBox/GuestInfo/Net/${_fqdn}" | sed s/\ //)
+    local _v=$(u/split "${_fqdn}" 1 ":")
+    if test "${_v}" != "Value" ; then
+      echo ""
+      $failure
+    fi
+    _v=$(u/split "${_fqdn}" 2 ":")
+    _fqdn="${_v}"
+  fi
+  echo "${_fqdn}"
+}
+
 function ssh/mgr() {
   import sys
   import gui
@@ -106,7 +130,9 @@ function ssh/mgr() {
         import net/port
         answer "Do you want to check connection to ${_h}?"
         if test $? -eq 0 ; then
-          net/port/test ${mid_ssh_fqdn} ${mid_ssh_port} &>/dev/null
+          local _fqdn=$(ssh/fqdn "${_h}" "${mid_ssh_fqdn}")
+          # net/port/test ${mid_ssh_fqdn} ${mid_ssh_port} &>/dev/null
+          net/port/test ${_fqdn} ${mid_ssh_port} &>/dev/null
           if test $? -gt 0 ; then
             msg "Connection failed"
           else
@@ -398,7 +424,9 @@ function ssh/login() {
     _opt="-v ${_opt}"
   fi
 
-  local _fqdn="${mid_ssh_fqdn}"
+  local _fqdn=$(ssh/fqdn "${_mid}" "${mid_ssh_fqdn}")
+
+  # local _fqdn="${mid_ssh_fqdn}"
   if ${_hoping} ; then
     # _opt="${_opt} -o CheckHostIP=no"
     _opt="${_opt} -o ProxyCommand='${_hop_cmd}'"

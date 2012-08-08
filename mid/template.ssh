@@ -7,6 +7,8 @@ mid_ssh_cluster="default"
 # FQDN
 mid_ssh_fqdn="default"
 
+# mid_ssh_fqdn="vbox:0/V4/IP"
+
 # username
 mid_ssh_user="${USER}"
 

@@ -1,0 +1,5 @@
+
+function sys/vm/vbox/guest/get() {
+  import sys/vm/vbox
+  ${sys_vm_vbox_mgr} guestproperty get $*
+}
