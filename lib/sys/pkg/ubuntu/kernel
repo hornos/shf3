@@ -54,13 +54,13 @@ function sys/pkg/ubuntu/removerepo() {
 function sys/pkg/ubuntu/install() {
    if empty "$*" ; then $failure; fi
 
-  ${sys_pkg_ubuntu}get install $*
+  u/sudo ${sys_pkg_ubuntu}get install $*
 }
 
 function sys/pkg/ubuntu/remove() {
    if empty "$*" ; then $failure; fi
 
-  ${sys_pkg_ubuntu}get remove $*
+  u/sudo ${sys_pkg_ubuntu}get remove $*
 }
 
 function sys/pkg/ubuntu/listupdates() {
@@ -68,7 +68,7 @@ function sys/pkg/ubuntu/listupdates() {
 }
 
 function sys/pkg/ubuntu/update() {
-  ${sys_pkg_ubuntu}get upgrade $*
+  u/sudo ${sys_pkg_ubuntu}get upgrade $*
 }
 
 function sys/pkg/ubuntu/search() {

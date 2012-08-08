@@ -34,3 +34,6 @@ alias suspend="procmgr -s"
 alias resume="procmgr -r"
 
 alias ltr="ls -tr"
+
+alias commit="gitmgr"
+alias update="gitmgr -p"
