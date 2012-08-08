@@ -13,6 +13,7 @@ function help/sys/pkg() {
   se PKG - search for pattern
   if PKG - package info
   ls PKG - package list
+  file FILE - file info
   ## Sanity
   clean  - system dependent cleaner
 EOF
@@ -30,7 +31,11 @@ function sys/pkg() {
   msg "Package Manager"
   gui/line
 
-  case "${_cmd}" in
+
+  # operator
+  local __cmd=$(ns/op/value "${_cmd}")
+
+  case "${__cmd}" in
 
     # Repo list
     lr|repos)
@@ -80,6 +85,16 @@ function sys/pkg() {
 
     ls|list)
       sys/call sys/pkg list $*
+    ;;
+
+    fl|file)
+      if $(ns/op ${_cmd} "-") ; then
+        sys/call sys/pkg fileinfo $*
+      elif $(ns/op ${_cmd} "+") ; then
+        sys/call sys/pkg filelist $*
+      else
+        sys/call sys/pkg file $*
+      fi
     ;;
 
     clean)

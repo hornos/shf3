@@ -1,0 +1,36 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+import sys/app
+
+function help/app() {
+  cat << EOF
+
+OS X Application (.app) wrapper
+
+Usage: ${gbn} Command.app
+
+EOF
+  exit 1
+}
+
+
+if test $# -lt 1 ; then
+  help/app
+fi
+
+if test "${1}" = "-h" || \
+   test "${1}" = "help" ; then
+  help/app
+fi
+
+_app="${1}"
+shift
+
+_app=$(sys/app "${_app}")
+echo ${_app}
+if ! executable "${_app}" ; then
+  msg "Not found: ${_app}"
+  exit 1
+fi
+
+"${_app}" $*

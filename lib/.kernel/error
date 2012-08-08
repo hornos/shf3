@@ -51,6 +51,14 @@ function readable() {
   return ${_false_}
 }
 
+function executable() {
+  local _f="${1}"
+  if test -x "${_f}" ; then
+    return ${_true_}
+  fi
+  return ${_false_}
+}
+
 function lessthan() {
   local _v=${1}
   local _l=${2}

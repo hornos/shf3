@@ -90,7 +90,6 @@ function choose() {
   done
 }
 
-
 function u/split() {
   local _s="${1}"
   local _f=${2:-1}

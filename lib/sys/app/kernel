@@ -1,0 +1,25 @@
+
+function sys/app() {
+  import sys
+
+  local _os=$(sys/os)
+  local _exe="$*"
+  local _app=""
+
+  case "${_os}" in
+    linux)
+      _app="${_exe}"
+    ;;
+    osx)
+      _exe_bn=$(basename "${_exe}")
+      _exe_dn=$(dirname "${_exe}")
+      _exe_bn=${_exe_bn%%/}
+      _exe_bn=${_exe_bn%%.app}
+      _app="${_exe_dn}/${_exe_bn}.app/${sys_app_contents}/${_exe_bn}"
+    ;;
+    *)
+      _app="${_exe}"
+    ;;
+  esac
+  echo "${_app}"
+}

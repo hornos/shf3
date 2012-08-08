@@ -81,6 +81,11 @@ function shf3/is/screen() {
   return 1
 }
 
+function u/col() {
+  local _f=${1:-1}
+  cut -d " " -f ${_f}
+}
+
 # OS X
 __os=${OSTYPE##darwin}
 if ! test -z "${__os}" ; then
