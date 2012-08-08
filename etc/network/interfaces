@@ -1,0 +1,27 @@
+# VirtualBox Ubuntu Guest Template
+#
+auto lo
+iface lo inet loopback
+
+# Host-only
+#define host eth0
+auto eth0
+iface eth0 inet dhcp
+
+# Bridge: en0 
+#define elan eth1
+# auto eth1
+iface eth1 inet dhcp
+
+# Bridge: en1
+#define wlan eth2
+# auto eth2
+iface eth2 inet dhcp
+
+# Internal
+#define inet eth3
+auto eth3
+# iface eth3 inet dhcp
+iface eth3 inet static
+  address 10.10.10.1
+  netmask 255.0.0.0
