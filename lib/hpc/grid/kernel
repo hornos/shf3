@@ -1,12 +1,45 @@
 
 function hpc/grid() {
-  local _g="${1}"
-  shift
-  local _q="${*}"
-  local _f="${hpc_grid_dir}/${_g}"
+  local _grid="${1}"
+  local _type=""
+  local _query=""
+
+  case "${_grid}" in
+    nodes)
+      shift
+      _type="${1}"
+      shift
+      _grid=${1:-default}
+      _query="-q ${_type} -n"
+    ;;
+
+    vips)
+      shift
+      _type=${1}
+      shift
+      _grid=${1:-default}
+      local _nodes=$(hpc/grid nodes "${_type}" "${_grid}")
+      import sys/vm/vbox/guest
+      local _ip=""
+      local i
+      for i in ${_nodes} ; do
+        _ip=$(sys/vm/vbox/guest/ip "${i}")
+        if empty "${_ip}" ; then _ip="down" ; fi
+        echo "${i}: ${_ip}"
+      done
+      return $?
+    ;;
+
+    *)
+      shift
+      local _query="${*}"
+    ;;
+  esac
+
+  local _f="${hpc_grid_dir}/${_grid}"
   if ! readable "${_f}" ; then
     echo ""
     $failure
   fi
-  ${hpc_grid_nodeattr} -f "${_f}" ${_q}
+  ${hpc_grid_nodeattr} -f "${_f}" ${_query}
 }
