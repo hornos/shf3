@@ -15,11 +15,11 @@ How to build a VirtualBox mini cluster
   Adapter 2: Bridged adapter, en1: AirPort
 
 3. Clone N-1 compute nodes
-  $ for i in 2 3 ; do sysmgr vm clone vm1 vm${i} ; done
+  $ for i in 2 3 ; do vmgr clone vm1 vm${i} ; done
 
 4. Set genders on the host
   Edit $HOME/shf3/mid/grid/default
   Check IPs of the cluster
-  $ sysmgr grid ips
+  $ gmgr ips
   Start/stop/pause the cluster
-  $ sysmgr grid start/stop/pause
+  $ gmgr start/stop/pause

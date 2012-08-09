@@ -31,7 +31,9 @@ function hpc/grid() {
       local _nodes=$(hpc/grid/nodes "${_type}" "${_grid}")
       local i
       for i in ${_nodes} ; do
+        echo ""
         sysmgr vm ${_cmd} ${i}
+        sleep 1
       done
     ;;
   esac
