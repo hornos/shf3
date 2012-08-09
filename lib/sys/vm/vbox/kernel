@@ -139,7 +139,7 @@ function sys/vm/vbox/clone() {
   answer "Clone ${_src} to ${_dst}?"
   if failed $? ; then $failure ; fi
 
-  ${sys_vm_vbox_mgr} "${_src}" --name ${_dst} --register --mode all
+  ${sys_vm_vbox_mgr} clonevm "${_src}" --name ${_dst} --register --mode all
 }
 
 function sys/vm/vbox/info() {
