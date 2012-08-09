@@ -158,6 +158,7 @@ function ssh/mnt() {
     return ${_false_}
   fi
 
+  ssh/fqdn "${_mid}" "${mid_ssh_fqdn}"
   local _fqdn="${mid_ssh_fqdn}"
   if ${_hoping} ; then
     if test "${_hop}" = "tor" ; then

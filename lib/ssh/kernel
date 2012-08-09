@@ -8,7 +8,6 @@ SSH module
 EOF
 }
 
-# TODO: fix fqdn
 function ssh/fqdn() {
   local _mid="${1}"
   local _fqdn="${2}"
@@ -20,16 +19,9 @@ function ssh/fqdn() {
   if test "${_m}" = "vbox" ; then
     _fqdn=$(u/split "${_fqdn}" 2 ":")
     import sys/vm/vbox/guest
-    _fqdn=$(sys/vm/vbox/guest/get "${_mid}" "/VirtualBox/GuestInfo/Net/${_fqdn}" | sed s/\ //)
-    local _v=$(u/split "${_fqdn}" 1 ":")
-    if test "${_v}" != "Value" ; then
-      echo ""
-      $failure
-    fi
-    _v=$(u/split "${_fqdn}" 2 ":")
-    _fqdn="${_v}"
+    _fqdn=$(sys/vm/vbox/guest/ip "${_mid}")
   fi
-  echo "${_fqdn}"
+  mid_ssh_fqdn="${_fqdn}"
 }
 
 function ssh/mgr() {
@@ -130,9 +122,8 @@ function ssh/mgr() {
         import net/port
         answer "Do you want to check connection to ${_h}?"
         if test $? -eq 0 ; then
-          local _fqdn=$(ssh/fqdn "${_h}" "${mid_ssh_fqdn}")
-          # net/port/test ${mid_ssh_fqdn} ${mid_ssh_port} &>/dev/null
-          net/port/test ${_fqdn} ${mid_ssh_port} &>/dev/null
+          ssh/fqdn "${_h}" "${mid_ssh_fqdn}"
+          net/port/test ${mid_ssh_fqdn} ${mid_ssh_port} &>/dev/null
           if test $? -gt 0 ; then
             msg "Connection failed"
           else
@@ -424,9 +415,8 @@ function ssh/login() {
     _opt="-v ${_opt}"
   fi
 
-  local _fqdn=$(ssh/fqdn "${_mid}" "${mid_ssh_fqdn}")
-
-  # local _fqdn="${mid_ssh_fqdn}"
+  ssh/fqdn "${_mid}" "${mid_ssh_fqdn}"
+  local _fqdn="${mid_ssh_fqdn}"
   if ${_hoping} ; then
     # _opt="${_opt} -o CheckHostIP=no"
     _opt="${_opt} -o ProxyCommand='${_hop_cmd}'"
@@ -521,6 +511,7 @@ function ssh/xfer() {
   # reinit hoping endpoint
   sys/mid "ssh/${_mid}"
 
+  ssh/fqdn "${_mid}" "${mid_ssh_fqdn}"
   local _fqdn="${mid_ssh_fqdn}"
   if ${_hoping} ; then
     if test "${_hop}" = "tor" ; then
@@ -763,6 +754,7 @@ function ssh/cmd() {
     _opt="-v ${_opt}"
   fi
 
+  ssh/fqdn "${_mid}" "${mid_ssh_fqdn}"
   local _fqdn="${mid_ssh_fqdn}"
   if ${_hoping} ; then
     # _opt="${_opt} -o CheckHostIP=no"
@@ -826,6 +818,7 @@ function ssh/conchk() {
   fi
   local i
 
+  # ssh/fqdn "${_mid}" "${mid_ssh_fqdn}"
   for i in ${mid_ssh_port_check} ; do
     if test "${i}" = "ping" ; then
       ${ssh_ping} ${mid_ssh_fqdn} &> /dev/null

@@ -1,0 +1,12 @@
+
+function hpc/grid() {
+  local _g="${1}"
+  shift
+  local _q="${*}"
+  local _f="${hpc_grid_dir}/${_g}"
+  if ! readable "${_f}" ; then
+    echo ""
+    $failure
+  fi
+  ${hpc_grid_nodeattr} -f "${_f}" ${_q}
+}

@@ -1,0 +1,2 @@
+hpc_grid_nodeattr="nodeattr"
+hpc_grid_dir="${grd}/mid/grid"

@@ -1,0 +1,18 @@
+
+function hpc/grid/vbox/ip() {
+  import sys/vm/vbox/guest
+  import hpc/grid
+  local _g="${1}"
+  local _q="${2}"
+  local _n=${3:-0}
+  if empty "${_g}" || empty "${_q}" ; then $failure ; fi
+
+  local _v=$(hpc/grid "${_g}" -n -q "${_q}")
+
+  if "${_v}" ; then $failure ; fi
+  local i
+  for i in ${_v} ; do
+    local _ip=$(sys/vm/vbox/guest/ip "${i}" ${_n})
+    echo "${i}: ${_ip}"
+  done
+}

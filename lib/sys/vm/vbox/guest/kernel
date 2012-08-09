@@ -3,3 +3,21 @@ function sys/vm/vbox/guest/get() {
   import sys/vm/vbox
   ${sys_vm_vbox_mgr} guestproperty get $*
 }
+
+function sys/vm/vbox/guest/ip() {
+  local _vm="${1}"
+  local _n=${2:-0}
+  if empty "${_vm}" ; then
+    echo ""
+    $failure
+  fi
+
+  local _fqdn=$(sys/vm/vbox/guest/get "${_vm}" "/VirtualBox/GuestInfo/Net/${_n}/V4/IP" | sed s/\ //)
+  local _v=$(u/split "${_fqdn}" 1 ":")
+  if test "${_v}" != "Value" ; then
+    echo ""
+    $failure
+  fi
+  _v=$(u/split "${_fqdn}" 2 ":")
+  echo "${_v}"
+}
