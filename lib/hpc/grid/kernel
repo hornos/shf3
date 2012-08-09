@@ -1,4 +1,4 @@
-
+# TODO: help
 
 function hpc/grid() {
   local _cmd="${1}"
@@ -36,6 +36,7 @@ function hpc/grid() {
         sleep 1
       done
     ;;
+
     load)
       local _nodes=$(hpc/grid/nodes "${_type}" "${_grid}")
       local i
@@ -43,9 +44,22 @@ function hpc/grid() {
         sysmgr vm load ${i} | sed /^O.*/d
       done
     ;;
+
     top)
       watch -n 2 sysmgr grid load "${_type}" "${_grid}"
     ;;
+    
+    dnsmasq)
+      local _nodes=$(hpc/grid/nodes "${_type}" "${_grid}")
+      local _ip
+      local _mac
+      local i
+      for i in ${_nodes} ; do
+        _ip=$(sysmgr vm ip ${i} ${hpc_grid_inet})
+        _mac=$(sysmgr vm mac ${i} ${hpc_grid_inet} | sed -e 's/../&:/g' -e 's/:$//')
+        if empty "${_ip}" ; then continue ; fi
+        echo "dhcp-host=${_mac},${i},${_ip}"
+      done
   esac
 }
 
