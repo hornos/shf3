@@ -68,7 +68,3 @@ function hpc/grid/nodes() {
   local _query="-q ${_type} -n"
   hpc/grid/query "${_grid}" ${_query}
 }
-
-function hpc/grid/load() {
-
-}
