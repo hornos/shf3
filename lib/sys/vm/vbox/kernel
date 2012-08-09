@@ -9,6 +9,8 @@ Virtual Box Manager
   stop
   off
   state
+  clone
+  info
 
 EOF
   $success
@@ -28,7 +30,7 @@ function sys/vm/vbox() {
 function sys/vm/vbox/list() {
   import gui
   local i
-  local _fmt="%7s %-8s %s\n"
+  local _fmt="%7s %-12s %s\n"
   local _s=false
   local _vm
   local _id
@@ -127,4 +129,35 @@ function sys/vm/vbox/off() {
   if failed $? ; then $failure ; fi
 
   ${sys_vm_vbox_mgr} controlvm "${_vm}" poweroff
+}
+
+function sys/vm/vbox/clone() {
+  local _src="${1}"
+  local _dst="${2}"
+  if empty "${_src}" || empty "${_dst}" ; then $failure ; fi
+
+  answer "Clone ${_src} to ${_dst}?"
+  if failed $? ; then $failure ; fi
+
+  ${sys_vm_vbox_mgr} "${_src}" --name ${_dst} --register --mode all
+}
+
+function sys/vm/vbox/info() {
+  local _vm="${1}"
+  if empty "${_vm}" ; then $failure ; fi
+
+  ${sys_vm_vbox_mgr} showvminfo "${_vm}"
+}
+
+function sys/vm/vbox/rm() {
+  local _vm="${1}"
+  if empty "${_vm}" ; then $failure ; fi
+
+  answer "Delete ${_vm}?"
+  if failed $? ; then $failure ; fi
+
+  answer "Are you sure?"
+  if failed $? ; then $failure ; fi
+
+  ${sys_vm_vbox_mgr} unregistervm "${_vm}" --delete
 }
