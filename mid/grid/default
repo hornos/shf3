@@ -1,4 +1,2 @@
-# defaults for a small vbox cluster
-vadmin   admin,all
-# internal network is for cvm[1-3]
-vm[1-3] eth1=c%n,compute,all
+vadmin  admin,all
+vm[1-3] compute,all

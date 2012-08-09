@@ -1,0 +1,73 @@
+How to build a VirtualBox mini cluster
+
+Host: OS X
+Guest: Ubuntu
+
+1.1 Install Ubuntu admin server
+  Name: vadmin
+  Adapter 1: Host-only adapter, 'vboxnet1'
+  Adapter 2: Bridged adapter, en0: Ethernet
+  Adapter 3: Bridged adapter, en1: AirPort
+  Adapter 4: Internal network, 'intnet'
+
+  Guest network from: shf3/etc/network/interfaces
+
+1.2 Install VirtualBox Additions:
+  $ sudo apt-get install -y dkms build-essential \
+         linux-headers-generic linux-headers-$(uname -r)
+  $ sudo mount /dev/cdrom /media/cdrom
+  $ sudo /media/cdrom/VBoxLinuxAdditions.run
+
+1.3 Install Ubuntu compute node or clone from initial vadmin
+  Name: vm1
+  (Install VirtualBox Additions)
+
+1.4 Clone N-1 compute nodes
+  $ for i in 2 3 ; do vmgr clone vm1 vm${i} ; done
+
+1.5 Set DHCP on vadmin
+  http://www.techrepublic.com/blog/opensource/using-dnsmasq-for-dns-and-dhcp-services/293
+  /etc/dnsmasq.conf:
+  interface=eth3
+  bind-interfaces
+  dhcp-range=10.10.10.11,10.10.10.254
+  dhcp-option=3,10.10.10.10
+  dhcp-lease-max=1000
+  dhcp-authoritative
+  address=/vadmin/10.10.10.10 
+
+2.1 Set genders on the Host
+  https://computing.llnl.gov/linux/genders.html
+  $HOME/shf3/mid/grid/default:
+  vadmin  admin,all
+  vm[1-3] compute,all
+
+
+2.2 Start the grid
+  $ gmgr start
+
+  # generate dhcp for the grid
+  # push to vadmin
+  # restart dnsmasq
+  # restart compute
+  # parallel ssh passless key
+  # install chef
+  # ufw
+  # remote logging syslog-ng/scribe
+  # monitoring ganglia cerebro
+  # mysql cluster
+  # slurm/mpi
+  # hadoop/hdfs
+  # mongodb
+  # cache
+  # dist pythons
+  
+  # app mon supervisond
+
+
+  Check IPs of the cluster
+  $ gmgr ips
+  Start/stop/pause the cluster
+  $ gmgr start/stop/pause
+  Check load
+  $ gmgr top

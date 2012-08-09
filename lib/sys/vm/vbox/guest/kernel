@@ -4,15 +4,17 @@ function sys/vm/vbox/guest/get() {
   ${sys_vm_vbox_mgr} guestproperty get $*
 }
 
-function sys/vm/vbox/guest/ip() {
+
+function sys/vm/vbox/guest/query() {
   local _vm="${1}"
-  local _n=${2:-0}
+  shift
+  local _q=${*}
   if empty "${_vm}" ; then
     echo ""
     $failure
   fi
 
-  local _fqdn=$(sys/vm/vbox/guest/get "${_vm}" "/VirtualBox/GuestInfo/Net/${_n}/V4/IP" | sed s/\ //)
+  local _fqdn=$(sys/vm/vbox/guest/get "${_vm}" "${_q}" | sed s/\ //)
   local _v=$(u/split "${_fqdn}" 1 ":")
   if test "${_v}" != "Value" ; then
     echo ""
@@ -20,4 +22,25 @@ function sys/vm/vbox/guest/ip() {
   fi
   _v=$(u/split "${_fqdn}" 2 ":")
   echo "${_v}"
+}
+
+
+function sys/vm/vbox/guest/ip() {
+  local _vm="${1}"
+  local _n=${2:-0}
+  if empty "${_vm}" ; then
+    echo ""
+    $failure
+  fi
+  sys/vm/vbox/guest/query "${_vm}" "/VirtualBox/GuestInfo/Net/${_n}/V4/IP"
+}
+
+function sys/vm/vbox/guest/mac() {
+  local _vm="${1}"
+  local _n=${2:-0}
+  if empty "${_vm}" ; then
+    echo ""
+    $failure
+  fi
+  sys/vm/vbox/guest/query "${_vm}" "/VirtualBox/GuestInfo/Net/${_n}/MAC"
 }

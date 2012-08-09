@@ -21,7 +21,9 @@ iface eth2 inet dhcp
 # Internal
 #define inet eth3
 auto eth3
+# for vm
 # iface eth3 inet dhcp
+# for vadmin
 iface eth3 inet static
-  address 10.10.10.1
+  address 10.10.10.10
   netmask 255.0.0.0

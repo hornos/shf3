@@ -168,3 +168,27 @@ function sys/vm/vbox/rm() {
 
   ${sys_vm_vbox_mgr} unregistervm "${_vm}" --delete
 }
+
+function sys/vm/vbox/ip() {
+  local _vm="${1}"
+  local _n=${2:-0}
+  if empty "${_vm}" ; then $failure ; fi
+  import sys/vm/vbox/guest
+  sys/vm/vbox/guest/ip "${_vm}" ${_n}
+}
+
+function sys/vm/vbox/mac() {
+  local _vm="${1}"
+  local _n=${2:-0}
+  if empty "${_vm}" ; then $failure ; fi
+  import sys/vm/vbox/guest
+  sys/vm/vbox/guest/mac "${_vm}" ${_n}
+}
+
+function sys/vm/vbox/query() {
+  local _vm="${1}"
+  local _q=${*}
+  if empty "${_vm}" ; then $failure ; fi
+  import sys/vm/vbox/guest
+  sys/vm/vbox/guest/get "${_vm}" ${_q}
+}
