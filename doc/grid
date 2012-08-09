@@ -10,7 +10,8 @@ Guest: Ubuntu
   Adapter 3: Bridged adapter, en1: AirPort
   Adapter 4: Internal network, 'intnet'
 
-  Guest network from: shf3/etc/network/interfaces
+  /etc/network/interfaces:
+  
 
 1.2 Install VirtualBox Additions:
   $ sudo apt-get install -y dkms build-essential \
@@ -18,12 +19,16 @@ Guest: Ubuntu
   $ sudo mount /dev/cdrom /media/cdrom
   $ sudo /media/cdrom/VBoxLinuxAdditions.run
 
-1.3 Install Ubuntu compute node or clone from initial vadmin
+
+1.3 Install Ubuntu compute node or clone vadmin
   Name: vm1
   (Install VirtualBox Additions)
 
+
 1.4 Clone N-1 compute nodes
-  $ for i in 2 3 ; do vmgr clone vm1 vm${i} ; done
+  $ gmgr clone vm1 3
+  # TODO: guestcontrol reset hostname
+
 
 1.5 Set DHCP on vadmin
   http://www.techrepublic.com/blog/opensource/using-dnsmasq-for-dns-and-dhcp-services/293
@@ -36,6 +41,7 @@ Guest: Ubuntu
   dhcp-authoritative
   address=/vadmin/10.10.10.10 
 
+
 2.1 Set genders on the Host
   https://computing.llnl.gov/linux/genders.html
   $HOME/shf3/mid/grid/default:
@@ -46,22 +52,18 @@ Guest: Ubuntu
 2.2 Start the grid
   $ gmgr start
 
-  # generate dhcp for the grid
-  # push to vadmin
-  # restart dnsmasq
-  # restart compute
-  # parallel ssh passless key
-  # install chef
+  # dnsmasq -> vadmin
+  # restart dnsmasq,compute
+  # parallel ssh
+  # chef
   # ufw
-  # remote logging syslog-ng/scribe
-  # monitoring ganglia cerebro
-  # mysql cluster
+  # syslog-ng/scribe
+  # ganglia cerebro
+  # mysql/postgres-xc cluster
   # slurm/mpi
   # hadoop/hdfs
   # mongodb
   # cache
-  # dist pythons
-  
   # app mon supervisond
 
 

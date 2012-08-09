@@ -14,6 +14,15 @@ function hpc/grid() {
     nodes)
       hpc/grid/nodes "${_type}" "${_grid}"
     ;;
+    
+    clone)
+      shift
+      local _start=${1:-2}
+      local i
+      for ((i=${_start};i<=${_grid};i++)) ; do 
+        sysmgr vm clone ${_type} vm${i}
+      done
+    ;;
 
     ips)
       local _nodes=$(hpc/grid/nodes "${_type}" "${_grid}")
