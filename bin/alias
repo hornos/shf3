@@ -37,3 +37,6 @@ alias ltr="ls -tr"
 
 alias commit="gitmgr"
 alias update="gitmgr -p"
+
+alias vmgr="sysmgr vm"
+alias gmgr="sysmgr grid"
