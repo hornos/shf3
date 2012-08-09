@@ -36,6 +36,16 @@ function hpc/grid() {
         sleep 1
       done
     ;;
+    load)
+      local _nodes=$(hpc/grid/nodes "${_type}" "${_grid}")
+      local i
+      for i in ${_nodes} ; do
+        sysmgr vm load ${i} | sed /^O.*/d
+      done
+    ;;
+    top)
+      watch -n 2 sysmgr grid load "${_type}" "${_grid}"
+    ;;
   esac
 }
 
@@ -57,4 +67,8 @@ function hpc/grid/nodes() {
   local _grid=${2:-default}
   local _query="-q ${_type} -n"
   hpc/grid/query "${_grid}" ${_query}
+}
+
+function hpc/grid/load() {
+
 }

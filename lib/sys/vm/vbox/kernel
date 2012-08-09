@@ -149,6 +149,13 @@ function sys/vm/vbox/info() {
   ${sys_vm_vbox_mgr} showvminfo "${_vm}"
 }
 
+function sys/vm/vbox/load() {
+  local _vm="${1}"
+  if empty "${_vm}" ; then $failure ; fi
+
+  ${sys_vm_vbox_mgr} metrics query "${_vm}" CPU/Load/User,RAM/Usage/Used
+}
+
 function sys/vm/vbox/rm() {
   local _vm="${1}"
   if empty "${_vm}" ; then $failure ; fi
