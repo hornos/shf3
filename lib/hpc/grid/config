@@ -1,2 +1,4 @@
 hpc_grid_nodeattr="nodeattr"
 hpc_grid_dir="${grd}/mid/grid"
+hpc_grid_intnet_nic=4
+hpc_grid_intnet=10.10.10.

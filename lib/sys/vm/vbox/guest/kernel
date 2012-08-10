@@ -4,6 +4,10 @@ function sys/vm/vbox/guest/get() {
   ${sys_vm_vbox_mgr} guestproperty get $*
 }
 
+function sys/vm/vbox/guest/mod() {
+  import sys/vm/vbox
+  ${sys_vm_vbox_mgr} modifyvm $*
+}
 
 function sys/vm/vbox/guest/query() {
   local _vm="${1}"
@@ -43,4 +47,16 @@ function sys/vm/vbox/guest/mac() {
     $failure
   fi
   sys/vm/vbox/guest/query "${_vm}" "/VirtualBox/GuestInfo/Net/${_n}/MAC"
+}
+
+function sys/vm/vbox/guest/nic() {
+  local _vm="${1}"
+  local _n=${2:-4}
+  local _t=${3:-none}
+  if empty "${_vm}" ; then
+    echo ""
+    $failure
+  fi
+  ${sys_vm_vbox}
+  sys/vm/vbox/guest/mod "${_vm}" --nic${_n} ${_t}
 }

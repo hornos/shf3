@@ -19,20 +19,47 @@ function hpc/grid() {
       shift
       local _start=${1:-2}
       local i
-      for ((i=${_start};i<=${_grid};i++)) ; do 
+      for ((i=${_start};i<=${_grid};i++)) ; do
+        echo ""
         sysmgr vm clone ${_type} vm${i}
       done
     ;;
 
-    ips)
+    ip)
+      # format: ip nicno type grid
+      local _n=${_type:-0}
+      _type="${1:-all}"
+      shift
+      _grid="${1:-default}"
+      # echo $_n $_type $_grid
+
       local _nodes=$(hpc/grid/nodes "${_type}" "${_grid}")
       import sys/vm/vbox/guest
       local _ip=""
       local i
       for i in ${_nodes} ; do
-        _ip=$(sys/vm/vbox/guest/ip "${i}")
+        _ip=$(sys/vm/vbox/guest/ip "${i}" ${_n})
         if empty "${_ip}" ; then _ip="down" ; fi
         echo "${i}: ${_ip}"
+      done
+    ;;
+
+    mac)
+      # format: mac nicno type grid
+      local _n=${_type:-0}
+      _type="${1:-all}"
+      shift
+      _grid="${1:-default}"
+      # echo $_n $_type $_grid
+
+      local _nodes=$(hpc/grid/nodes "${_type}" "${_grid}")
+      import sys/vm/vbox/guest
+      local _mac=""
+      local i
+      for i in ${_nodes} ; do
+        _mac=$(sys/vm/vbox/guest/mac "${i}" ${_n})
+        if empty "${_mac}" ; then _mac="down" ; fi
+        echo "${i}: ${_mac}"
       done
     ;;
 
@@ -58,17 +85,66 @@ function hpc/grid() {
       watch -n 2 sysmgr grid load "${_type}" "${_grid}"
     ;;
     
-    dnsmasq)
+    
+    nic)
+      # format: nic nicno nictype type grid
+      local _n=${_type:-0}
+      _t=${_grid:-none}
+      shift
+      _type="${1:-all}"
+      shift
+      _grid="${1:-default}"
+      # echo $_n $_t $_type $_grid
+       
       local _nodes=$(hpc/grid/nodes "${_type}" "${_grid}")
-      local _ip
+      answer "Set NIC adapter ${_n} to ${_t} on ${_grid}/${_type}?"
+      if failed $? ; then $failure ; fi
+      for i in ${_nodes} ; do
+        sysmgr vm nic ${i} ${_n} ${_t}
+      done
+    ;;
+
+    macs)
+      # format: mac nicno type grid
+      local _n=${_type:-0}
+      _type="${1:-all}"
+      shift
+      _grid="${1:-default}"
+      # echo $_n $_type $_grid
+
+      local _mac=""
+      local _nodes=$(hpc/grid/nodes "${_type}" "${_grid}")
+      for i in ${_nodes} ; do
+        _mac=$(sysmgr vm macs ${i} ${_n})
+        echo "${i}: ${_mac}"
+      done
+    ;;
+
+    dhcp)
+      # format: dnsmasq startip type grid
+      local _n=${_type:-0}
+      _type="${1:-all}"
+      shift
+      _grid="${1:-default}"
+      # echo $_n $_type $_grid
+
+      local _nodes=$(hpc/grid/nodes "${_type}" "${_grid}")
+      local _ip=${_n}
       local _mac
       local i
       for i in ${_nodes} ; do
-        _ip=$(sysmgr vm ip ${i} ${hpc_grid_inet})
-        _mac=$(sysmgr vm mac ${i} ${hpc_grid_inet} | sed -e 's/../&:/g' -e 's/:$//')
-        if empty "${_ip}" ; then continue ; fi
-        echo "dhcp-host=${_mac},${i},${_ip}"
+        # _ip=$(sysmgr vm ip ${i} ${hpc_grid_intnet_nic})
+        _ip=$((_ip+1))
+        _mac=$(sysmgr vm macs ${i} ${hpc_grid_intnet_nic} | sed -e 's/../&:/g' -e 's/:$//')
+        echo "dhcp-host=${_mac},${i},${hpc_grid_intnet}${_ip}"
       done
+    ;;
+
+    dnsmasq)
+      sysmgr grid dhcp 10 compute | sshexec vadmin "cat > /etc/dnsmasq.d/default"
+      sshexec vadmin sudo service dnsmasq restart
+    ;;
+
   esac
 }
 

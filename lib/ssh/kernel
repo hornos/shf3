@@ -789,6 +789,100 @@ function ssh/cmd() {
   return ${_ret}
 }
 
+# TODO: merge
+function ssh/exec() {
+  import sys
+  import ssh/key
+  local _mid="${1:-default}"
+  local _hop=false
+  local _x="${2:-ls -lA ${mid_ssh_scp_dst}}"
+  local _t=${3:-false}
+
+  echo ""
+  # hoping
+  local _hoping=false
+  if ssh/ishop "${_mid}" ; then
+    _hoping=true
+  fi
+  if ${_hoping} ; then
+    _hop=$(field "${_mid}" 1 "/")
+    _mid=$(field "${_mid}" 2 "/")
+  fi
+
+  sys/mid "ssh/${_mid}"
+  if test $? -gt 0 ; then
+    $failure
+  fi
+
+  # hoping
+  if ${_hoping} ; then
+    import ssh/hop
+    local _hop_cmd=""
+    ssh/hop "${_hop}"
+  fi
+
+  # connection check
+  ssh/conchk "${_hop}"
+  if failed $? ; then $failure; fi
+
+  # reinit hoping endpoint
+  sys/mid "ssh/${_mid}"
+
+  # opts
+  local _opt="${mid_ssh_ssh_opt}"
+
+  # force tty
+  if ${_t} ; then
+    _opt="-t ${_opt}"
+  fi
+
+  # begin gsi
+  if test "${mid_ssh_type}" = "gsi" ; then
+    # gsi
+    import ssh/gsi
+    ssh/gsi/init "${_mid}"
+    if test $? -gt 0 ; then
+      return ${_false_}
+    fi
+    gui/line
+  else
+    # private key
+    local _sec="$(ssh/key/sec ${_mid})"
+    if test -r "${_sec}" ; then
+      _opt="${_opt} -i ${_sec}"
+    fi
+  fi
+
+  # debug
+  if ${gdbg} ; then
+    _opt="-v ${_opt}"
+  fi
+
+  ssh/fqdn "${_mid}" "${mid_ssh_fqdn}"
+  local _fqdn="${mid_ssh_fqdn}"
+  if ${_hoping} ; then
+    # _opt="${_opt} -o CheckHostIP=no"
+    _opt="${_opt} -o ProxyCommand='${_hop_cmd}'"
+    if test "${_hop}" = "tor" ; then
+      _fqdn="${mid_tor_fqdn}"
+    fi
+  fi
+
+  local _url="${mid_ssh_user}@${_fqdn}"
+
+  # ssh
+  # eval pipe problem
+  ${ssh_ssh} -t ${_opt} ${_url} ${_x}
+  local _ret=$?
+
+  # grid proxy destroy
+  if test "${mid_ssh_type}" = "gsi" ; then
+    ssh/gsi/destroy
+  fi
+  return ${_ret}
+}
+
+
 function ssh/conchk() {
   if test "${_v}" = "tor" ; then
     if empty "${mid_tor_proxy}" ; then

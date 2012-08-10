@@ -185,10 +185,38 @@ function sys/vm/vbox/mac() {
   sys/vm/vbox/guest/mac "${_vm}" ${_n}
 }
 
+function sys/vm/vbox/macs() {
+  local _vm="${1}"
+  local _n=${2:-1}
+  if empty "${_vm}" ; then $failure ; fi
+ 
+  sys/vm/vbox/info ${_vm} | \
+  grep "NIC ${_n}" | \
+  sed s/.*MAC:\ // | \
+  sed s/,.*//
+}
+
+function sys/vm/vbox/nic() {
+  local _vm="${1}"
+  local _n=${2:-4}
+  local _t=${3:-none}
+  if empty "${_vm}" ; then $failure ; fi
+  import sys/vm/vbox/guest
+  sys/vm/vbox/guest/nic "${_vm}" ${_n} ${_t}
+}
+
 function sys/vm/vbox/query() {
   local _vm="${1}"
+  shift
   local _q=${*}
   if empty "${_vm}" ; then $failure ; fi
   import sys/vm/vbox/guest
   sys/vm/vbox/guest/get "${_vm}" ${_q}
+}
+
+function sys/vm/vbox/info() {
+  local _vm="${1}"
+  if empty "${_vm}" ; then $failure ; fi
+  import sys/vm/vbox/guest
+  ${sys_vm_vbox_mgr} showvminfo "${_vm}"
 }

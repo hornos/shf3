@@ -1,7 +1,15 @@
 How to build a VirtualBox mini cluster
 
-Host: OS X
-Guest: Ubuntu
+Real life alternatives:
+http://xcat.sourceforge.net
+MAAS/cobbler/OpenStack/JuJu
+http://www.sgi.com/products/software/smc.html
+
+H (host):  OS X
+A (admin): Ubuntu
+C (compute): Ubuntu
+
+Guest user: op/operator
 
 1.1 Install Ubuntu admin server
   Name: vadmin
@@ -11,23 +19,31 @@ Guest: Ubuntu
   Adapter 4: Internal network, 'intnet'
 
   /etc/network/interfaces:
+  $HOME/shf3/etc/network/interfaces
   
+  Enable SSH
 
 1.2 Install VirtualBox Additions:
-  $ sudo apt-get install -y dkms build-essential \
+  A$ sudo apt-get install -y dkms build-essential \
          linux-headers-generic linux-headers-$(uname -r)
-  $ sudo mount /dev/cdrom /media/cdrom
-  $ sudo /media/cdrom/VBoxLinuxAdditions.run
+  A$ sudo mount /dev/cdrom /media/cdrom
+  A$ sudo /media/cdrom/VBoxLinuxAdditions.run
 
 
-1.3 Install Ubuntu compute node or clone vadmin
+1.3 Install Ubuntu compute node seed or clone vadmin
   Name: vm1
   (Install VirtualBox Additions)
+  H$ gmgr start seed
+  Set seed sudoers:
+  /etc/sudoers.d/operator:
+  op ALL=(ALL) NOPASSWD: ALL
+  C$ sudo chmod 0440 /etc/sudoers.d/operator
+  C$ sudo chown root.root /etc/sudoers.d/operator
+  H$ gmgr stop seed
 
 
-1.4 Clone N-1 compute nodes
-  $ gmgr clone vm1 3
-  # TODO: guestcontrol reset hostname
+1.4 Clone N-1 compute nodes from the seed
+  H$ gmgr clone vm1 3
 
 
 1.5 Set DHCP on vadmin
@@ -41,6 +57,8 @@ Guest: Ubuntu
   dhcp-authoritative
   address=/vadmin/10.10.10.10 
 
+  A$ sudo chown -R op.root /etc/dnsmasq.d
+
 
 2.1 Set genders on the Host
   https://computing.llnl.gov/linux/genders.html
@@ -49,11 +67,12 @@ Guest: Ubuntu
   vm[1-3] compute,all
 
 
-2.2 Start the grid
-  $ gmgr start
+2.2 DHCP/DNS for compute nodes
+  # H$ gmgr dhcp 10 compute | sshexec vadmin "cat > /etc/dnsmasq.d/default"
+  # H$ sshexec vadmin sudo service dnsmasq restart
+  H$ gmgr dnsmasq
+  H$ gmgr start compute
 
-  # dnsmasq -> vadmin
-  # restart dnsmasq,compute
   # parallel ssh
   # chef
   # ufw
