@@ -84,8 +84,7 @@ function hpc/grid() {
     top)
       watch -n 2 sysmgr grid load "${_type}" "${_grid}"
     ;;
-    
-    
+
     nic)
       # format: nic nicno nictype type grid
       local _n=${_type:-0}
@@ -143,6 +142,25 @@ function hpc/grid() {
     dnsmasq)
       sysmgr grid dhcp 10 compute | sshexec vadmin "cat > /etc/dnsmasq.d/default"
       sshexec vadmin sudo service dnsmasq restart
+    ;;
+    sshkey)
+      local _pub="$HOME/shf3/key/ssh/${hpc_grid_vadmin}.pub"
+      if ! readable "${_pub}" ; then
+        msg "Not found: ${_pub}"
+        $failure
+      fi
+
+      local _nodes=$(hpc/grid/nodes "${_type}" "${_grid}")
+      local _ssh="/home/${hpc_grid_opuser}/.ssh"
+      local _keys="${_ssh}/authorized_keys"
+      local i
+      for i in ${_nodes} ; do
+        echo ""
+        answer "Set SSH key for ${i}?"
+        if failed $? ; then $failure ; fi
+        cat "${_pub}" | \
+        sshexec ${i} "mkdir ${_ssh}; cat > ${_keys}; chmod 600 ${_keys}"
+      done
     ;;
 
   esac

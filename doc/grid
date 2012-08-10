@@ -6,22 +6,24 @@ MAAS/cobbler/OpenStack/JuJu
 http://www.sgi.com/products/software/smc.html
 
 H (host):  OS X
-A (admin): Ubuntu
-C (compute): Ubuntu
+A (admin): Ubuntu head node
+C (compute): Ubuntu compute nodes
 
-Guest user: op/operator
+H constitutes eg. the IPMI network
+
+Operator  user/pass: op/operator
 
 1.1 Install Ubuntu admin server
   Name: vadmin
-  Adapter 1: Host-only adapter, 'vboxnet1'
-  Adapter 2: Bridged adapter, en0: Ethernet
-  Adapter 3: Bridged adapter, en1: AirPort
-  Adapter 4: Internal network, 'intnet'
+  IPMI-like : Adapter 1: Host-only adapter, 'vboxnet1'
+  World 1   : Adapter 2: Bridged adapter, en0: Ethernet
+  World 2   : Adapter 3: Bridged adapter, en1: AirPort
+  Mgmnt     : Adapter 4: Internal network, 'intnet'
 
   /etc/network/interfaces:
   $HOME/shf3/etc/network/interfaces
-  
-  Enable SSH
+
+  Enable SSH Server at install
 
 1.2 Install VirtualBox Additions:
   A$ sudo apt-get install -y dkms build-essential \
@@ -31,19 +33,25 @@ Guest user: op/operator
 
 
 1.3 Install Ubuntu compute node seed or clone vadmin
+  http://www.orzeszek.org/blog/2010/07/25/fix-missing-eth0-when-cloning-ubuntu-vmware-virtual-machines/
   Name: vm1
   (Install VirtualBox Additions)
   H$ gmgr start seed
   Set seed sudoers:
   /etc/sudoers.d/operator:
   op ALL=(ALL) NOPASSWD: ALL
+
   C$ sudo chmod 0440 /etc/sudoers.d/operator
   C$ sudo chown root.root /etc/sudoers.d/operator
+  C$ sudo rm /etc/udev/rules.d/70-persistent-net.rules
+  C$ sudo rm /var/lib/dhcp/dhclient.*
+  C$ echo "hostname \$new_host_name" | sudo tee /etc/dhcp/dhclient-exit-hooks.d/hostname
   H$ gmgr stop seed
 
 
 1.4 Clone N-1 compute nodes from the seed
   H$ gmgr clone vm1 3
+  (Optionally make a backup clone of vm1 with th GUI)
 
 
 1.5 Set DHCP on vadmin
@@ -68,13 +76,18 @@ Guest user: op/operator
 
 
 2.2 DHCP/DNS for compute nodes
-  # H$ gmgr dhcp 10 compute | sshexec vadmin "cat > /etc/dnsmasq.d/default"
-  # H$ sshexec vadmin sudo service dnsmasq restart
   H$ gmgr dnsmasq
   H$ gmgr start compute
+  H$ gmgr sshkey compute
 
   # parallel ssh
-  # chef
+
+2.4 Chef
+  http://generalthings.com/2012/05/08/simple-steps-install-chef-ubuntu-12-04-10-04/
+  H$ sshtx put vadmin /Users/mighty/shf3/etc/install_chef_server
+  H$ sshexec vadmin ./install_chef_server
+  H$ sshexec vadmin knife bootstrap 10.10.10.13 -x op --sudo
+
   # ufw
   # syslog-ng/scribe
   # ganglia cerebro
