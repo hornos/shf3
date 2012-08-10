@@ -25,6 +25,11 @@ Operator  user/pass: op/operator
 
   Enable SSH Server at install
 
+  A$ git clone git://github.com/hornos/shf3.git
+  $HOME/.profile:
+  source $HOME/shf3/bin/shfrc
+
+
 1.2 Install VirtualBox Additions:
   A$ sudo apt-get install -y dkms build-essential \
          linux-headers-generic linux-headers-$(uname -r)
@@ -80,7 +85,7 @@ Operator  user/pass: op/operator
   H$ gmgr start compute
   H$ gmgr sshkey compute
 
-  # parallel ssh
+# parallel ssh
 
 2.4 Chef
   http://generalthings.com/2012/05/08/simple-steps-install-chef-ubuntu-12-04-10-04/
