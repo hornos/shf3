@@ -1,0 +1,3 @@
+function sed/mac() {
+  sed -e 's/../&:/g' -e 's/:$//'
+}

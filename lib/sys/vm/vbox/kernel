@@ -1,30 +1,44 @@
 function help/sys/vm/vbox() {
   cat << EOF
-
-Virtual Box Manager
-
-  list
-  start
-  pause
-  stop
-  off
-  state
-  clone
-  info
-
+  list  - list vms
+  host  - show hostinfo
+  state vm      - vm state
+  start vm      - start vm
+  pause vm      - pause vm
+  stop vm       - stop vm
+  off vm        - power off vm
+  info vm       - information on vm
+  load vm       - top vm
+  clone vm1 vm2 - clone vm1 to vm2
+  delete vm     - delete and remove vm
 EOF
-  $success
+  $failure
 }
 
 function sys/vm/vbox() {
   import sys
   local _cmd=${1:-help}
   shift
-  if test "${_cmd}" = "help" ; then
-    help/sys/vm/vbox
-    return $?
-  fi
-  sys/vm/vbox/${_cmd} $*
+  case "${_cmd}" in
+    list|ls)
+      sys/vm/vbox/list $*
+    ;;
+    host|state|start|stop|off|clone|info|mac|ip)
+      sys/vm/vbox/${_cmd} $*
+    ;;
+    load|top)
+      sys/vm/vbox/load $*
+    ;;
+    delete|rm)
+      sys/vm/vbox/delete $*
+    ;;
+    property|prop)
+      sys/vm/vbox/property $*
+    ;;
+    help|*)
+      help/sys/vm/vbox
+    ;;
+  esac
 }
 
 function sys/vm/vbox/list() {
@@ -64,11 +78,10 @@ function sys/vm/vbox/host() {
 function sys/vm/vbox/state() {
   local _vm="${1}"
   if empty "${_vm}" ; then echo ""; $failure ; fi
-
   ${sys_vm_vbox_mgr} showvminfo "${_vm}" 2>/dev/null | grep State
 }
 
-function sys/vm/vbox/running() {
+function sys/vm/vbox/__running() {
   local _vm="${1}"
   if empty "${_vm}" ; then $failure ; fi
 
@@ -78,7 +91,7 @@ function sys/vm/vbox/running() {
   $success
 }
 
-function sys/vm/vbox/start() {
+function sys/vm/vbox/play() {
   local _vm="${1}"
   if empty "${_vm}" ; then $failure ; fi
 
@@ -115,7 +128,6 @@ function sys/vm/vbox/stop() {
   if failed $? ; then $failure ; fi
 
   ${sys_vm_vbox_mgr} controlvm "${_vm}" acpipowerbutton
-  # ${sys_vm_vbox_mgr} controlvm "${_vm}" poweroff
 }
 
 function sys/vm/vbox/off() {
@@ -156,7 +168,7 @@ function sys/vm/vbox/load() {
   ${sys_vm_vbox_mgr} metrics query "${_vm}" CPU/Load/User,RAM/Usage/Used
 }
 
-function sys/vm/vbox/rm() {
+function sys/vm/vbox/delete() {
   local _vm="${1}"
   if empty "${_vm}" ; then $failure ; fi
 
@@ -169,54 +181,105 @@ function sys/vm/vbox/rm() {
   ${sys_vm_vbox_mgr} unregistervm "${_vm}" --delete
 }
 
+function sys/vm/vbox/__get() {
+  ${sys_vm_vbox_mgr} guestproperty get $*
+}
+
+function sys/vm/vbox/__mod() {
+  ${sys_vm_vbox_mgr} modifyvm $*
+}
+
+function sys/vm/vbox/property() {
+  local _vm="${1}"
+  shift
+  local _q="/VirtualBox/${*}"
+  if empty "${_vm}" ; then
+    echo ""
+    $failure
+  fi
+
+  local _fqdn=$(sys/vm/vbox/__get "${_vm}" "${_q}" | sed s/\ //)
+  local _v=$(u/split "${_fqdn}" 1 ":")
+  if test "${_v}" != "Value" ; then
+    echo ""
+    $failure
+  fi
+  _v=$(u/split "${_fqdn}" 2 ":")
+  echo "${_v}"
+}
+
 function sys/vm/vbox/ip() {
   local _vm="${1}"
-  local _n=${2:-0}
-  if empty "${_vm}" ; then $failure ; fi
-  import sys/vm/vbox/guest
-  sys/vm/vbox/guest/ip "${_vm}" ${_n}
+  local _n=${2:-1}
+  if empty "${_vm}" ; then
+    echo ""
+    $failure
+  fi
+  local _mac=$(sys/vm/vbox/mac "${_vm}" ${_n})
+  local __mac=""
+  # workaround
+  local i
+  for i in 0 1 2 3 4 5 6 7 ; do
+    __mac=$(sys/vm/vbox/property "${_vm}" "GuestInfo/Net/${i}/MAC")
+    if test "${_mac}" = "${__mac}" ; then
+      sys/vm/vbox/property "${_vm}" "GuestInfo/Net/${i}/V4/IP"
+      return
+    fi
+  done
+  echo ""
 }
 
 function sys/vm/vbox/mac() {
-  local _vm="${1}"
-  local _n=${2:-0}
-  if empty "${_vm}" ; then $failure ; fi
-  import sys/vm/vbox/guest
-  sys/vm/vbox/guest/mac "${_vm}" ${_n}
-}
-
-function sys/vm/vbox/macs() {
+  import sed
   local _vm="${1}"
   local _n=${2:-1}
   if empty "${_vm}" ; then $failure ; fi
  
   sys/vm/vbox/info ${_vm} | \
-  grep "NIC ${_n}" | \
-  sed s/.*MAC:\ // | \
+  grep "NIC ${_n}" |
+  awk '{
+    split($0,a);
+    if(a[3]=="disabled")
+      print "";
+    else {
+      print a[4];
+    }
+  }' | \
   sed s/,.*//
 }
 
-function sys/vm/vbox/nic() {
-  local _vm="${1}"
-  local _n=${2:-4}
-  local _t=${3:-none}
-  if empty "${_vm}" ; then $failure ; fi
-  import sys/vm/vbox/guest
-  sys/vm/vbox/guest/nic "${_vm}" ${_n} ${_t}
-}
 
-function sys/vm/vbox/query() {
-  local _vm="${1}"
-  shift
-  local _q=${*}
-  if empty "${_vm}" ; then $failure ; fi
-  import sys/vm/vbox/guest
-  sys/vm/vbox/guest/get "${_vm}" ${_q}
-}
 
-function sys/vm/vbox/info() {
-  local _vm="${1}"
-  if empty "${_vm}" ; then $failure ; fi
-  import sys/vm/vbox/guest
-  ${sys_vm_vbox_mgr} showvminfo "${_vm}"
-}
+# function sys/vm/vbox/nic() {
+#   local _vm="${1}"
+#   local _n=${2:-4}
+#   local _t=${3}
+#   if empty "${_vm}" ; then $failure ; fi
+#   import sys/vm/vbox/guest
+#   sys/vm/vbox/guest/nic "${_vm}" ${_n} ${_t}
+# }
+# 
+# function sys/vm/vbox/guest/mac() {
+#   local _vm="${1}"
+#   local _n=${2:-0}
+#   if empty "${_vm}" ; then
+#     echo ""
+#     $failure
+#   fi
+#   sys/vm/vbox/guest/query "${_vm}" "/VirtualBox/GuestInfo/Net/${_n}/MAC"
+# }
+# # 
+# function sys/vm/vbox/guest/nic() {
+#   local _vm="${1}"
+#   local _nic=${2:-4}
+#   local _type=${3}
+#   if empty "${_vm}" ; then
+#     echo ""
+#     $failure
+#   fi
+#   if empty "${_type}" ; then
+#     
+#   fi
+#   # ${sys_vm_vbox}
+#   sys/vm/vbox/guest/mod "${_vm}" --nic${_nic} ${_type}
+# }
