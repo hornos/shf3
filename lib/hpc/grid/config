@@ -2,3 +2,6 @@ hpc_grid_nodeattr="nodeattr"
 hpc_grid_dir="${grd}/mid/grid"
 hpc_grid_intnet_nic=4
 hpc_grid_intnet=10.10.10.
+hpc_grid_vadmin_ip=10.10.10.10
+hpc_grid_vadmin="vadmin"
+hpc_grid_opuser="op"

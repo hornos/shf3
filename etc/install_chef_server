@@ -1,18 +1,33 @@
 #!/bin/bash
+source $HOME/shf3/lib/header
 
-echo "deb http://apt.opscode.com/ precise-0.10 main" | \
-sudo tee /etc/apt/sources.list.d/opscode.list
+answer "Add apt source list?"
+if succeed $? ; then
+  lsb=$(lsb_release -cs)
+  echo "deb http://apt.opscode.com/ ${lsb}-0.10 main" | \
+  sudo tee /etc/apt/sources.list.d/opscode.list
+fi
 
-sudo mkdir -p /etc/apt/trusted.gpg.d
-gpg --keyserver keys.gnupg.net --recv-keys 83EF826A
-gpg --export packages@opscode.com | \
-sudo tee /etc/apt/trusted.gpg.d/opscode-keyring.gpg
+answer "Add gpg keys?"
+if succeed $? ; then
+  sudo mkdir -p /etc/apt/trusted.gpg.d
+  sudo chown -R $USER.$USER $HOME/.gnupg
+  gpg --keyserver keys.gnupg.net --recv-keys 83EF826A
+  gpg --export packages@opscode.com | \
+  sudo tee /etc/apt/trusted.gpg.d/opscode-keyring.gpg > /dev/null
+fi
 
-sudo apt-get update
-sudo apt-get install opscode-keyring
-sudo apt-get upgrade
-sudo apt-get install chef chef-server
+answer "Install packages?"
+if succeed $? ; then
+  sudo apt-get update
+  sudo apt-get install opscode-keyring
+  sudo apt-get upgrade
+  sudo apt-get install chef chef-server chef-server-api chef-expander
+fi
 
-mkdir -p ~/.chef
-sudo cp /etc/chef/validation.pem /etc/chef/webui.pem ~/.chef
-sudo chown -R $USER ~/.chef
+answer "Setup CLI?"
+if succeed $? ; then
+  mkdir -p ~/.chef
+  sudo cp /etc/chef/validation.pem /etc/chef/webui.pem ~/.chef
+  sudo chown -R $USER ~/.chef
+fi

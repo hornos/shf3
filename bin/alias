@@ -40,3 +40,6 @@ alias update="gitmgr -p"
 
 alias vmgr="sysmgr vm"
 alias gmgr="sysmgr grid"
+
+alias "rubye=ruby -e"
+alias "pythone=python -c"

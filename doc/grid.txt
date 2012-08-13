@@ -1,18 +1,24 @@
 How to build a VirtualBox mini cluster
 
-Real life alternatives:
+For real infrastructure:
+------------------------------------------------------------------------
 http://xcat.sourceforge.net
 MAAS/cobbler/OpenStack/JuJu
 http://www.sgi.com/products/software/smc.html
 
+Abbreviations:
+------------------------------------------------------------------------
 H (host):  OS X
 A (admin): Ubuntu head node
 C (compute): Ubuntu compute nodes
 
 H constitutes eg. the IPMI network
 
-Operator  user/pass: op/operator
+Operator user/pass: op/operator
 
+
+Installation:
+------------------------------------------------------------------------
 1.1 Install Ubuntu admin server
   Name: vadmin
   IPMI-like : Adapter 1: Host-only adapter, 'vboxnet1'
@@ -31,18 +37,20 @@ Operator  user/pass: op/operator
 
 
 1.2 Install VirtualBox Additions:
-  A$ sudo apt-get install -y dkms build-essential \
-         linux-headers-generic linux-headers-$(uname -r)
+  A$ sudo apt-get install -y dkms build-essential linux-headers-generic linux-headers-$(uname -r)
   A$ sudo mount /dev/cdrom /media/cdrom
   A$ sudo /media/cdrom/VBoxLinuxAdditions.run
 
 
 1.3 Install Ubuntu compute node seed or clone vadmin
   http://www.orzeszek.org/blog/2010/07/25/fix-missing-eth0-when-cloning-ubuntu-vmware-virtual-machines/
+
   Name: vm1
   (Install VirtualBox Additions)
+
   H$ gmgr start seed
-  Set seed sudoers:
+
+  H$ sshin vm1
   /etc/sudoers.d/operator:
   op ALL=(ALL) NOPASSWD: ALL
 
@@ -51,6 +59,10 @@ Operator  user/pass: op/operator
   C$ sudo rm /etc/udev/rules.d/70-persistent-net.rules
   C$ sudo rm /var/lib/dhcp/dhclient.*
   C$ echo "hostname \$new_host_name" | sudo tee /etc/dhcp/dhclient-exit-hooks.d/hostname
+
+  /etc/dhcp/dhclient.conf:
+  prepend domain-name-servers 10.10.10.10
+
   H$ gmgr stop seed
 
 
@@ -65,7 +77,8 @@ Operator  user/pass: op/operator
   interface=eth3
   bind-interfaces
   dhcp-range=10.10.10.11,10.10.10.254
-  dhcp-option=3,10.10.10.10
+  dhcp-option=3
+  dhcp-option=6,10.10.10.10
   dhcp-lease-max=1000
   dhcp-authoritative
   address=/vadmin/10.10.10.10 
@@ -89,9 +102,15 @@ Operator  user/pass: op/operator
 
 2.4 Chef
   http://generalthings.com/2012/05/08/simple-steps-install-chef-ubuntu-12-04-10-04/
+  H$ gmgr ifup eth2 compute
+
   H$ sshtx put vadmin /Users/mighty/shf3/etc/install_chef_server
   H$ sshexec vadmin ./install_chef_server
-  H$ sshexec vadmin knife bootstrap 10.10.10.13 -x op --sudo
+  H$ sudo gem install chef
+
+
+  H$ gmgr chef bootstrap 2 compute
+  H$ gmgr stop/start compute
 
   # ufw
   # syslog-ng/scribe

@@ -143,6 +143,7 @@ function hpc/grid() {
       sysmgr grid dhcp 10 compute | sshexec vadmin "cat > /etc/dnsmasq.d/default"
       sshexec vadmin sudo service dnsmasq restart
     ;;
+
     sshkey)
       local _pub="$HOME/shf3/key/ssh/${hpc_grid_vadmin}.pub"
       if ! readable "${_pub}" ; then
@@ -163,6 +164,47 @@ function hpc/grid() {
       done
     ;;
 
+    chef)
+      # format: chef bootstrap nicno type grid
+      local _n=${_type:-0}
+      _t=${_grid:-none}
+      shift
+      _type="${1:-all}"
+      shift
+      _grid="${1:-default}"
+      # echo $_n $_type $_grid
+      local _nodes=$(hpc/grid/nodes "${_type}" "${_grid}")
+      local _ip=""
+      local i
+      for i in ${_nodes} ; do
+        _ip=$(sysmgr vm ip ${i} ${_t})
+        if empty "${_ip}" ; then continue ; fi
+        answer "Chef Bootstrap ${i}?"
+        if failed $? ; then continue ; fi
+        sshexec ${i} "echo \"nameserver ${hpc_grid_vadmin_ip}\" | sudo tee /etc/resolv.conf"
+        sshexec ${hpc_grid_vadmin} knife bootstrap ${_ip} -d ubuntu12.04-gems -x ${hpc_grid_opuser} --sudo
+      done
+    ;;
+
+    ifup|ifdown)
+      # format: ifup/ifdown eth? type grid
+      local _n=${_type:-0}
+      _type="${1:-all}"
+      shift
+      _grid="${1:-default}"
+      # echo $_n $_type $_grid
+      local _nodes=$(hpc/grid/nodes "${_type}" "${_grid}")
+      local _ip=""
+      local i
+      for i in ${_nodes} ; do
+        _ip=$(sysmgr vm ip ${i} 1)
+        if empty "${_ip}" ; then continue ; fi
+        answer "Interface: ${_cmd} ${_n} on ${i}?"
+        if failed $? ; then continue ; fi
+        sshexec ${i} sudo ${_cmd} ${_n}
+      done
+
+    ;;
   esac
 }
 
