@@ -59,6 +59,17 @@ function executable() {
   return ${_false_}
 }
 
+function directory() {
+  local _f="${1}"
+  if empty "${_f}" ; then
+    return ${_false_}
+  fi
+  if test -d "${_f}" ; then
+    return ${_true_}
+  fi
+  return ${_false_}
+}
+
 function lessthan() {
   local _v=${1}
   local _l=${2}

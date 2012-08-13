@@ -176,3 +176,14 @@ function u/sudo() {
     $*
   fi
 }
+
+function u/rm() {
+  local _f="${*}"
+  if empty "${_f}" ; then $failure ; fi
+  local i
+  for i in ${_f} ; do
+    if test -r "${i}" ; then
+      rm -f "${i}"
+    fi
+  done
+}
