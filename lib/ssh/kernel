@@ -15,11 +15,11 @@ function ssh/fqdn() {
     echo ""
     $failure
   fi
-  local _m=$(u/split "${_fqdn}" 1 ":")
-  if test "${_m}" = "vbox" ; then
-    _fqdn=$(u/split "${_fqdn}" 2 ":")
-    import sys/vm/vbox/guest
-    _fqdn=$(sys/vm/vbox/guest/ip "${_mid}")
+  local _vm=$(u/split "${_fqdn}" 1 "/")
+  if test "${_vm}" = "vbox" ; then
+    _nic=$(u/split "${_fqdn}" 2 "/")
+    import sys/vm/vbox
+    _fqdn=$(sys/vm/vbox/ip "${_mid}" ${_nic})
   fi
   mid_ssh_fqdn="${_fqdn}"
 }

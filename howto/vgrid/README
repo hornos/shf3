@@ -132,7 +132,19 @@ Operator user/pass: op/operator
   H$ vmgr knife head admin macbook
   H$ vmgr knife head show macbook
   (knife stuff is in A:$HOME/shf3.vre/mid/knife/macbook/.chef/)
+  H$ mkdir $HOME/knife
+  H$ cd $HOME/knife
 
+  - Create a head ssh mid file
+  H$ sshmgr -n head
+  mid_ssh_fqdn="vbox/2"
+  mid_ssh_user="op"
+
+  H$ vre create knife head/macbook
+  H$ vre login macbook
+  H$ knife list clients
+  H$ exit
+  (Happy cooking!)
 
 ----
 1.4 Clone N-1 compute nodes from the seed
