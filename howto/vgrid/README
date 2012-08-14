@@ -115,12 +115,23 @@ Operator user/pass: op/operator
   - Install Chef server
   H$ vmgr start head
   H$ vmgr chef server head
-  Chef URI: http://head:4000
-  RabbitMQ user/pass: chef/operator
+  Chef server URI: http://head:4000
+  RabbitMQ server user/pass: chef/operator
+  Chef server WebUI admin pass: operator
+  H$ vmgr ip head 2
+  Chrome =>ip:4000
+  H$ vmgr knife head
+  [/etc/chef/webui.pem] .chef/webui.pem
+  [/etc/chef/validation.pem] .chef/validation.pem
 
-  - Install Chef workstation
+  - Check local Knife
+  H$ vmgr knife head client show op
 
-
+  - Install Chef remote workstation
+  H$ sudo gem install chef
+  H$ vmgr knife head admin macbook
+  H$ vmgr knife head show macbook
+  (knife stuff is in A:$HOME/shf3.vre/mid/knife/macbook/.chef/)
 
 
 ----

@@ -42,7 +42,7 @@ function sys/vm/vbox() {
     mac|ip|nic|nics|ssh|export|cmd|hostname)
       sys/vm/vbox/${_cmd} $*
     ;;
-    static|chef)
+    static|chef|knife)
       sys/vm/vbox/${_cmd} $*
     ;;
     clone|cp)
@@ -346,10 +346,20 @@ function sys/vm/vbox/cmd() {
   local _user="${sys_vm_vbox_mgr_user}"
   local _nic=${sys_vm_vbox_mgr_nic}
 
+  local _profile=false
+  if ns/op "${_vm}" "+" ; then
+    _profile=true
+    _vm=$(ns/op/value "${_vm}" "+")
+  fi
+
   if empty "${_vm}" ; then $failure ; fi
   local _ip=$(sys/vm/vbox/ip "${_vm}" ${_nic})
   if empty "${_ip}" ; then $failure ; fi
-  ssh ${_user}@${_ip} ${_cmd}
+  if ${_profile} ; then
+    ssh ${_user}@${_ip} "source .profile;${_cmd}"
+  else
+    ssh ${_user}@${_ip} ${_cmd}
+  fi
 }
 
 function sys/vm/vbox/prepare() {
@@ -487,8 +497,8 @@ function sys/vm/vbox/static() {
   local _vm="${1}"
   local _eth="${2:-${sys_vm_vbox_intnet_eth}}"
   local _addr="${3:-${sys_vm_vbox_intnet}}"
-  local _nic=${3:-${sys_vm_vbox_mgr_nic}}
-  local _user=${4:-op}
+  local _nic=${4:-${sys_vm_vbox_mgr_nic}}
+  local _user=${5:-op}
 
   if empty "${_vm}" ; then $failure ; fi
   local _ip=$(sys/vm/vbox/ip "${_vm}" ${_nic})
@@ -529,5 +539,39 @@ EOF
   answer "Run interfaces script?"
   if failed $? ; then $failure ; fi
   ssh ${_user}@${_ip} bash ${sys_vm_vbox_interfaces}
+}
+
+# http://wiki.opscode.com/display/chef/Installing+Chef+Server+Manually
+function sys/vm/vbox/knife() {
+  local _vm="${1}"
+  shift
+  local _cmd=${*}
+  local __cmd=${1:-init}
+  if test "${__cmd}" = "init" ; then
+    answer "Init knife on ${_vm}?"
+    if failed $? ; then $failure ; fi
+    # from the vre package
+    sys/vm/vbox/cmd "+${_vm}" "install_chef_local_admin"
+    return
+  elif test "${__cmd}" = "admin" ; then
+    shift
+    local _admin="${1}"
+    if empty "${_admin}" ; then $failure ; fi
+    answer "Create knife admin ${_admin} on ${_vm}?"
+    if failed $? ; then $failure ; fi
+    # from the vre package
+    sys/vm/vbox/cmd "+${_vm}" "vre create knife admin ${_admin}"
+    return
+  elif test "${__cmd}" = "show" ; then
+    shift
+    local _client="${1}"
+    if empty "${_client}" ; then $failure ; fi
+    sys/vm/vbox/cmd "${_vm}" "knife client show ${_client}"
+    return
+  fi
+
+  answer "Knife on ${_vm}: ${_cmd}?"
+  if failed $? ; then $failure ; fi
+  sys/vm/vbox/cmd "${_vm}" "knife ${_cmd}"
 }
 
