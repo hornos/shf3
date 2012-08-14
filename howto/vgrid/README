@@ -1,0 +1,189 @@
+How to build a VirtualBox mini cluster
+
+For real infrastructure:
+------------------------------------------------------------------------
+http://xcat.sourceforge.net
+MAAS/cobbler/OpenStack/JuJu
+http://www.sgi.com/products/software/smc.html
+
+Abbreviations:
+------------------------------------------------------------------------
+H (host):  OS X + VirtualBox
+S (seed): Ubuntu seed image
+A (head): Ubuntu head node
+C (cNNN): Ubuntu compute nodes
+
+Operator user/pass: op/operator
+
+
+1 Install the Ubuntu seed
+  - Create a new VM in VB GUI: seed
+
+  - Network setup:
+    eth0: Adapter 1: Intel PRO/1000 MT Desktop (NAT)
+    eth1: Adapter 2: Intel PRO/1000 MT Desktop (Host-only adapter, 'vboxnet0')
+    eth2: Adapter 3: Intel PRO/1000 MT Desktop (Internal network, 'intnet')
+    eth3: Adapter 4: Intel PRO/1000 MT Desktop (Bridged adapter, en1: AirPort)
+  - Check netwok setup:
+  H$ vmgr nics seed
+
+  - Refer network cards by adapter number from the host eg:
+  H$ vmgr nic seed 2
+
+  - Manual Configuration:
+    local/keyboard as you wish
+    primary card: eth0 (NAT)
+    hostname: seed
+    user/pass: op/operator
+    disk: Guided (use entire disk)
+    proxy: -
+    no automatic updates
+    [*] OpenSSH Server
+    install GRUB
+  - Login to the seed in the VB GUI
+  S$ sudo vi /etc/sudoers.d/operator:
+    op ALL=(ALL) NOPASSWD: ALL
+  S$ sudo chmod 0440 /etc/sudoers.d/operator
+  S$ sudo chown root.root /etc/sudoers.d/operator
+
+  - Install VB guest addons (enbale addons cd in GUI)
+  S$ sudo apt-get upgrade
+  S$ sudo reboot
+  S$ sudo apt-get install -y dkms build-essential linux-headers-generic linux-headers-$(uname -r)
+  S$ sudo mount /dev/cdrom /media/cdrom
+  S$ sudo /media/cdrom/VBoxLinuxAdditions.run
+
+  - Set networking
+  S$ sudo vi /etc/network/interface
+    auto lo
+    iface lo inet loopback
+    auto eth0
+    iface eth0 inet dhcp
+    auto eth1
+    iface eth1 inet dhcp
+    iface eth2 inet dhcp
+    iface eth3 inet dhcp
+
+  - Edit $HOME/.profile
+  S$ vi $HOME/.profile
+    # (append at the end)
+    if [ -d $HOME/profile.d ]; then
+      for i in $HOME/profile.d/*; do
+        if [ -r $i ]; then source $i ; fi
+      done
+      unset i
+    fi
+  S$ mkdir profile.d
+
+  - Install shf3 packages
+  S$ sudo apt-get install git-core
+  S$ git clone git://github.com/hornos/shf3.git
+  S$ git clone git://github.com/hornos/shf3.vre.git
+  S$ echo "source \$HOME/shf3/bin/shfrc" | tee $HOME/profile.d/shf3
+  S$ echo "source \$HOME/shf3.vre/bin/shfrc" | tee $HOME/profile.d/shf3.vre
+  S$ sudo shutdown -h now
+
+  - Prepare for seeding
+  H$ vmgr start seed
+  H$ vmgr prepare seed
+  H$ vmgr stop seed
+
+  - Backup seed to an external storage
+  H$ vmgr export seed path_to_storage
+
+2. Install head server
+  - Virtual networks:
+    ETH  NIC DNS/IP boot VB Type   VB NET         Description
+    eth0   1   dhcp y    NAT                      firewalled internal network with default gw via the host
+    eth1   2   dhcp y    Host-only 'vboxnet0'     internal shortcut network for host-guest ssh
+    eth2   3 manual n    Internal  'intnet'       internal mgmnt network for the guests only
+    eth3   4   dhcp n    Bridged   'en1: AirPort' external network bridge
+
+  - Clone the head
+  H$ vmgr clone seed head
+  H$ vmgr start head
+
+  - Set the internal network
+  H$ vmgr static head
+  (set the default eth2 10.10.10.10/255.0.0.0)
+  H$ vmgr hostname head
+  (set head 10.10.10.10)
+  H$ vmgr stop head
+
+  - Add more memory to head eg.: 512M
+
+  - Install Chef server
+  H$ vmgr start head
+  H$ vmgr chef server head
+  Chef URI: http://head:4000
+  RabbitMQ user/pass: chef/operator
+
+  - Install Chef workstation
+
+
+
+
+----
+1.4 Clone N-1 compute nodes from the seed
+  H$ gmgr clone vm1 3
+  (Optionally make a backup clone of vm1 with th GUI)
+
+
+1.5 Set DHCP on vadmin
+  http://www.techrepublic.com/blog/opensource/using-dnsmasq-for-dns-and-dhcp-services/293
+  /etc/dnsmasq.conf:
+  interface=eth3
+  bind-interfaces
+  dhcp-range=10.10.10.11,10.10.10.254
+  dhcp-option=3
+  dhcp-option=6,10.10.10.10
+  dhcp-lease-max=1000
+  dhcp-authoritative
+  address=/vadmin/10.10.10.10 
+
+  A$ sudo chown -R op.root /etc/dnsmasq.d
+
+
+2.1 Set genders on the Host
+  https://computing.llnl.gov/linux/genders.html
+  $HOME/shf3/mid/grid/default:
+  vadmin  admin,all
+  vm[1-3] compute,all
+
+
+2.2 DHCP/DNS for compute nodes
+  H$ gmgr dnsmasq
+  H$ gmgr start compute
+  H$ gmgr sshkey compute
+
+# parallel ssh
+
+2.4 Chef
+  http://generalthings.com/2012/05/08/simple-steps-install-chef-ubuntu-12-04-10-04/
+  H$ gmgr ifup eth2 compute
+
+  H$ sshtx put vadmin /Users/mighty/shf3/etc/install_chef_server
+  H$ sshexec vadmin ./install_chef_server
+  H$ sudo gem install chef
+
+
+  H$ gmgr chef bootstrap 2 compute
+  H$ gmgr stop/start compute
+
+  # ufw
+  # syslog-ng/scribe
+  # ganglia cerebro
+  # mysql/postgres-xc cluster
+  # slurm/mpi
+  # hadoop/hdfs
+  # mongodb
+  # cache
+  # app mon supervisond
+
+
+  Check IPs of the cluster
+  $ gmgr ips
+  Start/stop/pause the cluster
+  $ gmgr start/stop/pause
+  Check load
+  $ gmgr top

@@ -1,1 +1,13 @@
 sys_vm_vbox_mgr="VBoxManage"
+
+sys_vm_vbox_mgr_nic=2
+sys_vm_vbox_intnet_eth=eth2
+sys_vm_vbox_mgr_user=op
+
+sys_vm_vbox_chef_server="install_chef_server"
+sys_vm_vbox_prepare="prepare_for_seeding"
+sys_vm_vbox_interfaces="set_interfaces"
+sys_vm_vbox_hostname="set_hostname"
+
+sys_vm_vbox_intnet="10.10.10.10/255.0.0.0"
+

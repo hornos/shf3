@@ -11,6 +11,19 @@ function help/sys/vm/vbox() {
   load vm       - top vm
   clone vm1 vm2 - clone vm1 to vm2
   delete vm     - delete and remove vm
+
+  mac vm [nic]  - mac addres of adapter no. nic on vm
+  ip vm [nic]   - ip address of adapter no. nic on vm
+  nics vm       - list adapters on vm
+  ssh vm [nic]  - ssh to vm on adapter no. nic
+  prepare vm [nic] - prepare for seeding
+  export vm [path] - export ovf vm to path
+
+  cmd vm cmds   - run cmds on vm (user: op nic: 2)
+  static vm [eth addr/mask] - switch to static eth interface
+  hostname vm [hostname addr] - sets hostname on vm
+
+  chef server vm - install chef server on vm
 EOF
   $failure
 }
@@ -23,8 +36,17 @@ function sys/vm/vbox() {
     list|ls)
       sys/vm/vbox/list $*
     ;;
-    host|state|start|stop|off|clone|info|mac|ip)
+    host|state|start|stop|off|info)
       sys/vm/vbox/${_cmd} $*
+    ;;
+    mac|ip|nic|nics|ssh|export|cmd|hostname)
+      sys/vm/vbox/${_cmd} $*
+    ;;
+    static|chef)
+      sys/vm/vbox/${_cmd} $*
+    ;;
+    clone|cp)
+      sys/vm/vbox/clone $*
     ;;
     load|top)
       sys/vm/vbox/load $*
@@ -34,6 +56,9 @@ function sys/vm/vbox() {
     ;;
     property|prop)
       sys/vm/vbox/property $*
+    ;;
+    prepare|prep)
+      sys/vm/vbox/prepare $*
     ;;
     help|*)
       help/sys/vm/vbox
@@ -61,7 +86,7 @@ function sys/vm/vbox/list() {
     fi
     _id="${i}"
 
-    sys/vm/vbox/running "${_vm}"
+    sys/vm/vbox/__running "${_vm}"
     if succeed $? ; then
       _s="Running"
     else
@@ -91,7 +116,7 @@ function sys/vm/vbox/__running() {
   $success
 }
 
-function sys/vm/vbox/play() {
+function sys/vm/vbox/start() {
   local _vm="${1}"
   if empty "${_vm}" ; then $failure ; fi
 
@@ -236,50 +261,273 @@ function sys/vm/vbox/mac() {
   if empty "${_vm}" ; then $failure ; fi
  
   sys/vm/vbox/info ${_vm} | \
-  grep "NIC ${_n}" |
+  grep "NIC ${_n}" | \
+  grep "MAC:" | \
   awk '{
     split($0,a);
-    if(a[3]=="disabled")
-      print "";
-    else {
-      print a[4];
-    }
+    print a[4];
   }' | \
   sed s/,.*//
 }
 
+function sys/vm/vbox/nic() {
+  local _vm="${1}"
+  local _nic=${2:-${sys_vm_vbox_mgr_nic}}
+  local _type=${3}
+  if empty "${_type}" ; then
+    sys/vm/vbox/info ${_vm} | \
+    grep "NIC ${_nic}" | \
+    grep "MAC:"
+    return
+  fi
+  sys/vm/vbox/__mod "${_vm}" --nic${_nic} ${_type}
+}
 
+function sys/vm/vbox/nics() {
+  local _vm="${1}"
+  shift
+  local _opt=$*
+  local _v=false
+  if test "${_opt}" = "-v" ; then
+    _v=true
+  fi
+  if empty "${_vm}" ; then $failure ; fi
+  local _nic=""
+  local _mac=""
+  local i
+  for i in 1 2 3 4 5 6 7 8 ; do
+    _nic=$(sys/vm/vbox/nic "${_vm}" $i)
+    if ${_v} ; then
+      echo "${_nic}" | \
+      grep "MAC:"
+    else
+      echo "${_nic}" | \
+      grep "MAC:" | \
+      sed s/,\ Trace.*//
+    fi
 
-# function sys/vm/vbox/nic() {
-#   local _vm="${1}"
-#   local _n=${2:-4}
-#   local _t=${3}
-#   if empty "${_vm}" ; then $failure ; fi
-#   import sys/vm/vbox/guest
-#   sys/vm/vbox/guest/nic "${_vm}" ${_n} ${_t}
-# }
-# 
-# function sys/vm/vbox/guest/mac() {
-#   local _vm="${1}"
-#   local _n=${2:-0}
-#   if empty "${_vm}" ; then
-#     echo ""
-#     $failure
-#   fi
-#   sys/vm/vbox/guest/query "${_vm}" "/VirtualBox/GuestInfo/Net/${_n}/MAC"
-# }
-# # 
-# function sys/vm/vbox/guest/nic() {
-#   local _vm="${1}"
-#   local _nic=${2:-4}
-#   local _type=${3}
-#   if empty "${_vm}" ; then
-#     echo ""
-#     $failure
-#   fi
-#   if empty "${_type}" ; then
-#     
-#   fi
-#   # ${sys_vm_vbox}
-#   sys/vm/vbox/guest/mod "${_vm}" --nic${_nic} ${_type}
-# }
+    #  | \
+    # awk '{split($0,a);print a[4]}' | \
+    # sed s/,.*//)
+    # if empty "${_mac}" ; then continue ; fi
+    # echo "${i}|${_mac}"
+  done
+}
+
+function sys/vm/vbox/ssh() {
+  local _vm="${1}"
+  local _nic=${2:-${sys_vm_vbox_mgr_nic}}
+  local _user=${3:-op}
+
+  if empty "${_vm}" ; then $failure ; fi
+  local _ip=$(sys/vm/vbox/ip "${_vm}" ${_nic})
+  if empty "${_ip}" ; then
+    msg "IP not found"
+    $failure
+  fi
+  ssh ${_user}@${_ip}
+}
+
+function sys/vm/vbox/ssh() {
+  local _vm="${1}"
+  local _nic=${2:-${sys_vm_vbox_mgr_nic}}
+  local _user=${3:-op}
+
+  if empty "${_vm}" ; then $failure ; fi
+  local _ip=$(sys/vm/vbox/ip "${_vm}" ${_nic})
+  if empty "${_ip}" ; then $failure ; fi
+  ssh ${_user}@${_ip}
+}
+
+function sys/vm/vbox/cmd() {
+  local _vm="${1}"
+  shift
+  local _cmd=${*:-hostname}
+  local _user="${sys_vm_vbox_mgr_user}"
+  local _nic=${sys_vm_vbox_mgr_nic}
+
+  if empty "${_vm}" ; then $failure ; fi
+  local _ip=$(sys/vm/vbox/ip "${_vm}" ${_nic})
+  if empty "${_ip}" ; then $failure ; fi
+  ssh ${_user}@${_ip} ${_cmd}
+}
+
+function sys/vm/vbox/prepare() {
+  local _vm="${1}"
+  local _nic=${2:-${sys_vm_vbox_mgr_nic}}
+  local _user=${3:-op}
+
+  if empty "${_vm}" ; then $failure ; fi
+  local _ip=$(sys/vm/vbox/ip "${_vm}" ${_nic})
+  if empty "${_ip}" ; then $failure ; fi
+
+  echo ""
+  answer "Create prepare script?"
+  if failed $? ; then $failure ; fi
+  cat << EOF | ssh ${_user}@${_ip} tee ${sys_vm_vbox_prepare}
+#!/bin/bash
+echo "Prepare for seeding"
+sudo rm /etc/udev/rules.d/70-persistent-net.rules
+sudo rm /var/lib/dhcp/dhclient.*
+echo "hostname \\\$new_host_name" | sudo tee /etc/dhcp/dhclient-exit-hooks.d/hostname
+EOF
+  echo ""
+  answer "Run prepare script?"
+  if failed $? ; then $failure ; fi
+  ssh ${_user}@${_ip} bash ${sys_vm_vbox_prepare}
+}
+
+function sys/vm/vbox/export() {
+  local _vm="${1}"
+  local _dst=${2:-${HOME}/storage/}
+
+  if empty "${_vm}" ; then $failure ; fi
+  _dst="${_dst}/${_vm}.ovf"
+  # if readable "${_dst}" ; then
+  #  answer "Overwrite?"
+  #  if failed $? ; then $failure ; fi
+  # fi
+
+  answer "Export ${_vm}?"
+  if failed $? ; then $failure ; fi
+
+  ${sys_vm_vbox_mgr} export "${_vm}" --output "${_dst}"
+}
+
+function sys/vm/vbox/hostname() {
+  local _vm="${1}"
+  local _h="${2:-${_vm}}"
+  local _addr=${3:-${sys_vm_vbox_intnet}}
+
+  local _nic=${4:-${sys_vm_vbox_mgr_nic}}
+  local _user=${5:-${sys_vm_vbox_mgr_user}}
+
+  if empty "${_vm}" ; then $failure ; fi
+  answer "Set hostname on ${_vm} to ${_h}?"
+  if failed $? ; then $failure ; fi
+  # echo "${_h}" | sysmgr vm cmd "${_vm}" sudo tee /etc/hostname
+
+  local _ip=$(sys/vm/vbox/ip "${_vm}" ${_nic})
+  if empty "${_ip}" ; then $failure ; fi
+
+  _addr=$(u/split "${_addr}" 1 "/")
+  echo ""
+  answer "Create hostname script?"
+  if failed $? ; then $failure ; fi
+  cat << EOF | ssh ${_user}@${_ip} tee ${sys_vm_vbox_hostname}
+#!/bin/bash
+echo "Enter to continue or Ctrl-C to abort"
+echo "Set hostname to ${_h} (${_addr})?"
+read
+cd /etc
+if ! test -r hostname.seed ; then
+  sudo cp hostname hostname.seed
+fi
+echo "${_h}" | sudo tee hostname
+if ! test -r hosts.seed ; then
+  sudo cp hosts hosts.seed
+fi
+cat hosts.seed | sudo tee hosts
+echo "${_addr} ${_h}" | sudo tee -a hosts
+EOF
+  echo ""
+  answer "Run hostname script?"
+  if failed $? ; then $failure ; fi
+  ssh ${_user}@${_ip} bash ${sys_vm_vbox_hostname}
+}
+
+function sys/vm/vbox/chef() {
+  local _chef="${1:-server}"
+  local _vm="${2}"
+
+  local _nic=${3:-${sys_vm_vbox_mgr_nic}}
+  local _user=${4:-${sys_vm_vbox_mgr_user}}
+
+  if empty "${_vm}" ; then $failure ; fi
+  local _ip=$(sys/vm/vbox/ip "${_vm}" ${_nic})
+  if empty "${_ip}" ; then $failure ; fi
+
+  local _script="${sys_vm_vbox_chef_server}"
+  if test "${_chef}" = "server" ; then
+    echo ""
+    answer "Create chef server script?"
+    if failed $? ; then $failure ; fi
+    cat << EOF | ssh ${_user}@${_ip} tee ${_script}
+#!/bin/bash
+echo "Enter to continue"
+echo "Ctrl-C to abort"
+echo "Add opscode apt source?"
+read
+lsb=\$(lsb_release -cs)
+echo "deb http://apt.opscode.com/ \${lsb}-0.10 main" | \
+sudo tee /etc/apt/sources.list.d/opscode.list
+sudo mkdir -p /etc/apt/trusted.gpg.d
+sudo chown -R \$USER.\$USER \$HOME/.gnupg
+gpg --keyserver keys.gnupg.net --recv-keys 83EF826A
+gpg --export packages@opscode.com | \
+sudo tee /etc/apt/trusted.gpg.d/opscode-keyring.gpg > /dev/null
+echo "Install chef server?"
+read
+sudo apt-get update
+sudo apt-get install opscode-keyring
+sudo apt-get upgrade
+sudo apt-get install chef chef-server chef-server-api chef-expander
+EOF
+  else
+    _script="${sys_vm-chef_client}"
+    echo ""
+  fi
+  echo ""
+  answer "Run chef script?"
+  if failed $? ; then $failure ; fi
+  ssh ${_user}@${_ip} bash ${_script}
+}
+
+function sys/vm/vbox/static() {
+  local _vm="${1}"
+  local _eth="${2:-${sys_vm_vbox_intnet_eth}}"
+  local _addr="${3:-${sys_vm_vbox_intnet}}"
+  local _nic=${3:-${sys_vm_vbox_mgr_nic}}
+  local _user=${4:-op}
+
+  if empty "${_vm}" ; then $failure ; fi
+  local _ip=$(sys/vm/vbox/ip "${_vm}" ${_nic})
+  if empty "${_ip}" ; then $failure ; fi
+
+  # address
+  local _addr_ip=$(u/split "${_addr}" 1 "/")
+  local _addr_mask=$(u/split "${_addr}" 2 "/")
+  if test "${_addr_mask}" = "${_addr_ip}" ; then
+    _addr_mask="255.0.0.0"
+  fi
+
+  echo ""
+  answer "Switch ${_eth} to ${_addr} on ${_vm}?"
+  if failed $? ; then $failure ; fi
+  cat << EOF | ssh ${_user}@${_ip} tee ${sys_vm_vbox_interfaces}
+#!/bin/bash
+echo "Enter to continue"
+echo "Ctrl-C to abort"
+echo "Switch to static net on ${_eth} to ${_addr}?"
+read
+cd /etc/network
+if ! test -r interfaces.seed ; then
+  sudo cp interfaces interfaces.seed
+fi
+cat interfaces.seed | \
+awk '/iface ${_eth}/{
+print "auto ${_eth}"
+print "iface ${_eth} inet static"
+print "address ${_addr_ip}"
+print "netmask ${_addr_mask}"
+next
+} {print}' | \
+sudo tee interfaces
+EOF
+
+  echo ""
+  answer "Run interfaces script?"
+  if failed $? ; then $failure ; fi
+  ssh ${_user}@${_ip} bash ${sys_vm_vbox_interfaces}
+}
+
