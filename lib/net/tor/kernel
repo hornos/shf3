@@ -113,7 +113,7 @@ function net/tor/rapid() {
   echo "ReachableDirAddresses *:80"         >> "${_rc}"
   echo "ReachableORAddresses *:443"         >> "${_rc}"
   echo "FascistFirewall 1"                  >> "${_rc}"
-  echo "HashedControlPassword \"${_pass}\"" >> "${_rc}"
+  echo "HashedControlPassword ${_pass}"     >> "${_rc}"
   # socks
   if test "${_socks}" != "None" ; then
     _socks="Socks5Proxy ${_socks}"          >> "${_rc}"

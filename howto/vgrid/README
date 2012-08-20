@@ -1,13 +1,16 @@
 How to build a VirtualBox mini cluster
 
 For real infrastructure:
-------------------------------------------------------------------------
 http://xcat.sourceforge.net
 MAAS/cobbler/OpenStack/JuJu
 http://www.sgi.com/products/software/smc.html
 
+
+For VBox:
+http://vagrantup.com
+
+
 Abbreviations:
-------------------------------------------------------------------------
 H (host):  OS X + VirtualBox
 S (seed): Ubuntu seed image
 A (head): Ubuntu head node
@@ -131,7 +134,11 @@ Operator user/pass: op/operator
   H$ sudo gem install chef
   H$ vmgr knife head admin macbook
   H$ vmgr knife head show macbook
+
   (knife stuff is in A:$HOME/shf3.vre/mid/knife/macbook/.chef/)
+
+  H$ vmgr cache ip head
+
   H$ mkdir $HOME/knife
   H$ cd $HOME/knife
 
@@ -142,17 +149,14 @@ Operator user/pass: op/operator
 
   H$ vre create knife head/macbook
   H$ vre login macbook
+  H$ vi .chef/knife.rb
+  chef_server_ip=`sysmgr vm ip head 2`.strip
+  chef_server_url "http://#{chef_server_ip}:4000"
   H$ knife list clients
   H$ exit
   (Happy cooking!)
 
-----
-1.4 Clone N-1 compute nodes from the seed
-  H$ gmgr clone vm1 3
-  (Optionally make a backup clone of vm1 with th GUI)
-
-
-1.5 Set DHCP on vadmin
+3. Chef: Setup dnsmasq on the server
   http://www.techrepublic.com/blog/opensource/using-dnsmasq-for-dns-and-dhcp-services/293
   /etc/dnsmasq.conf:
   interface=eth3
@@ -166,6 +170,7 @@ Operator user/pass: op/operator
 
   A$ sudo chown -R op.root /etc/dnsmasq.d
 
+4. Cloning
 
 2.1 Set genders on the Host
   https://computing.llnl.gov/linux/genders.html
