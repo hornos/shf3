@@ -28,14 +28,14 @@ _m="LIST"
 _f=""
 _t=""
 _a=""
-while getopts hf:t:a:l:p:n:d:u:s:v o; do
+while getopts hf:t:a:l:c:n:d:u:s:v o; do
   case "$o" in
     f) _f=$OPTARG;;
     t) _t=$OPTARG;;
     a) _a=$OPTARG;;
     l) _l=$OPTARG;;
     u) _u=$OPTARG;;
-    p) _m="CHANGE"; _u=$OPTARG;;
+    c) _m="CHANGE"; _u=$OPTARG;;
     n) _m="CREATE"; _u=$OPTARG;;
     d) _m="DELETE"; _u=$OPTARG;;
     s) _m="SEARCH"; _u=$OPTARG;;
