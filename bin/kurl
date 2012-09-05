@@ -1,0 +1,11 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+
+_url=$1
+if test -z "${_url}" ; then
+  exit 1
+fi
+
+_dst=$(basename "${_url}")
+
+curl -L "${_url}" > "${_dst}"
