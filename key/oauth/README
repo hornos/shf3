@@ -1,0 +1,6 @@
+CONSUMER_KEY="XXX" # obtained from https://dev.twitter.com/apps/new
+CONSUMER_SECRET="XXX"
+
+# access token
+ACCESS_TOKEN="XXX"
+ACCESS_KEY="XXX"
