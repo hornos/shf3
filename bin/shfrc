@@ -86,6 +86,18 @@ function u/col() {
   cut -d " " -f ${_f}
 }
 
+function shf3/rc() {
+  local i
+  local _rc
+  for i in $* ; do
+    _rc="${HOME}/shf3.${i}/bin/shfrc"
+    if ! test -r "${_rc}" ; then
+      continue
+    fi
+    echo "${_rc}"
+  done
+}
+
 # OS X
 __os=${OSTYPE##darwin}
 if ! test -z "${__os}" ; then
