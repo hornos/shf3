@@ -525,6 +525,7 @@ function que/sub() {
       echo "export MPI_NPPN=\"${_nppn}\""   >> "${_bat}"
 
       ### job file compliance for easy syntax
+      echo "export NODES=${NODES}"          >> "${_bat}"
       echo "export SCKTS=${SCKTS}"          >> "${_bat}"
       echo "export CORES=${CORES}"          >> "${_bat}"
       echo "export BIND=\"${_bind}\""       >> "${_bat}"
