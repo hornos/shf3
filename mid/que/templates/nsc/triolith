@@ -1,0 +1,8 @@
+QSCHED="slurm"
+# QMAILTO=""
+QMAIL="ALL"
+# QPROJ=""
+QEXCL="yes"
+QPART="triolith"
+QSETUP="$HOME/shf3/bin/machines $HOME/shf3/bin/scratch"
+QULIMIT="ulimit -s unlimited"
