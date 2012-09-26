@@ -1,4 +1,3 @@
-
 function run/prg/vasp/check/accuracy() {
   import run/valid
   run/valid/check OUTCAR "reached required accuracy"
@@ -18,3 +17,6 @@ function run/prg/vasp/check/header() {
   head -n 6 OUTCAR
 }
 
+function run/prg/vasp/check/total_energy() {
+  grep "E0=" OSZICAR | tail -n 1 | awk '{printf "E_tot= %.4f eV\n", $5}'
+}
