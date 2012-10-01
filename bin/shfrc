@@ -99,7 +99,7 @@ function shf3/rc() {
 }
 
 # OS X
-__os=${OSTYPE##linux}
-if ! test -z "${__os}" ; then
-  alias ldd="otool -L"
-fi
+# __os=${OSTYPE##linux}
+# if ! test -z "${__os}" ; then
+#  alias ldd="otool -L"
+# fi

@@ -6,6 +6,6 @@ if test -z "${_url}" ; then
   exit 1
 fi
 
-_dst="${_url}"
+_dst=$( echo "${_url}"  | sed s/\\//\\\\/g)
 
 curl -L "${_url}" > "${_dst}"
