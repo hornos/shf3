@@ -12,3 +12,4 @@ bin/src/connect
 *.o
 *.so
 *.a
+*sublime*

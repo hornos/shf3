@@ -6,4 +6,4 @@ SCKTS=2
 CORES=8
 QUEUE=triolith
 MODE=mpi/impi
-Run=""
+RUN=""
