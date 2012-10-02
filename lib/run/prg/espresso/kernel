@@ -17,7 +17,7 @@ function run/prg/espresso/check() {
     return ${_false_}
   fi
 
-  function run/prg/espresso/diskio
+  run/prg/espresso/diskio
   if test $? -gt 0 ; then
     msg "parameter not found: disk_io"
     return ${_false_}
