@@ -1,0 +1,13 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+
+cmd=${1}
+shift
+ver="${2}"
+if ! test -z "${ver}" ; then
+  ver="--version \"${ver}\""
+fi
+
+gem "${cmd}" "${ver}"
+
+  
