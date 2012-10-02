@@ -1,3 +1,8 @@
+function run/prg/espresso/diskio() {
+  local _inp=$(ns/op/value "${MAIN}")
+  cat "${_inp}" | grep '^ *disk_io'
+}
+
 
 function run/prg/espresso/check() {
   # main input check
@@ -9,6 +14,12 @@ function run/prg/espresso/check() {
   # other input check
   run/check/other
   if test $? -gt 0 ; then
+    return ${_false_}
+  fi
+
+  function run/prg/espresso/diskio
+  if test $? -gt 0 ; then
+    msg "parameter not found: disk_io"
     return ${_false_}
   fi
 
