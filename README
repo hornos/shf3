@@ -1,36 +1,65 @@
-# SHF3 #
+= SHF3 =
 Modular Bash framework for Unix
 
-## Install ##
-    cd $HOME
-    git clone git://github.com/hornos/shf3.git
-    curl -L https://get.rvm.io | bash -s stable --ruby --gems=cheat
+== Install ==
+  cd $HOME
+  git clone git://github.com/hornos/shf3.git
+  curl -L https://get.rvm.io | bash -s stable --ruby --gems=cheat
 
 Source and setup the Shell Framework in $HOME/.profile or .bashrc:
-    source $HOME/shf3/bin/shfrc
-    shf3/ps1 MACHINE[\\h]
-    shf3/alias yes
-    shf3/screen yes
-    shf3/mc/color yes
-    if shf3/is/screen ; then
-      source "/etc/profile.d/modules.sh"
-    fi
-    source $HOME/shf3/bin/complete
+  source $HOME/shf3/bin/shfrc
 
-## SSH-related stuff ##
-### Login ###
-#### Hoping with a host ####
-    sshin HOP/MID
-#### Hoping with Tor ####
-    sshin tor/MID
+== Update ==
+Update the framework:
+  shfupd
 
-On the ssh host set in /etc/tor/torrc:
-    HiddenServiceDir /var/lib/tor/ssh/
-    HiddenServicePort port 127.0.0.1:port
+== Scripting ==
+=== Libraries / Namespaces ===
+Libraries are kept under the <code>shf3/lib/</code> directory. Each subdirectory is a namespace. Each namespace (directory) contains the following files in load order:
+  kernel - function definitions
+  [config] - variables
+  [config.$OSTYPE] - OS specific variables  
+  [config.$USER] - user specific variables
 
-Tor fqdn is in /var/lib/tor/ssh/hostname
-* https://www.torproject.org/docs/tor-hidden-service.html.en
-* http://mancoosi.org/~abate/hidden-ssh-service-tor
+In a script a namespace is imported by:
+  import lib1/lib2
+
+ Function and variable names are prefixed by the namespace:
+  a function in shf3/lib/lib1/lib2 is function lib1/lib2/function() {...
+  a variable in shf3/lib/lib1/lib2 is lib1_lib2_variable=...
+
+=== Meta ID (MID) ===
+Meta ID is a data object (bag) like a json or yml file. These files contains <code>key=value</code> pairs.
+
+=== Directories ===
+The most important directories are:
+  bin - scripts 
+  lib - libraries
+  mid - mid files
+  key - key files
+
+=== Operators ===
+String values can have operators at the 1st character. Default operators are: <code>< + -</code> . Operator clean value of a variable can be obtained by:
+  ns/op/value $var
+
+=== Framework Scripts ===
+Framework scripts should contain the following header after the shebang:
+  source $(dirname ${BASH_SOURCE})/../lib/header
+
+==== Extensions Scripts ====
+Extension script should refer the framework header more directly. Eg. the a script in <code>shf3.ext/bin</code> would do:
+  source $(dirname ${BASH_SOURCE})/../../shf3/lib/header
+  or
+  source ${HOME}/shf3/lib/header
+Libraries under <code>shf3.ext/lib</code> are added to the import path by:
+  include $(dirname ${BASH_SOURCE})/../lib
+
+=== CLI ===
+There is an interactive interface for testing and for the internal help:
+  shfcli
+To get help:
+  help
+  help namespace
 
 
 
