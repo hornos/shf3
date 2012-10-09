@@ -14,7 +14,7 @@ Update the framework:
 
 == Scripting ==
 === Libraries / Namespaces ===
-Libraries are kept under the <code>shf3/lib/</code> directory. Each subdirectory is a namespace. Each namespace (directory) contains the following files in load order:
+Libraries are kept under the shf3/lib/ directory. Each subdirectory is a namespace. Each namespace (directory) contains the following files in load order:
   kernel - function definitions
   [config] - variables
   [config.$OSTYPE] - OS specific variables  
@@ -28,7 +28,7 @@ In a script a namespace is imported by:
   a variable in shf3/lib/lib1/lib2 is lib1_lib2_variable=...
 
 === Meta ID (MID) ===
-Meta ID is a data object (bag) like a json or yml file. These files contains <code>key=value</code> pairs.
+Meta ID is a data object (bag) like a json or yml file. These files contains KEY=VALUE pairs.
 
 === Directories ===
 The most important directories are:
@@ -38,7 +38,7 @@ The most important directories are:
   key - key files
 
 === Operators ===
-String values can have operators at the 1st character. Default operators are: <code>< + -</code> . Operator clean value of a variable can be obtained by:
+String values can have operators at the 1st character. Default operators are: < + - . Operator clean value of a variable can be obtained by:
   ns/op/value $var
 
 === Framework Scripts ===
@@ -46,7 +46,7 @@ Framework scripts should contain the following header after the shebang:
   source $(dirname ${BASH_SOURCE})/../lib/header
 
 ==== Extensions Scripts ====
-Extension script should refer the framework header more directly. Eg. the a script in <code>shf3.ext/bin</code> would do:
+Extension script should refer the framework header more directly. Eg. the a script in shf3.ext/bin would do:
   source $(dirname ${BASH_SOURCE})/../../shf3/lib/header
   or
   source ${HOME}/shf3/lib/header
