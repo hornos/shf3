@@ -4,7 +4,6 @@ Modular Bash framework for Unix
 == Install ==
   cd $HOME
   git clone git://github.com/hornos/shf3.git
-  curl -L https://get.rvm.io | bash -s stable --ruby --gems=cheat
 
 Source and setup the Shell Framework in $HOME/.profile or .bashrc:
   source $HOME/shf3/bin/shfrc
