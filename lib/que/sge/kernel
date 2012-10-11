@@ -25,7 +25,7 @@ function que/sge() {
 
     # memory
     if ! test -z "${MEMORY}" ; then
-      _qlogin="${_qlogin} -l h_vmem=${MEMORY}${que_slurm_unit}"
+      _qlogin="${_qlogin} -l h_vmem=${MEMORY}"
     fi
 
     # gpus
