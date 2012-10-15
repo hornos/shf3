@@ -189,12 +189,14 @@ function ssh/mnt() {
 
   sys/dir/mk "${_src}"
 
+  # https://code.google.com/p/macfuse/wiki/OPTIONS
   if test "$(sys/os)" = "osx" ; then
-    local _vol="sshfs/${_mid}:${mid_ssh_user}@${_fqdn}"
-    _opt="${_opt} -o volname=${_vol}"
+#    local _vol="sshfs/${_mid}:${mid_ssh_user}@${_fqdn}"
+    local _vol="sshfs/${_mid}"
+    _opt="${_opt} -o volname=${_vol},fsname=${_vol}"
     local _ico="${sys_img_dir}/sshfs.icns"
     if test -r "${_ico}" ; then
-      _opt="${_opt} -o modules=volicon -o volicon=${_ico}"
+      _opt="${_opt},modules=volicon,volicon=${_ico}"
     fi
   fi
 

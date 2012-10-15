@@ -87,13 +87,14 @@ function enc/encfs/mnt() {
   fi
 
   # osx
+  # https://code.google.com/p/macfuse/wiki/OPTIONS
   local _osx_opt=""
   if test "$(sys/os)" = "osx" ; then
-    _osx_opt="-- -o volname=encfs/${_h}"
+    _osx_opt="-- -o volname=encfs/${_h},fsname=encfs/${_h}"
 
     local _ico="${sys_img_dir}/encfs.icns"
     if test -r "${_ico}" ; then
-      _osx_opt="${_opt} -o modules=volicon -o volicon=${_ico}"
+      _osx_opt="${_opt},modules=volicon,volicon=${_ico}"
     fi
   else
     _opt="${_opt} -o nonempty"
