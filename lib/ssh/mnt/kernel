@@ -193,10 +193,10 @@ function ssh/mnt() {
   if test "$(sys/os)" = "osx" ; then
 #    local _vol="sshfs/${_mid}:${mid_ssh_user}@${_fqdn}"
     local _vol="sshfs/${_mid}"
-    _opt="${_opt} -o volname=${_vol},fsname=${_vol}"
+    _opt="${_opt} -o volname=${_vol} -o fsname=${_vol}"
     local _ico="${sys_img_dir}/sshfs.icns"
     if test -r "${_ico}" ; then
-      _opt="${_opt},modules=volicon,volicon=${_ico}"
+      _opt="${_opt} -o modules=volicon -o volicon=${_ico}"
     fi
   fi
 
