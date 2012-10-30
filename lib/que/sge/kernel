@@ -85,7 +85,7 @@ function que/sge() {
     local _mem=${MEMORY}
     # _mem=$((SLOTS*_mem))
     # _mem=$((TASKS*_mem))
-    echo "#${que_sge} -l mem=${_mem}${que_sge_unit}"    >> "${_bat}"
+    echo "#${que_sge} -l h_vmem=${_mem}"    >> "${_bat}"
   fi
 
   # binding

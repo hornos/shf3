@@ -29,7 +29,7 @@ function que/slurm() {
 
     # memory
     if ! test -z "${MEMORY}" ; then
-      _qlogin="${_qlogin} --mem-per-cpu=${MEMORY}${que_slurm_unit}"
+      _qlogin="${_qlogin} --mem-per-cpu=${MEMORY}"
     fi
 
     # nodes
@@ -98,8 +98,7 @@ function que/slurm() {
 
   # memory
   if ! test -z "${MEMORY}" ; then
-    local _mem="${MEMORY}${que_slurm_unit}"
-    echo "#${que_slurm} --mem-per-cpu=${_mem}"        >> "${_bat}"
+    echo "#${que_slurm} --mem-per-cpu=${MEMORY}"        >> "${_bat}"
   fi
 
   if ! test -z "${NODES}" ; then
