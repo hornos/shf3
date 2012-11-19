@@ -109,8 +109,9 @@ function run/init/data() {
   return ${_true_}
 }
 
+# init other and kernel input
 function run/init/other() {
-  if test -z "${OTHER}" ; then
+  if empty "${OTHER}" && empty "${KERNEL}"; then
     return ${_true_}
   fi
 
@@ -120,7 +121,7 @@ function run/init/other() {
   local inp
   local _inp
   local _idn
-  for inp in ${OTHER}; do
+  for inp in ${OTHER} ${KERNEL}; do
     _idn=$(dirname "${inp}")
     if test "${_idn}" = "." ; then
       _inp="${INPUTDIR}/${inp}"
