@@ -37,7 +37,7 @@ function sys/vm/vbox() {
     list|ls)
       sys/vm/vbox/list $*
     ;;
-    host|state|start|stop|off|info|pause)
+    host|state|start|stop|off|info|pause|save|resume)
       sys/vm/vbox/${_cmd} $*
     ;;
     mac|ip|nic|nics|ssh|export|cmd|hostname)
@@ -140,8 +140,36 @@ function sys/vm/vbox/pause() {
   answer "Pause VM ${_vm}?"
   if failed $? ; then $failure ; fi
 
+  ${sys_vm_vbox_mgr} controlvm "${_vm}" pause
+}
+
+function sys/vm/vbox/resume() {
+  local _vm="${1}"
+  if empty "${_vm}" ; then $failure ; fi
+
+  local _s=$(sys/vm/vbox/state "${_vm}" | grep running)
+  if ! empty "${_s}" ; then $failure ; fi
+
+  answer "Resume VM ${_vm}?"
+  if failed $? ; then $failure ; fi
+
+  ${sys_vm_vbox_mgr} controlvm "${_vm}" resume
+}
+
+
+function sys/vm/vbox/save() {
+  local _vm="${1}"
+  if empty "${_vm}" ; then $failure ; fi
+
+  local _s=$(sys/vm/vbox/state "${_vm}" | grep running)
+  if empty "${_s}" ; then $failure ; fi
+
+  answer "Pause VM ${_vm}?"
+  if failed $? ; then $failure ; fi
+
   ${sys_vm_vbox_mgr} controlvm "${_vm}" savestate
 }
+
 
 function sys/vm/vbox/stop() {
   local _vm="${1}"
