@@ -2,6 +2,7 @@ function help/sys/vm/vbox() {
   cat << EOF
   list  - list vms
   host  - show hostinfo
+
   state vm      - vm state
   start vm      - start vm
   pause vm      - pause vm
@@ -12,18 +13,18 @@ function help/sys/vm/vbox() {
   clone vm1 vm2 - clone vm1 to vm2
   delete vm     - delete and remove vm
 
-  mac vm [nic]  - mac addres of adapter no. nic on vm
-  ip vm [nic]   - ip address of adapter no. nic on vm
-  nics vm       - list adapters on vm
-  ssh vm [nic]  - ssh to vm on adapter no. nic
+  mac vm [nic]     - mac addres of adapter no. nic on vm
+  ip vm [nic]      - ip address of adapter no. nic on vm
+  nics vm          - list adapters on vm
+  ssh vm [nic]     - ssh to vm on adapter no. nic
   prepare vm [nic] - prepare for seeding
   export vm [path] - export ovf vm to path
 
-  cmd vm cmds   - run cmds on vm (user: op nic: 2)
-  static vm [eth addr/mask] - switch to static eth interface
+  cmd vm cmds      - run cmds on vm (user: op nic: 2)
+  static vm [eth addr/mask]   - switch to static eth interface
   hostname vm [hostname addr] - sets hostname on vm
 
-  chef server vm - install chef server on vm
+  chef server vm   - install chef server on vm
 EOF
   $failure
 }
@@ -36,7 +37,7 @@ function sys/vm/vbox() {
     list|ls)
       sys/vm/vbox/list $*
     ;;
-    host|state|start|stop|off|info)
+    host|state|start|stop|off|info|pause)
       sys/vm/vbox/${_cmd} $*
     ;;
     mac|ip|nic|nics|ssh|export|cmd|hostname)
