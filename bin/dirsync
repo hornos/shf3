@@ -21,9 +21,11 @@ fi
 
 _src="${1}"
 _dst="${2}"
+# limit to 2.5MB/s
+_lim=${3:-2500}
 
 echo
 msg "${gbn}"
 gui/line
 
-sys/dir/sync "${_src}" "${_dst}" "-av --progress"
+sys/dir/sync "${_src}" "${_dst}" "-av --progress --bwlimit=${_lim}"

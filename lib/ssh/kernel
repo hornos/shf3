@@ -550,16 +550,16 @@ function ssh/xfer() {
       local _opt="-p ${mid_ssh_port}"
       local _url="${_src_url}"
       local _mtxt="rsync/ssh"
-      local _rsync_opt=""
+      local _rsync_opt="${ssh_rsync_opt}"
       if ${_r} ; then
-        _rsync_opt="-r -k -L"
+        _rsync_opt="${_rsync_opt} -r -k -L"
       fi
     ;;
     4)
       local _opt="-p ${mid_ssh_port}"
       local _url="${_src_url}"
       local _mtxt="rsync/ssh"
-      local _rsync_opt="-aH --delete"
+      local _rsync_opt="${ssh_rsync_opt} -aH --delete"
     ;;
     *) sp_f_err "Invalid mode"
        return ${_false_}

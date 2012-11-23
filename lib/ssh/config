@@ -2,6 +2,7 @@ ssh_ssh="ssh"
 ssh_scp="scp"
 ssh_tar="tar"
 ssh_rsync="rsync"
+ssh_rsync_opt="--bwlimit=2500"
 ssh_template="template.ssh"
 # defaults
 ssh_TCPKeepAlive="no"
