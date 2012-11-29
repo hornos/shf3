@@ -81,7 +81,7 @@ if ${_p} ; then
 fi
 
 # commit
-git status
+git status -sb
 answer "Commit changes?"
 if test $? -gt 0 ; then
   exit ${_false_}
