@@ -13,7 +13,7 @@ Usage: ${gbn} options
               -f - force
               -v - verbose
               -x CMD
-              -l remote port[/local port]
+              -l LINK
 EOF
   exit ${_false_}
 }

@@ -382,7 +382,7 @@ function ssh/login() {
   if ! ${_hoping} ; then
     # TODO: syntax ,merge
     if ! test -z "${_link}" ; then
-      _opt="${_opt} ${_link}"
+      _opt="${_opt} -L${_link}"
     fi
     if ! test -z "${mid_ssh_tunnel}" ; then
       if sys/lck/mk "${_lck}" ; then
