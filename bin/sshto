@@ -13,6 +13,7 @@ Usage: ${gbn} options
               -f - force
               -v - verbose
               -x CMD
+              -l remote port[/local port]
 EOF
   exit ${_false_}
 }
@@ -22,12 +23,14 @@ _m=""
 _f=false
 _v=false
 _x=""
-while getopts hfvm:x: o; do
+_l=""
+while getopts hfvl:m:x: o; do
   case "$o" in
     m) _m=$OPTARG;;
     x) _x=$OPTARG;;
     f) _f=true;;
     v) gdbg=true;;
+    l) _l=$OPTARG;;
     h|*) help/sshto;;
   esac
 done
@@ -47,4 +50,4 @@ if ! test -z "${_x}" ; then
   exit $?
 fi
 
-ssh/login "${_m}" ${_f}
+ssh/login "${_m}" ${_f} "${_l}"

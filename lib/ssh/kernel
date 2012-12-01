@@ -338,6 +338,7 @@ function ssh/login() {
   local _mid="${1:-default}"
   local _hop=false
   local _f="${2:-false}"
+  local _link="${3}"
 
   # hoping
   local _hoping=false
@@ -379,6 +380,10 @@ function ssh/login() {
 
   # TODO: hoping tunnels
   if ! ${_hoping} ; then
+    # TODO: syntax ,merge
+    if ! test -z "${_link}" ; then
+      _opt="${_opt} ${_link}"
+    fi
     if ! test -z "${mid_ssh_tunnel}" ; then
       if sys/lck/mk "${_lck}" ; then
         _tunnel=true
