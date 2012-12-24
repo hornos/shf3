@@ -11,6 +11,7 @@ function ssh/hop() {
   # VPN
   if test "${_hop}" = "vpn" ; then
     mid_ssh_fqdn="${mid_vpn_fqdn}"
+    $success
   fi
   # Tor hoping
   if test "${_hop}" = "tor" ; then
