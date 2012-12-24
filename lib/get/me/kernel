@@ -1,0 +1,9 @@
+function get/me/id() {
+  date +%s | shasum | base64 | head -c 8
+}
+
+function __get/me/id() {
+  local l=${1:-6}
+  [ "$l" == "" ] && l=16
+  tr -dc a-zA-Z0-9 < /dev/urandom | head -c ${l} | xargs
+}

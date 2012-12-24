@@ -1,0 +1,27 @@
+
+function i/can/find() {
+  local _v="${1}"
+  local _t="${2:--r}"
+  if empty "${_v}" ; then $failure; fi
+
+  local _p=$(which "${_v}")
+  if empty "${_p}"; then $failure; fi
+
+  if test ${_t} "${_p}" ; then $success; fi
+  # else
+  $failure
+}
+
+
+function i/can/execute() {
+  local _v=$*
+  if empty "${_v}" ; then $failure; fi
+
+  local i
+  for i in ${_v} ; do
+    if ! i/can/find "${i}" -x ; then
+      $failure
+    fi
+  done
+  $success
+}

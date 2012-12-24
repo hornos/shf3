@@ -8,6 +8,10 @@ function ssh/hop() {
     $failure
   fi
 
+  # VPN
+  if test "${_hop}" = "vpn" ; then
+    mid_ssh_fqdn="${mid_vpn_fqdn}"
+  fi
   # Tor hoping
   if test "${_hop}" = "tor" ; then
     if empty "${mid_tor_fqdn}" ; then
