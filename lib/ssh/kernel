@@ -379,7 +379,7 @@ function ssh/login() {
   local _tunnel=false
 
   # TODO: hoping tunnels
-  if ! ${_hoping} ; then
+  if ! ${_hoping} || test "${_hop}" = "tor" ; then
     # TODO: syntax ,merge
     if ! test -z "${_link}" ; then
       _opt="${_opt} -L${_link}"
@@ -424,7 +424,9 @@ function ssh/login() {
   local _fqdn="${mid_ssh_fqdn}"
   if ${_hoping} ; then
     # _opt="${_opt} -o CheckHostIP=no"
-    _opt="${_opt} -o ProxyCommand='${_hop_cmd}'"
+    if ! empty "${_hop_cmd}" ; then
+      _opt="${_opt} -o ProxyCommand='${_hop_cmd}'"
+    fi
     if test "${_hop}" = "tor" ; then
       _fqdn="${mid_tor_fqdn}"
     fi
@@ -763,7 +765,9 @@ function ssh/cmd() {
   local _fqdn="${mid_ssh_fqdn}"
   if ${_hoping} ; then
     # _opt="${_opt} -o CheckHostIP=no"
-    _opt="${_opt} -o ProxyCommand='${_hop_cmd}'"
+    if ! empty "${_hop_cmd}" ; then
+      _opt="${_opt} -o ProxyCommand='${_hop_cmd}'"
+    fi
     if test "${_hop}" = "tor" ; then
       _fqdn="${mid_tor_fqdn}"
     fi
@@ -867,7 +871,9 @@ function ssh/exec() {
   local _fqdn="${mid_ssh_fqdn}"
   if ${_hoping} ; then
     # _opt="${_opt} -o CheckHostIP=no"
-    _opt="${_opt} -o ProxyCommand='${_hop_cmd}'"
+    if ! emtpy "${_hop_cmd}" ; then
+      _opt="${_opt} -o ProxyCommand='${_hop_cmd}'"
+    fi
     if test "${_hop}" = "tor" ; then
       _fqdn="${mid_tor_fqdn}"
     fi
