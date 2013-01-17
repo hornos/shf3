@@ -21,6 +21,54 @@ function ssh/key/p12() {
   ssh/key "${1:-default}" "${ssh_key_p12}"
 }
 
+function ssh/key/pem() {
+  import sys/dir
+
+  local _m=$1
+  local _g=$2
+  local _g_bn=$(basename ${_g})
+  local _cnf="${_m}.cnf"
+  local _pem="${_m}.pem"
+  local _csr="${_m}.csr"
+
+  # switch to ${ssh_key_dir}
+  sys/dir/svwd "${ssh_key_dir}"
+
+  # download config for openssl
+  answer "Download ${_g_bn}?"
+  if failed $? ; then $failure ; fi
+  curl -s "${_g}" > "${_g_bn}"
+
+  echo ""
+  echo "Please set your details"
+  local _cn
+  read -p "Your name: " _cn
+  read -p "Unit name: " _un
+  cat "${_g_bn}" | \
+  sed "s/^default_bits.*=.*/default_bits = 2048/" | \
+  sed "s/^default_keyfile.*=.*/default_keyfile\ =\ ${_pem}/" | \
+  sed "s/.*YOUR\ name.*/commonName\ =\ ${_cn}/" | \
+  sed "s/2.organizationalUnitName_default.*=.*/2.organizationalUnitName_default\ =\ ${_un}/" | \
+  grep -v "^#.*" | \
+  grep -v ^$ > ${_cnf}
+
+  echo ""
+  cat "${_cnf}"
+  echo ""
+  answer "Is this correct?"
+  if failed $? ; then $failure ; fi
+
+  openssl req -newkey rsa:2048 -config ${_cnf} -out ${_csr}
+
+  echo ""
+  echo "Submit this certificate request"
+  cat ${_csr}
+
+  passmgr -l 12 -n ${_m}.challenge
+  passmgr -l 12 -n ${_m}.request
+
+}
+
 function ssh/key/gen() {
   import sys
   import sys/dir

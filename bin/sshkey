@@ -9,7 +9,7 @@ function help/sshkey() {
 SSH key generator
 
 Usage: ${gbn} options
-              -n MID - new
+              -n MID - new [-g CNF_URL - grid certificate]
               -c MID - change
               -e MID - export to pkcs12
               -v - verbose
@@ -23,11 +23,12 @@ EOF
 ### args
 _m=""
 _c="NEW"
-while getopts hvc:n:e: o; do
+while getopts hvc:n:e:g: o; do
   case "$o" in
     n) _n="NEW"; _m=$OPTARG;;
     c) _c="CHANGE"; _m=$OPTARG;;
     e) _c="PKCS12"; _m=$OPTARG;;
+    g) _g=$OPTARG;;
     v) gdbg=true;;
     h|*) help/sshkey;;
   esac
@@ -54,7 +55,11 @@ case ${_c} in
     answer "Generate key for ${_m}?"
     if failed $? ; then exit ${_false_}; fi
 
-    ssh/key/gen "${_m}"
+    if test -z "${_g}" ; then
+      ssh/key/gen "${_m}"
+      exit $?
+    fi
+    ssh/key/pem "${_m}" "${_g}"
   ;;
   PKCS12)
     answer "Export pkcs12 key for ${_m}?"
