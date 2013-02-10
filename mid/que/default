@@ -1,1 +1,4 @@
 QSCHED=slurm
+QPART="batch"
+QSETUP="$HOME/shf3/bin/machines"
+QULIMIT="ulimit -s unlimited"

@@ -1,0 +1,1 @@
+ssh_mnt_umnt="umount -f"

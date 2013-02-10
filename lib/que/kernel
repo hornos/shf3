@@ -477,6 +477,8 @@ function que/sub() {
       _mpirun_opt="${MPIRUN_OPT}"
     fi
     local _mpi_opt="${_mpirun_opt}"
+    # resloved options for non-runprg apps
+    local _mpi_opt_res="${_mpirun_opt}"
 
     echo ""                                             >> "${_bat}"
     echo "### MPI Setup"                                >> "${_bat}"
@@ -532,8 +534,16 @@ function que/sub() {
 
       # prerun should be @resolved
       # PRERUN  VERBOSE     OPTIONS     MACHINES      NPPN        NUMA     BINDING BOOST     PROFILER
-      _mpi_opt="${_verbose} ${_mpi_opt} ${__machines} @{MPI_NPPN} \${NUMA} @{BIND} ${_boost} ${_prof}"
-      echo "export MPI_OPT=\"${_mpi_opt}\""           >> "${_bat}"
+
+      match RUN runprg
+      if succeed $? ; then
+        # PRERUN  VERBOSE     OPTIONS     MACHINES      NPPN        NUMA     BINDING BOOST     PROFILER
+        _mpi_opt="${_verbose} ${_mpi_opt} ${__machines} @{MPI_NPPN} \${NUMA} @{BIND} ${_boost} ${_prof}"
+        echo "export MPI_OPT=\"${_mpi_opt}\""           >> "${_bat}"
+      else
+        _mpi_opt_res="${_verbose} ${_mpi_opt} ${__machines} \${MPI_NPPN} \${NUMA} \${BIND} ${_boost} ${_prof}"
+        echo "export MPI_OPT=\"${_mpi_opt_res}\""           >> "${_bat}"
+      fi
       echo "export PRERUN=\"${_mpirun} \${MPI_OPT}\"" >> "${_bat}"
     fi
 
@@ -655,6 +665,8 @@ function que/sub() {
         $failure
       fi
     fi
+  else
+    RUN="\$PRERUN ${RUN}"
   fi
   echo "${RUN}"      >> "${_bat}"
 

@@ -4,7 +4,7 @@ function ssh/mnt/ls() {
 
   printf "%-32s %s\n" "Local directory" "Remote url"
   gui/line
-  mount | egrep 'fusefs|fuse.sshfs' | \
+  mount | egrep 'fusefs|fuse.sshfs|fuse4x' | \
           egrep -v 'encfs|fuse.encfs' | \
           egrep -v 'TrueCrypt' | \
           egrep ${USER} | \
@@ -146,6 +146,10 @@ function ssh/mnt() {
     ${ssh_mnt_umnt} ${_opt} ${_src} 2>/dev/null
     _ret=$?
     if ! test ${_ret} -gt 0 ; then
+      if test "${mid_ssh_type}" = "gsi" ; then
+        import ssh/gsi
+        ssh/gsi/destroy "${X509_USER_PROXY}"
+      fi
       sys/lck/rm "${_lck}"
       msg "Unmount success"
     fi
@@ -179,12 +183,23 @@ function ssh/mnt() {
 
   local _opt="${mid_ssh_sshfs_opt}"
 
-  # key
-  local _sec="$(ssh/key/sec ${_mid})"
-  if test -r "${_sec}" ; then
-    _opt="${_opt} -o IdentityFile=${_sec}"
+  if test "${mid_ssh_type}" = "gsi" ; then
+    # gsi
+    import ssh/gsi
+    ssh/gsi/init "${_mid}"
+    if test $? -gt 0 ; then
+      return ${_false_}
+    fi
+    _opt="${_opt} -o ssh_command=$(which gsissh)"
+    gui/line
   else
-    msg "Key not found ${_sec}"
+    # ssh
+    local _sec="$(ssh/key/sec ${_mid})"
+    if test -r "${_sec}" ; then
+      _opt="${_opt} -o IdentityFile=${_sec}"
+    else
+      msg "Key not found ${_sec}"
+    fi
   fi
 
   sys/dir/mk "${_src}"
@@ -217,6 +232,11 @@ function ssh/mnt() {
   if test ${_ret} -gt 0 ; then
     msg "Mount failed"
     sys/lck/rm "${_lck}"
+
+    # grid proxy destroy
+    if test "${mid_ssh_type}" = "gsi" ; then
+      ssh/gsi/destroy
+    fi
   else
     msg "Mount success"
   fi
