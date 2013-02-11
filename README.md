@@ -60,15 +60,15 @@ Login to a remote machine is done by:
 
 Keys will be used if present. If you have tunnels a lock file is created to prevent duplicated redirection. After a not clean logout lock file remains. To force tunnels against the lock run:
 
-  sshto -f -m MID
+    sshto -f -m MID
 
 File or directory transfer can be done between your CWD and `$mid_ssh_scp_dst` directory. To copy a file/dir from CWD:
 
-  sshtx put MID FILE/DIR
+    sshtx put MID FILE/DIR
 
 To copy back to CWD from `$mid_ssh_scp_dst` run:
 
-  sshtx get MID FILE/DIR
+    sshtx get MID FILE/DIR
 
 Note that SSH keys, options and port as well as SCP options are used from the MID file. The transfer command employs rsync with ssh therefore it is especially suitable to synchronise large files or directories. Transfers can be interrupted and resumed at will.
 
