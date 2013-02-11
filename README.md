@@ -194,4 +194,38 @@ If you specify `MODE=mpiomp` the wrapper configures SCKTS number of MPI process 
 and 8 slots will be allocated per node. If you have a large memory requirement you may have to allocate more cores than MPI processes.
 
 ### Application Wrapper
-Usually you want to run a script instead of single program.
+Usually you want to run a script instead of single program. There is no general solution but you can follow this simple scheme:
+1. Preprocess inputs and copy them to the scratch directory
+2. Run the application
+3. Collect and postprocess outputs (eg. gzip) and move to submit directory (somewhere in your `$HOME`)
+
+Unfortunately, the details of this scheme is application dependent and you have to write wrapper functions for each application. There is a general wrapper which does not do application specific input/output processing. It is a good starting point to develop new wrappers. The Application Wrapper does not depend on the Queue Wrapper, although the Queue Wrapper detects the Application Wrapper.
+
+For the Application Wrapper you need a guide file. This file contains information to configure that 3-step scheme above. A general guide contains (`guide`):
+
+    # submit dir
+    INPUTDIR="${PWD}"
+    # scratch dir
+    WORKDIR="${SCRATCH}/hpl-${USER}-${HOSTNAME}-$$"
+    # result dir, usually the same as submit dir
+    RESULTDIR="${INPUTDIR}"
+    # application binary and options
+    PRGBIN="${HPL_BIN}/xhpl"
+    PRGOPT=""
+    # data inputs, usually precalculated libraries
+    DATADIR=""
+    DATA=""
+    # main input
+    MAIN="-hpl.dat"
+    # other inputs, usually for restart
+    OTHER=""
+    # in case of error outputs are saved
+    ERROR="save"
+    # patterns for outputs to collect
+    RESULT="*"
+
+The `*DIR` variables tell where to copy inputs from: `MAIN` and `OTHER` is realtive to `INPUTDIR`. The `DATA` key is application specific and "relative" to `DATADIR`. The main input is also application specific and can start with a 1 character operator: `-` input is copied but not included int the argument list, `<` input is stdin redirected, and no operator means the input is put into the argument list. The final command is `$PRGBIN $PRGOPT $MAIN` . The program call can be augmented by the queue and the parallel environment. You can run the application with:
+
+    runprg -p general -g guide
+
+This command creates the scratch, copy inputs, run the application, moves back the results and deletes scratch directory.
