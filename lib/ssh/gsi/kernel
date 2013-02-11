@@ -7,7 +7,7 @@ function ssh/gsi/init() {
   import ssh/key/crt
 
   local _h="${1}"
-  local _x_lck="${2:-${sys_lck_dir}/${gbn}.gsi.$$}"
+  local _x_lck="${2:-${sys_lck_dir}/${_h}.${gbn}.$$}"
   if test -z "${_h}" ; then
     return ${_false_}
   fi
@@ -65,7 +65,9 @@ function ssh/gsi/init() {
 }
 
 function ssh/gsi/destroy() {
-  local _x_lck="${1:-${sys_lck_dir}/${gbn}.gsi.$$}"
+  local _h="${1}"
+  local _x_lck="${2:-${sys_lck_dir}/${_h}.${gbn}.$$}"
+
   if ${gdbd} ; then
     _x_opt="-debug"
   fi

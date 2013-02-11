@@ -444,7 +444,7 @@ function ssh/login() {
   gui/line
   # grid proxy destroy
   if test "${mid_ssh_type}" = "gsi" ; then
-    ssh/gsi/destroy
+    ssh/gsi/destroy "${_mid}"
   fi
 
   # clear tunnel lock
@@ -653,7 +653,7 @@ function ssh/xfer() {
   gui/line
   # grid proxy destroy
   if test "${mid_ssh_type}" = "gsi" ; then
-    ssh/gsi/destroy
+    ssh/gsi/destroy "${_mid}"
   fi
   return ${_ret}
 }
@@ -793,7 +793,7 @@ function ssh/cmd() {
   gui/line
   # grid proxy destroy
   if test "${mid_ssh_type}" = "gsi" ; then
-    ssh/gsi/destroy
+    ssh/gsi/destroy "${_mid}"
   fi
   return ${_ret}
 }
@@ -888,7 +888,7 @@ function ssh/exec() {
 
   # grid proxy destroy
   if test "${mid_ssh_type}" = "gsi" ; then
-    ssh/gsi/destroy
+    ssh/gsi/destroy "${_mid}"
   fi
   return ${_ret}
 }

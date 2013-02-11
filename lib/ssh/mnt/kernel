@@ -148,7 +148,7 @@ function ssh/mnt() {
     if ! test ${_ret} -gt 0 ; then
       if test "${mid_ssh_type}" = "gsi" ; then
         import ssh/gsi
-        ssh/gsi/destroy "${X509_USER_PROXY}"
+        ssh/gsi/destroy "${_mid}" "${sys_lck_dir}/${_lck}"
       fi
       sys/lck/rm "${_lck}"
       msg "Unmount success"
@@ -186,7 +186,7 @@ function ssh/mnt() {
   if test "${mid_ssh_type}" = "gsi" ; then
     # gsi
     import ssh/gsi
-    ssh/gsi/init "${_mid}"
+    ssh/gsi/init "${_mid}" "${sys_lck_dir}/${_lck}"
     if test $? -gt 0 ; then
       return ${_false_}
     fi
@@ -231,12 +231,14 @@ function ssh/mnt() {
   _ret=$?
   if test ${_ret} -gt 0 ; then
     msg "Mount failed"
-    sys/lck/rm "${_lck}"
 
     # grid proxy destroy
     if test "${mid_ssh_type}" = "gsi" ; then
-      ssh/gsi/destroy
+      ssh/gsi/destroy "${_mid}" "${sys_lck_dir}/${_lck}"
     fi
+
+    sys/lck/rm "${_lck}"
+
   else
     msg "Mount success"
   fi
