@@ -195,9 +195,10 @@ and 8 slots will be allocated per node. If you have a large memory requirement y
 
 ### Application Wrapper
 Usually you want to run a script instead of single program. There is no general solution but you can follow this simple scheme:
+
 1. Preprocess inputs and copy them to the scratch directory
 2. Run the application
-3. Collect and postprocess outputs (eg. gzip) and move to submit directory (somewhere in your `$HOME`)
+* Collect and postprocess outputs (eg. gzip) and move to submit directory (somewhere in your `$HOME`)
 
 Unfortunately, the details of this scheme is application dependent and you have to write wrapper functions for each application. There is a general wrapper which does not do application specific input/output processing. It is a good starting point to develop new wrappers. The Application Wrapper does not depend on the Queue Wrapper, although the Queue Wrapper detects the Application Wrapper.
 
