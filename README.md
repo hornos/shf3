@@ -31,6 +31,7 @@ Optionally, you can generate private/public key pairs. Keys are located in `$HOM
 
 ### Options in the MID file
 The MID file is a regular Bash script file, which contains only `key=value` pairs. You can source it from any other script.
+
     # ssh for regular ssh, gsi for gsi-ssh (see later) 
     mid_ssh_type=ssh
     # FQDN of the remote host
