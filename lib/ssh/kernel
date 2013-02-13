@@ -432,7 +432,7 @@ function ssh/login() {
         _fqdn="${mid_tor_fqdn}"
         ;;
       vpn)
-        _fqdn="${mid_ssh_vpn_fqdn}"
+        _fqdn="${mid_vpn_fqdn}"
         ;;
     esac
   fi
