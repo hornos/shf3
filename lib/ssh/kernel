@@ -427,9 +427,14 @@ function ssh/login() {
     if ! empty "${_hop_cmd}" ; then
       _opt="${_opt} -o ProxyCommand='${_hop_cmd}'"
     fi
-    if test "${_hop}" = "tor" ; then
-      _fqdn="${mid_tor_fqdn}"
-    fi
+    case "${_hop}" in
+      tor)
+        _fqdn="${mid_tor_fqdn}"
+        ;;
+      vpn)
+        _fqdn="${mid_ssh_vpn_fqdn}"
+        ;;
+    esac
   fi
 
   # login
