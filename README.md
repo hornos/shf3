@@ -1,7 +1,7 @@
 Shell Framework 3
 ==============
 
-Shell framework is a Bash 3 based script library designed for fast script development.
+Shell framework is a Bash 3 based script library designed for fast script development and advanced bash scripting.
 
 Basics
 -------
@@ -18,6 +18,15 @@ Edit your `.bashrc` or `.profile`:
     source $HOME/shf3/bin/shfrc
 
 If you just want to activate it type the command above into your shell.
+
+### Update
+You can update the framewrok from Github by:
+
+    shfmgr -u
+
+### Backup or relocate
+The framework is self-contained. All you need to do is copy or move the entire `$HOME/shf3` directory to a new location or a new machine or an encrypted external drive. All your SSH keys, GSI certificates, queueu configurations will move.
+
 
 SSH Wrapper
 ----------------
@@ -93,7 +102,7 @@ Get info of an account by:
 
 
 ### GSI SSH Support
-Login, transfer and mount commands are GSI aware. Instead of your password or private key password the certificate password is asked. Grid proxy is initialized and destroyed automatically. Login proxies are separate. The certificates are sperate from your `$HOME/.globus` settigns.
+Login, transfer and mount commands are GSI aware. Grid proxy is initialized and destroyed automatically. Login proxies are separate. Certificates are sperate from your `$HOME/.globus` settings.
 
 In order to use GSI you have to include the following options in the MID:
 
@@ -117,6 +126,24 @@ Certificates are downloaded to `$HOME/shf3/crt/prace` directory. Your grid accou
 
 The certificate configuration is used by openssl to generate the secret key and the certificate request. The request is found in `$HOME/shf3/key/ssh/MID.csr` . Note that the sshkey command calls the shf3 password manager to store challenge and request passwords.
 
+### Encrypted directories
+If you install FUSE [encfs https://en.wikipedia.org/wiki/EncFS] you can have encripted directories. MID files or encrypted directories are in `$HOME/shf3/encfs` directory. You can create an encfs MID by:
+
+    encfsmgr -n secret
+
+The MID file has to contain one line:
+
+    # location of the encrypted directory
+    mid_encfs_enc="${HOME}/.secret"
+
+Select `p` for pre-configured paranoia mode and type your encryption password. Note that encryption keys ar located in `$HOME/shf3/key/encfs` directory (`MID.sec` files) and not in the encrypted directory.
+
+To mount the encrypted directory:
+
+    encfsmnt -m MID
+
+Encrypted directories are mounted to `$HOME/encfs/MID` . Start to encrypt your secret files by moving stuff into this directory.
+
 Queue Wrapper
 ------------------
 The queue wrapper library is designed to make batch submission of parallel programs very easy. First, you have configure a MID file for the queue. This MID file contains parameters which are same for every submission. Keys and values are scheduler dependent. Currently, Slurm, PBS and SGE is supported. Queue files are located in `$HOME/shf3/mid/que directory`. Key value pairs are:
@@ -128,13 +155,13 @@ The queue wrapper library is designed to make batch submission of parallel progr
     # which notifications: abe, ALL
     QMAIL=
     # setup scripts
-    QSETUP="$HOME/shf3/bin/machines"
+    QSETUP="$HOME/shf3/bin/machines $HOME/shf3/bin/scratch"
     # ulimits
     QLIMIT="ulimit -s unlimited"
     # exclusive allocation
     QEXCL="yes"
 
-Note that the setup script machines is somewhat mandatory. It sets the variable `MACHINES` to the hostnames of the allocated nodes. You will need this because MPI implementations do not support every scheduler. The `MACHINES` variable is used by the MPI wrapper functions to specify hostnames for the mpirun command. The machines is included in the job script.
+Note that the setup script `machines` and `scratch` is somewhat mandatory. The former sets the variable `MACHINES` to the hostnames of the allocated nodes. You will need this because MPI implementations do not support every scheduler. The `MACHINES` variable is used by the MPI wrapper functions to specify hostnames for the mpirun command. The latter sets the `SCRATCH` variable to your scratch space. Application Wrapper (see later) needs this. Please check each script if you are in doubt.
 
 The purpose of the wrapper is to write job scripts for the supported schedulers. The scheduler dependent key values are:
 
@@ -229,4 +256,7 @@ The `*DIR` variables tell where to copy inputs from: `MAIN` and `OTHER` is realt
 
     runprg -p general -g guide
 
-This command creates the scratch, copy inputs, run the application, moves back the results and deletes scratch directory.
+This command creates the scratch, copy inputs, run the application, moves back the results and deletes scratch directory. You can combine the two wrappers by setting `RUN="runprg -p general -g guide"` .
+
+## A Full Example
+Let me present a full example as well introduce guide kernels. In this example 
