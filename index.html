@@ -1,0 +1,335 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Shf3 by hornos</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Shf3</h1>
+        <p>General Bash Framework</p>
+
+        <p class="view"><a href="https://github.com/hornos/shf3">View the Project on GitHub <small>hornos/shf3</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/hornos/shf3/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/hornos/shf3/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/hornos/shf3">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>Shell Framework 3</h1>
+
+<p>Shell framework is a Bash 3 based script library designed for fast script development and advanced bash scripting.</p>
+
+<h2>Basics</h2>
+
+<p>The framework is a directory hierarchy which is usually installed into user home. You only need a unix like system. It is tested on Linux and OS X.</p>
+
+<h2>Installation</h2>
+
+<pre><code>cd $HOME
+git clone git://github.com/hornos/shf3.git
+</code></pre>
+
+<p>Edit your <code>.bashrc</code> or <code>.profile</code>:</p>
+
+<pre><code>source $HOME/shf3/bin/shfrc
+</code></pre>
+
+<p>If you just want to activate it type the command above into your shell.</p>
+
+<h3>Update</h3>
+
+<p>You can update the framewrok from Github by:</p>
+
+<pre><code>shfmgr -u
+</code></pre>
+
+<h3>Backup or relocate</h3>
+
+<p>The framework is self-contained. All you need to do is copy or move the entire <code>$HOME/shf3</code> directory to a new location or a new machine or an encrypted external drive. All your SSH keys, GSI certificates, queueu configurations will move.</p>
+
+<h2>SSH Wrapper</h2>
+
+<p>The framework contains a sophisticated SSH wrapper. You can use ssh, scp, sshfs and even gsi-ssh in the same manner. The wrapper is independent of the <code>$HOME/.ssh/config</code> settings and employs command line arguments only.</p>
+
+<p>For every <code>user@login</code> pair you have to create a descriptor file where the options and details of the account is stored. Descriptor files are located in <code>$HOME/shf3/mid/ssh</code> directory. The name of the file is a meta-id (MID) which refers to options of the descriptor file. Wrapper commands use the MID for each connection. MIDs are unique and short. All you have to remember is the MID. With the SSH wrapper it is easy to have different SSH keys and options for each account. You can create the MID file from <code>$HOME/shf3/mid/template.ssh</code> or create it by the manager:</p>
+
+<pre><code>sshmgr -n skynet
+</code></pre>
+
+<p>Optionally, you can generate private/public key pairs. Keys are located in <code>$HOME/shf3/key/ssh</code> directory. Secret key is named <code>MID.sec</code>, public key is named <code>MID.pub</code>. The public part should be added to <code>authorized_keys</code> on remote machines.</p>
+
+<h3>Options in the MID file</h3>
+
+<p>The MID file is a regular Bash script file, which contains only <code>key=value</code> pairs. You can source it from any other script.</p>
+
+<pre><code># ssh for regular ssh, gsi for gsi-ssh (see later) 
+mid_ssh_type=ssh
+# FQDN of the remote host
+mid_ssh_fqdn="skynet.cyberdy.ne"
+# remote user name
+mid_ssh_user="$USER"
+# SSH port
+mid_ssh_port=222
+# check port explicitly before connect by nmap
+mid_ssh_port_check="nmap"
+# common SSH options for ssh and scp
+mid_ssh_opt=
+# SSH only options
+mid_ssh_ssh_opt=
+# remote directory where SCP will copy
+mid_ssh_scp_dst="/home/${mid_ssh_user}"
+# SSH tunnel options, eg. proxy redirection
+mid_ssh_tunnel="-L63128:localhost:3128"
+# sshfs remote mount target
+mid_ssh_sshfs_dst="/home/${mid_ssh_user}"
+# sshfs options
+mid_ssh_sshfs_opt=
+</code></pre>
+
+<p>Login to a remote machine is done by:</p>
+
+<pre><code>sshto -m MID
+</code></pre>
+
+<p>Keys will be used if present. If you have tunnels a lock file is created to prevent duplicated redirection. After a not clean logout lock file remains. To force tunnels against the lock run:</p>
+
+<pre><code>sshto -f -m MID
+</code></pre>
+
+<p>File or directory transfer can be done between your CWD and <code>$mid_ssh_scp_dst</code> directory. To copy a file/dir from CWD:</p>
+
+<pre><code>sshtx put MID FILE/DIR
+</code></pre>
+
+<p>To copy back to CWD from <code>$mid_ssh_scp_dst</code> run:</p>
+
+<pre><code>sshtx get MID FILE/DIR
+</code></pre>
+
+<p>Note that SSH keys, options and port as well as SCP options are used from the MID file. The transfer command employs rsync with ssh therefore it is especially suitable to synchronise large files or directories. Transfers can be interrupted and resumed at will.</p>
+
+<p>You can mount the account with sshfs. All you need is the MID and a valid setting of <code>mid_ssh_sshfs_dst</code> in the MID file. Accounts are mounted to <code>$HOME/sshfs/MID</code>. To mount a MID:</p>
+
+<pre><code>sshmnt -m MID
+</code></pre>
+
+<p>To unmount:</p>
+
+<pre><code>sshmnt -u MID
+</code></pre>
+
+<p>Note that you have to install fuse and sshfs for your OS.</p>
+
+<p>The <code>sshmgr</code> command can be used to manage your MIDs. You can list your accounts by:</p>
+
+<pre><code>sshmgr
+</code></pre>
+
+<p>Get info of an account by:</p>
+
+<pre><code>sshmgr -i MID
+</code></pre>
+
+<h3>GSI SSH Support</h3>
+
+<p>Login, transfer and mount commands are GSI aware. Grid proxy is initialized and destroyed automatically. Login proxies are separate. Certificates are sperate from your <code>$HOME/.globus</code> settings.</p>
+
+<p>In order to use GSI you have to include the following options in the MID:</p>
+
+<pre><code>mid_ssh_type=gsi
+# Grid proxy timeout in HH:MM format
+mid_ssh_valid="12:00"
+# Grid certificate group
+mid_ssh_grid="prace"
+</code></pre>
+
+<p>Currently, PRACE grid certificates are supported. You can create a grid certificate file in <code>$HOME/shf3/mid/crt/GRID</code>, where <code>GRID</code> is the name of the grid certificate group. The content of the <code>GRID</code> file is:</p>
+
+<pre><code>mid_crt_url="URL_TO_CERTS.tar.gz"
+</code></pre>
+
+<p>PRACE is supported out-of-the-box but certificates have to be downloaded or updated by:</p>
+
+<pre><code>sshmgr -g prace
+</code></pre>
+
+<p>Certificates are downloaded to <code>$HOME/shf3/crt/prace</code> directory. Your grid account certificate should be copied to <code>$HOME/shf3/key/ssh/MID.crt</code> and the secret key (pem file) to <code>$HOME/shf3/key/ssh/MID.sec</code> . If you create a Grid account with <code>sshmgr -n</code> you have to skip SSH key generation and have to do it manually by the following command:</p>
+
+<pre><code>sshkey -n MID -g URL_TO_OPENSSL_CONFIG
+</code></pre>
+
+<p>The certificate configuration is used by openssl to generate the secret key and the certificate request. The request is found in <code>$HOME/shf3/key/ssh/MID.csr</code> . Note that the sshkey command calls the shf3 password manager to store challenge and request passwords.</p>
+
+<h3>Encrypted directories</h3>
+
+<p>If you install FUSE [encfs <a href="https://en.wikipedia.org/wiki/EncFS">https://en.wikipedia.org/wiki/EncFS</a>] you can have encripted directories. MID files or encrypted directories are in <code>$HOME/shf3/encfs</code> directory. You can create an encfs MID by:</p>
+
+<pre><code>encfsmgr -n secret
+</code></pre>
+
+<p>The MID file has to contain one line:</p>
+
+<pre><code># location of the encrypted directory
+mid_encfs_enc="${HOME}/.secret"
+</code></pre>
+
+<p>Select <code>p</code> for pre-configured paranoia mode and type your encryption password. Note that encryption keys ar located in <code>$HOME/shf3/key/encfs</code> directory (<code>MID.sec</code> files) and not in the encrypted directory.</p>
+
+<p>To mount the encrypted directory:</p>
+
+<pre><code>encfsmnt -m MID
+</code></pre>
+
+<p>Encrypted directories are mounted to <code>$HOME/encfs/MID</code> . Start to encrypt your secret files by moving stuff into this directory.</p>
+
+<h2>Queue Wrapper</h2>
+
+<p>The queue wrapper library is designed to make batch submission of parallel programs very easy. First, you have configure a MID file for the queue. This MID file contains parameters which are same for every submission. Keys and values are scheduler dependent. Currently, Slurm, PBS and SGE is supported. Queue files are located in <code>$HOME/shf3/mid/que directory</code>. Key value pairs are:</p>
+
+<pre><code># scheduler type: slurm, pbs, sge
+QSCHED=slurm
+# email address for notifications
+QMAILTO=your@email
+# which notifications: abe, ALL
+QMAIL=
+# setup scripts
+QSETUP="$HOME/shf3/bin/machines $HOME/shf3/bin/scratch"
+# ulimits
+QLIMIT="ulimit -s unlimited"
+# exclusive allocation
+QEXCL="yes"
+</code></pre>
+
+<p>Note that the setup script <code>machines</code> and <code>scratch</code> is somewhat mandatory. The former sets the variable <code>MACHINES</code> to the hostnames of the allocated nodes. You will need this because MPI implementations do not support every scheduler. The <code>MACHINES</code> variable is used by the MPI wrapper functions to specify hostnames for the mpirun command. The latter sets the <code>SCRATCH</code> variable to your scratch space. Application Wrapper (see later) needs this. Please check each script if you are in doubt.</p>
+
+<p>The purpose of the wrapper is to write job scripts for the supported schedulers. The scheduler dependent key values are:</p>
+
+<pre><code># Slurm account
+QPROJ=
+# Slurm partition
+QPART=
+# Slurm constraints
+QCONST=""
+# SGE queue
+QQUEUE=
+# SGE parallel environment
+QPE=
+</code></pre>
+
+<p>You can find templates in <code>$HOME/shf3/mid/que/templates</code> directory.</p>
+
+<h3>Job Submission</h3>
+
+<p>If the queue MID is ready all you need is a job file. The job file is independent of the scheduler and contains only your resource needs. The queue wrapper is designed for MPI or OMP parallel programs. Co-array Fortran and MPI-OMP hybrid mode is also supported. A typical job file is the following (<code>jobfile</code>):</p>
+
+<pre><code># name of the job
+NAME=test
+# refers to the queue file in shf3/mid/que/skynet
+QUEUE=skynet
+#  the program to run
+RUN="application args"
+# parallel type of run, here MPI-only run with SGI MPT
+MODE=mpi/mpt
+# compute resources: 8 nodes with 2 sockets and 4 cores per socket
+NODES=8
+SCKTS=2
+CORES=4
+# 2 hours wall time
+TIME=02:00:00
+</code></pre>
+
+<p>To submit your job (batch submission) run:</p>
+
+<pre><code>jobmgr -b jobfile
+</code></pre>
+
+<p>This command will run generic checks and shows a summary table of the proposed allocation like that:</p>
+
+<pre><code>  QSCHED NODES SCKTS   CORES GPUS override
+   slurm     1     2       4    0  
+         SLOTS TASKS sockets      
+             8     8       2       
+    MODE    np    pn threads
+ mpi/mpt     8     8       1
+</code></pre>
+
+<p>You can also check the actual, scheduler dependent job script as well. If you have very special needs it is possible to use the wrapper to generate actual job scripts as good starting point. MPI or OMP options are set in various environment variables. You may ask why so serious with parallel submission? Because the above job script is scheduler free and contains only the necessary information. MPI or OMP parameters are error free and calculated accordingly the following table. </p>
+
+<p>Currently, OpenMPI, Intel MPI, SGI MPT, OpenMP and Co-Array Fortran is supported.</p>
+
+<h3>MPI-OMP hybrid mode</h3>
+
+<p>If you specify <code>MODE=mpiomp</code> the wrapper configures SCKTS number of MPI process per node and CORES number of OMP threads per MPI process. You can give any combination of SCKTS and CORES. If your scheduler does not support node based allocation like SGE you may have to specify the total number of job slots per node by:</p>
+
+<pre><code>SLTPN=8
+</code></pre>
+
+<p>and 8 slots will be allocated per node. If you have a large memory requirement you may have to allocate more cores than MPI processes.</p>
+
+<h3>Application Wrapper</h3>
+
+<p>Usually you want to run a script instead of single program. There is no general solution but you can follow this simple scheme:</p>
+
+<ol>
+<li>Preprocess inputs and copy them to the scratch directory</li>
+<li>Run the application</li>
+<li>Collect and postprocess outputs (eg. gzip) and move to submit directory (somewhere in your <code>$HOME</code>)</li>
+</ol><p>Unfortunately, the details of this scheme is application dependent and you have to write wrapper functions for each application. There is a general wrapper which does not do application specific input/output processing. It is a good starting point to develop new wrappers. The Application Wrapper does not depend on the Queue Wrapper, although the Queue Wrapper detects the Application Wrapper.</p>
+
+<p>For the Application Wrapper you need a guide file. This file contains information to configure that 3-step scheme above. A general guide contains (<code>guide</code>):</p>
+
+<pre><code># submit dir
+INPUTDIR="${PWD}"
+# scratch dir
+WORKDIR="${SCRATCH}/hpl-${USER}-${HOSTNAME}-$$"
+# result dir, usually the same as submit dir
+RESULTDIR="${INPUTDIR}"
+# application binary and options
+PRGBIN="${HPL_BIN}/xhpl"
+PRGOPT=""
+# data inputs, usually precalculated libraries
+DATADIR=""
+DATA=""
+# main input
+MAIN="-hpl.dat"
+# other inputs, usually for restart
+OTHER=""
+# in case of error outputs are saved
+ERROR="save"
+# patterns for outputs to collect
+RESULT="*"
+</code></pre>
+
+<p>The <code>*DIR</code> variables tell where to copy inputs from: <code>MAIN</code> and <code>OTHER</code> is realtive to <code>INPUTDIR</code>. The <code>DATA</code> key is application specific and "relative" to <code>DATADIR</code>. The main input is also application specific and can start with a 1 character operator: <code>-</code> input is copied but not included int the argument list, <code>&lt;</code> input is stdin redirected, and no operator means the input is put into the argument list. The final command is <code>$PRGBIN $PRGOPT $MAIN</code> . The program call can be augmented by the queue and the parallel environment. You can run the application with:</p>
+
+<pre><code>runprg -p general -g guide
+</code></pre>
+
+<p>This command creates the scratch, copy inputs, run the application, moves back the results and deletes scratch directory. You can combine the two wrappers by setting <code>RUN="runprg -p general -g guide"</code> .</p>
+
+<h2>A Full Example</h2>
+
+<p>Let me present a full example as well introduce guide kernels. In this example </p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/hornos">hornos</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
