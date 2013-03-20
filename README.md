@@ -306,7 +306,7 @@ This command generates keys as well. All you need to do is send the public key t
 Install shf on skynet as well. You need this for the job submission. First you have to setup the queue. On this example machine the job shceduler is Slurm. Create a queue file `$HOME/shf3/mid/que/skynet`:
 
     QSCHED="slurm"
-    QMAILTO="my.email@gmail.com"
+    QMAILTO="bob@gmail.com"
     QMAIL="ALL"
     QPROJ="P-20130320"
     QCONST="ib"
@@ -358,7 +358,7 @@ The actual job file will look like this:
     ### Scheduler  : slurm
     #SBATCH --job-name TEST
     #SBATCH --mail-type=ALL
-    #SBATCH --mail-user=my.email@gmail.com
+    #SBATCH --mail-user=bob@gmail.com
     #SBATCH --time=12:00:00
     #SBATCH --nodes=2
     #SBATCH --ntasks-per-node=8
@@ -374,8 +374,8 @@ The actual job file will look like this:
     #                 16     8       4       
     
     ### Queue Setup
-    source /home/test/shf3/bin/machines
-    source /home/test/shf3/bin/scratch
+    source /home/bob/shf3/bin/machines
+    source /home/bob/shf3/bin/scratch
     ulimit -s unlimited; ulimit -l unlimited
     
     ### MPI Setup
@@ -392,7 +392,7 @@ The actual job file will look like this:
     export MPI_OPT="   ${MACHINES} @{MPI_NPPN} ${NUMA} @{BIND}  "
     export PRERUN="mpirun ${MPI_OPT}"
     
-    ### Fortran Mulit-processing
+    ### Fortran Multi-processing
     export FMP_MPI_NODES=2
     export FMP_MPI_PERNODE=8
     
@@ -408,6 +408,119 @@ The actual job file will look like this:
     ### Command
     runprg -p vasp -g vasp.guide -s slurm
 
-TODO: on SGE
+Lets assume that your colleague works on an other machine called budapest. She wants to reproduce your results and rerun the same calculation. She installed shf3 and configured the following queue MID on the budapest machine (`$HOME/shf3/mid/que/budapest`):
+
+    QSCHED="sge"
+    QMAILTO="alice@gmail.com"
+    QMAIL="abe"
+    QQUEUE="budapest.q"
+    QPE="mpi"
+    QEXCL="yes"
+    QSHELL="/bin/bash"
+    QULIMIT="ulimit -s unlimited"
+    QOPT="-cwd -V"
+    QSETUP="${HOME}/shf3/bin/machines ${HOME}/shf3/bin/scratch"
+
+On that machine the scheduler is SGE and different parameters have to be used. You have to send the following files to Alice:
+
+    vasp.job
+    vasp.guide
+    (other application specific inputs)
+
+Since the budapest machine have a different architecture Alice changes the folloing lines in `vasp.job`:
+
+    SCKTS=2
+    CORES=12
+    MODE=mpi/ompi
+    BIND="--bycore --bind-to-core"
+
+She switches to OpenMPI and more cores. Every other parameter remains the same. Alice submits the job by the same command:
+
+    jobmgr -b vasp.job
+
+She will generate and submit the following actual job script:
+
+    #!/bin/bash
+    ### Date Wed Mar 20 12:15:50 CET 2013
+    
+    ### Scheduler  : sge
+    #$ -N TEST
+    #$ -S /bin/bash
+    #$ -m abe
+    #$ -M alice@gmail.com
+    #$ -l h_cpu=12:00:00
+    #$ -pe mpi 48
+    #$ -q budapest.q
+    #$ -l exclusive=true
+    #$ -o StdOut
+    #$ -e ErrOut
+    #$ -cwd -V
+    
+    ### Resource Allocation
+    #       QSCHED NODES SCKTS   CORES GPUS override
+    #          sge     2     2      12    0  
+    #              SLOTS TASKS sockets      
+    #                 48    24       4       
+    
+    ### Queue Setup
+    source /home/alice/shf3/bin/machines
+    source /home/alice/shf3/bin/scratch
+    ulimit -s unlimited
+    
+    ### MPI Setup
+    export MPI_MODE="mpi"
+    export MPI_MPI="ompi"
+    export MPI_MAX_SLOTS=48
+    export MPI_MAX_TASKS=24
+    export MPI_NUM_NODES=2
+    export MPI_NPPN="-np 48 -npernode 24"
+    export NODES=2
+    export SCKTS=2
+    export CORES=12
+    export BIND="--bycore --bind-to-core"
+    export MPI_OPT="    @{MPI_NPPN} ${NUMA} @{BIND}  "
+    export PRERUN="mpirun ${MPI_OPT}"
+    
+    ### Fortran Mulit-processing
+    export FMP_MPI_NODES=2
+    export FMP_MPI_PERNODE=24
+    
+    ### OMP Setup
+    export OMP_NUM_THREADS=1
+    export MKL_NUM_THREADS=1
+    export KMP_LIBRARY=serial
+    
+    ### Parallel Mode
+    #         MODE    np    pn threads
+    #     mpi/ompi    48    24       1 
+    
+    ### Command
+    runprg -p vasp -g vasp.guide -s sge
+
+### HPL test example
+HPL is a supported application. You have the following `hpl.job` file:
+
+    NAME=xhpl
+    TIME=06:00:00
+    NODES=1
+    SCKTS=2
+    CORES=12
+    QUEUE=budapest
+    MODE=mpi/ompi
+    BIND="--bycore --bind-to-core"
+    RUN="runprg -p hpl -g hpl.guide"
+
+and the guide file (`hpl.guide`):
+
+    INPUTDIR="${PWD}"
+    WORKDIR="${SCRATCH}/hpl-${USER}-${HOSTNAME}-$$"
+    RESULTDIR="${INPUTDIR}"
+    PRGBIN="${PWD}/xhpl"
+    PRGOPT=""
+    DATADIR=""
+    DATA=""
+    MAIN="-hpl.dat"
+    ERROR="save"
+    RESULT="*"
 
 ## Advanced job scripts (Kernels)

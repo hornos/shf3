@@ -16,7 +16,7 @@ Usage: ${gbn} options
               -b jobfile  - submitt
               -l jobfile  - login
               -d database - job track
-              -f force    - no check
+              -f          - no check
               -o command  - omp run (obsolete)
               -a command  - array run
               -p command  - parallel run
@@ -34,7 +34,7 @@ _x=""
 _r="batch:1:8"
 _f=true
 _v=false
-while getopts hvnb:l:d:r:o:a:p: o; do
+while getopts hvfnb:l:d:r:o:a:p: o; do
   case "$o" in
     b) _c="BATCH"; _j=$OPTARG;;
     l) _c="LOGIN"; _j=$OPTARG;;
