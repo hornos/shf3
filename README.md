@@ -74,6 +74,10 @@ In order to use VPN or tor have have to change `<MID>` to `vpn/<MID>` or `tor/<M
 
     sshtx put tor/<MID> <FILE>
 
+or if you wan to mount the MID over the vpn:
+
+    sshmnt -m vpn/<MID>
+
 #### Login and file transfer
 Login to a remote machine is done by:
 
@@ -394,3 +398,7 @@ The actual job file will look like this:
 
     ### Command
     runprg -p vasp -g vasp.guide -s slurm
+
+TODO: on SGE
+
+## Advanced job scripts (Kernels)
