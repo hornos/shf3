@@ -172,7 +172,7 @@ List all passwords:
 Passwords are stored in `$HOME/shf3/sql/enc_pass.sqlite` SQLite database.
 
 ### Encrypted directories
-If you install FUSE [encfs https://en.wikipedia.org/wiki/EncFS] you can have encripted directories. MID files or encrypted directories are in `$HOME/shf3/encfs` directory. You can create an encfs MID by:
+If you install FUSE [encfs](https://en.wikipedia.org/wiki/EncFS) you can have encripted directories. MID files or encrypted directories are in `$HOME/shf3/encfs` directory. You can create an encfs MID by:
 
     encfsmgr -n secret
 
