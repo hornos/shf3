@@ -70,7 +70,7 @@ Where the `<VPN IP>` is the remote address on the VPN. For the TOR you need:
     mid_tor_fqdn="<ONION NAME>.onion"
     mid_tor_proxy="localhost:9050"
 
-In order to use VPN or tor have have to change `<MID>` to `vpn/<MID>` or `tor/<MID>`, respectively. Note that this notation can be used everywhere insted of a regular MID, so to copy a file over TOR you have to write:
+In order to use VPN or TOR change `<MID>` to `vpn/<MID>` or `tor/<MID>`, respectively. Note that this notation can be used everywhere insted of a regular MID, so to copy a file over TOR you have to write:
 
     sshtx put tor/<MID> <FILE>
 
