@@ -150,6 +150,27 @@ Certificates are downloaded to `$HOME/shf3/crt/prace` directory. Your grid accou
 
 The certificate configuration is used by openssl to generate the secret key and the certificate request. The request is found in `$HOME/shf3/key/ssh/<MID>.csr` . Note that the sshkey command calls the shf3 password manager to store challenge and request passwords.
 
+### Password manager
+Shf3 has a basic shell based password manager. Passwords are stored in an sqlite database and encrypted by GPG. Passwords are random strings from random.org and protected by a per password master password. To generate a 21 character long new password:
+
+     passmgr -l 21 -u <ID>
+
+Retrive the generated password:
+
+    passmgr -u <ID>
+
+Note that the password is obscured and shown between `>` and `<` caharacters and you have to highlight it to reveal.
+
+Search for an ID:
+
+    passmgr -s <ID>
+
+List all passwords:
+
+    passmgr
+
+Passwords are stored in `$HOME/shf3/sql/enc_pass.sqlite` SQLite database.
+
 ### Encrypted directories
 If you install FUSE [encfs https://en.wikipedia.org/wiki/EncFS] you can have encripted directories. MID files or encrypted directories are in `$HOME/shf3/encfs` directory. You can create an encfs MID by:
 
@@ -170,6 +191,11 @@ Encrypted directories are mounted to `$HOME/encfs/<MID>` . Start to encrypt your
 
 Queue Wrapper
 ------------------
+
+Shf3 is not a grid middleware tool and does not have middleware support right now. The only requirement is a properly configured scheduler. You have to read and understand the description of the site specific manual of the scheduler. You have to put constant parameters to a queue MID file. Shf3 queue wrapper helps regular HPC users if they can't use a middleware yet they want some interoperatibility. It is specially suitable for groups where job scripts are shared and version controlled.
+
+The main goal is to have simple and portable job scripts as well as workflow like application scripts. At first for every site you have to create a queue MID. For every job you have to create a job file. Actual job scripts are generated acoording to the queue and job file. If you move to an other machine you just move your shf3 directory, configure a new queue MID and submit your jobs with the new queue.
+
 The queue wrapper library is designed to make batch submission of parallel programs very easy. First, you have to configure a MID file for the queue. This MID file contains parameters which are same for every submission. Keys and values are scheduler dependent. Currently, Slurm, PBS and SGE is supported. Queue files are located in `$HOME/shf3/mid/que` directory. The following key/value pairs are common for evry shceduler:
 
     # scheduler type: slurm, pbs, sge
@@ -257,7 +283,7 @@ If you specify `MODE=mpiomp` the wrapper configures `SCKTS` number of MPI proces
 In this case 8 slots are allocated per node. You can use the hybrid mode if want to run a large memory job on low memory nodes by overallocating.
 
 ### Application Wrapper
-In practice you want to run a script instead of single program. There is no general solution but you can follow this simple scheme:
+In practice you want to run a script instead of single program. There is no general solution but you can follow this simple Prepare-Run-Collect (PRC) scheme:
 
 1. Preprocess inputs and copy them to the scratch directory
 2. Run the application
@@ -410,7 +436,7 @@ The actual job file will look like this:
 
 #### Note on `MPI_OPT`
 
-This variable is evaluated by `runprg` on-the-fly since you can run a script function, called kernel, instead of the application specified in the guide. The kernel function will call your application an can change MPI and OMP parameters or restart your application during the run. See Advanced job scripts section. If you do not use `runprg` the `MPI_OPT` variable does not contain `@` characters and you have a normal prerun line in your actual job script:
+This variable is evaluated by `runprg` on-the-fly since you can run a script function, called kernel, instead of the application specified in the guide. The kernel function will call your application an can change MPI and OMP parameters or restart your application during the run. See Workflow scripts section. If you do not use `runprg` the `MPI_OPT` variable does not contain `@` characters and you have a normal prerun line in your actual job script:
 
     $PRERUN <YOUR APP>
 
@@ -525,8 +551,54 @@ and the guide file (`hpl.guide`):
     PRGOPT=""
     DATADIR=""
     DATA=""
-    MAIN="-hpl.dat"
+    MAIN="-HPL.dat"
     ERROR="save"
     RESULT="*"
 
-## Advanced job scripts (Kernels)
+## Workflow scripts
+Program wrapper is a simple workflow manager. It has support for some specific application. You can use the general wrapper to run any kind of application in the PRC scheme. If you want to run the HPL test adove with the general runner (`hpl.job`):
+
+    NAME=xhpl
+    TIME=06:00:00
+    NODES=1
+    SCKTS=2
+    CORES=12
+    QUEUE=budapest
+    MODE=mpi/ompi
+    BIND="--bycore --bind-to-core"
+    RUN="runprg -p general -g hpl.guide"
+
+The general runner checks only for the `PRGBIN`. In case of supported apps input files are also checked. By using an application specific wrapper you can reduce faulty submissions considerably.
+
+### Workflow kernel
+You can run a so-called kernel function insted of `PRGBIN` if you specify the following line in the guide file:
+
+    KERNEL="${INPUTDIR}/kernel"
+
+The kernel file is copied to the scratch space and sourced by `runpgr`. The most simple kernel file looks like this (`kernel`):
+
+    function general/kernel() {
+      run/prg/step
+    }
+
+This kernel runs your application. The kernel functions lives inside `runpgr` you have to be careful what you do here, although, you can do pretty much anything: modify inputs, restart the application, reconfigure parallel paremeters etc. For example if you want to switch to MPI OMP mode on the fly after you do this:
+
+    function general/kernel() {
+      # run the first step
+      run/prg/step
+      
+      # check outputs and modify inputs
+      
+      # set new socket and core per node parameters
+      SCKTS=4
+      CORES=2
+      BIND="omplace -s 1"
+
+      # switch to MPI-OMP mode
+      run/prg/mode mpiomp
+
+      # rerun the application
+      run/prg/step
+    }
+
+You can consider kernels as dynamic applications inside the RPC scheme. It is especially usefule if you have simple workflows eg. you have to call the same application with different inputs in sequence. You can save time and imporove utilization by grouping tightly coupled run steps into a kernel. Do more and submit once!
