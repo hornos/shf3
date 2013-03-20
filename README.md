@@ -78,6 +78,8 @@ or if you wan to mount the MID over the vpn:
 
     sshmnt -m vpn/<MID>
 
+#### SSH hoping
+
 #### Login and file transfer
 Login to a remote machine is done by:
 
@@ -218,7 +220,14 @@ If the queue MID is ready all you need is a job file. The job file is independen
     # 2 hours wall time
     TIME=02:00:00
 
-The `QUEUE` refers to the queue MID file (note that it is not real queue of a system). The `RUN` key sets your application, which can be a script if you need complex pre or post-processing. Please note that you ''do not have to explicitly include mpirun'' before your application, the job wrapper does it. Three modes are supported: i) MPI-only (`MODE=mpi/<MPI>`), ii) MPI-OMP hybrid (`MODE=mpiomp/<MPI>`) and iii) OpenMP (`MODE=omp`), where `<MPI>` is `opmi` (OpenMPI), `ipmi` (Intel MPI), `mpt` (SGI MPT). MPI parameters and OMP settings are generated according to the `NODES`, `SCKTS` and `CORES` resource needs, which are number of nodes, number of CPU sockets per node, and number of CPU cores per socket, respectively. The following table is used to determine the parameters:
+The `QUEUE` refers to the queue MID file (note that it is not real queue of a system). The `RUN` key sets your application, which can be a script if you need complex pre or post-processing. Please note that you ''do not have to explicitly include mpirun'' before your application, the job wrapper does it. Three modes are supported:
+
+1. MPI-only (`MODE=mpi/<MPI>`)
+2. MPI-OMP hybrid (`MODE=mpiomp/<MPI>`)
+3. OpenMP (`MODE=omp`)
+*. Co-Array Fortran(`MODE=caf`)
+
+where `<MPI>` is `opmi` (OpenMPI), `ipmi` (Intel MPI), `mpt` (SGI MPT). MPI parameters and OMP settings are generated according to the `NODES`, `SCKTS` and `CORES` resource needs, which are number of nodes, number of CPU sockets per node, and number of CPU cores per socket, respectively. The following table is used to determine the parameters:
 
     Par. Mode        # of MPI procs          # of MPI procs/node  # of OMP threads/MPI proc.
     MPI-only (mpi)   NODES × SCKTS × CORES   SCKTS × CORES        1
