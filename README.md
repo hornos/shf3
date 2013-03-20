@@ -408,6 +408,12 @@ The actual job file will look like this:
     ### Command
     runprg -p vasp -g vasp.guide -s slurm
 
+#### Note on `MPI_OPT`
+
+This variable is evaluated by `runprg` on-the-fly since you can run a script function, called kernel, instead of the application specified in the guide. The kernel function will call your application an can change MPI and OMP parameters or restart your application during the run. See Advanced job scripts section. If you do not use `runprg` the `MPI_OPT` variable does not contain `@` characters and you have a normal prerun line in your actual job script:
+
+    $PRERUN <YOUR APP>
+
 Lets assume that your colleague works on an other machine called budapest. She wants to reproduce your results and rerun the same calculation. She installed shf3 and configured the following queue MID on the budapest machine (`$HOME/shf3/mid/que/budapest`):
 
     QSCHED="sge"
@@ -427,7 +433,7 @@ On that machine the scheduler is SGE and different parameters have to be used. Y
     vasp.guide
     (other application specific inputs)
 
-Since the budapest machine have a different architecture Alice changes the folloing lines in `vasp.job`:
+Since the budapest machine have a different architecture Alice changes the following lines in `vasp.job`:
 
     SCKTS=2
     CORES=12
