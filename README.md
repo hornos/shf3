@@ -225,7 +225,7 @@ The `QUEUE` refers to the queue MID file (note that it is not real queue of a sy
 1. MPI-only (`MODE=mpi/<MPI>`)
 2. MPI-OMP hybrid (`MODE=mpiomp/<MPI>`)
 3. OpenMP (`MODE=omp`)
-*. Co-Array Fortran(`MODE=caf`)
+4. Co-Array Fortran(`MODE=caf`)
 
 where `<MPI>` is `opmi` (OpenMPI), `ipmi` (Intel MPI), `mpt` (SGI MPT). MPI parameters and OMP settings are generated according to the `NODES`, `SCKTS` and `CORES` resource needs, which are number of nodes, number of CPU sockets per node, and number of CPU cores per socket, respectively. The following table is used to determine the parameters:
 
