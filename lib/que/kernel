@@ -548,7 +548,7 @@ function que/sub() {
     fi
 
     echo ""                                    >> "${_bat}"
-    echo "### Fortran Mulit-processing"        >> "${_bat}"
+    echo "### Fortran Multi-processing"        >> "${_bat}"
     import hpc/fmp
     hpc/fmp/binding ${_nodes} ${_pn}           "${_bat}"
   fi
