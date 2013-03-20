@@ -194,6 +194,8 @@ Queue Wrapper
 
 Shf3 is not a grid middleware tool and does not have middleware support right now. The only requirement is a properly configured scheduler. You have to read and understand the description of the site specific manual of the scheduler. You have to put constant parameters to a queue MID file. Shf3 queue wrapper helps regular HPC users if they can't use a middleware yet they want some interoperatibility. It is specially suitable for groups where job scripts are shared and version controlled.
 
+Shf3 has no support for UNICORE. However, it has some middleware like features. The only requirement is a local job scheduler. Shf3 is for the local batch system. It provides unified local access on the local batch system level. Lot of users are still and will be local batch users using applications where UNICORE is not applicable.
+
 The main goal is to have simple and portable job scripts as well as workflow like application scripts. At first for every site you have to create a queue MID. For every job you have to create a job file. Actual job scripts are generated acoording to the queue and job file. If you move to an other machine you just move your shf3 directory, configure a new queue MID and submit your jobs with the new queue.
 
 The queue wrapper library is designed to make batch submission of parallel programs very easy. First, you have to configure a MID file for the queue. This MID file contains parameters which are same for every submission. Keys and values are scheduler dependent. Currently, Slurm, PBS and SGE is supported. Queue files are located in `$HOME/shf3/mid/que` directory. The following key/value pairs are common for evry shceduler:
