@@ -79,6 +79,13 @@ or if you wan to mount the MID over the vpn:
     sshmnt -m vpn/<MID>
 
 #### SSH hoping
+Shf3 supports one step SSH hoping. You have to setup a MID for the internal machine (`<INT>`), and you have to change to original MID:
+
+    sshto -m <MID>/<INT>
+
+Login is redirected via `<MID>` to `<INT>`. You can use this notaion for other SSH commands as well. eg. mount the internal machine:
+
+    sshmnt -m <MID>/<INT>
 
 #### Login and file transfer
 Login to a remote machine is done by:
