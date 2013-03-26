@@ -1,0 +1,20 @@
+# http://www.schedmd.com/slurmdocs/rosetta.pdf
+# User Commands for SLURM
+
+function job_submit() { sbatch $* }
+
+function job_delete() { scancel $* }
+
+function job_status() { squeue $* }
+
+function job_status_by { squeue -u $* }
+
+function job_status_by_me { job_status_by $USER }
+
+function job_hold { scontrol hold $* }
+
+function job_release { scontrol release $* }
+
+function queue_list { squeue }
+
+function sched_gui { sview }

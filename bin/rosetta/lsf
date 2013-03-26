@@ -1,0 +1,20 @@
+# http://www.schedmd.com/slurmdocs/rosetta.pdf
+# User Commands for PBS/Torque
+
+function job_submit() { bsub $* }
+
+function job_delete() { bkill $* }
+
+function job_status() { bjobs $* }
+
+function job_status_by { bjobs -u $* }
+
+function job_status_by_me { job_status_by $USER }
+
+function job_hold { bstop $* }
+
+function job_release { bresume $* }
+
+function queue_list { bqueues }
+
+function sched_gui { xlsf }

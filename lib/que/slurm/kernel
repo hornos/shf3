@@ -3,13 +3,38 @@ function que/slurm() {
   local _sub="${1:-BATCH}"
   local _bat="${2:-slurm.batch.sh}"
 
-  if test "${_sub}" = "LOGIN" ; then
+  if [ "${_sub}" = "LOGIN" ] ; then
     _bat="${2:-slurm.login.sh}"
   fi
-  if ! test -r "${_bat}" ; then
-    msg "Batch file not found"
+  if [ ! -r "${_bat}" ] ; then
+    msg/error "($FUNCNAME) File not found ${_bat}"
     return ${_false_}
   fi
+
+  ### Slurm Rosetta based job specification
+
+  # Description     | Input file
+  # ----------------+-------------------------
+  # Scheduler queue | Queue file
+  local _sched_queue=${sched_queue:-${QPART}}
+
+  # Node Count      | Job file
+  local _nodes=${nodes:-${NODES}}
+
+  # CPU Count       | Job file
+  # local _cpus=${cpus}
+
+  # Wall Clock Limit
+  # local _job_walltime=${walltime:-${TIME}}
+  # local _job_stdout=${stdout:-${STDOUT}}
+  # local _job_stderr=${stderr:-${STDERR}}
+  # local _job_copy_env=${copy_env:${QOPT}}
+  # local _job_events=
+  # local _job_email=
+  # local _job_name=
+  # local _job_requeue=
+  # local _job_wdir
+  # local _job_mem
 
   ### begin login
   if test "${_sub}" = "LOGIN" ; then
@@ -17,6 +42,11 @@ function que/slurm() {
     if ! $(u/installed "${_qlogin}") ; then
        msg "${_qlogin} not found"
        return ${_false_}
+    fi
+
+    # partition
+    if ! test -z "${QPART}" ; then
+      _qlogin="${_qlogin} --partition=${QPART}"
     fi
 
     # name
@@ -64,11 +94,6 @@ function que/slurm() {
       _qlogin="${_qlogin}${_const}"
     fi
 
-    # partition
-    if ! test -z "${QPART}" ; then
-      _qlogin="${_qlogin} --partition=${QPART}"
-    fi
-
     # project
     if ! test -z "${QACC}" ; then
       _qlogin="${_qlogin} --account=${QACC}"
@@ -98,7 +123,7 @@ function que/slurm() {
 
   # memory
   if ! test -z "${MEMORY}" ; then
-    echo "#${que_slurm} --mem-per-cpu=${MEMORY}"        >> "${_bat}"
+    echo "#${que_slurm} --mem-per-cpu=${MEMORY}"      >> "${_bat}"
   fi
 
   if ! test -z "${NODES}" ; then

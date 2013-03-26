@@ -379,7 +379,9 @@ function ssh/login() {
   local _tunnel=false
 
   # TODO: hoping tunnels
-  if ! ${_hoping} || test "${_hop}" = "tor" ; then
+  if ! ${_hoping} || \ 
+     test "${_hop}" = "tor" || \
+     test "${_hop}" = "vpn" ; then
     # TODO: syntax ,merge
     if ! test -z "${_link}" ; then
       _opt="${_opt} -L${_link}"
