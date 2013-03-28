@@ -19,7 +19,7 @@ if empty "${_socks}" ; then
   exit 1
 fi
 
-cat << EOF
+cat > "${conf}" << EOF
 strict_chain
 quiet_mode
 proxy_dns
