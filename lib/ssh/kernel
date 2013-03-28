@@ -1,3 +1,5 @@
+# ssh kernel
+
 function help/ssh() {
   cat << EOF
 SSH module
