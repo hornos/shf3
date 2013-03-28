@@ -90,11 +90,11 @@ Login is redirected via `<MID>` to `<INT>`. You can use this notaion for other S
 #### Login and file transfer
 Login to a remote machine is done by:
 
-    sshto -m <MID>
+    sshin <MID>
 
 If you have tunnels a lock file is created to prevent duplicated redirection. After a not clean logout lock file remains. To force tunnels against the lock run:
 
-    sshto -f -m <MID>
+    sshin +<MID>
 
 File or directory transfer can be done between your CWD and `$mid_ssh_scp_dst` directory. To copy a file/dir from CWD:
 
@@ -205,7 +205,11 @@ Shf3 has no support for UNICORE. However, it has some middleware like features. 
 
 The main goal is to have simple and portable job scripts as well as workflow like application scripts. At first for every site you have to create a queue MID. For every job you have to create a job file. Actual job scripts are generated acoording to the queue and job file. If you move to an other machine you just move your shf3 directory, configure a new queue MID and submit your jobs with the new queue.
 
-The queue wrapper library is designed to make batch submission of parallel programs very easy. First, you have to configure a MID file for the queue. This MID file contains parameters which are same for every submission. Keys and values are scheduler dependent. Currently, Slurm, PBS and SGE is supported. Queue files are located in `$HOME/shf3/mid/que` directory. The following key/value pairs are common for evry shceduler:
+The queue wrapper library is designed to make batch submission of parallel programs very easy. First, you have to configure a MID file for the queue. This MID file contains parameters which are same for every submission. Keys and values are scheduler dependent. Currently, Slurm, PBS and SGE is supported. Queue files (MIDs) are located in `$HOME/shf3/mid/que` directory.
+
+Queue and job file keys are based on the [Slurm rosetta](http://www.schedmd.com/slurmdocs/rosetta.pdf) which has a unified interface for the following schedulers: PBS, Slurm, LSF, SGE, LoadLeveler.
+
+The following key/value pairs are common for evry shceduler:
 
     # scheduler type: slurm, pbs, sge
     QSCHED=slurm

@@ -5,17 +5,16 @@ function job_submit() { llsubmit $* }
 
 function job_delete() { llcancel $* }
 
-# TODO
-function job_status() { qstat -j $* }
+function job_status() { llq -j $* }
 
-function job_status_by { qstat -u $* }
+function job_status_by { llq -u $* }
 
 function job_status_by_me { job_status_by $USER }
 
-function job_hold { qhold $* }
+function job_hold { llhold $* }
 
-function job_release { qrls $* }
+function job_release { llhold -r $* }
 
-function queue_list { qconf -sql }
+function queue_list { llclass }
 
-function sched_gui { qmon }
+function sched_gui { xload }

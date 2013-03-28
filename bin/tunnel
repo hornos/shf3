@@ -1,0 +1,30 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../lib/header
+
+conf="${gdn}/.${gbn}.$$"
+
+function tunnel/stop() {
+  if test -r "${conf}" ; then
+    rm -f "${conf}"
+  fi
+  exit 1
+}
+trap tunnel/stop INT TERM EXIT
+
+_socks=$1
+shift
+
+
+if empty "${_socks}" ; then
+  exit 1
+fi
+
+cat << EOF
+strict_chain
+quiet_mode
+proxy_dns
+[ProxyList]
+socks5 127.0.0.1 ${_socks}
+EOF
+
+PROXYCHAINS_CONF_FILE="${conf}" $*

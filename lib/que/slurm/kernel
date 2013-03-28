@@ -13,25 +13,57 @@ function que/slurm() {
 
   ### Slurm Rosetta based job specification
 
-  # Description     | Input file
-  # ----------------+-------------------------
-  # Scheduler queue | Queue file
-  local _sched_queue=${sched_queue:-${QPART}}
+  # Description          | Input file
+  # ---------------------+-------------------------
+  # Scheduler queue      | Queue file
+  local _jobqueue=${jobqueue:-${QPART}}
 
-  # Node Count      | Job file
+  # Node Count           | Job file
   local _nodes=${nodes:-${NODES}}
 
-  # CPU Count       | Job file
+  # CPU Count            | Job file
   # local _cpus=${cpus}
 
-  # Wall Clock Limit
-  # local _job_walltime=${walltime:-${TIME}}
-  # local _job_stdout=${stdout:-${STDOUT}}
-  # local _job_stderr=${stderr:-${STDERR}}
-  # local _job_copy_env=${copy_env:${QOPT}}
-  # local _job_events=
-  # local _job_email=
-  # local _job_name=
+  # Wall Clock Limit     | Job file
+  local _walltime=${walltime:-${TIME}}
+
+  # Standard Output FIle | job file
+  # local _stdout=${stdout:-${STDOUT}}
+
+  # Standard Error File  | job file
+  # local _stderr=${stderr:-${STDERR}}
+
+  # Copy Environment     | Queue file
+  # local _copy_env=${copy_env:-${QOPT}}
+
+  # Event Notification   | Queue file
+  local _events=${events:-${QMAIL}}
+
+  # Email Address        | Queue file
+  local _mailto=${mailto:-${MAILTO}}
+
+  # Job Name             | Job file
+  local _jobname=${jobname:-${NAME}}
+
+  # Job Restart          | job file
+  local _restart=${restart}
+
+  # Working Directory    | job file
+  local _workdir=${workdir}
+
+  # Resource Sharing     | Job file
+  local _sharing=${sharing}
+
+  # Memory Size per core | job file
+  local _memory=${memory:-${MEMORY}}
+
+  # Account to charge    | Queue file
+  local _account=${account:-${QPROJ}}
+
+  # Tasks Per Node
+  local _tasks=${tasks:-${TASKS}}
+
+
   # local _job_requeue=
   # local _job_wdir
   # local _job_mem
@@ -45,7 +77,7 @@ function que/slurm() {
     fi
 
     # partition
-    if ! test -z "${QPART}" ; then
+    if ! empty "${QPART}" ; then
       _qlogin="${_qlogin} --partition=${QPART}"
     fi
 
@@ -53,32 +85,32 @@ function que/slurm() {
     _qlogin="${_qlogin} --job-name ${NAME}"
 
     # time
-    if ! test -z "${TIME}" ; then
+    if ! empty "${TIME}" ; then
       _qlogin="${_qlogin} --time=${TIME}"
     fi
 
     # memory
-    if ! test -z "${MEMORY}" ; then
+    if ! empty "${MEMORY}" ; then
       _qlogin="${_qlogin} --mem-per-cpu=${MEMORY}"
     fi
 
     # nodes
-    if ! test -z "${NODES}" ; then
+    if ! empty "${NODES}" ; then
       _qlogin="${_qlogin} --nodes=${NODES}"
     fi
 
     # tasks
-    if ! test -z "${TASKS}" ; then
+    if ! empty "${TASKS}" ; then
       _qlogin="${_qlogin} --ntasks-per-node=${TASKS}"
     fi
 
     # gpus
-    if ! test -z "${GPUS}" ; then
+    if ! empty "${GPUS}" ; then
       _qlogin="${_qlogin} --gres=gpu:${GPUS}"
     fi
 
     # other constraints
-    if ! test -z "${QCONST}" ; then
+    if ! empty "${QCONST}" ; then
       local _const=""
       _qlogin="${_qlogin} --constraint="
       local _first=true
@@ -95,7 +127,7 @@ function que/slurm() {
     fi
 
     # project
-    if ! test -z "${QACC}" ; then
+    if ! empty "${QACC}" ; then
       _qlogin="${_qlogin} --account=${QACC}"
     fi
 

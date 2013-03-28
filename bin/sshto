@@ -45,7 +45,7 @@ if test "${_m}" = "" ; then
   read _m
 fi
 
-if ! test -z "${_x}" ; then
+if ! empty "${_x}" ; then
   ssh/cmd "${_m}" "${_x}"
   exit $?
 fi
