@@ -1,3 +1,6 @@
+function que/slurm/constraints() {
+  echo $* | sed s/,/\&/g
+}
 
 function que/slurm() {
   local _sub="${1:-BATCH}"
@@ -11,7 +14,15 @@ function que/slurm() {
     return ${_false_}
   fi
 
-  ### Slurm Rosetta based job specification
+
+  # ********************************************************
+  #     ____                  __  __
+  #    / __ \____  ________  / /_/ /_____ _
+  #   / /_/ / __ \/ ___/ _ \/ __/ __/ __ `/
+  #  / _, _/ /_/ (__  )  __/ /_/ /_/ /_/ /
+  # /_/ |_|\____/____/\___/\__/\__/\__,_/
+  #
+  # ********************************************************
 
   # Description          | Input file
   # ---------------------+-------------------------
@@ -22,37 +33,37 @@ function que/slurm() {
   local _nodes=${nodes:-${NODES}}
 
   # CPU Count            | Job file
-  # local _cpus=${cpus}
+  local _slots=${slots}
 
   # Wall Clock Limit     | Job file
   local _walltime=${walltime:-${TIME}}
 
   # Standard Output FIle | job file
-  # local _stdout=${stdout:-${STDOUT}}
+  local _stdout=${stdout:-${STDOUT}}
 
   # Standard Error File  | job file
-  # local _stderr=${stderr:-${STDERR}}
+  local _stderr=${stderr:-${STDERR}}
 
   # Copy Environment     | Queue file
-  # local _copy_env=${copy_env:-${QOPT}}
+  local _copy_env=${copy_env:-no}
 
   # Event Notification   | Queue file
   local _events=${events:-${QMAIL}}
 
   # Email Address        | Queue file
-  local _mailto=${mailto:-${MAILTO}}
+  local _mailto=${mailto:-${QMAILTO}}
 
   # Job Name             | Job file
   local _jobname=${jobname:-${NAME}}
 
   # Job Restart          | job file
-  local _restart=${restart}
+  local _restart=${restart:-no}
 
   # Working Directory    | job file
   local _workdir=${workdir}
 
   # Resource Sharing     | Job file
-  local _sharing=${sharing}
+  local _exclusive=${exclusive:-no}
 
   # Memory Size per core | job file
   local _memory=${memory:-${MEMORY}}
@@ -60,153 +71,376 @@ function que/slurm() {
   # Account to charge    | Queue file
   local _account=${account:-${QPROJ}}
 
-  # Tasks Per Node
+  # Tasks Per Node       | Job file
   local _tasks=${tasks:-${TASKS}}
 
+  # CPUs per task        | Job file
+  local _taskcpus=${taskcpus}
 
-  # local _job_requeue=
-  # local _job_wdir
-  # local _job_mem
+  # Job Dependency       | Job file
+  local _depend=${depend}
 
-  ### begin login
-  if test "${_sub}" = "LOGIN" ; then
+  # Job Project          | Job file
+  local _project=${project}
+
+  # Job host preference  | Job file
+  local _include_nodes=${include_nodes}
+  local _exclude_nodes=${exclude_nodes}
+
+  # Quality Of Service   | Job file
+  local _quality=${quality}
+
+  # Job Arrays           | Job file
+  local _arrays=${arrays}
+
+  # Generic Resources    | Job file
+  local _gpus=${gpus:-${GPUS}}
+
+  # Licenses             | Job file
+  local _licenses=${licenses}
+
+  # Begin Time           | job file
+  local _begin=${begin}
+
+  # Constraints          | Queue file
+  local _constraints=${constraints:-${QCONST}}
+
+  # Other Options        | Queue file
+  local _options=${options:-${QOPT}}
+
+
+  # ********************************************************
+  #     ____      __                       __  _
+  #    /  _/___  / /____  _________ ______/ /_(_)   _____
+  #    / // __ \/ __/ _ \/ ___/ __ `/ ___/ __/ / | / / _ \
+  #  _/ // / / / /_/  __/ /  / /_/ / /__/ /_/ /| |/ /  __/
+  # /___/_/ /_/\__/\___/_/   \__,_/\___/\__/_/ |___/\___/
+  #
+  # ********************************************************
+
+  if [ "${_sub}" = "LOGIN" ] ; then
+    # check the cluster login app
     local _qlogin="${que_slurm_qlogin}"
-    if ! $(u/installed "${_qlogin}") ; then
-       msg "${_qlogin} not found"
+    if ! u/installed "${_qlogin}" ; then
+       msg/error "($FUNCNAME) Not found ${_qlogin}"
        return ${_false_}
     fi
 
-    # partition
-    if ! empty "${QPART}" ; then
-      _qlogin="${_qlogin} --partition=${QPART}"
+    # Queue
+    if ! empty "${_jobqueue}" ; then
+      _qlogin="${_qlogin} -p ${_jobqueue}"
     fi
 
-    # name
-    _qlogin="${_qlogin} --job-name ${NAME}"
-
-    # time
-    if ! empty "${TIME}" ; then
-      _qlogin="${_qlogin} --time=${TIME}"
+    # Node Count
+    if ! empty "${_nodes}" ; then
+      _qlogin="${_qlogin} -N ${_nodes}"
     fi
 
-    # memory
-    if ! empty "${MEMORY}" ; then
-      _qlogin="${_qlogin} --mem-per-cpu=${MEMORY}"
+    # CPU Count
+    if ! empty "${_slots}" ; then
+      _qlogin="${_qlogin} -n ${_slots}"
     fi
 
-    # nodes
-    if ! empty "${NODES}" ; then
-      _qlogin="${_qlogin} --nodes=${NODES}"
+    # Wall Clock Limit
+    if ! empty "${_walltime}" ; then
+      _qlogin="${_qlogin} -t ${_walltime}"
     fi
 
-    # tasks
-    if ! empty "${TASKS}" ; then
-      _qlogin="${_qlogin} --ntasks-per-node=${TASKS}"
+    # N/A Standard Output File
+    # N/A Standard Error File
+
+    # Copy Environment
+    if [ "${_copy_env}" = "yes" ] ; then
+      _qlogin="${_qlogin} --export=ALL"
     fi
 
-    # gpus
-    if ! empty "${GPUS}" ; then
-      _qlogin="${_qlogin} --gres=gpu:${GPUS}"
+    # N/A Event Notification
+    # N/A Email Address
+
+    # Job Name
+    _qlogin="${_qlogin} --job-name ${_jobname}"
+
+    # N/A Job Restart
+
+    # Working Directory
+    if ! empty "${_workdir}" ; then
+      _qlogin="${_qlogin} --workdir=${_workdir}"
     fi
 
-    # other constraints
-    if ! empty "${QCONST}" ; then
-      local _const=""
-      _qlogin="${_qlogin} --constraint="
-      local _first=true
-      local _c
-      for _c in ${QCONST} ; do
-        if ${_first} ; then
-          _const="${_c}"
-          _first=false
-        else
-          _const="${_const}\&${_c}"
-        fi
-      done
-      _qlogin="${_qlogin}${_const}"
+    # Resource Sharing
+    if [ "${_exclusive}"  = "yes" ] ; then
+      _qlogin="${_qlogin} --exclusive"
     fi
 
-    # project
-    if ! empty "${QACC}" ; then
-      _qlogin="${_qlogin} --account=${QACC}"
+    # Memory Size in MB
+    if ! empty "${_memory}" ; then
+      _qlogin="${_qlogin} --mem-per-cpu=${_memory}M"
+    fi
+
+    # Account to charge
+    if ! empty "${_account}" ; then
+      _qlogin="${_qlogin} --account=${_account}"
+    fi
+
+    # Tasks Per Node
+    if ! empty "${_tasks}" ; then
+      _qlogin="${_qlogin} --ntasks-per-node=${_tasks}"
+    fi
+
+    # CPUs Per Task
+    if ! empty "${_taskcpus}" ; then
+      _qlogin="${_qlogin} --cpus-per-task=${_taskcpus}"
+    fi
+
+    # N/A Job Dependency
+
+    # Job Project
+    if ! empty "${_project}" ; then
+      _qlogin="${_qlogin} --wckey=${_project}"
+    fi
+
+    # Job host preference
+    if ! empty "${_include_nodes}" ; then
+      # TODO: filter spaces
+      _qlogin="${_qlogin} --nodelist=${_include_nodes}"
+    fi
+
+    if ! empty "${_exclude_nodes}" ; then
+      # TODO: filter spaces
+      _qlogin="${_qlogin} --exclude=${_exclude_nodes}"
+    fi
+
+    # Quality Of Service
+    if ! empty "${_quality}" ; then
+      _qlogin="${_qlogin} --qos=${_quality}"
+    fi
+
+    # Job Arrays
+    if ! empty "${_arrays}" ; then
+      _qlogin="${_qlogin} --array=${_arrays}"
+    fi
+
+    # Generic Resources
+    if ! empty "${_gpus}" ; then
+      _qlogin="${_qlogin} --gres=gpu:${gpus}"
+    fi
+
+    # Licenses
+    if ! empty "${_licenses}" ; then
+      _qlogin="${_qlogin} --licenses=${_licenses}"
+    fi
+
+    # N/A Begin Time
+
+    # Constraints
+    if ! empty "${_constraints}" ; then
+      local _cons=$(que/slurm/constraints "${_constraints}")
+      _qlogin="${_qlogin} --constraint=${_const}"
+    fi
+
+    # Options
+    if ! empty "${_options}" ; then
+      _qlogin="${_qlogin} ${_options}"
     fi
 
     echo "${_qlogin}" >> "${_bat}"
     return ${_true_}
   fi
-  ### end login
+  # end Interactive Login
 
-  ### begin batch
-  # name
-  echo "#${que_slurm} --job-name ${NAME}"             >> "${_bat}"
 
-  # mail
-  if ! test -z "${QMAIL}" && test "${QMAIL}" != "runprg" ; then
-    echo "#${que_slurm} --mail-type=${QMAIL}"         >> "${_bat}"
-    if ! test -z "${QMAILTO}" ; then
-      echo "#${que_slurm} --mail-user=${QMAILTO}"     >> "${_bat}"
+  # ********************************************************
+  #     ____        __       __
+  #    / __ )____ _/ /______/ /_
+  #   / __  / __ `/ __/ ___/ __ \
+  #  / /_/ / /_/ / /_/ /__/ / / /
+  # /_____/\__,_/\__/\___/_/ /_/
+  #
+  # ********************************************************
+
+  # Queue
+  if ! empty "${_jobqueue}" ; then
+    echo "#${que_slurm} -p ${_jobqueue}" \
+    >> "${_bat}"
+  fi
+
+  # Node Count
+  if ! empty "${_nodes}" ; then
+    echo "#${que_slurm} -N ${_nodes}" \
+    >> "${_bat}"
+  fi
+
+  # CPU Count
+  if ! empty "${_slots}" ; then
+    echo "#${que_slurm} -n ${_slots}" \
+    >> "${_bat}"
+  fi
+
+  # Wall Clock Limit
+  if ! empty "${_walltime}" ; then
+    echo "#${que_slurm} -t ${_walltime}" \
+    >> "${_bat}"
+  fi
+
+  # Standard Output FIle
+  if ! empty "${_stdout}" ; then
+    echo "#${que_slurm} -o ${_stdout}" \
+    >> "${_bat}"
+  fi
+
+  # Standard Error File
+  if ! empty "${_stderr}" ; then
+    echo "#${que_slurm} -e ${_stderr}" \
+    >> "${_bat}"
+  fi
+
+  # Copy Environment
+  if [ "${_copy_env}"  = "yes" ] ; then
+    echo "#${que_slurm} --export=ALL" \
+    >> "${_bat}"
+  fi
+
+  # Event Notification
+  # Email Address
+  if ! empty "${_events}" && \
+       test "${_events}" != "runprg" ; then
+
+    echo "#${que_slurm} --mail-type=${_events}" \
+    >> "${_bat}"
+
+    if ! empty "${_mailto}" ; then
+      echo "#${que_slurm} --mail-user=${_mailto}" \
+      >> "${_bat}"
     fi
   fi
 
-  # time
-  if ! test -z "${TIME}" ; then
-    echo "#${que_slurm} --time=${TIME}"               >> "${_bat}"
+  # Job Name
+  echo "#${que_slurm} --job-name ${_jobname}" \
+  >> "${_bat}"
+
+  # Job Restart
+  if [ "${_restart}"  = "yes" ] ; then
+    echo "#${que_slurm} --requeue" \
+    >> "${_bat}"
   fi
 
-  # memory
-  if ! test -z "${MEMORY}" ; then
-    echo "#${que_slurm} --mem-per-cpu=${MEMORY}"      >> "${_bat}"
+  # Working Directory
+  if ! empty "${_workdir}" ; then
+    echo "#${que_slurm} --workdir=${_workdir}" \
+    >> "${_bat}"
   fi
 
-  if ! test -z "${NODES}" ; then
-    echo "#${que_slurm} --nodes=${NODES}"             >> "${_bat}"
+  # Resource Sharing
+  if [ "${_exclusive}" = "yes" ] ; then
+    echo "#${que_slurm} --exclusive" \
+    >> "${_bat}"
   fi
 
-  if ! test -z "${TASKS}" ; then
-      echo "#${que_slurm} --ntasks-per-node=${TASKS}" >> "${_bat}"
+  # Memory Size
+  if ! empty "${_memory}" ; then
+    echo "#${que_slurm} --mem-per-cpu=${_memory}M" \
+    >> "${_bat}"
   fi
 
-  if ! test -z "${GPUS}" ; then
-      echo "#${que_slurm} --gres=gpu:${GPUS}"         >> "${_bat}"
+  # Account to charge
+  if ! empty "${_account}" ; then
+    echo "#${que_slurm} --account=${_account}" \
+    >> "${_bat}"
   fi
 
-  # other constraints
-  if ! test -z "${QCONST}" ; then
+  # Tasks Per Node
+  if ! empty "${_tasks}" ; then
+    echo "#${que_slurm} --ntasks-per-node=${_tasks}" \
+    >> "${_bat}"
+  fi
+
+  # CPUs Per Task
+  if ! empty "${_taskcpus}" ; then
+    echo "#${que_slurm} --cpus-per-task=${_taskcpus}" \
+    >> "${_bat}"
+  fi
+
+  # Job Dependency
+  if ! empty "${_depend}" ; then
+    echo "#${que_slurm} --depend=${_depend}" \
+    >> "${_bat}"
+  fi
+
+
+  # Job Project
+  if ! empty "${_project}" ; then
+    echo "#${que_slurm} --wckey=${_project}" \
+    >> "${_bat}"
+  fi
+
+  # Job host preference
+  if ! empty "${_include_nodes}" ; then
+    # TODO: filter spaces
+    echo "#${que_slurm} --nodelist=${_include_nodes}" \
+    >> "${_bat}"
+  fi
+
+  if ! empty "${_exclude_nodes}" ; then
+    # TODO: filter spaces
+    echo "#${que_slurm} --exclude=${_exclude_nodes}" \
+    >> "${_bat}"
+  fi
+
+  # Quality Of Service
+  if ! empty "${_quality}" ; then
+    echo "#${que_slurm} --qos=${_quality}" \
+    >> "${_bat}"
+  fi
+
+  # Job Arrays
+  if ! empty "${_arrays}" ; then
+    echo "#${que_slurm} --array=${_arrays}" \
+    >> "${_bat}"
+  fi
+
+  # Generic Resources
+  if ! empty "${_gpus}" ; then
+    echo "#${que_slurm} --gres=gpu:${gpus}" \
+    >> "${_bat}"
+  fi
+
+  # Licenses
+  if ! empty "${_licenses}" ; then
+    echo "#${que_slurm} --licenses=${_licenses}" \
+    >> "${_bat}"
+  fi
+
+  # Begin Time
+  if ! empty "${_begin}" ; then
+    echo "#${que_slurm} --begin=${_begin}" \
+    >> "${_bat}"
+  fi
+
+  # Constraints
+  if ! empty "${_constraints}" ; then
     local _c
-    for _c in ${QCONST} ; do
-      echo "#${que_slurm} --constraint=${_c}"         >> "${_bat}"
+    for _c in ${_constraints} ; do
+      echo "#${que_slurm} --constraint=${_c}" \
+      >> "${_bat}"
     done
   fi
 
-  # partition
-  if ! test -z "${QPART}" ; then
-    echo "#${que_slurm} --partition=${QPART}"         >> "${_bat}"
-  fi
-
-  # project
-  if ! test -z "${QACC}" ; then
-    echo "#${que_slurm} --account=${QACC}"            >> "${_bat}"
-  fi
-
-  # qos
-  if ! test -z "${QQOS}" ; then
-    echo "#${que_slurm} --qos=${QQOS}"                >> "${_bat}"
-  fi
-
-  # exclusive
-  if test "${QEXCL}" = "yes" ; then
-    echo "#${que_slurm} --exclusive"                  >> "${_bat}"
-  fi
-
-  # outputs
-  echo "#${que_slurm} -o ${QOUT}"                     >> "${_bat}"
-  echo "#${que_slurm} -e ${QERR}"                     >> "${_bat}"
-
-  # other options
-  if ! test -z "${QOPT}" ; then
-    echo "#${que_slurm} ${QOPT}"                      >> "${_bat}"
+  # Options
+  if ! empty "${_options}" ; then
+    echo "#${que_slurm} ${_options}" \
+    >> "${_bat}"
   fi
 }
+
+
+# ********************************************************
+#    ______      ____
+#   / ____/___  / / /_
+#  / /   / __ \/ / __/
+# / /___/ /_/ / / /_
+# \____/\____/_/\__/
+#
+# ********************************************************
 
 function que/slurm/run() {
   # mode
