@@ -32,7 +32,7 @@ mid_ssh_valid="12:00"
 mid_ssh_grid="prace"
 
 # Common options
-mid_ssh_opt="-o TCPKeepAlive=${ssh_TCPKeepAlive} -o ServerAliveInterval=${ssh_ServerAliveInterval}"
+mid_ssh_opt="-o TCPKeepAlive=${ssh_TCPKeepAlive} -o ServerAliveInterval=${ssh_ServerAliveInterval} -o VisualHostKey=yes"
 
 # SSH options
 mid_ssh_ssh_opt="-XC -p ${mid_ssh_port} ${mid_ssh_opt}"
