@@ -1,0 +1,12 @@
+NAME=test
+TIME=00:30:00
+# SMP NODES should be 1 !
+# compute numa node: 2 x 6 cores Xeon
+NODES=1
+SCKTS=2
+CORES=6
+QUEUE=pecs
+# SGI MPT
+MODE="mpi/mpt"
+BINDING="dplace -s 1"
+# RUN=""

@@ -25,12 +25,12 @@ function run/prg/mode() {
 
   if test "${_mode}" != "mpi" && \
      test "${_mode}" != "mpiomp" ; then
-    msg "${FUNCNAME}: invalid mode: ${_mode}"
+    msg "${FUNCNAME}: Invalid mode: ${_mode}"
     $failure
   fi
 
   if empty "${_mpi}" ; then
-    msg "${FUNCNAME}: mpi not set"
+    msg "${FUNCNAME}: MPI not set"
     $failure
   fi
 
@@ -44,18 +44,19 @@ function run/prg/mode() {
   local _max_tasks=${MPI_MAX_TASKS}
 
   if test ${_tasks} -gt ${_max_tasks} ; then
-    msg "${FUNCNAME}: task overload"
+    msg "${FUNCNAME}: TASKS exceeded"
     $failure
   fi
 
-  # mpi -> mpi
+  ### On-the-fly mode switch
+  # MPI to MPI
   if test "${_mode}" = "mpi" ; then
     _np=${_slots}
     _pn=${_tasks}
     _threads=1
   fi
 
-  # mpi -> mpiomp
+  # MPI to MPI-OMP
   if test "${_mode}" = "mpiomp" ; then
     local _np=${_sockets}
     local _pn=${_sckts}
@@ -104,12 +105,12 @@ function run/prg/save() {
   local _o=$*
 
   if empty "${_s}" ; then 
-    msg "Step not found"
+    msg "${FUNCNAME}: Empty step"
     $failure
   fi
  
   if empty "${_o}" ; then 
-    msg "Output not found"
+    msg "${FUNCNAME}: Empty output"
     $failure
   fi
  
@@ -118,7 +119,7 @@ function run/prg/save() {
     if test -r "${i}" ; then
       cp -fv ${i} ${_s}.${i}
     else
-      msg "Not found: ${i}"
+      msg "${FUNCNAME}: Not found: ${i}"
     fi
   done
 }
@@ -139,7 +140,7 @@ function run/prg() {
 
   ### check
   run/check ${_chk} "${_prg}" "${_guide}"
-  if test $? -gt 0 ; then
+  if failed $? ; then
     return ${_false_}
   fi
 

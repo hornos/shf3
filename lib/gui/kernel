@@ -61,6 +61,12 @@ function gui/cline() {
   gui/txt $(gui/line) ${_fg} ${_bg}
 }
 
+function gui/cat() {
+  gui/line
+  cat $*
+  gui/line
+}
+
 function gui/pass() {
   gui/txt "${*}" "black" "black"
 }

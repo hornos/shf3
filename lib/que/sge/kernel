@@ -10,133 +10,364 @@ function que/sge() {
     return ${_false_}
   fi
 
-  ### begin login
+  # ********************************************************
+  #     ____                  __  __
+  #    / __ \____  ________  / /_/ /_____ _
+  #   / /_/ / __ \/ ___/ _ \/ __/ __/ __ `/
+  #  / _, _/ /_/ (__  )  __/ /_/ /_/ /_/ /
+  # /_/ |_|\____/____/\___/\__/\__/\__,_/
+  #
+  # ********************************************************
+
+  # Description          | Input file
+  # ---------------------+-------------------------
+  # Scheduler queue      | Queue file
+  local _jobqueue=${JOBQUEUE:-${QQUEUE}}
+
+  # Parallel Environment
+  local _parenv=${PARENV}
+
+  # Node Count           | Job file
+  local _nodes=${NODES}
+
+  # CPU Count            | Job file
+  local _cpu_slots=${CPU_SLOTS}
+
+  # Wall Clock Limit     | Job file
+  local _walltime=${WALLTIME:-${TIME}}
+
+  # Standard Output FIle | job file
+  local _stdout=${STDOUT}
+
+  # Standard Error File  | job file
+  local _stderr=${STDERR}
+
+  # Copy Environment     | Queue file
+  local _copy_env=${COPY_ENV:-no}
+
+  # Event Notification   | Queue file
+  local _events=${EVENTS:-${QMAIL}}
+
+  # Email Address        | Queue file
+  local _mailto=${MAILTO:-${QMAILTO}}
+
+  # Job Name             | Job file
+  local _jobname=${JOBNAME:-${NAME}}
+
+  # Job Restart          | job file
+  local _restart=${RESTART:-no}
+
+  # Working Directory    | job file
+  local _workdir=${WORK_DIRECTORY}
+
+  # Resource Sharing     | Job file
+  local _exclusive=${EXCLUSIVE:-no}
+
+  # Memory Size per core | job file
+  local _memory=${MEMORY}
+
+  # Account to charge    | Queue file
+  local _account=${ACCOUNT:-${QPROJ}}
+
+  # Tasks Per Node       | Job file
+  local _tasks=${TASKS}
+
+  # CPUs per task        | Job file
+  local _taskcpus=${TASK_CPUS}
+
+  # Job Dependency       | Job file
+  local _depend=${DEPEND}
+
+  # Job Project          | Job file
+  local _project=${PROJECT}
+
+  # Job host preference  | Job file
+  local _include_nodes=${INCLUDE_NODES}
+  local _exclude_nodes=${EXCLUDE_NODES}
+
+  # Quality Of Service   | Job file
+  local _quality=${QUALITY}
+
+  # Job Arrays           | Job file
+  local _arrays=${ARRAYS}
+
+  # Generic Resources    | Job file
+  local _gpus=${GPUS}
+
+  # Licenses             | Job file
+  local _licenses=${LICENSES}
+
+  # Begin Time           | job file
+  local _begin=${BEGIN}
+
+  # Constraints          | Queue file
+  local _constraints=${CONSTRAINTS:-${QCONST}}
+
+  # Other Options        | Queue file
+  local _options=${OPTIONS:-${QOPT}}
+
+
+  # ********************************************************
+  #     ____      __                       __  _
+  #    /  _/___  / /____  _________ ______/ /_(_)   _____
+  #    / // __ \/ __/ _ \/ ___/ __ `/ ___/ __/ / | / / _ \
+  #  _/ // / / / /_/  __/ /  / /_/ / /__/ /_/ /| |/ /  __/
+  # /___/_/ /_/\__/\___/_/   \__,_/\___/\__/_/ |___/\___/
+  #
+  # ********************************************************
+
   if test "${_sub}" = "LOGIN" ; then
     local _qlogin="${que_sge_qlogin}"
 
-    # name
-    _qlogin="${_qlogin} -N ${NAME}"
-
-
-    # time
-    if ! test -z "${TIME}" ; then
-      _qlogin="${_qlogin} -l h_cpu=${TIME}"
+    # Queue
+    if ! empty "${_jobqueue}" ; then
+      _qlogin="${_qlogin} -q ${_jobqueue}"
     fi
 
-    # memory
-    if ! test -z "${MEMORY}" ; then
-      _qlogin="${_qlogin} -l h_vmem=${MEMORY}"
+    # N/A Node Count
+
+    # Parallel Environment
+    # SLOTS is exported by the que kernel
+    if ! empty "${_parenv}" ; then
+      _qlogin="${_qlogin} -pe ${_parenv} ${SLOTS}"
+    fi   
+
+    # Wall Clock Limit
+    if ! empty "${_walltime}" ; then
+      _qlogin="${_qlogin} -l time=${_walltime}"
     fi
 
-    # gpus
-    if ! test -z "${GPUS}" ; then
-      _qlogin="${_qlogin} -l gpu=${GPUS}"
+    # N/A Standard Output File
+    # N/A Standard Error File
+    # N/A Combine stdout/err
+
+    # Copy Environment
+    if [ "${_copy_env}" = "yes" ] ; then
+      _qlogin="${_qlogin} -V"
     fi
 
-    # pe
-    if ! test -z "${QPE}" ; then
-      _qlogin="${_qlogin} -pe ${QPE} ${SLOTS}"
+    # N/A Event Notification
+    # N/A Email Address
+
+    # Name
+    _qlogin="${_qlogin} -N ${_jobname}"
+
+    # N/A Job Restart
+
+    # Working Directory
+    if ! empty "${_workdir}" ; then
+      _qlogin="${_qlogin} -wd ${_workdir}"
     fi
 
-    # project
-    if ! test -z "${QACC}" ; then
-      _qlogin="${_qlogin} -A ${QACC}"
-    fi
-
-    # queue
-    if ! test -z "${QQUEUE}" ; then
-      _qlogin="${_qlogin} -q ${QQUEUE}"
-    fi
-
-    # exclusive
-    if test "${QEXCL}" = "yes" ; then
+    # Resource Sharing
+    if [ "${_exclusive}"  = "yes" ] ; then
       _qlogin="${_qlogin} -l exclusive=true"
+    fi
+
+    # Memory Size in MB
+    if ! empty "${_memory}" ; then
+      _qlogin="${_qlogin} -l mem_free=${_memory}M"
+    fi
+
+    # Account to charge
+    if ! empty "${_account}" ; then
+      _qlogin="${_qlogin} -A ${_account}"
+    fi
+
+    # N/A Tasks Per Node
+    # N/A CPUs Per Task
+    # N/A Job Dependency
+
+    # Job Project
+    if ! empty "${_project}" ; then
+      _qlogin="${_qlogin} -P ${_project}"
+    fi
+
+    # TODO: Job host preference
+    # N/A Quality Of Service
+
+    # Job Arrays
+    if ! empty "${_arrays}" ; then
+      _qlogin="${_qlogin} -t ${_arrays}"
+    fi
+
+    # Generic Resources
+    if ! empty "${_gpus}" ; then
+      _qlogin="${_qlogin} -l gpu=${gpus}"
+    fi
+
+    # N/A Licenses
+    # N/A Begin Time
+    # N/A Constraints
+
+    # Options
+    if ! empty "${_options}" ; then
+      _qlogin="${_qlogin} ${_options}"
     fi
 
     echo "${_qlogin}" >> "${_bat}"
     return ${_true_}
   fi
-  ### end login
+  # end Interactive Login
 
-  ### begin batch 
-  # name
-  echo "#${que_sge} -N ${NAME}"                         >> "${_bat}"
 
-  # shell
-  if ! test -z "${QSHELL}" ; then
-    echo "#${que_sge} -S ${QSHELL}"                     >> "${_bat}"
+  # ********************************************************
+  #     ____        __       __
+  #    / __ )____ _/ /______/ /_
+  #   / __  / __ `/ __/ ___/ __ \
+  #  / /_/ / /_/ / /_/ /__/ / / /
+  # /_____/\__,_/\__/\___/_/ /_/
+  #
+  # ********************************************************
+ 
+  local _qbatch="${que_sge}"
+
+  # Queue
+  if ! empty "${_jobqueue}" ; then
+    echo "#${_qbatch} -q ${_jobqueue}" \
+    >> "${_bat}"
   fi
 
-  # mail
-  if ! test -z "${QMAIL}" && test "${QMAIL}" != "runprg" ; then
-    echo "#${que_sge} -m ${QMAIL}"                      >> "${_bat}"
-    if ! test -z "${QMAILTO}" ; then
-      echo "#${que_sge} -M ${QMAILTO}"                  >> "${_bat}"
+  # N/A Node Count
+
+  # CPU Count & Parallel Environment
+  if ! empty "${_parenv}" ; then
+    echo "#${_qbatch} -pe ${_parenv} ${SLOTS}" \
+    >> "${_bat}"
+  fi
+
+  # Wall Clock Limit
+  if ! empty "${_walltime}" ; then
+    echo "#${_qbatch} -l time=${_walltime}" \
+    >> "${_bat}"
+  fi
+
+  # Standard Output FIle
+  if ! empty "${_stdout}" ; then
+    echo "#${_qbatch} -o ${_stdout}" \
+    >> "${_bat}"
+  fi
+
+  # Standard Error File
+  if ! empty "${_stderr}" ; then
+    echo "#${_qbatch} -e ${_stderr}" \
+    >> "${_bat}"
+  fi
+
+  # Skip: Combine
+
+  # Copy Environment
+  if [ "${_copy_env}" = "yes" ] ; then
+    echo "#${_qbatch} -V" \
+    >> "${_bat}"
+  fi
+
+  # Event Notification
+  # Email Address
+  if ! empty "${_events}" && \
+       test "${_events}" != "runprg" ; then
+
+    echo "#${_qbatch} -m ${_events}" \
+    >> "${_bat}"
+
+    if ! empty "${_mailto}" ; then
+      echo "#${_qbatch} -M ${_mailto}" \
+      >> "${_bat}"
     fi
   fi
 
-  # time
-  if ! test -z "${TIME}" ; then
-    echo "#${que_sge} -l h_cpu=${TIME}"                 >> "${_bat}"
+  # Job Name
+  echo "#${_qbatch} -N ${_jobname}" \
+  >> "${_bat}"
+
+  # Job Restart
+  if [ "${_restart}" = "yes" ] ; then
+    echo "#${_qbatch} -r yes" \
+    >> "${_bat}"
   fi
 
-  # memory
-  if ! test -z "${MEMORY}" ; then
-    local _mem=${MEMORY}
-    # _mem=$((SLOTS*_mem))
-    # _mem=$((TASKS*_mem))
-    echo "#${que_sge} -l h_vmem=${_mem}"    >> "${_bat}"
+  # Working Directory
+  if ! empty "${_workdir}" ; then
+    echo "#${_qbatch} -wd ${_workdir}" \
+    >> "${_bat}"
   fi
 
-  # binding
-  if ! test -z "${QBIND}" ; then
-    local _qbind="-binding ${QBIND}:${SLOTS}"
-    echo "#${que_sge} ${_qbind}"                        >> "${_bat}"
-  fi
-  
-  # arch
-  if ! test -z "${QARCH}" ; then
-    echo "#${que_sge} -l arch=${QARCH}"                 >> "${_bat}"
+  # Resource Sharing
+  if [ "${_exclusive}" = "yes" ] ; then
+    echo "#${_qbatch} -l exclusive=true" \
+    >> "${_bat}"
   fi
 
-  # other constraints
-  if ! test -z "${QCONST}" ; then
-    echo "#${que_sge} -l ${QCONST}"                     >> "${_bat}"
+  # Memory Size
+  if ! empty "${_memory}" ; then
+    echo "#${_qbatch} -l mem_free=${_memory}M" \
+    >> "${_bat}"
   fi
 
-  # pe
-  if ! test -z "${QPE}" ; then
-    echo "#${que_sge} -pe ${QPE} ${SLOTS}"              >> "${_bat}"
+  # Account to charge
+  if ! empty "${_account}" ; then
+    echo "#${_qbatch} -A ${_account}" \
+    >> "${_bat}"
   fi
 
-  # project
-  if ! test -z "${QACC}" ; then
-    echo "#${que_sge} -A ${QACC}"                       >> "${_bat}"
+  # N/A Tasks Per Node
+
+  # CPUs Per Task
+  if ! empty "${_taskcpus}" ; then
+    echo "#${_qbatch} --cpus-per-task=${_taskcpus}" \
+    >> "${_bat}"
   fi
 
-  # queue
-  if ! test -z "${QQUEUE}" ; then
-    echo "#${que_sge} -q ${QQUEUE}"                     >> "${_bat}"
+  # Job Dependency
+  if ! empty "${_depend}" ; then
+    echo "#${_qbatch} hold_jid ${_depend}" \
+    >> "${_bat}"
   fi
 
-  if test "${QEXCL}" = "yes" ; then
-    echo "#${que_sge} -l exclusive=true"                >> "${_bat}"
+  # Job Project
+  if ! empty "${_project}" ; then
+    echo "#${_qbatch} -P ${_project}" \
+    >> "${_bat}"
   fi
 
-  # gpus
-  if ! test -z "${GPUS}" ; then
-    echo "#${que_sge} -l gpu=${GPUS}"                   >> "${_bat}"
+  # Job host preference
+  if ! empty "${_include_nodes}" ; then
+    # TODO: filter spaces
+    echo "#${_qbatch} --nodelist=${_include_nodes}" \
+    >> "${_bat}"
   fi
 
-  if ! test -z "${QJSV}" ; then
-    echo "#${que_sge} -jsv ${QJSV}"                     >> "${_bat}"
+  # TODO
+  # if ! empty "${_exclude_nodes}" ; then
+  #   # TODO: filter spaces
+  #   echo "#${_qbatch} --exclude=${_exclude_nodes}" \
+  #   >> "${_bat}"
+  # fi
+
+  # N/A Quality Of Service
+
+  # Job Arrays
+  if ! empty "${_arrays}" ; then
+    echo "#${_qbatch} -t ${_arrays}" \
+    >> "${_bat}"
   fi
 
-  echo "#${que_sge} -o ${QOUT}"                         >> "${_bat}"
-  echo "#${que_sge} -e ${QERR}"                         >> "${_bat}"
+  # Generic Resources
+  if ! empty "${_gpus}" ; then
+    echo "#${_qbatch} -l gpu=${gpus}" \
+    >> "${_bat}"
+  fi
 
-  if ! test -z "${QOPT}" ; then
-    echo "#${que_sge} ${QOPT}"                          >> "${_bat}"
+  # N/A Licenses
+
+  # N/A Begin Time
+
+  # N/A Constraints
+
+  # Options
+  if ! empty "${_options}" ; then
+    echo "#${_qbatch} ${_options}" \
+    >> "${_bat}"
   fi
 }
 

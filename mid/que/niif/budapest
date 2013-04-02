@@ -1,0 +1,10 @@
+SCHEDULER=sge
+# MAILTO=""
+EVENTS=abe
+JOBQUEUE=budapest.q
+PARENV=mpi
+EXCLUSIVE=yes
+USER_LIMIT="ulimit -s unlimited"
+OPTIONS="-cwd"
+COPY_ENV=yes
+QUEUE_SETUP="${HOME}/shf3/bin/machines ${HOME}/shf3/bin/scratch ${HOME}/shf3/bin/sched/env/${SCHEDULER}"

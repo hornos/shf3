@@ -1,0 +1,9 @@
+SCHEDULER=sge
+# MAILTO=""
+EVENTS=abe
+JOBQUEUE=szeged.q
+PARENV=mpi
+EXCLUSIVE=yes
+OPTIONS="-cwd"
+COPY_ENV=yes
+QUEUE_SETUP="${HOME}/shf3/bin/machines ${HOME}/shf3/bin/scratch ${HOME}/shf3/bin/sched/env/${SCHEDULER}"

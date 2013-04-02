@@ -13,3 +13,4 @@ bin/src/connect
 *.so
 *.a
 *sublime*
+test/

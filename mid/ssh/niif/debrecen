@@ -1,0 +1,48 @@
+# type of ssh auth: ssh | gsi
+mid_ssh_type=ssh
+
+# group host to cluster
+mid_ssh_cluster="niif"
+
+# FQDN
+mid_ssh_fqdn="login.debrecen.hpc.niif.hu"
+
+# username
+mid_ssh_user="${USER}"
+
+# SSH port
+# gsi: 2222
+mid_ssh_port=22
+
+# Valid proxy timeout for gsissh
+# mid_ssh_valid="12:00"
+
+# Certificate MID for gsi
+# mid_ssh_grid="prace"
+
+# Common options
+mid_ssh_opt="-o TCPKeepAlive=${ssh_TCPKeepAlive} -o ServerAliveInterval=${ssh_ServerAliveInterval}"
+
+# SSH options
+mid_ssh_ssh_opt="-A -XC ${mid_ssh_opt} -p ${mid_ssh_port} ${mid_ssh_opt}"
+
+# SCP options
+mid_ssh_scp_opt="-C -P ${mid_ssh_port} ${mid_ssh_opt}"
+
+# environment to load for sshcmd
+mid_ssh_env=".bashrc"
+
+# SCP remote destination
+mid_ssh_scp_dst="/home/${mid_ssh_user}"
+
+# SSH tunnels
+# mid_ssh_tunnel="-L63128:localhost:3128"
+
+# SSHFS remote destination
+mid_ssh_sshfs_dst="/home/${mid_ssh_user}"
+
+# SSHFS mount point
+mid_ssh_sshfs_src="${ssh_sshfs_dir}/${BASH_SOURCE}"
+
+# SSHFS options
+mid_ssh_sshfs_opt="-C -o Port=${mid_ssh_port} -o rw -o follow_symlinks"

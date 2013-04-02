@@ -7,6 +7,7 @@ function help/que/sub() {
 EOF
 }
 
+# subroutines
 function que/jobchk() {
   local i
   for i in NAME MODE QUEUE RUN ; do
@@ -19,7 +20,7 @@ function que/jobchk() {
 
 function que/quechk() {
   local i
-  for i in SCHEDULER ; do
+  for i in QSCHED ; do
     if empty "${!i}" ; then
       msg "${FUNCNAME} not set ${i}"
       $failure
@@ -27,35 +28,12 @@ function que/quechk() {
   done
 }
 
-# autoenv sets variables from the environment
 function que/autoenv() {
   local _v="${1}"
   local _w=""
   if empty "${_v}" ; then $failure ; fi
 
-  ### PRACE
-  _w="PRACE_${_v}"
-  if test "${!_v}" = "prace" ; then
-    if empty "${!_w}" ; then
-      msg "${FUNCNAME}: not set ${_w}"
-      $failure
-    fi
-    echo "${!_w}"
-    return
-  fi
-
-  ### NCE
-  _w="NCE_${_v}"
-  if test "${!_v}" = "nce" ; then
-    if empty "${!_w}" ; then
-      msg "${FUNCNAME}: not set ${_w}"
-      $failure
-    fi
-    echo "${!_w}"
-    return
-  fi
-
-  ### ESZR
+  # ESZR
   _w="ESZR_${_v}"
   if test "${!_v}" = "eszr" ; then
     if empty "${!_w}" ; then
@@ -65,7 +43,6 @@ function que/autoenv() {
     echo "${!_w}"
     return
   fi
-
   echo ${!_v}
 }
 
@@ -98,20 +75,20 @@ function que/check() {
     $failure
   fi
 
-  # Summary
+  import run
+  # summary
   if test "${_sub}" = "SUMMARY" ; then
     import run
     run/sum "${_prg}" "${_guide}"
     return $?
   fi
-
-  # Check
+  # check
   import run/check
   run/check 2 "${_prg}" "${_guide}"
 }
 
 
-# OMP-only
+# omp only run
 function que/omp/run() {
   import gui
   import que
@@ -156,17 +133,14 @@ function que/omp/run() {
   msg "Queue file  : ${_que}"
 
   ### scheduler
-  # DEPRICATED
   QSCHED=$(que/autoenv QSCHED)
-  local _scheduler=$(que/autoenv SCHEDULER)
-  local _sch=${_scheduler:-{QSCHED}}
-
+  local _sch=${QSCHED}
   import que/${_sch}
   if failed $?; then $failure ; fi
 
   gui/line
-  printf "%12s %5s %7s %7s %4s\n"   "Scheduler" "Nodes" "Sockets" "Cores" "GPUs"
-  printf "%12s %5d %7d %7d %4s\n"   ${_sch}  ${_nodes} ${_sckts} ${_cores}   ${_gpus}
+  printf "%12s %5s %5s %7s %4s\n"   "QSCHED" "NODES"   "SCKTS"   "CORES"     "GPUS"
+  printf "%12s %5d %5d %7d %4s\n"   ${_sch}  ${_nodes} ${_sckts} ${_cores}   ${_gpus}
 
   if test "${_mode}" = "arr" ; then
     printf "%12s %7s\n"      "MODE"  "arrays"
@@ -191,8 +165,7 @@ function que/omp/run() {
   hpc/mkl/binding ${_threads}
 
   echo ""
-  local _queue=${JOBQUEUE}
-  que/${_sch}/run ${_mode} ${_queue} ${_nodes} ${_sckts} ${_cores} ${_gpus} ${_x}
+  que/${_sch}/run ${_mode} ${QPART} ${_nodes} ${_sckts} ${_cores} ${_gpus} ${_x}
 }
 
 
@@ -213,7 +186,7 @@ function que/sub() {
     return $?
   fi
 
-  ### read and check job file
+  ### read job file
   if ! readable "${_job}" ; then
     msg "${FUNCNAME}: job file not found ${_job}"
     $failure
@@ -230,7 +203,7 @@ function que/sub() {
 
   msg "Job file    : ${_job}"
 
-  ### read and check queue file
+  ### read queue file
   local _que="${que_dir}/${QUEUE:-default}"
   if ! readable "${_que}" ; then
     msg "${FUNCNAME}: queue file not found ${_que}"
@@ -244,11 +217,8 @@ function que/sub() {
 
   ### global IO defaults
   QIN=${QIN:-/dev/null}
-  local _stdin=${STDIN:-${QIN}}
   QERR=${QERR:-ErrOut}
-  local _stderr=${STDERR:-${QERR}}
   QOUT=${QOUT:-StdOut}
-  local _stdout=${STDOUT:-${QOUT}}
 
   ### parallel mode
   MODE=$(que/autoenv MODE)
@@ -261,8 +231,7 @@ function que/sub() {
 
   ### scheduler
   QSCHED=$(que/autoenv QSCHED)
-  local _scheduler=$(que/autoenv SCHEDULER)
-  local _sch=${_scheduler:-${QSCHED}}
+  local _sch=${QSCHED}
   import que/${_sch}
   if failed $?; then $failure ; fi
 
@@ -326,8 +295,6 @@ function que/sub() {
   ### GPU resources
   local _gpus=${GPUS:-0}
 
-  ### TODO MIC resources
-
   ### global compound resources
   SLOTS=${_slots}
   TASKS=${_tasks}
@@ -355,17 +322,17 @@ function que/sub() {
     _over="SLOTS TASKS"
   fi
   gui/line
-  printf "%12s %7s %14s %14s %7s %s\n"   "Scheduler" "Nodes" "Sockets" "Cores" "GPUs" "Overload"
-  printf "%12s %7d %14d %14d %7s %s\n"   ${_sch}  ${_nodes} ${_sckts} ${_cores}   ${_gpus} " "
-  printf "%12s %7s %14s %14s %7s %s\n"   " "      "Slots"   "Tasks/Node"   "Tot. Sockets"   " "  "${_over}"
-  printf "%12s %7d %14d %14d %7s %s\n"   " "      ${SLOTS}  ${TASKS}  ${_sockets} " "      " "
+  printf "%12s %5s %5s %7s %4s %s\n"   "QSCHED" "NODES"   "SCKTS"   "CORES"     "GPUS"   "override"
+  printf "%12s %5d %5d %7d %4s %s\n"   ${_sch}  ${_nodes} ${_sckts} ${_cores}   ${_gpus} " "
+  printf "%12s %5s %5s %7s %4s %s\n"   " "      "SLOTS"   "TASKS"   "sockets"   " "      "${_over}"
+  printf "%12s %5d %5d %7d %4s %s\n"   " "      ${SLOTS}  ${TASKS}  ${_sockets} " "      " "
 
   echo ""                                                                                           >> "${_bat}"
   echo   "### Resource Allocation"                                                                  >> "${_bat}"
-  printf "# %12s %7s %14s %14s %7s %s\n" "Scheduler" "Nodes" "Sockets" "Cores" "GPUs" "Overload"      >> "${_bat}"
-  printf "# %12s %7d %14d %14d %7s %s\n" ${_sch}  ${_nodes} ${_sckts} ${_cores}   ${_gpus} " "        >> "${_bat}"
-  printf "# %12s %7s %14s %14s %7s %s\n" " "      "Slots"   "Tasks"   "Sockets"   " "      "${_over}" >> "${_bat}"
-  printf "# %12s %7d %14d %14d %7s %s\n" " "      ${SLOTS}  ${TASKS}  ${_sockets} " "      " "        >> "${_bat}"
+  printf "# %12s %5s %5s %7s %4s %s\n" "QSCHED" "NODES"   "SCKTS"   "CORES"     "GPUS"   "override" >> "${_bat}"
+  printf "# %12s %5d %5d %7d %4s %s\n" ${_sch}  ${_nodes} ${_sckts} ${_cores}   ${_gpus} " "        >> "${_bat}"
+  printf "# %12s %5s %5s %7s %4s %s\n" " "      "SLOTS"   "TASKS"   "sockets"   " "      "${_over}" >> "${_bat}"
+  printf "# %12s %5d %5d %7d %4s %s\n" " "      ${SLOTS}  ${TASKS}  ${_sockets} " "      " "        >> "${_bat}"
 
   ### queue login
   if test "${_sub}" = "LOGIN" ; then
@@ -386,50 +353,44 @@ function que/sub() {
 
   ### continue batch file
   # custom queue setup scripts
-  local _queue_setup=${QUEUE_SETUP:-${QSETUP}}
-  if ! empty "${_queue_setup}" ; then
+  if ! empty "${QSETUP}" ; then
     echo ""                          >> "${_bat}"
     echo "### Queue Setup"           >> "${_bat}"
     local _s
-    for _s in ${_queue_setup} ; do
+    for _s in ${QSETUP} ; do
       echo "source ${_s}"            >> "${_bat}"
     done
   fi
 
   # ulimit settings
-  local _user_limits=${USER_LIMITS:-${QLIMIT}}
-  if ! empty "${_user_limits}" ; then
-    echo "${_user_limits}"           >> "${_bat}"
+  if ! empty "${QULIMIT}" ; then
+    echo "${QULIMIT}"                >> "${_bat}"
   fi
 
   # mail notifications
-  local _events=${EVENTS:-${QMAIL}}
-  local _mailto=${MAILTO:-${QMAILTO}}
-  if test "${_events}" = "runprg" ; then
+  if test "${QMAIL}" = "runprg" ; then
     echo ""                          >> "${_bat}"
     echo "### Mail Setup"            >> "${_bat}"
-    echo "export MAILTO=${_mailto}"  >> "${_bat}"
+    echo "export QMAILTO=${QMAILTO}" >> "${_bat}"
     msg "Mail by runprg"
   fi
 
   # custom job setup scripts
-  local _job_setup=${JOB_SETUP:-${SETUP}}
-  if ! empty "${_job_setup}" ; then
+  if ! empty "${SETUP}" ; then
     echo ""                          >> "${_bat}"
     echo "### Job Setup"             >> "${_bat}"
     local _s
-    for _s in ${_job_setup} ; do
+    for _s in ${SETUP} ; do
       echo "source ${_s}"            >> "${_bat}"
     done
   fi
 
   # environment modules
-  local _modules=${MODULES:-${MODULE}}
-  if ! empty "${_modules}" ; then
+  if ! empty "${MODULE}" ; then
     echo ""                          >> "${_bat}"
     echo "### Modules"               >> "${_bat}"
     local _m
-    for _m in ${_modules} ; do
+    for _m in ${MODULE} ; do
       echo "module load ${_m}"       >> "${_bat}"
     done
   fi
@@ -445,7 +406,11 @@ function que/sub() {
   fi
 
   # cpu binding
-  local _binding=${BINDING:-${BIND}}
+  local _bind=""
+  if ! empty "${BIND}" ; then
+    _bind="${BIND}"
+    # msg "CPU Binding : ${_bind}"
+  fi
 
   # phigemm
   local _phigemm=""
@@ -454,7 +419,11 @@ function que/sub() {
   fi
 
   # profiler
-  local _profiler=${PROFILER:${PROF}}
+  local _prof=""
+  if ! empty "${PROF}" ; then
+    _prof="${PROF}"
+    # msg "Profiler    : ${_prof}"
+  fi
 
   # verbose level
   local _v=${VERBOSE:-0}
@@ -469,10 +438,10 @@ function que/sub() {
     fi
 
     # SGI MPT Perfboost like booster
-    local _perfboost=""
-    if ! empty "${PERFBOOST}" ; then
-      _perfboost="${PERFBOOST}"
-      msg "Perfboost : ${_perfboost}"
+    local _boost=""
+    if ! empty "${BOOST}" ; then
+      _boost="${BOOST}"
+      msg "Perfboost : ${_boost}"
     fi
 
     # defaults for MPIOMP
@@ -508,6 +477,8 @@ function que/sub() {
       _mpirun_opt="${MPIRUN_OPT}"
     fi
     local _mpi_opt="${_mpirun_opt}"
+    # resloved options for non-runprg apps
+    local _mpi_opt_res="${_mpirun_opt}"
 
     echo ""                                             >> "${_bat}"
     echo "### MPI Setup"                                >> "${_bat}"
@@ -535,15 +506,15 @@ function que/sub() {
       local _verbose=$(hpc/mpi/${_mpi}/verbose ${_v} "${_bat}")
 
       # predefined bindings
-      case "${_binding}" in
+      case "${_bind}" in
         core|socket|cache)
-          _bind=$(hpc/mpi/${_mpi}/binding ${_binding})
+          _bind=$(hpc/mpi/${_mpi}/binding ${_bind})
         ;;
       esac
 
-      ### old static distribution
+      ### static distribution
       # PRERUN    VERBOSE     OPTIONS     MACHINES      NPPN     NUMA     BINDING  BOOST     PROFILER
-      # _mpi_opt="${_verbose} ${_mpi_opt} ${__machines} ${_nppn} \${NUMA} ${_binding} ${_perfboost} ${_profiler}"
+      # _mpi_opt="${_verbose} ${_mpi_opt} ${__machines} ${_nppn} \${NUMA} ${_bind} ${_boost} ${_prof}"
       # echo "export MPI_OPT=\"${_mpi_opt}\""             >> "${_bat}"
       # echo "export PRERUN=\"${_mpirun} \${MPI_OPT}\""   >> "${_bat}"
 
@@ -559,43 +530,47 @@ function que/sub() {
       echo "export NODES=${NODES}"          >> "${_bat}"
       echo "export SCKTS=${SCKTS}"          >> "${_bat}"
       echo "export CORES=${CORES}"          >> "${_bat}"
-      echo "export BINDING=\"${_binding}\""    >> "${_bat}"
+      echo "export BIND=\"${_bind}\""       >> "${_bat}"
 
       # prerun should be @resolved
       # PRERUN  VERBOSE     OPTIONS     MACHINES      NPPN        NUMA     BINDING BOOST     PROFILER
-      _mpi_opt="${_verbose} ${_mpi_opt} ${__machines} @{MPI_NPPN} \${NUMA} @{BINDING} ${_perfboost} ${_profiler}"
 
-      # resolv if not runprg
       match RUN runprg
-      if failed $? ; then u/resolv _mpi_opt; fi
-      echo "export MPI_OPT=\"${_mpi_opt}\""           >> "${_bat}"
+      if succeed $? ; then
+        # PRERUN  VERBOSE     OPTIONS     MACHINES      NPPN        NUMA     BINDING BOOST     PROFILER
+        _mpi_opt="${_verbose} ${_mpi_opt} ${__machines} @{MPI_NPPN} \${NUMA} @{BIND} ${_boost} ${_prof}"
+        echo "export MPI_OPT=\"${_mpi_opt}\""           >> "${_bat}"
+      else
+        _mpi_opt_res="${_verbose} ${_mpi_opt} ${__machines} \${MPI_NPPN} \${NUMA} \${BIND} ${_boost} ${_prof}"
+        echo "export MPI_OPT=\"${_mpi_opt_res}\""           >> "${_bat}"
+      fi
       echo "export PRERUN=\"${_mpirun} \${MPI_OPT}\"" >> "${_bat}"
     fi
 
     echo ""                                    >> "${_bat}"
-    echo "### Fortran Mulit-processing"        >> "${_bat}"
+    echo "### Fortran Multi-processing"        >> "${_bat}"
     import hpc/fmp
-    hpc/fmp/binding ${_nodes} ${_pn} "${_bat}"
+    hpc/fmp/binding ${_nodes} ${_pn}           "${_bat}"
   fi
 
   # TODO: bind and numa
   ### Co-array Fortran
   if test "${_mode}" = "caf" ; then
-    echo ""                                           >> "${_bat}"
-    echo "### Co-array Fortran Setup"                 >> "${_bat}"
-    echo "export PRERUN=\"${_binding} ${_profiler}\"" >> "${_bat}"
+    echo ""                                    >> "${_bat}"
+    echo "### Co-array Fortran Setup"          >> "${_bat}"
+    echo "export PRERUN=\"${_bind} ${_prof}\"" >> "${_bat}"
     _images=${_tasks}
     _threads=1
     # FCO images
     import hpc/fco
-    hpc/caf/binding ${_images} "${_bat}"
+    hpc/caf/binding ${_images}                 "${_bat}"
   fi
 
   ### OMP and Intel MKL
-  echo ""                                             >> "${_bat}"
-  echo "### OMP Setup"                                >> "${_bat}"
+  echo ""                                      >> "${_bat}"
+  echo "### OMP Setup"                         >> "${_bat}"
   if test "${_mode}" = "omp" ; then
-    echo "export PRERUN=\"${_binding} ${_profiler}\"" >> "${_bat}"
+    echo "export PRERUN=\"${_bind} ${_prof}\"" >> "${_bat}"
     _threads=${_tasks}
   fi
   # override threads by THRDS
@@ -605,68 +580,61 @@ function que/sub() {
 
   # OMP threads
   import hpc/omp
-  hpc/omp/binding ${_threads} "${_bat}"
+  hpc/omp/binding ${_threads}                  "${_bat}"
   # set affinity
   if test "${_mode}" = "omp" ; then
-    hpc/omp/affinity ${_threads} "${_bat}"
+    hpc/omp/affinity ${_threads}               "${_bat}"
   fi
 
   # MKL threads
   import hpc/mkl
-  hpc/mkl/binding ${_threads} "${_bat}"
+  hpc/mkl/binding ${_threads}                  "${_bat}"
 
   # PhiGEMM
   if ! empty "${_phigemm}" ; then
     import hpc/phigemm
-    hpc/phigemm/binding "${_phigemm}" "${_bat}"
+    hpc/phigemm/binding "${_phigemm}"          "${_bat}"
   fi
 
-  # Overloaded resources
+  ### requested MPI OMP resources
   _over=""
   if test ${_mpipn} -gt 0 ; then
-    _over="PN"
+    _over="pn"
   fi
   if test ${_thrds} -gt 0 ; then
     if empty "${_over}" ; then
-      _over="THREADS"
+      _over="threads"
     else
-      _over="${_over} THREADS"
+      _over="${_over} threads"
     fi
   fi
 
-  #
-  # Summary Table for Parallel Modes
-  #
-  echo ""
-  echo ""                  >> "${_bat}"
-  echo "### Parallel Mode" >> "${_bat}"
-
+  echo ""                                                                            >> "${_bat}"
+  echo "### Parallel Mode"                                                           >> "${_bat}"
   case "${_mode}" in
-    # OpenMP
     omp)
-      printf "%12s %14s\n"      "Mode"  "OMP Threads"
-      printf "# %12s %14s\n"    "Mode"  "OMP Threads"          >> "${_bat}"
-      printf "%12s %14d %s\n"   ${MODE} ${_threads} "${_over}"
-      printf "# %12s %14d %s\n" ${MODE} ${_threads} "${_over}" >> "${_bat}"
+      printf "%12s %7s\n"      "MODE"  "threads"
+      printf "# %12s %7s\n"    "MODE"  "threads"                                     >> "${_bat}"
+      printf "%12s %7d %s\n"   ${MODE} ${_threads} "${_over}"
+      printf "# %12s %7d %s\n" ${MODE} ${_threads} "${_over}"                        >> "${_bat}"
     ;;
-    # Co-Array Fortran
     caf)
-      printf "%12s %7s %7s\n"      "Mode"  "CAF Images" "OMP Threads"
-      printf "# %12s %7s %7s\n"    "Mode"  "CAF Images" "OMP Threads"        >> "${_bat}"
-      printf "%12s %7s %7d %s\n"   ${MODE} ${_images} ${_threads} "${_over}"
-      printf "# %12s %7s %7d %s\n" ${MODE} ${_images} ${_threads} "${_over}" >> "${_bat}"
+      printf "%12s %6s %7s\n"      "MODE"  "images" "threads"
+      printf "# %12s %6s %7s\n"    "MODE"  "images" "threads"                        >> "${_bat}"
+      printf "%12s %6s %7d %s\n"   ${MODE} ${_images} ${_threads} "${_over}"
+      printf "# %12s %6s %7d %s\n" ${MODE} ${_images} ${_threads} "${_over}"         >> "${_bat}"
     ;;
-    # MPI and MPI-OMP hybrid
     mpi|mpiomp)
-      printf "%12s %7s %7s %14s\n"      "Mode"  "np"   "pn"   "OMP Threads"
-      printf "# %12s %7s %7s %14s\n"    "Mode"  "np"   "pn"   "OMP Threads"           >> "${_bat}"
-      printf "%12s %7d %7d %14d %s\n"   ${MODE} ${_np} ${_pn} ${_threads} "${_over}"
-      printf "# %12s %7d %7d %14d %s\n" ${MODE} ${_np} ${_pn} ${_threads} "${_over}"  >> "${_bat}"
+      printf "%12s %5s %5s %7s\n"      "MODE"  "np"   "pn"   "threads"
+      printf "# %12s %5s %5s %7s\n"    "MODE"  "np"   "pn"   "threads"               >> "${_bat}"
+      printf "%12s %5d %5d %7d %s\n"   ${MODE} ${_np} ${_pn} ${_threads} "${_over}"
+      printf "# %12s %5d %5d %7d %s\n" ${MODE} ${_np} ${_pn} ${_threads} "${_over}"  >> "${_bat}"
     ;;
   esac
   gui/line
 
-  # Runprg wrapper
+  ### command
+  # runprg wrapper
   echo ""            >> "${_bat}"
   echo "### Command" >> "${_bat}"
   if ! empty "${RUNPRG}" ; then
@@ -685,7 +653,7 @@ function que/sub() {
     RUN="runprg ${_p} ${_g}"
   fi
 
-  # Set explicit Scheduler for runprg 
+  # set scheduler
   match RUN runprg
   if succeed $? ; then
     # set scheduler
@@ -697,15 +665,20 @@ function que/sub() {
         $failure
       fi
     fi
+  else
+    RUN="\$PRERUN ${RUN}"
   fi
-  echo "${RUN}" >> "${_bat}"
+  echo "${RUN}"      >> "${_bat}"
 
-  # Check batch file
+  ### submit
   echo ""
   answer "Show batch file?"
-  if succeed $? ; then gui/cat "${_bat}"; fi
+  if succeed $? ; then
+    gui/line
+    cat "${_bat}"
+    gui/line
+  fi
 
-  # Check submit app
   local _qsub="que_${_sch}_qsub"
   _qsub=${!_qsub}
   if ! $(u/installed "${_qsub}") ; then
@@ -713,23 +686,25 @@ function que/sub() {
     $failure
   fi
 
-  # Submit
+  # submit
   answer "Submit job?"
   if failed $? ; then $failure; fi
 
   # clear stderr/out
   local i
-  for i in "${_stderr}" "${_stdout}" ; do
-    if test -f "${i}" ; then rm -f "${i}"; fi
+  for i in "${QERR}" "${QOUT}" ; do
+    if test -f "${i}" ; then
+      rm -f "${i}"
+    fi
   done
-
-  # Logging
   local _log="./${_qsub}.log"
   ${_qsub} "${_bat}" | tee "${_log}"
   if failed $? ; then
     msg "${FUNCNAME}: Submit failed"
     $failure
   fi
+  # insert
+  # local _ctime
 
   msg "Submit success"
   $success

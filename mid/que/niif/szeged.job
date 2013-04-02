@@ -1,0 +1,11 @@
+NAME=test
+TIME=00:30:00
+# compute node: 4 x 12 cores Opteron
+NODES=1
+SCKTS=4
+CORES=12
+QUEUE=szeged
+# OpenMPI
+MODE="mpi/ompi"
+# BINDING=""
+# RUN=""

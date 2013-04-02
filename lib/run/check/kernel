@@ -23,8 +23,8 @@ function run/check() {
   local _guide="${3}"
 
   # check guide
-  if test -z "${_guide}" || ! test -r "${_guide}" ; then
-    msg "Guide not found: ${guide}"
+  if empty "${_guide}" || ! readable "${_guide}" ; then
+    msg "${FUNCNAME}: Guide not found: ${guide}"
     return ${_false_}
   fi
 
@@ -33,23 +33,24 @@ function run/check() {
 
   # check program binary
   if ! test -x "${PRGBIN}" ; then
-    msg "Program not found: ${PRGBIN}"
+    msg "${FUNCNAME}: PRGBIN not found: ${PRGBIN}"
     return ${_false_}
   fi
 
   # check kernel
-  if ! test -z "${KERNEL}" ; then
-    if ! test -r "${KERNEL}" ; then
-      msg "Kernel not found: ${KERNEL}"
+  if ! empty "${KERNEL}" ; then
+    if ! readable "${KERNEL}" ; then
+      msg "${FUNCNAME}: KERNEL not found: ${KERNEL}"
       return ${_false_}
     fi
     source "${KERNEL}"
     local _kernel="${_prg}/kernel"
     if ! $(ns/isfunc ${_kernel}) ; then
-      msg "Kernel function not found: ${_kernel}"
+      msg "${FUNCNAME}: KERNEL function not found: ${_kernel}"
       return ${_false_}
     fi
   fi
+  # push out kernel
   OTHER="${OTHER} ${KERNEL}"
 
   # basic dir checks
@@ -60,7 +61,7 @@ function run/check() {
       # operator clean name
       _dir=$(ns/op/value "${!dir}" "+")
       if ! test -d "${_dir}" ; then
-        msg "Directory not found: \$${dir}"
+        msg "${FUNCNAME}: Directory not found: \$${dir}"
         return ${_false_}
       fi
     done
@@ -69,24 +70,24 @@ function run/check() {
   # specific check
   if test ${_chk} -gt 1 ; then
     import run/prg/${_prg}
-    if test $? -gt 0 ; then
-      msg "Module not found: run/prg/${_prg}"
+    if failed $? ; then
+      msg "${FUNCNAME}: Module not found: run/prg/${_prg}"
       return ${_false_}
     fi
     run/prg/${_prg}/check ${_chk}
-    if test $? -gt 0 ; then
+    if failed $? ; then
       return ${_false_}
     fi
   fi
 
-  msg "All checks passed (${_chk})"
+  msg "${FUNCNAME}: PASSED (${_chk})"
   return ${_true_}
 }
 
 
 function run/check/main() {
-  if test -z "${MAIN}" ; then
-    msg "\$MAIN not set"
+  if empty "${MAIN}" ; then
+    msg "${FUNCNAME}: MAIN not set"
     return ${_false_}
   fi
 
@@ -95,8 +96,8 @@ function run/check/main() {
   local _idir=$(ns/op/value "${INPUTDIR}")
   _inp="${_idir}/${_inp}"
 
-  if ! test -r "${_inp}" ; then
-    msg "Main input not found: ${_inp}"
+  if ! readable "${_inp}" ; then
+    msg "${FUNCNAME}: Main input not found: ${_inp}"
     return ${_false_}
   fi
 }
@@ -106,7 +107,7 @@ function run/check/other() {
   local _input="${1:-OTHER}"
 
   # continue
-  if test -z "${OTHER}" ; then
+  if empty "${OTHER}" ; then
     return ${_true_}
   fi
 
@@ -123,8 +124,8 @@ function run/check/other() {
       _inp="${inp}"
     fi
 
-    if ! test -r "${_inp}" ; then
-      msg "${FUNCNAME} Input not found: ${_inp}"
+    if ! readable "${_inp}" ; then
+      msg "${FUNCNAME}: Input not found: ${_inp}"
       return ${_false_}
     fi
   done
@@ -134,12 +135,12 @@ function run/check/other() {
 
 function run/check/data() {
   # continue
-  if test -z "${DATADIR}" ; then
-    msg "${FUNCNAME} Not found: DATADIR"
+  if empty "${DATADIR}" ; then
+    msg "${FUNCNAME}: Empty DATADIR"
     return ${_true_}
   fi
-  if test -z "${DATA}" ; then
-    msg "${FUNCNAME} Not found: DATA"
+  if empty "${DATA}" ; then
+    msg "${FUNCNAME}: Empty DATA"
     return ${_true_}
   fi
 
@@ -149,8 +150,8 @@ function run/check/data() {
   local _dat
   for _dat in ${DATA}; do
     _dat="${_ddir}/${_dat}"
-    if ! test -r "${_dat}" ; then
-      msg "${FUNCNAME} Data not found: ${_dat}"
+    if ! readable "${_dat}" ; then
+      msg "${FUNCNAME}: DATA not found: ${_dat}"
       return ${_false_}
     fi
   done

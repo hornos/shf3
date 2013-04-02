@@ -27,86 +27,86 @@ function que/slurm() {
   # Description          | Input file
   # ---------------------+-------------------------
   # Scheduler queue      | Queue file
-  local _jobqueue=${jobqueue:-${QPART}}
+  local _jobqueue=${JOBQUEUE:-${QPART}}
 
   # Node Count           | Job file
-  local _nodes=${nodes:-${NODES}}
+  local _nodes=${NODES}
 
   # CPU Count            | Job file
-  local _slots=${slots}
+  local _cpu_slots=${CPU_SLOTS}
 
   # Wall Clock Limit     | Job file
-  local _walltime=${walltime:-${TIME}}
+  local _walltime=${WALLTIME:-${TIME}}
 
   # Standard Output FIle | job file
-  local _stdout=${stdout:-${STDOUT}}
+  local _stdout=${STDOUT}
 
   # Standard Error File  | job file
-  local _stderr=${stderr:-${STDERR}}
+  local _stderr=${STDERR}
 
   # Copy Environment     | Queue file
-  local _copy_env=${copy_env:-no}
+  local _copy_env=${COPY_ENV:-no}
 
   # Event Notification   | Queue file
-  local _events=${events:-${QMAIL}}
+  local _events=${EVENTS:-${QMAIL}}
 
   # Email Address        | Queue file
-  local _mailto=${mailto:-${QMAILTO}}
+  local _mailto=${MAILTO:-${QMAILTO}}
 
   # Job Name             | Job file
-  local _jobname=${jobname:-${NAME}}
+  local _jobname=${JOBNAME:-${NAME}}
 
   # Job Restart          | job file
-  local _restart=${restart:-no}
+  local _restart=${RESTART:-no}
 
   # Working Directory    | job file
-  local _workdir=${workdir}
+  local _workdir=${WORK_DIRECTORY}
 
   # Resource Sharing     | Job file
-  local _exclusive=${exclusive:-no}
+  local _exclusive=${EXCLUSIVE:-no}
 
   # Memory Size per core | job file
-  local _memory=${memory:-${MEMORY}}
+  local _memory=${MEMORY}
 
   # Account to charge    | Queue file
-  local _account=${account:-${QPROJ}}
+  local _account=${ACCOUNT:-${QPROJ}}
 
   # Tasks Per Node       | Job file
-  local _tasks=${tasks:-${TASKS}}
+  local _tasks=${TASKS}
 
   # CPUs per task        | Job file
-  local _taskcpus=${taskcpus}
+  local _taskcpus=${TASK_CPUS}
 
   # Job Dependency       | Job file
-  local _depend=${depend}
+  local _depend=${DEPEND}
 
   # Job Project          | Job file
-  local _project=${project}
+  local _project=${PROJECT}
 
   # Job host preference  | Job file
-  local _include_nodes=${include_nodes}
-  local _exclude_nodes=${exclude_nodes}
+  local _include_nodes=${INCLUDE_NODES}
+  local _exclude_nodes=${EXCLUDE_NODES}
 
   # Quality Of Service   | Job file
-  local _quality=${quality}
+  local _quality=${QUALITY}
 
   # Job Arrays           | Job file
-  local _arrays=${arrays}
+  local _arrays=${ARRAYS}
 
   # Generic Resources    | Job file
-  local _gpus=${gpus:-${GPUS}}
+  local _gpus=${GPUS}
 
   # Licenses             | Job file
-  local _licenses=${licenses}
+  local _licenses=${LICENSES}
 
   # Begin Time           | job file
-  local _begin=${begin}
+  local _begin=${BEGIN}
 
   # Constraints          | Queue file
-  local _constraints=${constraints:-${QCONST}}
+  local _constraints=${CONSTRAINTS:-${QCONST}}
 
   # Other Options        | Queue file
-  local _options=${options:-${QOPT}}
+  local _options=${OPTIONS:-${QOPT}}
 
 
   # ********************************************************
@@ -137,8 +137,8 @@ function que/slurm() {
     fi
 
     # CPU Count
-    if ! empty "${_slots}" ; then
-      _qlogin="${_qlogin} -n ${_slots}"
+    if ! empty "${_cpu_slots}" ; then
+      _qlogin="${_qlogin} -n ${_cpu_slots}"
     fi
 
     # Wall Clock Limit
@@ -258,45 +258,47 @@ function que/slurm() {
   #
   # ********************************************************
 
+  local _qbatch="${que_slurm}"
+
   # Queue
   if ! empty "${_jobqueue}" ; then
-    echo "#${que_slurm} -p ${_jobqueue}" \
+    echo "#${_qbatch} -p ${_jobqueue}" \
     >> "${_bat}"
   fi
 
   # Node Count
   if ! empty "${_nodes}" ; then
-    echo "#${que_slurm} -N ${_nodes}" \
+    echo "#${_qbatch} -N ${_nodes}" \
     >> "${_bat}"
   fi
 
   # CPU Count
-  if ! empty "${_slots}" ; then
-    echo "#${que_slurm} -n ${_slots}" \
+  if ! empty "${_cpu_slots}" ; then
+    echo "#${_qbatch} -n ${_cpu_slots}" \
     >> "${_bat}"
   fi
 
   # Wall Clock Limit
   if ! empty "${_walltime}" ; then
-    echo "#${que_slurm} -t ${_walltime}" \
+    echo "#${_qbatch} -t ${_walltime}" \
     >> "${_bat}"
   fi
 
   # Standard Output FIle
   if ! empty "${_stdout}" ; then
-    echo "#${que_slurm} -o ${_stdout}" \
+    echo "#${_qbatch} -o ${_stdout}" \
     >> "${_bat}"
   fi
 
   # Standard Error File
   if ! empty "${_stderr}" ; then
-    echo "#${que_slurm} -e ${_stderr}" \
+    echo "#${_qbatch} -e ${_stderr}" \
     >> "${_bat}"
   fi
 
   # Copy Environment
   if [ "${_copy_env}"  = "yes" ] ; then
-    echo "#${que_slurm} --export=ALL" \
+    echo "#${_qbatch} --export=ALL" \
     >> "${_bat}"
   fi
 
@@ -305,114 +307,114 @@ function que/slurm() {
   if ! empty "${_events}" && \
        test "${_events}" != "runprg" ; then
 
-    echo "#${que_slurm} --mail-type=${_events}" \
+    echo "#${_qbatch} --mail-type=${_events}" \
     >> "${_bat}"
 
     if ! empty "${_mailto}" ; then
-      echo "#${que_slurm} --mail-user=${_mailto}" \
+      echo "#${_qbatch} --mail-user=${_mailto}" \
       >> "${_bat}"
     fi
   fi
 
   # Job Name
-  echo "#${que_slurm} --job-name ${_jobname}" \
+  echo "#${_qbatch} --job-name ${_jobname}" \
   >> "${_bat}"
 
   # Job Restart
   if [ "${_restart}"  = "yes" ] ; then
-    echo "#${que_slurm} --requeue" \
+    echo "#${_qbatch} --requeue" \
     >> "${_bat}"
   fi
 
   # Working Directory
   if ! empty "${_workdir}" ; then
-    echo "#${que_slurm} --workdir=${_workdir}" \
+    echo "#${_qbatch} --workdir=${_workdir}" \
     >> "${_bat}"
   fi
 
   # Resource Sharing
   if [ "${_exclusive}" = "yes" ] ; then
-    echo "#${que_slurm} --exclusive" \
+    echo "#${_qbatch} --exclusive" \
     >> "${_bat}"
   fi
 
   # Memory Size
   if ! empty "${_memory}" ; then
-    echo "#${que_slurm} --mem-per-cpu=${_memory}M" \
+    echo "#${_qbatch} --mem-per-cpu=${_memory}M" \
     >> "${_bat}"
   fi
 
   # Account to charge
   if ! empty "${_account}" ; then
-    echo "#${que_slurm} --account=${_account}" \
+    echo "#${_qbatch} --account=${_account}" \
     >> "${_bat}"
   fi
 
   # Tasks Per Node
   if ! empty "${_tasks}" ; then
-    echo "#${que_slurm} --ntasks-per-node=${_tasks}" \
+    echo "#${_qbatch} --ntasks-per-node=${_tasks}" \
     >> "${_bat}"
   fi
 
   # CPUs Per Task
   if ! empty "${_taskcpus}" ; then
-    echo "#${que_slurm} --cpus-per-task=${_taskcpus}" \
+    echo "#${_qbatch} --cpus-per-task=${_taskcpus}" \
     >> "${_bat}"
   fi
 
   # Job Dependency
   if ! empty "${_depend}" ; then
-    echo "#${que_slurm} --depend=${_depend}" \
+    echo "#${_qbatch} --depend=${_depend}" \
     >> "${_bat}"
   fi
 
 
   # Job Project
   if ! empty "${_project}" ; then
-    echo "#${que_slurm} --wckey=${_project}" \
+    echo "#${_qbatch} --wckey=${_project}" \
     >> "${_bat}"
   fi
 
   # Job host preference
   if ! empty "${_include_nodes}" ; then
     # TODO: filter spaces
-    echo "#${que_slurm} --nodelist=${_include_nodes}" \
+    echo "#${_qbatch} --nodelist=${_include_nodes}" \
     >> "${_bat}"
   fi
 
   if ! empty "${_exclude_nodes}" ; then
     # TODO: filter spaces
-    echo "#${que_slurm} --exclude=${_exclude_nodes}" \
+    echo "#${_qbatch} --exclude=${_exclude_nodes}" \
     >> "${_bat}"
   fi
 
   # Quality Of Service
   if ! empty "${_quality}" ; then
-    echo "#${que_slurm} --qos=${_quality}" \
+    echo "#${_qbatch} --qos=${_quality}" \
     >> "${_bat}"
   fi
 
   # Job Arrays
   if ! empty "${_arrays}" ; then
-    echo "#${que_slurm} --array=${_arrays}" \
+    echo "#${_qbatch} --array=${_arrays}" \
     >> "${_bat}"
   fi
 
   # Generic Resources
   if ! empty "${_gpus}" ; then
-    echo "#${que_slurm} --gres=gpu:${gpus}" \
+    echo "#${_qbatch} --gres=gpu:${gpus}" \
     >> "${_bat}"
   fi
 
   # Licenses
   if ! empty "${_licenses}" ; then
-    echo "#${que_slurm} --licenses=${_licenses}" \
+    echo "#${_qbatch} --licenses=${_licenses}" \
     >> "${_bat}"
   fi
 
   # Begin Time
   if ! empty "${_begin}" ; then
-    echo "#${que_slurm} --begin=${_begin}" \
+    echo "#${_qbatch} --begin=${_begin}" \
     >> "${_bat}"
   fi
 
@@ -420,14 +422,14 @@ function que/slurm() {
   if ! empty "${_constraints}" ; then
     local _c
     for _c in ${_constraints} ; do
-      echo "#${que_slurm} --constraint=${_c}" \
+      echo "#${_qbatch} --constraint=${_c}" \
       >> "${_bat}"
     done
   fi
 
   # Options
   if ! empty "${_options}" ; then
-    echo "#${que_slurm} ${_options}" \
+    echo "#${_qbatch} ${_options}" \
     >> "${_bat}"
   fi
 }
