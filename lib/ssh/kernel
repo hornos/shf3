@@ -43,7 +43,7 @@ function ssh/mgr() {
       local i
       for i in ${sys_mid_dir}/ssh/* ; do
         mid_ssh_type=""
-        if test -r "${i}" ; then
+        if test -f "${i}" ; then
           i=$(basename "${i}")
           sys/mid "ssh/${i}"
           if ! test -z "${mid_ssh_type}" ; then
