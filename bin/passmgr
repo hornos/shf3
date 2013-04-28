@@ -13,7 +13,7 @@ Usage: ${gbn} options
               -f database
               -t table
               -u uid - retrieve
-              -c uid - change
+              -p uid - change
               -n uid - new
               -d uid - delete
               -s uid - search
