@@ -134,7 +134,8 @@ function que/sge() {
 
     # Wall Clock Limit
     if ! empty "${_walltime}" ; then
-      _qlogin="${_qlogin} -l time=${_walltime}"
+      # _qlogin="${_qlogin} -l time=${_walltime}"
+      _qlogin="${_qlogin} -l h_rt=${_walltime}"
     fi
 
     # N/A Standard Output File
@@ -166,7 +167,8 @@ function que/sge() {
 
     # Memory Size in MB
     if ! empty "${_memory}" ; then
-      _qlogin="${_qlogin} -l mem_free=${_memory}M"
+      # _qlogin="${_qlogin} -l mem_free=${_memory}M"
+      _qlogin="${_qlogin} -l h_vmem=${_memory}M"
     fi
 
     # Account to charge
