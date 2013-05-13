@@ -240,7 +240,9 @@ function que/sge() {
 
   # Wall Clock Limit
   if ! empty "${_walltime}" ; then
-    echo "#${_qbatch} -l time=${_walltime}" \
+    # echo "#${_qbatch} -l time=${_walltime}" \
+    # >> "${_bat}"
+    echo "#${_qbatch} -l h_rt=${_walltime}" \
     >> "${_bat}"
   fi
 
@@ -302,7 +304,9 @@ function que/sge() {
 
   # Memory Size
   if ! empty "${_memory}" ; then
-    echo "#${_qbatch} -l mem_free=${_memory}M" \
+    # echo "#${_qbatch} -l mem_free=${_memory}M" \
+    # >> "${_bat}"
+    echo "#${_qbatch} -l h_vmem=${_memory}M" \
     >> "${_bat}"
   fi
 
