@@ -209,37 +209,52 @@ The queue wrapper library is designed to make batch submission of parallel progr
 
 Queue and job file keys are based on the [Slurm rosetta](http://www.schedmd.com/slurmdocs/rosetta.pdf) which has a unified interface for the following schedulers: PBS, Slurm, LSF, SGE, LoadLeveler.
 
-The following key/value pairs are common for evry shceduler:
+Variable       | Description            | Input | Scheduler
+--- | --- | --- | ---
+JOBQUEUE       | Scheduler queue        | queue | All
+PARENV         | Parallel Environment   | job   | SGE
+NODES          | Node Count             | job   | All 
+CPU_SLOTS      | CPU Count              | job   |
+WALLTIME       | Wall Clock Limit       | job   | All
+STDOUT         | Standard Output File   | job   |
+STDERR         | Standard Error File    | job   |
+COPY_ENV       | Copy Environment       | queue |
+EVENTS         | Event Notification     | queue |
+MAILTO         | Email Address          | queue | All
+JOBNAME        | Job Name               | job   | All
+RESTART        | Job Restart            | job   |
+WORK_DIRECTORY | Working Directory      | job   |
+EXCLUSIVE      | Resource Sharing       | job   |
+MEMORY         | Memory Size per core   | job   |
+ACCOUNT        | Account to charge      | queue |
+TASKS          | Tasks Per Node         | job   |
+TASK_CPUS      | CPUs per task          | job   |
+DEPEND         | Job Dependency         | job   |
+PROJECT        | Job Project            | job   |
+INCLUDE_NODES  | Job host preference    | job   |
+EXCLUDE_NODES  | Job host preference    | job   |
+QUALITY        | Quality Of Service     | job   |
+ARRAYS         | Job Arrays             | job   |
+GPUS           | GPU Resources          | job   |
+LICENSES       | Licenses               | job   |
+BEGIN          | Begin Time             | job   |
+CONSTRAINTS    | Constraints            | queue |
+OPTIONS        | Other Options          | queue |
 
-    # scheduler type: slurm, pbs, sge
-    QSCHED=slurm
-    # email address for notifications
-    QMAILTO=your@email
-    # which notifications: abe, ALL
-    QMAIL=
-    # setup scripts
-    QSETUP="$HOME/shf3/bin/machines $HOME/shf3/bin/scratch"
-    # ulimits
-    QLIMIT="ulimit -s unlimited"
-    # exclusive allocation
-    QEXCL="yes"
+Example queue MID:
 
-Note that the setup script `machines` and `scratch` is somewhat mandatory. The former sets the variable `MACHINES` to the hostnames of the allocated nodes. You will need this because MPI implementations do not support every scheduler. The `MACHINES` variable is used by the MPI wrapper functions to specify hostnames for the `mpirun` command. The latter sets the `SCRATCH` variable to your scratch space. Application Wrapper (see later) needs this. Please check each script if you are in doubt. Prace scratch environment variable (`PRACE_SCRATCH`) is supported.
+    SCHEDULER=sge
+    MAILTO="my@email"
+    EVENTS=abe
+    JOBQUEUE=budapest.q
+    PARENV=mpi
+    EXCLUSIVE=yes
+    USER_LIMIT="ulimit -s unlimited"
+    OPTIONS="-cwd"
+    COPY_ENV=yes
+    QUEUE_SETUP="${HOME}/shf3/bin/machines ${HOME}/shf3/bin/scratch ${HOME}/shf3/bin/sched/env/${SCHEDULER}"
 
-The purpose of the wrapper is to write job scripts for each scheduler. The scheduler dependent key/value pairs are:
-
-    # Slurm account
-    QPROJ=
-    # Slurm partition
-    QPART=
-    # Slurm constraints
-    QCONST=""
-    # SGE queue
-    QQUEUE=
-    # SGE parallel environment
-    QPE=
-
-You can find templates in `$HOME/shf3/mid/que/templates` directory.
+Note that the setup script `machines`, `scratch` and `env/${SCHEDULER}` are somewhat mandatory. The former sets the variable `MACHINES` to the hostnames of the allocated nodes. You will need this because MPI implementations do not support every scheduler. The `MACHINES` variable is used by the MPI wrapper functions to specify hostnames for the `mpirun` command. The latter sets the `SCRATCH` variable to your scratch space. Application Wrapper (see later) needs this. Please check each script if you are in doubt. Prace scratch environment variable (`PRACE_SCRATCH`) is supported. You can find templates in `$HOME/shf3/mid/que/templates` directory.
 
 ### Job Submission
 If the queue MID is ready all you need is a job file. The job file is independent of the scheduler and contains only your resource needs. The queue wrapper is designed for MPI or OMP parallel programs. Co-array Fortran and MPI-OMP hybrid mode is also supported. A typical job file is the following (`jobfile`):
