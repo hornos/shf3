@@ -1,0 +1,32 @@
+# illuminati hooks
+# git://github.com/hornos/illuminati.git
+#
+
+function ting/json() {
+  cat ${1} | \
+  grep -Po '"${2:-ip}":.*?[^\\]",' | \
+  awk '{print $2}' | \
+  sed s/[\",]//g
+}
+
+function ting/fqdn() {
+  if empty "${1}" ; then
+    echo ""
+    return false
+  fi
+  local _host="${ting_hosts}/${1}"
+  if test -r "${_host}" ; then
+    ting/json "${_host}"
+  fi
+}
+
+function ting/fp() {
+  if empty "${1}" ; then
+    echo ""
+    return false
+  fi
+  local _host="${ting_hosts}/${1}"
+  if test -r "${_host}" ; then
+    ting/json "${_host}" "fp"
+  fi
+}

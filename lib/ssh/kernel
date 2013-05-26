@@ -10,6 +10,10 @@ SSH module
 EOF
 }
 
+#
+# returns the actual fqdn or ip if
+# $2 has the format: <type>/<mid>
+#
 function ssh/fqdn() {
   local _mid="${1}"
   local _fqdn="${2}"
@@ -17,14 +21,24 @@ function ssh/fqdn() {
     echo ""
     $failure
   fi
+
   local _vm=$(u/split "${_fqdn}" 1 "/")
-  if test "${_vm}" = "vbox" ; then
-    _nic=$(u/split "${_fqdn}" 2 "/")
-    import sys/vm/vbox
-    _fqdn=$(sys/vm/vbox/ip "${_mid}" ${_nic})
-  fi
+  case "${_vm}" in
+    vbox)
+      _nic=$(u/split "${_fqdn}" 2 "/")
+      import sys/vm/vbox
+      _fqdn=$(sys/vm/vbox/ip "${_mid}" ${_nic})
+    ;;
+    ting)
+      import ting
+      _host=$(u/split "${_fqdn}" 2 "/")
+      _fqdn=$(ting/fqdn ${_host})
+    ;;
+  esac
+
   mid_ssh_fqdn="${_fqdn}"
 }
+
 
 function ssh/mgr() {
   import sys
@@ -438,6 +452,10 @@ function ssh/login() {
       vpn)
         _fqdn="${mid_vpn_fqdn}"
         ;;
+      ting)
+        import ting
+        msg "SSH fingerprint: $(ting/fp ${_mid})"
+      ;;
     esac
   fi
 
