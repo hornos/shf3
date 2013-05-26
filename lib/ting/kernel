@@ -2,31 +2,30 @@
 # git://github.com/hornos/illuminati.git
 #
 
-function ting/json() {
-  cat ${1} | \
-  grep -Po '"${2:-ip}":.*?[^\\]",' | \
-  awk '{print $2}' | \
-  sed s/[\",]//g
-}
-
 function ting/fqdn() {
-  if empty "${1}" ; then
+  if empty "${1}" ; then
     echo ""
     return false
   fi
-  local _host="${ting_hosts}/${1}"
+  local _host="${ting_hosts}/${1}.json"
   if test -r "${_host}" ; then
-    ting/json "${_host}"
+    cat ${_host} | \
+    grep '"ip"' | \
+    awk '{print $2}' | \
+    sed s/[\",]//g
   fi
 }
 
 function ting/fp() {
-  if empty "${1}" ; then
+  if empty "${1}" ; then
     echo ""
     return false
   fi
-  local _host="${ting_hosts}/${1}"
+  local _host="${ting_hosts}/${1}.json"
   if test -r "${_host}" ; then
-    ting/json "${_host}" "fp"
+    cat ${_host} | \
+    grep '"fp"' | \
+    awk '{print $2}' | \
+    sed s/[\",]//g
   fi
 }

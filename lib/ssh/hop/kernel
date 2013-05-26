@@ -13,6 +13,11 @@ function ssh/hop() {
     mid_ssh_fqdn="${mid_vpn_fqdn}"
     $success
   fi
+
+  if test "${_hop}" = "ting" ; then
+    $success
+  fi
+
   # Tor hoping
   if test "${_hop}" = "tor" ; then
     if empty "${mid_tor_fqdn}" ; then

@@ -29,11 +29,6 @@ function ssh/fqdn() {
       import sys/vm/vbox
       _fqdn=$(sys/vm/vbox/ip "${_mid}" ${_nic})
     ;;
-    ting)
-      import ting
-      _host=$(u/split "${_fqdn}" 2 "/")
-      _fqdn=$(ting/fqdn ${_host})
-    ;;
   esac
 
   mid_ssh_fqdn="${_fqdn}"
@@ -454,6 +449,7 @@ function ssh/login() {
         ;;
       ting)
         import ting
+        _fqdn=$(ting/fqdn ${_mid})
         msg "SSH fingerprint: $(ting/fp ${_mid})"
       ;;
     esac
