@@ -459,7 +459,11 @@ function ssh/login() {
   local _url="${mid_ssh_user}@${_fqdn}"
   msg "URL  : ${_url}"
   gui/line
-  local _cmd="${ssh_ssh} ${_opt} ${_url}"
+  if ${_mosh} ; then
+    local _cmd="mosh --ssh=\"${ssh_ssh} ${_opt}\" ${_url}"
+  else
+    local _cmd="${ssh_ssh} ${_opt} ${_url}"
+  fi
   msg/debug "${_cmd}"
   eval ${_cmd}
   local _ret=$?

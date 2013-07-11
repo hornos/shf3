@@ -78,6 +78,10 @@ or if you wan to mount the MID over the vpn:
 
     sshmnt -m vpn/<MID>
 
+or just login:
+
+    sshin vpn/<MID>
+
 #### SSH hoping
 Shf3 supports one step SSH hoping. You have to setup a MID for the internal machine (`<INT>`), and you have to change to original MID:
 
@@ -95,6 +99,14 @@ Login to a remote machine is done by:
 If you have tunnels a lock file is created to prevent duplicated redirection. After a not clean logout lock file remains. To force tunnels against the lock run:
 
     sshin +<MID>
+
+On slow lines use [Mosh](http://mosh.mit.edu/) to improve reception. Login using Mosh by:
+
+    sshin @<MID>
+
+You can run Mosh over VPN as well:
+
+    sshin @vpn/<MID>
 
 File or directory transfer can be done between your CWD and `$mid_ssh_scp_dst` directory. To copy a file/dir from CWD:
 

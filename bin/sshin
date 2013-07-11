@@ -24,10 +24,17 @@ if empty "${_m}" ; then
 fi
 
 ### main
+# force
 if ns/op "${_m}" "+" ; then
-  # force
   _f=true
   _m=$(ns/op/value "${_m}" "+")
+fi
+
+# mosh
+_mosh=false
+if ns/op "${_m}" "@" ; then
+  _mosh=true
+  _m=$(ns/op/value "${_m}" "@")
 fi
 
 ssh/login "${_m}" ${_f}
