@@ -32,9 +32,9 @@ fi
 
 # mosh
 _mosh=false
-if ns/op "${_m}" "@" ; then
+if ns/op "${_m}" "%" ; then
   _mosh=true
-  _m=$(ns/op/value "${_m}" "@")
+  _m=$(ns/op/value "${_m}" "%")
 fi
 
 ssh/login "${_m}" ${_f}

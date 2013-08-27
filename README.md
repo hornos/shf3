@@ -102,11 +102,11 @@ If you have tunnels a lock file is created to prevent duplicated redirection. Af
 
 On slow lines use [Mosh](http://mosh.mit.edu/) to improve reception. Login using Mosh by:
 
-    sshin @<MID>
+    sshin %<MID>
 
 You can run Mosh over VPN as well:
 
-    sshin @vpn/<MID>
+    sshin %vpn/<MID>
 
 File or directory transfer can be done between your CWD and `$mid_ssh_scp_dst` directory. To copy a file/dir from CWD:
 
