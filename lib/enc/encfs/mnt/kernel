@@ -94,7 +94,7 @@ function enc/encfs/mnt() {
 
     local _ico="${sys_img_dir}/encfs.icns"
     if test -r "${_ico}" ; then
-      _osx_opt="${_osx_opt} -o modules=volicon -o volicon=${_ico}"
+      _osx_opt="${_osx_opt} -o modules=volicon -o iconpath=${_ico}"
     fi
   else
     _opt="${_opt} -o nonempty"
