@@ -13,6 +13,9 @@ Usage: ${gbn} cmd MID files
               put
               get
               backup
+
+To rsync the content of the directory in THREADS thread at the same time.
+              tput MID THREADS directory
 EOF
   exit 1
 }
@@ -21,7 +24,7 @@ EOF
 if test $# -lt 2 ; then
   help/sshtx
 fi
-_t=3
+_t=1
 
 ### main
 _c="${1}"

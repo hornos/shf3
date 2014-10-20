@@ -26,7 +26,7 @@ EOF
 ### args
 _c="LIST"
 _m=""
-while getopts hvki:n:d:e:p:u:s:c: o; do
+while getopts hvki:n:d:e:p:u:s:c:g: o; do
   case "$o" in
     k) _c="KILL";;
     d) _c="DELETE"; _m=$OPTARG;;

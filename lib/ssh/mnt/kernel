@@ -4,7 +4,7 @@ function ssh/mnt/ls() {
 
   printf "%-32s %s\n" "Local directory" "Remote url"
   gui/line
-  mount | egrep 'fusefs|fuse.sshfs|fuse4x' | \
+  mount | egrep 'osxfusefs|fusefs|fuse.sshfs|fuse4x' | \
           egrep -v 'encfs|fuse.encfs' | \
           egrep -v 'TrueCrypt' | \
           egrep ${USER} | \
@@ -211,7 +211,7 @@ function ssh/mnt() {
     _opt="${_opt} -o volname=${_vol} -o fsname=${_vol}"
     local _ico="${sys_img_dir}/sshfs.icns"
     if test -r "${_ico}" ; then
-      _opt="${_opt} -o modules=volicon -o volicon=${_ico}"
+      _opt="${_opt} -o modules=volicon -o iconpath=${_ico}"
     fi
   fi
 

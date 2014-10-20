@@ -49,5 +49,5 @@ if ! empty "${_x}" ; then
   ssh/cmd "${_m}" "${_x}"
   exit $?
 fi
-
+_mosh=false
 ssh/login "${_m}" ${_f} "${_l}"

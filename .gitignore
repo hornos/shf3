@@ -14,3 +14,9 @@ bin/src/connect
 *.a
 *sublime*
 test/
+crt/*
+key/*
+lck/*
+*.hornos
+mid/*
+bin/test*

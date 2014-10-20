@@ -16,6 +16,16 @@ function cmp/ssh/ftp() {
 # TODO
 # complete -F cmp/${i} ${i}
 
+function tput() {
+  local _h=${1:-default}
+  shift
+  export SSH_NUM_THREADS=${1:-3}
+  shift
+  # mode setting
+  _t=5
+  PUT ${_h} $*
+}
+
 function put() {
   PUT $*
 }
@@ -27,11 +37,13 @@ function PUT() {
   # sources
   local _s=${*}
   if test -z "${_s}" ; then
+    echo "source error"
     return ${_false_}
   fi
 
   local i
-  for i in ${_s} ; do
+  for i in "${_s}" ; do
+    echo "Copying: $i"
     if test -L "${i}" ; then
       # resolv symlinks
       import sys/dir

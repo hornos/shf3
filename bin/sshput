@@ -51,4 +51,4 @@ if test -z "${src}" ; then
   exit ${_false_}
 fi
 
-PUT ${mid} ${src}
+PUT ${mid} "${src}"
